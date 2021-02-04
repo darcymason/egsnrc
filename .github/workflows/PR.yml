@@ -35,8 +35,10 @@ jobs:
       working-directory: git
       run: |
         git clone --depth 1 https://github.com/nrc-cnrc/EGSnrc.git
-        EGSnrc/HEN_HOUSE/scripts/configure.expect actions.conf 3 | tee configure.log
-        export HEN_HOUSE=/home/runner/work/EGSnrc/HEN_HOUSE
+        cd EGSnrc
+        HEN_HOUSE/scripts/configure.expect actions.conf 3 | tee configure.log
+        export HEN_HOUSE=/home/runner/work/git/EGSnrc/HEN_HOUSE
+        ls /home/runner/work
         export EGS_HOME=/home/runner/work/egsnrc/egsnrc/egs_home/
         export PY_EGS=/home/runner/work/egsnrc/egsnrc/HEN_HOUSE/src/
         export EGS_CONFIG=/home/runner/work/git/EGSnrc/HEN_HOUSE/specs/linux.conf
