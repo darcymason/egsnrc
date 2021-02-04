@@ -28,7 +28,7 @@ jobs:
 
     - name: EGSnrc pre-reqs
       run: |
-        apt install -y gfortran gcc g++ make expect
+        sudo apt-get install -y gfortran gcc g++ make expect
         mkdir -p git
 
     - name: EGSnrc install
