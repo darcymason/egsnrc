@@ -1,0 +1,49 @@
+name: PR
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.9]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install wheel
+        python -m pip install -r requirements.txt
+
+    - name: EGSnrc pre-reqs
+      run: |
+        apt install -y gfortran gcc g++ make expect
+        mkdir -p git
+
+    - name: EGSnrc install
+      working-directory: git
+        git clone --depth 1 https://github.com/nrc-cnrc/EGSnrc.git
+        EGSnrc/HEN_HOUSE/scripts/configure.expect actions.conf 3 | tee configure.log
+        export EGS_HOME=/home/runner/work/egsnrc/egsnrc/egs_home/
+        export PY_EGS=/home/runner/work/egsnrc/egsnrc/HEN_HOUSE/src/
+        export EGS_CONFIG=/home/runner/work/git/EGSnrc/HEN_HOUSE/specs/linux.conf
+        alias m='/home/runner/work/git/EGSnrc/HEN_HOUSE/scripts/compile_user_code m'
+
+    - name: Build egsfortran
+      run: |
+        python egsnrc/egsnrc/egs_home/tutor4/make_egsfortran.py
+
+    - name: Test with pytest
+      run: |
+        python -m pip install pytest
+        cd egsnrc
+        pytest

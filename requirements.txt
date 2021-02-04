@@ -1,0 +1,6 @@
+pydicom>=2.0.0
+jinja2>2
+git+https://github.com/dicompyler/dicompyler-core@master
+scipy
+bokeh==2.0.0
+# pandas==1.1.0
