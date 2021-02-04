@@ -1,12 +1,12 @@
 
 from pathlib import Path
-from egsnrc2py import egsfortran
+from egsnrc import egsfortran
 import logging
 import numpy  # cannot use `np` as is an EGS var!!
 from math import log  # for calculate_tstep_...
 
 # Get all common blocks
-from egsnrc2py.commons import *
+from egsnrc.commons import *
 
 # Specific common blocks for this code
 #  COMMON block geom --------
@@ -19,7 +19,7 @@ iwatch = score.iwatch
 escore = score.escore
 
 
-logger = logging.getLogger('egsnrc2py')  # XXX later `egsnrc`
+logger = logging.getLogger('egsnrc')  # XXX later `egsnrc`
 
 
 def randomset():

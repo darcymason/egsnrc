@@ -6,17 +6,9 @@ import subprocess
 import shutil
 import contextlib
 
-@contextlib.contextmanager
-def working_dir(path):
-    save_dir = Path.cwd()
-    os.chdir(path)
-    try:
-        yield
-    finally:
-        os.chdir(save_dir)
 # Add a config var for PY_EGS, for modified EGSnrc mortan codes.
-# You will have to modify `compile_user_code script` also,
-# to change the directory path in the standard_sources line
+# You will also have to modify the .make file for modified
+# versions of mortran file stored in this repo (point to PY_EGS location).
 HERE  = Path(__file__).resolve().parent
 USER_CODE = "tutor4"
 CONF = "_linux"
@@ -25,11 +17,21 @@ HEN_HOUSE = Path(os.environ["HEN_HOUSE"])
 COMPILE_USER_CODE = HEN_HOUSE / "scripts" / "compile_user_code"
 PY_EGS = str(HERE.parent.parent / "HEN_HOUSE" / "src") + "/"
 LIB_NAME = "egsfortran"
-LIB_PATH = str(HERE.parent.parent / LIB_NAME)
 F2PY_OPTIONS = "--quiet --debug"
 
 os.environ['PY_EGS'] = PY_EGS
 print(f"Set environment variable PY_EGS to {PY_EGS}")
+
+
+@contextlib.contextmanager
+def working_dir(path):
+    save_dir = Path.cwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(save_dir)
+
 
 with working_dir(HERE):
     print(f"Working directory: {HERE}")
@@ -57,7 +59,7 @@ with working_dir(HERE):
 
     print(f"Running f2py on {USER_CODE_FORTRAN}")
     proc = subprocess.run(
-        f"python3.9 -m numpy.f2py {F2PY_OPTIONS} -c {USER_CODE_FORTRAN} -m {LIB_PATH}".split(),
+        f"python3.9 -m numpy.f2py {F2PY_OPTIONS} -c {USER_CODE_FORTRAN} -m {LIB_NAME}".split(),
         # capture_output=True, encoding="utf8"
     )
     if proc.returncode != 0:
@@ -65,11 +67,10 @@ with working_dir(HERE):
         print(f"{LIB_NAME} not created.  Stopping.")
         print(proc.stderr)
     else:
-        print(f"Created {LIB_NAME} shared lib in egsnrc2py package")
-        # filenames = HERE.glob(f"{LIB_NAME}*")
-        # for filename in filenames:
-        #     print(f"Copying {filename.name} shared lib to egsnrc2py package")
-        #     shutil.copy(filename, HERE.parent.parent)
+        filenames = HERE.glob(f"{LIB_NAME}*")
+        for filename in filenames:
+            print(f"Copying {filename.name} shared lib to egsnrc package")
+            shutil.copy(filename, HERE.parent.parent)
     # python3.9 -c ";f=
     # python3.9 -m numpy.f2py -c mod_tutor4.f -m egsfortran
     # cp egsfortran* ../../

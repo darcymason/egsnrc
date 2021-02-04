@@ -1,4 +1,4 @@
-from egsnrc2py import egsfortran
+from egsnrc import egsfortran
 
 ranlux = egsfortran.ranlux
 rng_seed = egsfortran.randomm.rng_seed
@@ -8,7 +8,7 @@ rng_array = egsfortran.randomm.rng_array
 np = egsfortran.stack.np
 npold = egsfortran.stack.npold
 
-# CALLBACKS ---- 
+# CALLBACKS ----
 
 def randomset():
 # randomm
@@ -27,7 +27,7 @@ def randomset():
 # ******************************************************************
 #                                National Research Council of Canada
 def SHOWER(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
-    #                                                                   
+    #
     # ******************************************************************
 
     # stack
@@ -35,7 +35,7 @@ def SHOWER(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
     # uphiot
     global theta, sinthe, costhe, sinphi, cosphi, pi, twopi, pi5d2
 
-    
+
     # $ comin_shower # DEFAULT REPLACEMENT PRODUCES THE FOLLOWING:
                     # COMIN/DEBUG,STACK,UPHIOT,RANDOM/
 
@@ -79,7 +79,7 @@ def SHOWER(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
 
     if IQI == 2:
         # PI-ZERO OPTION
-        # IF(EI <= PI0MSQ) [OUTPUT EI;    corrected Oct 24 1995 e-mail Hideo H 
+        # IF(EI <= PI0MSQ) [OUTPUT EI;    corrected Oct 24 1995 e-mail Hideo H
         #                   noted by      Dr.  Muroyama at Nagoya University
         if ei**2 <= pi0msq:
             msg = (
@@ -102,7 +102,7 @@ def SHOWER(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
 
 
     while np > 0:
-        #  DEFAULT FOR $ KERMA-INSERT; IS ; (NULL) 
+        #  DEFAULT FOR $ KERMA-INSERT; IS ; (NULL)
         if  iq[np-1] == 0:
             call egsfortran.photon(ircode)
         else:

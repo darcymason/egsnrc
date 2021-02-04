@@ -1,1 +1,11 @@
 egsnrc/.vscode/*
+**/__pycache__/*
+egsnrc/egs_home/**/*.so
+egsnrc/egs_home/**/mortjob.*
+egsnrc/egs_home/**/egs_run*
+egsnrc/*.so
+egsnrc/egsfortran-f2pywrappers.f
+egsnrc.egg-info/*
+egsnrc/egsfortranmodule.c
+egsnrc/egs_home/**/*.mortlst
+egsnrc/egs_home/**/*.io

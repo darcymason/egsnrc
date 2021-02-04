@@ -1,9 +1,9 @@
 import pytest
 from pathlib import Path
 
-pytest.importorskip("egsnrc2py.egsfortran")  # from numpy.f2py, used while in transition
-from egsnrc2py import egsfortran
-from egsnrc2py.egs_home.tutor4 import tutor4
+pytest.importorskip("egsnrc.egsfortran")  # from numpy.f2py, used while in transition
+from egsnrc import egsfortran
+from egsnrc.egs_home.tutor4 import tutor4
 
 HERE  = Path(__file__).resolve().parent
 TEST_DATA = HERE / "data"
@@ -134,7 +134,7 @@ class TestTutor4:
         tutor4.init()  # get all data loaded
 
         # Need setting here to get to IF conditions where this code applies
-        from egsnrc2py.commons import et_control
+        from egsnrc.commons import et_control
         et_control.exact_bca = True
 
         # Known input and output from Mortran/Fortran tutor4 run
