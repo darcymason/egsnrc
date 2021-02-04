@@ -1,0 +1,495 @@
+"******************************************************************"
+"                               National Research Council of Canada"
+SUBROUTINE HATCH;
+"                                                                  "
+"******************************************************************"
+"   Setup which the user is expected to do before calling HATCH is:"
+"     1. SET 'NMED' TO THE NUMBER OF MEDIA TO BE USED."
+"     2. SET THE ARRAY 'MEDIA', WHICH CONTAINS THE NAMES OF THE"
+"        MEDIA THAT ARE DESIRED.  THE CHARACTER FORMAT IS A1, SO"
+"        THAT MEDIA(IB,IM) CONTAINS THE IB'TH BYTE OF THE NAME OF"
+"        THE IM'TH MEDIUM IN A1 FORMAT."
+"     3. SET 'DUNIT', THE DISTANCE UNIT TO BE USED."
+"        DUNIT.GT.0 MEANS VALUE OF DUNIT IS LENGTH OF DISTANCE UNIT"
+"        CENTIMETERS.  DUNIT.LT.0 MEANS USE THE RADIATION LENGTH OF"
+"        THE ABS(DUNIT)'TH MEDIUM FOR THE DISTANCE UNIT."
+"     4. FILL THE ARRAY 'MED' WITH THE MEDIUM INDICES FOR THE"
+"        REGIONS."
+"     5. FILL ARRAYS 'ECUT' AND 'PCUT' WITH THE ELECTRON AND PHOTON"
+"        CUT-OFF ENERGIES FOR EACH REGION RESPECTIVELY.  SETUP WILL"
+"        RAISE THESE IF NECESSARY TO MAKE THEM AT LEAST AS LARGE AS"
+"        THE REGION'S MEDIUM'S AE AND AP RESPECTIVELY."
+"     6. FILL 'MED' ARRAY.  MED(IR) IS THE MEDIUM INDEX FOR REGION"
+"        IR.  A ZERO MEDIUM INDEX MEANS THE REGION IS IN A VACUUM."
+"     7. FILL THE ARRAY 'IRAYLR' WITH 1 FOR EACH REGION IN WHICH"
+"        RAYLEIGH (COHERENT) SCATTERING IS TO BE INCLUDED."
+"
+"   KMPO = 8 and KMPI = 12 are set in BLOCK DATA"
+"   The echo to unit 8 has been removed since it is sent"
+"                                          to /dev/null anyway!"
+"           To put it back search $UOUTPUT  and $ECHO and uncomment"
+"******************************************************************"
+
+$IMPLICIT-NONE;
+
+character*512 toUpper;
+$COMIN-HATCH;    "DEFAULT REPLACEMENT PRODUCES THE FOLLOWING:
+                 "COMIN/DEBUG,BOUNDS,BREMPR,EGS-VARIANCE-REDUCTION,"
+                      "ELECIN,MEDIA,MISC,PHOTIN,STACK,
+                      "THRESH,UPHIIN,UPHIOT,USEFUL,USER,RANDOM/;
+
+$DECLARE-PEGS4-COMMON-BLOCKS;
+
+$DEFINE-LOCAL-VARIABLES-HATCH;
+
+character*256 tmp_string;
+$INTEGER      lnblnk1;" in house lnblnk function becuase not all compilers"
+                      " support this"
+
+DATA MDLABL/$S' MEDIUM='/,LMDL/8/,LMDN/24/,DUNITO/1./;
+DATA I1ST/1/,NSINSS/37/,MXSINC/$MXSINC/,ISTEST/0/,NRNA/1000/;
+
+$INIT-PEGS4-VARIABLES;
+
+"   FORMAT STATEMENTS USED MULTIPLE TIMES IN SETUP"
+:INT:FORMAT(1X,14I5);
+:FLT:FORMAT(1X,1PE14.5,4E14.5);
+:BYTE:FORMAT(72A1);
+
+IF (I1ST.NE.0)[ I1ST=0;"RESET FIRST TIME FLAG"
+"   DO FIRST TIME INITIALIZATION"
+
+$HATCH-USER-INPUT-INIT;
+
+"   NOW CONSTRUCT PIECEWISE LINEAR FIT TO SINE FUNCTION OVER THE"
+"   INTERVAL (0,5*PI/2).  DIVIDE THIS INTERVAL INTO MXSINC SUB-"
+"   INTERVALS.  EACH OF THESE SUBINTERVALS IS THEN SUBDIVIDED INTO"
+"   NSINSS SUB-SUB-INTERVALS.  THE ANGLES AT THE BOUNDARIES OF"
+"   THESE SUB-SUB-INTERVALS AND THEIR SINES ARE USED TO COMPUTE"
+"   LEAST SQUARES COEFFICIENTS FOR THE SUBINTERVAL.  AN EXTRA"
+"   SUBINTERVAL ON EACH SIDE OF THE INTERVAL (0,5*PI/2) IS INCLUDED"
+"   FOR GOOD MEASURE."
+NISUB=MXSINC-2;FNSSS=NSINSS;
+WID=PI5D2/FLOAT(NISUB);
+WSS=WID/(FNSSS-1.0);
+ZEROS(1)=0.;ZEROS(2)=PI; ZEROS(3)=TWOPI;
+
+DO ISUB=1,MXSINC ["LOOP OVER SUBINTERVALS"
+SX=0.;SY=0.;SXX=0.;SXY=0.;"ZERO SUMS"
+
+XS0=WID*FLOAT(ISUB-2);XS1=XS0+WID;"LOWER & UPPER LIMITS"
+"   NOW CHECK TO SEE IF ANY ZEROS ARE IN THE INTERVAL"
+IZ=0; DO IZZ=1,3 [
+IF ((XS0.LE.ZEROS(IZZ)).AND.(ZEROS(IZZ).LE.XS1))[IZ=IZZ;EXIT;]
+] "END OF LOOP OVER ZEROS"
+IF (IZ.EQ.0)[XSI=XS0;]ELSE[XSI=ZEROS(IZ);]
+DO ISS=1,NSINSS ["LOOP OVER SUB-SUBINTERVALS"
+XS=WID*FLOAT(ISUB-2)+WSS*FLOAT(ISS-1)-XSI; "ANGLE VALUE"
+YS=SIN(XS+XSI); "SINE OF ANGLE"
+SX=SX+XS; "ACCUMULATE SUMS"
+SY=SY+YS;
+SXX=SXX+XS*XS;
+SXY=SXY+XS*YS;
+] "END SUB-SUBINTERVAL LOOP"
+
+"   NOW COMPUTE LEAST SQUARES COEFFICIENTS"
+IF (IZ.NE.0)["FORCE FIT THROUGH SINES' ZEROS,"
+"             FOR SMALL REL.ERR.&GOOD"
+"   VALUES OF SINTHE/THETA NEAR ZERO"
+SIN1(ISUB)=SXY/SXX;
+SIN0(ISUB)=-SIN1(ISUB)*XSI;]
+ELSE["DO FULL LEAST SQUARES"
+DEL=FNSSS*SXX-SX*SX;
+SIN1(ISUB)=(FNSSS*SXY-SY*SX)/DEL;
+SIN0(ISUB)=(SY*SXX-SX*SXY)/DEL - SIN1(ISUB)*XSI ; ]
+] "END SUB-INTERVAL LOOP"
+
+SINC0=2.0 ;"SET COEFFICIENTS WHICH DETERMINE INTERVAL"
+SINC1=1.0/WID;
+
+"   NOW TEST FIT, IF REQUESTED"
+IF (ISTEST.NE.0)[
+"   FIRST TEST AT POINTS PREVIOUSLY COMPUTED, EXCLUDING"
+"   END SUBINTERVALS"
+ADEV=0.;RDEV=0.;S2C2MN=10.;S2C2MX=0.;
+DO ISUB=1,NISUB [ DO ISS=1,NSINSS [
+THETA=WID*FLOAT(ISUB-1)+WSS*FLOAT(ISS-1);
+CTHET=PI5D2-THETA;
+$SET INTERVAL THETA,SINC;$SET INTERVAL CTHET,SINC;
+$EVALUATE SINTHE USING SIN(THETA);
+$EVALUATE COSTHE USING SIN(CTHET);
+SINT=SIN(THETA); COST=COS(THETA);
+ASD=ABS(SINTHE-SINT); ACD=ABS(COSTHE-COST);
+ADEV=max(ADEV,ASD,ACD);
+IF (SINT.NE.0.0)RDEV=max(RDEV,ASD/ABS(SINT));
+IF (COST.NE.0.0)RDEV=max(RDEV,ACD/ABS(COST));
+S2C2=SINTHE**2+COSTHE**2;
+S2C2MN=min(S2C2MN,S2C2);
+S2C2MX=max(S2C2MX,S2C2);
+IF (ISUB.LT.11)[$egs_info('(1PE20.7,4E20.7)',THETA,SINTHE,SINT,COSTHE,COST);]
+] ] "END OF FIXED INTERVAL TEST-OUTPUT RESULTS"
+$egs_info('(a,2i5)',' SINE TESTS,MXSINC,NSINSS=',MXSINC,NSINSS);
+$egs_info('(a,1PE16.8,3e16.8)',' ADEV,RDEV,S2C2(MN,MX) =',
+                                 ADEV,RDEV,S2C2MN,S2C2MX);
+"   NOW DO RANDOM TEST"
+ADEV=0.;RDEV=0.;S2C2MN=10.;S2C2MX=0.;
+DO IRN=1,NRNA[ $RANDOMSET THETA;THETA=THETA*PI5D2;
+CTHET=PI5D2-THETA;
+$SET INTERVAL THETA,SINC;$SET INTERVAL CTHET,SINC;
+$EVALUATE SINTHE USING SIN(THETA);
+$EVALUATE COSTHE USING SIN(CTHET);
+SINT=SIN(THETA); COST=COS(THETA);
+ASD=ABS(SINTHE-SINT); ACD=ABS(COSTHE-COST);
+ADEV=max(ADEV,ASD,ACD);
+IF (SINT.NE.0.0)RDEV=max(RDEV,ASD/ABS(SINT));
+IF (COST.NE.0.0)RDEV=max(RDEV,ACD/ABS(COST));
+S2C2=SINTHE**2+COSTHE**2;
+S2C2MN=min(S2C2MN,S2C2);
+S2C2MX=max(S2C2MX,S2C2);
+] "END RANDOM ANGLE LOOP"
+$egs_info('(a,i7,a)', ' TEST AT ',NRNA,' RANDOM ANGLES IN (0,5*PI/2)');
+$egs_info('(1PE16.8,3E16.8)',' ADEV,RDEV,S2C2(MN,MX) =',
+                               ADEV,RDEV,S2C2MN,S2C2MX);
+] "END OF SINE TABLE TEST"
+
+"   NOW FILL IN POWER OF TWO TABLE.  PWR2I(I)=1/2**(I-1)"
+P=1.; DO I=1,$MXPWR2I [PWR2I(I)=P; P=P/2.;]
+
+] "END OF FIRST TIME INITIALIZATION"
+
+"FILL IRAYLM ARRAY BASED ON IRAYLR INPUTS"
+$need_rayleigh_data;
+
+"Ali:photonuc, 2 lines"
+"FILL IPHOTONUCM ARRAY BASED ON IPHOTONUCR INPUTS"
+$need_photonuc_data;
+$egs_info('(a,i3)',' ===> Photonuclear flag: ', iphotonuc);
+
+"   NOW SEARCH FILE FOR DATA FOR REQUESTED MATERIALS"
+IF(~is_pegsless) REWIND KMPI;
+"explicit file name for HP compiler  Nov 23, 1996   DR"
+IUECHO=KMPO;
+NM=0; "NUMBER OF MEDIA FOUND"
+DO IM=1,NMED [LOK(IM)=0;"SET FLAG TELLING WHICH MEDIA ARE OK"
+  "NOW TELL USER IF RAYLEIGH OPTION HAS BEEN REQUESTED"
+  IF(IRAYLM(IM).EQ.1) [
+     $egs_info('(a,i3/)', ' RAYLEIGH OPTION REQUESTED FOR MEDIUM NUMBER',IM);
+  ]
+]
+
+"Ali:photonuc, 1 block"
+DO IM=1,NMED [
+  "TELL USER IF PHOTONUC HAS BEEN REQUESTED"
+  IF(IPHOTONUCM(IM).EQ.1) [
+     $egs_info('(a,i3/)', ' PHOTONUCLEAR REQUESTED FOR MEDIUM NUMBER',IM);
+  ]
+]
+
+IF(~is_pegsless)[
+:MEDIUM:
+LOOP["MEDIUM SEARCH LOOP"
+
+:MDLOOK:
+LOOP["MEDIUM HEADER SEARCH LOOP"
+  "   FIRST LOOK FOR MEDIUM HEADER"
+  READ(KMPI,:BYTE:,END=:MDNOMORE:)MBUF;
+  DO IB=1,LMDL [IF (MBUF(IB).NE.MDLABL(IB))NEXT:MDLOOK:;]
+  "   HEADER MATCHES. NOW SEE IF IT IS ONE OF REQUESTED MEDIA"
+  :MDNAME:
+  DO IM=1,NMED [
+    DO IB=1,LMDN [IL=LMDL+IB; IF (MBUF(IL).NE.MEDIA(IB,IM))NEXT:MDNAME:;
+    IF (IB.EQ.LMDN)EXIT:MDLOOK:; ]
+  ] "END :MDNAME: DO"
+  "   NOT IN NAME TABLE, SO IGNORE IT"
+]REPEAT "MDLOOK"
+
+"   'IM' IS THE INDEX OF THE MEDIUM READY TO BE READ"
+IF (LOK(IM).NE.0)GO TO :MDLOOK:;"WE ALREADY HAVE THIS ONE"
+LOK(IM)=1;NM=NM+1;"SET FOUND FLAG AND STEP MEDIUM COUNTER"
+
+"   NOW READY TO READ IN DATA FOR THIS MEDIUM"
+"$UOUTPUT(KMPO)IM,MBUF;(' DATA FOR MEDIUM #',I3,', WHICH IS:',72A1);"
+
+"   NOW PUT OUT LINES SHOWING COMPOSITION OF MEDIUM"
+"THE FOLLOWING LINE WAS CHANGED TO STORE THE ELEMENTAL COMPOSITION AFB 88/05/31"
+"$UINPUT(KMPI)(MBUF(I),I=1,5),RHO(IM),NE;"
+"The next two lines were line prior to Dec 89 mods to get IUNRST"
+"$UINPUT(KMPI)(MBUF(I),I=1,5),RHO(IM),NNE(IM);"
+"(5A1,5X,F11.0,4X,I2);"
+"following used to pick up IUNRST, IAPRIM and EPSTFL"
+"Problem is that GASP may or may not be printed, so we make"
+"a kludge which will work with all old data files"
+"FIRST WE ASSUME THERE IS NO GASP VALUE IN THE LINE"
+"Note that this reading scheme counts on there being an"
+"error when GASP does exist on the line--an error does"
+"occur on most compilers, however, we have found that on"
+"the rs6000 an error does not occur.  Instead, a warning"
+"is printed out and IUNRST,EPSTFL and IAPRIM are set to 0."
+"This will make no difference in simulations but will cause"
+"a problem when running EXAMIN"
+
+" IK: backspace(kmpi) fails under windows using g77 with I/O error"
+"     therefore we read the line in a temporary string and then "
+"     use memoty I/O to try to read with and without gasp there. "
+
+read(kmpi,'(a)',err=:hatch_read_error1:) tmp_string;
+goto :no_hatch_read_error1:;
+:hatch_read_error1:
+$egs_fatal(*,'Error while reading pegs4 file');
+
+:no_hatch_read_error1:;
+read(tmp_string,1,ERR=:GASP-THERE:)
+"READ(KMPI,1,ERR=:GASP-THERE:)"
+(MBUF(I),I=1,5),RHO(IM),NNE(IM),IUNRST(IM),EPSTFL(IM),IAPRIM(IM);
+1   FORMAT(5A1,5X,F11.0,4X,I2,9X,I1,9X,I1,9X,I1);
+"IUNRST, EPSTFL AND IAPRIM ARE STORED IN COMIN ELECIN"
+GO TO :GASP-NOT-THERE:;
+
+:GASP-THERE:;
+"WE MUST REREAD THE LINE WITH THE CORRECT FORMAT"
+"BACKSPACE(KMPI);""THIS BACKS UP ONE RECORD TO RE-READ IT"
+"READ(KMPI,2)"
+
+"The following output is only there because without it"
+"code compiled with the new gfortran GNU compiler "
+"fails with run time error. Another bug in their "
+"pre-alpha quality I/O system ----IK, Oct 26 2005 "
+"write(6,*) 'Found medium with gas pressure';"
+$egs_info(*,'Found medium with gas pressure');
+read(tmp_string,2)
+(MBUF(I),I=1,5),RHO(IM),NNE(IM),IUNRST(IM),EPSTFL(IM),
+IAPRIM(IM);
+2     FORMAT(5A1,5X,F11.0,4X,I2,26X,I1,9X,I1,9X,I1);
+
+:GASP-NOT-THERE:
+
+"THE FOLLOWING LINE WAS CHANGED AS WELL AFB 88/05/31"
+"$UOUTPUT(KMPO)(MBUF(I),I=1,5),RHO(IM),NE;"
+";$UOUTPUT(KMPO)(MBUF(I),I=1,5),RHO(IM),NNE(IM);"
+"(5A1,',RHO=',1PG11.4,',NE=',I2,',COMPOSITION IS :');"
+"THE FOLLOWING LINE WAS CHANGED AS WELL AFB 88/05/31"
+"DO IE=1,NE["
+DO IE=1,NNE(IM)[
+    "THE FOLLOWING LINE, COMMENTED OUT, WAS THE OLD WAY OF READING IN "
+    "THE ELEMENTAL COMPOSITION OF EACH MEDIUM. THE INFORMATION WAS NOT"
+    "PASSED ON TO EGS. IN THE PRESENT VERSION IT IS READ IN AND STORED"
+    "IN COMMON BREMPR. AFB 88/05/31.                                  "
+    "READ(KMPI,:BYTE:)MBUF;WRITE(KMPO,:BYTE:)MBUF;"
+    $UINPUT(KMPI)
+    (MBUF(I),I=1,6),(ASYM(IM,IE,I),I=1,2),
+    ZELEM(IM,IE),WA(IM,IE),PZ(IM,IE),RHOZ(IM,IE);
+    (6A1,2A1,3X,F3.0,3X,F9.0,4X,F12.0,6X,F12.0);
+    "$UOUTPUT(KMPO)"
+    "(MBUF(I),I=1,6),(ASYM(IM,IE,I),I=1,2),"
+    "ZELEM(IM,IE),WA(IM,IE),PZ(IM,IE),RHOZ(IM,IE);"
+    "(6A1,2A1,',Z=',F3.0,',A=',F9.3,',PZ=',1PE12.5,',RHOZ=',1PE12.5);"
+    ]
+
+"   MEDIA AND THRESH"
+"$ECHO" READ(KMPI,:FLT:) $LGN(RLC,AE,AP,UE,UP(IM));
+TE(IM)=AE(IM)-RM; THMOLL(IM)=TE(IM)*2. + RM ;
+
+"   ACTUAL ARRAY SIZES FROM PEGS"
+"$ECHO" READ(KMPI,:INT:)
+$LGN(MSGE,MGE,MSEKE,MEKE,MLEKE,MCMFP,MRANGE(IM)),IRAYL;
+NSGE=MSGE(IM);NGE=MGE(IM);NSEKE=MSEKE(IM);NEKE=MEKE(IM);
+NLEKE=MLEKE(IM);NCMFP=MCMFP(IM);NRANGE=MRANGE(IM);
+
+"   BREMPR"
+"$ECHO" READ(KMPI,:FLT:)($LGN(DL(I,IM)/1,2,3,4,5,6/),I=1,6);
+"$ECHO" READ(KMPI,:FLT:)DELCM(IM),($LGN(ALPHI,BPAR,
+   DELPOS(I,IM)),I=1,2);
+
+"   ELECIN"
+"$ECHO" READ(KMPI,:FLT:)$LGN(XR0,TEFF0,BLCC,XCC(IM));
+"$ECHO" READ(KMPI,:FLT:)$LGN(EKE(IM)/0,1/);
+"$ECHO" READ(KMPI,:FLT:)
+($LGN(ESIG,PSIG,EDEDX,PDEDX,EBR1,PBR1,PBR2,
+   TMXS(I,IM)/0,1/),I=1,NEKE);
+
+"   PHOTIN"
+"$ECHO" READ(KMPI,:FLT:)EBINDA(IM),$LGN(GE(IM)/0,1/);
+"$ECHO" READ(KMPI,:FLT:)($LGN(GMFP,GBR1,GBR2(I,IM)/0,1/),I=1,NGE);
+
+"   PHOTIN (CONTINUED)---OPTIONAL RAYLEIGH SCATTERING INPUT"
+
+/* Leave this for compatibility with existing pegs4 data sets.  */
+IF (IRAYL.EQ.1) [
+"$ECHO" READ(KMPI,:INT:) NGR(IM);
+NGRIM=NGR(IM);
+"$ECHO" READ(KMPI,:FLT:)$LGN(RCO(IM)/0,1/);
+"$ECHO" READ(KMPI,:FLT:)($LGN(RSCT(I,IM)/0,1/),I=1,NGRIM);
+"$ECHO" READ(KMPI,:FLT:)($LGN(COHE(I,IM)/0,1/),I=1,NGE);
+ "IF(IRAYLM(IM).NE.1) ["
+ $egs_info('(a,i3,a)', ' Rayleigh data available for medium',
+          IM, ' in PEGS4 data set.');
+ "]"
+]
+
+/*******************************************************************
+ Rayleigh data picked up directly from pgs4form.data or user-supplied
+ ff file in egs_init_rayleigh unless user wants to use PEGS4 data.
+*********************************************************************/
+IF(IRAYLM(IM).EQ.1) ["Rayleigh data requested for medium IM"
+  IF(IRAYL.NE.1) ["No data in PEGS4"
+    IF(toUpper($cstring(photon_xsections))='PEGS4')
+    ["Rayleigh not possible"
+     $egs_fatal('(a,i3 /,a /,a)',
+     ' IN HATCH: REQUESTED RAYLEIGH OPTION FOR MEDIUM',
+     IM,' BUT RAYLEIGH DATA NOT INCLUDED IN PEGS4 FILE.',
+     ' YOU WILL NOT BE ABLE TO USE THE PEGS4 DATA WITH RAYLEIGH ON!');
+    ]
+    ELSE["Data will be taken from elsewhere (si,epdl,xcom,custom)"
+     $egs_warning('(a,i3 /,a)',
+     ' IN HATCH: REQUESTED RAYLEIGH OPTION FOR MEDIUM',
+     IM,' BUT RAYLEIGH DATA NOT INCLUDED IN PEGS4 FILE.');
+    ]
+  ]
+ ELSE["Rayleigh data in PEGS4"
+    IF(toUpper($cstring(photon_xsections))='PEGS4')
+    ["PEGS4 data selected"
+      "***********************************************************"
+      "Preparing data for new Rayleigh angular sampling when using"
+      "the pegs4 data set,                                        "
+      "***********************************************************"
+       call egs_init_rayleigh_sampling(IM);
+    ]
+    "ELSE[Taking photon data from either si,epdl,xcom or user]"
+  ]
+]
+/*******************************************************************/
+
+"   THAT'S ALL FOR THIS MEDIUM"
+]UNTIL NM.GE.NMED; "LOOP UNTIL WE HAVE ENOUGH.  END :MEDIUM: LOOP"
+
+CLOSE (UNIT=KMPI);
+
+"   WE NOW HAVE DATA FOR ALL MEDIA REQUESTED.  NOW DO DISTANCE UNIT"
+"   CHANGE.  DATA FROM PEGS IS IN UNITS OF RADIATION LENGTHS."
+"   EGS IS RUN IN UNITS OF 'DUNIT' CENTIMETERS, IF DUNIT.GT.0 "
+"   OR IN UNITS OF RLC(-DUNIT) CENTIMETERS IF DUNIT.LT.0."
+"   THAT IS, A NEGATIVE DUNIT MEANS UNIT IS TO BE THE RADIATION"
+"   LENGTH OF THE MEDIUM WHOSE INDEX IS -DUNIT"
+DUNITR=DUNIT; "SAVE REQUESTED"
+IF(DUNIT.LT.0.0)[ID=MAX0(1,MIN0($MXMED,int(-DUNIT)));
+   DUNIT=RLC(ID);]
+IF(DUNIT.NE.1.0) [
+$egs_info('(a,1PE14.5,E14.5,a)',' DUNIT REQUESTED&USED ARE: ',
+         DUNITR,DUNIT,'(CM.)' );
+]
+DO IM=1,NMED [
+DFACT=RLC(IM)/DUNIT; "CONVERTS RL TO DUNITS"
+DFACTI=1.0/DFACT;    "CONVERT RL**-1 TO DUNITS**-1"
+
+FOR I=1 TO MEKE(IM) [
+$SCALE $LGN(ESIG,PSIG,EDEDX,PDEDX(I,IM)/0,1/) BY DFACTI;
+$SCALE $LGN(TMXS(I,IM)/0,1/) BY DFACT;]
+$SCALE TEFF0(IM) BY DFACT;
+$SCALE BLCC(IM) BY DFACTI;
+$SCALE XCC(IM) BY SQRT(DFACTI);
+RLDU(IM)=RLC(IM)/DUNIT;
+FOR I=1 TO MGE(IM) [$SCALE $LGN(GMFP(I,IM)/0,1/) BY DFACT; ]
+] "END IM DO"
+
+"   SCALE VACDST.  UNDO PREVIOUS SCALE, THEN DO NEW."
+VACDST=VACDST*DUNITO/DUNIT;
+DUNITO=DUNIT; "SAVE OLD DUNIT"
+
+]"end regular pegs4 intake"
+ELSE["pegsless intake of medium data"
+
+$egs_info(*,' PEGSLESS INPUT.  CALCULATING ELECTRON CROSS-SECTIONS.');
+
+$GET-PEGSLESS-XSECTIONS;
+
+]
+
+"   NOW MAKE SURE ECUT AND PCUT ARE NOT LOWER THAN ANY AE OR AP"
+"   ALSO SET DEFAULT DENSITIES"
+$adjust_rhor_ecut_pcut;
+
+"BREMSSTRAHLUNG ANGULAR DISTRIBUTION INITIALIZATION - DEFAULT IS NULL"
+"NEXT LINE ADDED AFB 88/05/31"
+$INITIALIZE-BREMS-ANGLE;
+
+"PAIR ANGULAR DISTRIBUTION INITIALIZATION - DEFAULT IS NULL"
+"NEXT LINE ADDED AFB 91/05/29"
+$INITIALIZE-PAIR-ANGLE;
+
+" See if user has requested PEGS4 photon cross section data "
+IF(toUpper($cstring(photon_xsections)) = 'PEGS4')[
+  $egs_warning('(6(a/))','Using photon data from PEGS4 file!!!',
+  'However, the new Rayleigh angular sampling will be used.',
+  'The original EGS4 angular sampling undersamples large scattering ',
+  'angles. This may have little impact as Rayleigh scattering ',
+  'is forward peaked.',
+  '*********************************************************');
+
+]
+ELSE["re-calculates photon xsections using available or user data"
+"Ali:photonuc, 2 lines"
+    call egs_init_user_photon(photon_xsections,comp_xsections,
+    photonuc_xsections,xsec_out);
+"    call egs_init_user_photon(photon_xsections,comp_xsections,xsec_out);"
+]
+
+call mscati;       "Initialize new MS, step-sizes, etc, IK Oct 97"
+
+"Calling order of the subroutines below is important when using"
+"detailed atomic relaxation in order to use the binding energies"
+"corresponding to the requested photon cross section library"
+IF ( eadl_relax & photon_xsections = 'xcom' )[
+   call init_compton; "Initialize bound Compton scattering"
+   call EDGSET(1,1);  "Initialize relaxations and photo-absorption data"
+]
+ELSE[
+   call EDGSET(1,1);  "Initialize relaxations and photo-absorption data,"
+                      "if requested
+   call init_compton; "Initialize bound compton scattering, IK, Jan 99"
+                      "if requested
+]
+
+IF( xsec_out = 1 & eadl_relax) [
+  call egs_print_binding_energies;
+]
+
+call fix_brems;    "Re-calculate dl1,... for the different technique"
+                   "employed in BREMS. Note that the old EGS sampling"
+                   "technique for BREMS had a bug that shows up only"
+                   "if AP is not much smaller than electron kinetic energy"
+
+IF( ibr_nist >= 1 ) [ call init_nist_brems; ]
+                   "initializes the sampling tables and modifies the total"
+                   "brems cross sections if the NIST brems data base is to"
+                   "be used                                               "
+
+IF( pair_nrc = 1 ) [ call init_nrc_pair; ]
+
+" Load and initialize EII data if needed. "
+call eii_init;
+
+" Load and initialize the triplet data if needed "
+call init_triplet;
+
+"   SETUP IS NOW COMPLETE"
+IF (NMED.EQ.1)[
+   $egs_info(*,'EGSnrc SUCCESSFULLY ''HATCHED'' FOR ONE MEDIUM.');
+]
+ELSE[
+   $egs_info('(a,i5,a)',
+             'EGSnrc SUCCESSFULLY ''HATCHED'' FOR ',NMED,' MEDIA.');
+]
+
+RETURN;
+
+:MDNOMORE:
+$egs_info('(a,i2//,a/,a/)', ' END OF FILE ON UNIT ',KMPI,
+  ' PROGRAM STOPPED IN HATCH BECAUSE THE',
+  ' FOLLOWING NAMES WERE NOT RECOGNIZED:');
+DO IM=1,NMED [
+   IF(LOK(IM).NE.1) [
+      $egs_info('(40x,a,24a1,a)','''',(MEDIA(I,IM),I=1,LMDN),'''');
+   ]
+]
+STOP;
+"END OF SUBROUTINE HATCH"   END;

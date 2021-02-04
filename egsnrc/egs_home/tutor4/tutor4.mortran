@@ -1,0 +1,316 @@
+%C80
+%L
+!INDENT M 4;    "indent each MORTRAN nesting level by 4"
+!INDENT F 2;    "indent each FORTRAN nesting level by 2"
+"  !COMMENTS;   keep off here, but use whenever need f2py signatures"
+
+"#############################################################################"
+"                                                                             "
+"  EGSnrc tutor4 application                                                  "
+"  Copyright (C) 2015 National Research Council Canada                        "
+"                                                                             "
+"  This file is part of EGSnrc.                                               "
+"                                                                             "
+"  EGSnrc is free software: you can redistribute it and/or modify it under    "
+"  the terms of the GNU Affero General Public License as published by the     "
+"  Free Software Foundation, either version 3 of the License, or (at your     "
+"  option) any later version.                                                 "
+"                                                                             "
+"  EGSnrc is distributed in the hope that it will be useful, but WITHOUT ANY  "
+"  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS  "
+"  FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for   "
+"  more details.                                                              "
+"                                                                             "
+"  You should have received a copy of the GNU Affero General Public License   "
+"  along with EGSnrc. If not, see <http://www.gnu.org/licenses/>.             "
+"                                                                             "
+"#############################################################################"
+"                                                                             "
+"  Author:          Dave Roger, 2000                                          "
+"                                                                             "
+"  Contributors:    Iwan Kawrakow                                             "
+"                   Reid Townson                                              "
+"                                                                             "
+"#############################################################################"
+"                                                                             "
+"  An EGSnrc user code which calculates the total amount of energy reflected, "
+"  deposited and transmitted when a 20 MeV beam of electrons is incident on a "
+"  1 mm slab of tantalum. It is the same as tutor2.mortran but it has the     "
+"  watch routine turned on for the first 10 histories.                        "
+"                                                                             "
+"  Note that the WATCH routine is included via the standard configuration     "
+"  file as part of nrcaux.mortran. To output a file for EGS_windows you will  "
+"  need to link fort.13 to the files name in an environment file.             "
+"                                                                             "
+"  Iwan Kawrakow, 2003: Adapted to new EGSnrc MP system by adding call        "
+"  egs_init at the beginning and call egs_finish at the end.                  "
+"                                                                             "
+"#############################################################################"
+REPLACE {$MXMED} WITH {1}   "only 1 medium in the problem(default 10)"
+REPLACE {$MXREG} WITH {3}   "only 3 geometric regions (default 2000)"
+REPLACE {$MXSTACK} WITH {15}"less than 15 particles on stack at once"
+
+"Define a common to pass information to the geometry routine HOWFAR"
+REPLACE {;COMIN/GEOM/;} WITH {;COMMON/GEOM/ZBOUND;$REAL ZBOUND;}
+
+REPLACE {$CALL-HOWNEAR(#);} WITH {
+   ";$egs_info('(a,3e16.8)','HOWNEAR inputs=',x(np),y(np),z(np));"
+   ;{P1} = hownear(x(np),y(np),z(np),irl);
+   "$egs_info('(a,e16.8)', 'Return value=', {P1});"
+   }
+
+REPLACE {$XXXCOMPUTE-DRANGE(#,#,#,#,#,#);} WITH
+"        ============================="
+{
+  $egs_info('(a,I4, I4, 2F14.9,I4,2F14.9)','in ',
+    lelec, medium, {P1},{P2},{P3},{P4},{P5});
+  fedep = 1 - {P2}/{P1};
+  elktmp = 0.5*({P4}+{P5}+0.25*fedep*fedep*(1+fedep*(1+0.875*fedep)));
+           " the above evaluates the logarithm of the midpoint energy"
+  lelktmp = {P3};
+  IF(lelec < 0) [
+      $EVALUATE dedxmid USING ededx(elktmp);
+      dedxmid = 1/dedxmid;
+      aux = ededx1(lelktmp,medium)*dedxmid;
+      "aux = ededx1(lelktmp,medium)/dedxmid;"
+  ]
+  ELSE [
+      $EVALUATE dedxmid USING pdedx(elktmp);
+      dedxmid = 1/dedxmid;
+      aux = pdedx1(lelktmp,medium)*dedxmid;
+      "aux = pdedx1(lelktmp,medium)/dedxmid;"
+  ]
+  aux = aux*(1+2*aux)*(fedep/(2-fedep))**2/6;
+  "{P6} = fedep*{P1}/dedxmid*(1+aux);"
+  {P6} = fedep*{P1}*dedxmid*(1+aux);
+  $egs_info('(a,F14.9)','out ',{P6});
+}
+;
+
+REPLACE {$XXXCALCULATE-TSTEP-FROM-DEMFP;} WITH  "Remove XXX for generating test data"
+"        ============================"
+{;
+  IF( compute_tstep ) [
+    total_de = demfp/sig; fedep = total_de;
+    $egs_info('(a,4I4,5E25.16e2)','in ',
+    qel,lelec, medium, lelke, demfp, sig, eke, elke,total_de);
+    ekef  = eke - fedep;
+    IF( ekef <= E_array(1,medium) ) [ tstep = vacdst; ]
+    ELSE
+    [
+      elkef = Log(ekef);
+      $SET INTERVAL elkef,eke;
+      IF( lelkef = lelke )
+      [       " initial and final energy are in the same interpolation bin "
+          $COMPUTE-DRANGE(eke,ekef,lelke,elke,elkef,tstep);
+      ]
+      ELSE
+      [   " initial and final energy are in different interpolation bins, "
+          " calc range from ekef to E(lelkef+1) and from E(lelke) to eke  "
+          " and add the pre-calculated range from E(lelkef+1) to E(lelke) "
+          ekei = E_array(lelke,medium);
+          elkei = (lelke - eke0(medium))/eke1(medium);
+          $COMPUTE-DRANGE(eke,ekei,lelke,elke,elkei,tuss);
+          ekei = E_array(lelkef+1,medium);
+          elkei = (lelkef + 1 - eke0(medium))/eke1(medium);
+          $COMPUTE-DRANGE(ekei,ekef,lelkef,elkei,elkef,tstep);
+          tstep=tstep+tuss+
+                  range_ep(qel,lelke,medium)-range_ep(qel,lelkef+1,medium);
+      ]
+    ]
+    total_tstep = tstep;
+    $egs_info('(a,E25.16e2)','out ',tstep);
+    compute_tstep = .false.;
+  ]
+  tstep = total_tstep/rhof;  " non-default density scaling "
+}
+;
+
+REPLACE {$CALCULATE-TSTEP-FROM-DEMFP;} WITH
+"        ============================"
+{;
+  total_de = demfp/sig;
+  IF( compute_tstep ) [
+     tstep = calc_tstep_from_demfp(qel,lelec,medium,lelke,
+                                   demfp,sig,eke,elke,total_de);
+     total_tstep = tstep;
+     compute_tstep = .false.;
+  ]
+  tstep = total_tstep/rhof;  " non-default density scaling "
+}
+;
+
+
+REPLACE {$COMPUTE-ELOSS(#,#,#,#,#);} WITH
+"        =========================="
+{;
+  {P5} = compute_eloss(lelec, medium, {P1},{P2},{P3},{P4});
+}
+;
+
+REPLACE {$XXXCOMPUTE-ELOSS(#,#,#,#,#);} WITH
+"        =========================="
+{;
+  $egs_info('(a, 2I4, 3E25.16e2,I4)','in ',
+    lelec, medium, {P1},{P2},{P3},{P4});
+  IF( lelec < 0 ) [
+      $EVALUATE dedxmid USING ededx({P3});
+      aux = ededx1({P4},medium)/dedxmid;
+  ]
+  ELSE [
+      $EVALUATE dedxmid USING pdedx({P3});
+      aux = pdedx1({P4},medium)/dedxmid;
+  ]
+  /*
+  {P5} = dedxmid*{P1};  " Energy loss using stopping power at the beginning "
+  */
+  {P5} = dedxmid*{P1}*rhof; "IK: rhof scaling bug, June 9 2006"
+                            "rhof scaling must be done here and NOT in "
+                            "$COMPUTE-ELOSS-G below!"
+  fedep = {P5}/{P2};
+  {P5} = {P5}*(1-0.5*fedep*aux*(1-0.333333*fedep*(aux-1-
+             0.25*fedep*(2-aux*(4-aux)))));
+  $egs_info('(a,E25.16e2)','out ',{P5});
+}
+;
+
+
+REPLACE {$XXXCOMPUTE-ELOSS-G(#,#,#,#,#);} WITH
+"        ============================"
+{
+  "lelec, medium, step, eke, elke, lelke, range_"
+  $egs_info('(a, 2I4, 3E25.16e2,I4, E25.16e2)','in ',
+  lelec, medium, {P1},{P2},{P3},{P4}, range);
+
+  tuss = range - range_ep(qel,{P4},medium)/rhof;
+    " here tuss is the range between the initial energy and the next lower "
+    " energy on the interpolation grid "
+  IF( tuss >= {P1} ) [  " Final energy is in the same interpolation bin "
+      $COMPUTE-ELOSS({P1},{P2},{P3},{P4},{P5});
+      /* {P5} = {P5}*rhof; "IK, rhof bug"  */
+      "IK: rhof scaling bug, June 9 2006. rhof scaling is done in "
+      "    $COMPUTE-ELOSS above!                                  "
+  ]
+  ELSE [ " Must find first the table index where the step ends using "
+         " pre-calculated ranges                                     "
+      lelktmp = {P4};
+      tuss = (range - {P1})*rhof;
+         " now tuss is the range of the final energy electron "
+         " scaled to the default mass density from PEGS4      "
+      IF( tuss <= 0 ) [ {P5} = {P2} - TE(medium)*0.99; ]
+        " i.e., if the step we intend to take is longer than the particle "
+        " range, the particle energy goes down to the threshold "
+        "({P2} is the initial particle energy)  "
+        "originally the entire energy was lost, but msdist_xxx is not prepared"
+        "to deal with such large eloss fractions => changed July 2005."
+      ELSE [
+          WHILE ( tuss < range_ep(qel,lelktmp,medium) ) [
+              lelktmp = lelktmp - 1; ]
+          elktmp = (lelktmp+1-eke0(medium))/eke1(medium);
+          eketmp = E_array(lelktmp+1,medium);
+          "tuss = range_ep(qel,lelktmp+1,medium) - tuss;"
+          "IK: rhof scaling bug, June 9 2006: because of the change in "
+          "    $COMPUTE-ELOSS above, we must scale tuss by rhof        "
+          tuss = (range_ep(qel,lelktmp+1,medium) - tuss)/rhof;
+          $COMPUTE-ELOSS(tuss,eketmp,elktmp,lelktmp,{P5});
+          {P5} = {P5} + {P2} - eketmp;
+      ]
+  ]
+  $egs_info('(a,E25.16e2)','out ',{P5});
+}
+;
+
+
+REPLACE {$COMPUTE-ELOSS-G(#,#,#,#,#);} WITH
+"        ============================"
+{
+  {P5} = compute_eloss_g(lelec,medium, {P1},{P2},{P3},{P4},range);
+}
+;
+
+
+REPLACE {$CALCULATE-XI(#);} WITH
+{
+  $egs_info('(a, 2I4, 6E25.16e2)','in ',
+  lelec, medium, ekems, rmt2, rmsq, xccl, blccl, {P1});
+
+  p2 = ekems*(ekems+rmt2); beta2 = p2/(p2 + rmsq);
+  chia2 = xccl/(4*blccl*p2);
+                                "Note that our chia2 is Moliere chia2/4"
+                                "Note also that xcc is now old egs xcc**2"
+  xi = 0.5*xccl/p2/beta2*{P1};
+  IF( spin_effects ) [
+      elkems = Log(ekems);
+      $SET INTERVAL elkems,eke;
+      IF(lelec < 0) [
+          $EVALUATE etap USING etae_ms(elkems);
+          $EVALUATE xi_corr USING q1ce_ms(elkems);
+      ]
+      ELSE          [
+          $EVALUATE etap USING etap_ms(elkems);
+          $EVALUATE xi_corr USING q1cp_ms(elkems);
+      ]
+      chia2 = chia2*etap; xi = xi*xi_corr;
+      $EVALUATE ms_corr USING blcce(elkems);
+      blccl = blccl*ms_corr;
+  ]
+  ELSE [ xi_corr = 1; etap = 1; ]
+  xi = xi*(Log(1+1./chia2)-1/(1+chia2));
+  $egs_info('(a,2E25.16e2)','out ',xi, blccl);
+}
+
+
+"Define a COMMON for scoring in AUSGAB"
+REPLACE {;COMIN/SCORE/;} WITH {
+   ;COMMON/SCORE/ESCORE(3),IWATCH; $INTEGER IWATCH; REAL*8 ESCORE;
+}
+
+" Dummy subroutine to keep definitions of common blocks"
+SUBROUTINE dummyxxx;
+
+;COMIN/BOUNDS,GEOM,MEDIA,MISC,SCORE,STACK,THRESH,USEFUL/;
+"       The above expands into a series of COMMON statements"
+"       BOUNDS contains ECUT and PCUT"
+"       GEOM passes info to our HOWFAR routine"
+"       MEDIA contains the array MEDIA"
+"       MISC contains MED"
+"       SCORE contains the scoring array ESCORE and IWATCH"
+"       STACK to provide LATCHI"
+"       THRESH contains various thresholds"
+"       USEFUL contains PRM"
+
+end;
+
+"********************************************************************"
+"                                                                    "
+SUBROUTINE AUSGAB(IARG);
+"                                                                    "
+" In this AUSGAB routine for tutor4, we score the energy deposited   "
+"  in the various regions. This amounts to the total energy          "
+"  reflected,deposited and transmitted by the slab.                  "
+"                                                                    "
+"  For IARG=0, an electron or photon step is about to occur and we   "
+"  score the energy deposited, if any. Note that only electrons      "
+"  deposit energy during a step, and due to our geometry, electrons  "
+"  only take steps in region 2 - however there is no need to check.  "
+"  For IARG=1,2 and 4, particles have been discarded for falling     "
+"  below various energy cutoffs and all their energy is deposited    "
+"  locally (in fact EDEP = particles kinetic energy).                "
+"  For IARG=3, we are discarding the particle since it is in         "
+"  region 1 or 3, so score its energy.                               "
+"                                                                    "
+"********************************************************************"
+$IMPLICIT-NONE;
+$INTEGER IARG,IRL;
+
+COMIN/EPCONT,SCORE,STACK/; "we use EDEP from EPCONT,IR(NP) from STACK"
+"                        ESCORE is passed in user defined COMIN SCORE"
+
+IF (IWATCH > 0 ) CALL WATCH(IARG,IWATCH); "handles printouts of data"
+                                          "IWATCH is passed in SCORE"
+
+IF(IARG <= 4) [
+   IRL = IR(NP);" pick up current region number"
+   ESCORE(IRL)=ESCORE(IRL)+EDEP;
+]
+RETURN;END;"end of ausgab"
