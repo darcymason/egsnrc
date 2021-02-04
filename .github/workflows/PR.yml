@@ -6,11 +6,11 @@ on:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 4
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest]
         python-version: [3.9]
 
     steps:
@@ -33,6 +33,7 @@ jobs:
 
     - name: EGSnrc install
       working-directory: git
+      run: |
         git clone --depth 1 https://github.com/nrc-cnrc/EGSnrc.git
         EGSnrc/HEN_HOUSE/scripts/configure.expect actions.conf 3 | tee configure.log
         export EGS_HOME=/home/runner/work/egsnrc/egsnrc/egs_home/
