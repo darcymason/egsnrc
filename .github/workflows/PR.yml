@@ -57,7 +57,7 @@ jobs:
         rm -rf EGSnrc
         git clone --depth 1 https://github.com/nrc-cnrc/EGSnrc.git
         cd EGSnrc
-        HEN_HOUSE/scripts/configure.expect HEN_HOUSE/specs/linux.conf 3 | tee configure.log
+        /HEN_HOUSE/scripts/configure.expect linux.conf 3 | tee configure.log
         cd /home/runner/work/egsnrc/egsnrc
 
     - name: Build egsfortran
