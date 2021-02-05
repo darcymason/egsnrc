@@ -59,6 +59,18 @@ jobs:
         HEN_HOUSE/scripts/configure.expect actions.conf 3 | tee configure.log
         cd /home/runner/work/egsnrc/egsnrc
 
+    - name: Build egsfortran
+      run: |
+        export WORK_BASE=/home/runner/work/egsnrc/egsnrc
+        export EGS_CONFIG=/home/runner/EGSnrc/HEN_HOUSE/specs/actions.conf
+        export HEN_HOUSE=/home/runner/EGSnrc/HEN_HOUSE
+        export EGS_HOME=$WORK_BASE/egsnrc/egs_home/
+        export PY_EGS=$WORK_BASE/egsnrc/HEN_HOUSE/src/
+        alias m='/home/runner/work/git/EGSnrc/HEN_HOUSE/scripts/compile_user_code m'
+        python egsnrc/egs_home/tutor4/make_egsfortran.py
+
     - name: Test with pytest
       run: |
         python -m pip install pytest
+        python -c "from egsnrc import egsfortran"  # test if can import the lib
+        python -m pytest -v
