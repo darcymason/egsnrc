@@ -73,7 +73,8 @@ jobs:
       run: |
         echo cd egsnrc/egs_home/tutor4
         cd egsnrc/egs_home/tutor4
-        echo Setting WORK_BASE, EGS_CONFIG PY_EGS
+        echo Setting HEN_HOUSE, WORK_BASE, EGS_CONFIG PY_EGS
+        export HEN_HOUSE=/home/runner/EGSnrc/HEN_HOUSE
         export WORK_BASE=/home/runner/work/egsnrc/egsnrc
         export EGS_CONFIG=/home/runner/EGSnrc/HEN_HOUSE/specs/actions.conf
         export PY_EGS=$WORK_BASE/egsnrc/HEN_HOUSE/src/
