@@ -78,6 +78,8 @@ jobs:
         echo ls HEN_HOUSE
         ls -l $HEN_HOUSE
         export EGS_HOME=$WORK_BASE/egsnrc/egs_home/
+        echo EGS_HOME $EGS_HOME
+        echo Starting python tutor4.py
         python tutor4.py
         # python -m pip install pytest
         # python -c "from egsnrc import egsfortran"  # test if can import the lib

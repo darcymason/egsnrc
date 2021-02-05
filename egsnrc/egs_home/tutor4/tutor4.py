@@ -150,14 +150,14 @@ USER_CODE = HERE.name
 PEGS_FILE = "tutor_data"
 
 def print_info():
-    print("egsfortran values")
-    print("-----------------")
+    print("egsfortran values", flush=True)
+    print("-----------------", flush=True)
     for name in ('egs_home', 'user_code', 'pegs_file'):
-        print(f"{name}: ", getattr(egsfortran.egs_io, name))
-    print("\nEnvironment")
-    print("-----------")
-    print(f"HEN_HOUSE={str(HEN_HOUSE)}")
-    print(f"EGS_HOME={str(EGS_HOME)}")
+        print(f"{name}: ", getattr(egsfortran.egs_io, name), flush=True)
+    print("\nEnvironment", flush=True)
+    print("-----------", flush=True)
+    print(f"HEN_HOUSE={str(HEN_HOUSE)}", flush=True)
+    print(f"EGS_HOME={str(EGS_HOME)}", flush=True)
 # ---------------------------------------------------------------------
 # STEP 1:  USER-OVERRIDE-OF-EGSnrc-MACROS
 # ---------------------------------------------------------------------
@@ -184,7 +184,7 @@ def print_info():
 # --------------------------------------------------------------------
 # egsfortran.egs_init()
 def init():
-    print("---Before setting pegs_file and user_code --")
+    print("---Before setting pegs_file and user_code --", flush=True)
     print_info()
 
     egsfortran.egs_set_defaults()
@@ -200,7 +200,7 @@ def init():
     egsfortran.egs_io.user_code = f"{USER_CODE:<64}"
 
 
-    print("\n---After setting pegs_file and user_code --")
+    print("\n---After setting pegs_file and user_code --", flush=True)
     print_info()
 
     egsfortran.egs_init1()
