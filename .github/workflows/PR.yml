@@ -73,17 +73,15 @@ jobs:
       run: |
         echo cd egsnrc/egs_home/tutor4
         cd egsnrc/egs_home/tutor4
-        echo Setting WORK_BASE, EGS_CONFIG
+        echo Setting WORK_BASE, EGS_CONFIG PY_EGS
         export WORK_BASE=/home/runner/work/egsnrc/egsnrc
         export EGS_CONFIG=/home/runner/EGSnrc/HEN_HOUSE/specs/actions.conf
-        echo source egsnrc_bashrc_additions
-        source /home/runner/work/egsnrc/egsnrc/egsnrc_bashrc_additions
         export PY_EGS=$WORK_BASE/egsnrc/HEN_HOUSE/src/
         echo ls HEN_HOUSE/pegs4/data from hen_house=$HEN_HOUSE
         ls -l $HEN_HOUSE/pegs4/data
         export EGS_HOME=$WORK_BASE/egsnrc/egs_home/
         echo EGS_HOME $EGS_HOME
-        echo ---
+        # echo ---
         # echo Trying make
         # make  -- did run, only expected missing functions (they are in Python)
         echo Starting python tutor4.py
