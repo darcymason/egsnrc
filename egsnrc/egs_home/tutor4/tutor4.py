@@ -146,6 +146,7 @@ def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
 #  - e.g. in tutor1, tutor2, etc.
 HERE  = Path(__file__).resolve().parent
 EGS_HOME = HERE.parent
+EGS_CONFIG = os.environ['EGS_CONFIG']
 USER_CODE = HERE.name
 PEGS_FILE = "tutor_data"
 
@@ -158,6 +159,7 @@ def print_info():
     print("-----------", flush=True)
     print(f"HEN_HOUSE={str(HEN_HOUSE)}", flush=True)
     print(f"EGS_HOME={str(EGS_HOME)}", flush=True)
+    print(f"EGS_CONFIG={str(EGS_CONFIG)}", flush=True)
 # ---------------------------------------------------------------------
 # STEP 1:  USER-OVERRIDE-OF-EGSnrc-MACROS
 # ---------------------------------------------------------------------
