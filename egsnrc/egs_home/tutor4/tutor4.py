@@ -148,7 +148,6 @@ HERE  = Path(__file__).resolve().parent
 EGS_HOME = HERE.parent
 USER_CODE = HERE.name
 PEGS_FILE = "tutor_data"
-HEN_HOUSE =
 
 def print_info():
     print("egsfortran values")
