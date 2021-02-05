@@ -81,8 +81,8 @@ jobs:
         export EGS_HOME=$WORK_BASE/egsnrc/egs_home/
         echo EGS_HOME $EGS_HOME
         echo ---
-        echo Trying make
-        make
+        # echo Trying make
+        # make  -- did run, only expected missing functions (they are in Python)
         echo Starting python tutor4.py
         python tutor4.py
         # python -m pip install pytest
