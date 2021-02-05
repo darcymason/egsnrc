@@ -51,7 +51,7 @@ jobs:
 
 
     - name: EGSnrc install
-      # if: ${{ steps.cache-EGSnrc.outputs.cache-hit != 'true' }}
+      if: ${{ steps.cache-EGSnrc.outputs.cache-hit != 'true' }}
       run: |
         cd
         rm -rf EGSnrc
@@ -73,8 +73,6 @@ jobs:
 
     - name: Test with pytest
       run: |
-        echo cd egsnrc/egs_home/tutor4
-        cd egsnrc/egs_home/tutor4
         echo Setting HEN_HOUSE, WORK_BASE, EGS_CONFIG PY_EGS, EGS_HOME
         export HEN_HOUSE=/home/runner/EGSnrc/HEN_HOUSE
         export WORK_BASE=/home/runner/work/egsnrc/egsnrc
@@ -83,8 +81,13 @@ jobs:
         export EGS_HOME=$WORK_BASE/egsnrc/egs_home/
         echo egs_config = $EGS_CONFIG
         echo EGS_HOME = $EGS_HOME
-        echo Starting python tutor4.py
-        python tutor4.py
+        # echo Starting python tutor4.py
+        # echo cd egsnrc/egs_home/tutor4
+        # cd egsnrc/egs_home/tutor4
+        # python tutor4.py
+        # cd ../../../
         python -m pip install pytest
+        echo python -c "from egsnrc import egsfortran"
         python -c "from egsnrc import egsfortran"  # test if can import the lib
+        echo python -m pytest -v
         python -m pytest -v
