@@ -39,6 +39,8 @@ def known_in_out(filepath, in_types, out_types):
         else:
             yield inputs, outputs
 
+tutor4.init()
+
 class TestTutor4:
     def xxxtest_output(self, capfd):
         """Test that (partially) Python tutor4 produces known output"""
@@ -76,7 +78,7 @@ class TestTutor4:
     def test_compute_drange(self):
         "Calculate correct values for $COMPUTE-DRANGE in Python"
         # Compare against ones captured from TUTOR4 run with extra prints
-        tutor4.init()  # get all data loaded
+        # tutor4.init()  # get all data loaded
         # Known inputs for compute-drange from Mortran tutor4 run
         for inputs, expected in known_in_out(TEST_DATA / "compute-drange.txt",
             (int, int, float, float, int, float, float), float
@@ -88,7 +90,7 @@ class TestTutor4:
     def test_calc_tstep(self):
         "Calc correct values for modified $CALCULATE-TSTEP-FROM-DEMFP in Python"
         # Compare against ones captured from TUTOR4 run with extra prints
-        tutor4.init()  # get all data loaded
+        # tutor4.init()  # get all data loaded
         # Known inputs from Mortran tutor4 run
         for inputs, expected in known_in_out(TEST_DATA / "calc-tstep.txt",
             (int, int, int, int, float, float, float, float, float), float
@@ -103,7 +105,7 @@ class TestTutor4:
     def test_compute_eloss(self):
         "Calc correct values for $COMPUTE-ELOSS in Python"
         # Compare against ones captured from TUTOR4 run with extra prints
-        tutor4.init()  # get all data loaded
+        # tutor4.init()  # get all data loaded
         # Known inputs from Mortran tutor4 run
         for inputs, expected in known_in_out(TEST_DATA / "compute-eloss.txt",
             (int, int, float, float, float, int), float
@@ -117,7 +119,7 @@ class TestTutor4:
     def test_compute_eloss_g(self):
         "Calc correct values for $COMPUTE-ELOSS-G in Python"
         # Compare against ones captured from TUTOR4 run with extra prints
-        tutor4.init()  # get all data loaded
+        # tutor4.init()  # get all data loaded
         # Known input and output from Mortran tutor4 run
         for inputs, expected in known_in_out(TEST_DATA / "compute-eloss-g.txt",
             # lelec, medium, step, eke, elke, lelke, range_
