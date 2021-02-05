@@ -1,5 +1,6 @@
 
 from pathlib import Path
+import os
 from egsnrc import egsfortran
 import logging
 import numpy  # cannot use `np` as is an EGS var!!
@@ -20,6 +21,9 @@ escore = score.escore
 
 
 logger = logging.getLogger('egsnrc')  # XXX later `egsnrc`
+
+HEN_HOUSE = Path(os.environ["HEN_HOUSE"])
+EGS_HOME = Path(os.environ['EGS_HOME'])
 
 
 def randomset():
@@ -144,11 +148,17 @@ HERE  = Path(__file__).resolve().parent
 EGS_HOME = HERE.parent
 USER_CODE = HERE.name
 PEGS_FILE = "tutor_data"
+HEN_HOUSE =
 
 def print_info():
+    print("egsfortran values")
+    print("-----------------")
     for name in ('egs_home', 'user_code', 'pegs_file'):
         print(f"{name}: ", getattr(egsfortran.egs_io, name))
-
+    print("\nEnvironment")
+    print("-----------")
+    print(f"HEN_HOUSE={str(HEN_HOUSE)}")
+    print(f"EGS_HOME={str(EGS_HOME)}")
 # ---------------------------------------------------------------------
 # STEP 1:  USER-OVERRIDE-OF-EGSnrc-MACROS
 # ---------------------------------------------------------------------
@@ -188,8 +198,8 @@ def init():
     egsfortran.egs_io.user_code = f"{USER_CODE:<64}"
 
 
-    # print("---After setting pegs_file and user_code --")
-    # print_info()
+    print("---After setting pegs_file and user_code --")
+    print_info()
 
     egsfortran.egs_init1()
     # ----- end equiv of egs_init
@@ -645,3 +655,4 @@ if __name__ == "__main__":
             main(-1)
             print("\n\n# e+   ----------------------------")
             main(+1)
+
