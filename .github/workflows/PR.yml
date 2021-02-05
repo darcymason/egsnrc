@@ -51,7 +51,7 @@ jobs:
 
 
     - name: EGSnrc install
-      if: ${{ steps.cache-EGSnrc.outputs.cache-hit != 'true' }}
+      # if: ${{ steps.cache-EGSnrc.outputs.cache-hit != 'true' }}
       run: |
         cd
         git clone --depth 1 https://github.com/nrc-cnrc/EGSnrc.git
