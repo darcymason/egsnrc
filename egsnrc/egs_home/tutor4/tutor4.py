@@ -184,6 +184,9 @@ def print_info():
 # --------------------------------------------------------------------
 # egsfortran.egs_init()
 def init():
+    print("---Before setting pegs_file and user_code --")
+    print_info()
+
     egsfortran.egs_set_defaults()
     egsfortran.egs_check_arguments()
     # print("COMMON IO")
@@ -197,7 +200,7 @@ def init():
     egsfortran.egs_io.user_code = f"{USER_CODE:<64}"
 
 
-    print("---After setting pegs_file and user_code --")
+    print("\n---After setting pegs_file and user_code --")
     print_info()
 
     egsfortran.egs_init1()
