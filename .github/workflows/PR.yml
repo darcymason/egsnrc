@@ -72,6 +72,11 @@ jobs:
     - name: Test with pytest
       run: |
         cd egsnrc/egs_home/tutor4
+        export WORK_BASE=/home/runner/work/egsnrc/egsnrc
+        export EGS_CONFIG=/home/runner/EGSnrc/HEN_HOUSE/specs/actions.conf
+        export HEN_HOUSE=/home/runner/EGSnrc/HEN_HOUSE
+        ls -l $HEN_HOUSE
+        export EGS_HOME=$WORK_BASE/egsnrc/egs_home/
         python tutor4.py
         python -m pip install pytest
         python -c "from egsnrc import egsfortran"  # test if can import the lib
