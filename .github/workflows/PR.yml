@@ -68,7 +68,7 @@ jobs:
         export HEN_HOUSE=/home/runner/EGSnrc/HEN_HOUSE
         export EGS_HOME=$WORK_BASE/egsnrc/egs_home/
         export PY_EGS=$WORK_BASE/egsnrc/HEN_HOUSE/src/
-        alias m='/home/runner/work/git/EGSnrc/HEN_HOUSE/scripts/compile_user_code m'
+        alias m='/home/runner/EGSnrc/HEN_HOUSE/scripts/compile_user_code m'
         python egsnrc/egs_home/tutor4/make_egsfortran.py
 
     - name: Test with pytest
