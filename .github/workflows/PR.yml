@@ -75,10 +75,13 @@ jobs:
         export WORK_BASE=/home/runner/work/egsnrc/egsnrc
         export EGS_CONFIG=/home/runner/EGSnrc/HEN_HOUSE/specs/actions.conf
         export HEN_HOUSE=/home/runner/EGSnrc/HEN_HOUSE
-        echo ls HEN_HOUSE
-        ls -l $HEN_HOUSE
+        echo ls HEN_HOUSE/pegs4/data from hen_house=$HEN_HOUSE
+        ls -l $HEN_HOUSE/pegs4/data
         export EGS_HOME=$WORK_BASE/egsnrc/egs_home/
         echo EGS_HOME $EGS_HOME
+        echo ---
+        echo Trying make
+        make
         echo Starting python tutor4.py
         python tutor4.py
         # python -m pip install pytest
