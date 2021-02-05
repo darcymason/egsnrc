@@ -51,10 +51,10 @@ jobs:
 
 
     - name: EGSnrc install
-      # if: ${{ steps.cache-EGSnrc.outputs.cache-hit != 'true' }}
+      if: ${{ steps.cache-EGSnrc.outputs.cache-hit != 'true' }}
       run: |
         cd
-        if [ ! -d "EGSnrc" ]; git clone --depth 1 https://github.com/nrc-cnrc/EGSnrc.git; fi
+        rm -rf EGSnrc
         cd EGSnrc
         HEN_HOUSE/scripts/configure.expect linux.conf 3 | tee configure.log
         cd /home/runner/work/egsnrc/egsnrc
@@ -73,24 +73,16 @@ jobs:
       run: |
         echo cd egsnrc/egs_home/tutor4
         cd egsnrc/egs_home/tutor4
-        echo Setting HEN_HOUSE, WORK_BASE, EGS_CONFIG PY_EGS
+        echo Setting HEN_HOUSE, WORK_BASE, EGS_CONFIG PY_EGS, EGS_HOME
         export HEN_HOUSE=/home/runner/EGSnrc/HEN_HOUSE
         export WORK_BASE=/home/runner/work/egsnrc/egsnrc
         export EGS_CONFIG=/home/runner/EGSnrc/HEN_HOUSE/specs/linux.conf
         export PY_EGS=$WORK_BASE/egsnrc/HEN_HOUSE/src/
-        echo Show egs_config $EGS_CONFIG
-        echo ------
-        cat $EGS_CONFIG
-        echo ------
-        echo ls HEN_HOUSE/pegs4/data from hen_house=$HEN_HOUSE
-        ls -l $HEN_HOUSE/pegs4/data
         export EGS_HOME=$WORK_BASE/egsnrc/egs_home/
-        echo EGS_HOME $EGS_HOME
-        # echo ---
-        # echo Trying make
-        # make  -- did run, only expected missing functions (they are in Python)
+        echo egs_config = $EGS_CONFIG
+        echo EGS_HOME = $EGS_HOME
         echo Starting python tutor4.py
-        python tutor4.py
-        # python -m pip install pytest
-        # python -c "from egsnrc import egsfortran"  # test if can import the lib
-        # python -m pytest -v
+        # python tutor4.py
+        python -m pip install pytest
+        python -c "from egsnrc import egsfortran"  # test if can import the lib
+        python -m pytest -v
