@@ -1,5 +1,6 @@
 
 from pathlib import Path
+import os
 from egsnrc import egsfortran
 import logging
 import numpy  # cannot use `np` as is an EGS var!!
@@ -20,6 +21,9 @@ escore = score.escore
 
 
 logger = logging.getLogger('egsnrc')  # XXX later `egsnrc`
+
+HEN_HOUSE = Path(os.environ["HEN_HOUSE"])
+EGS_HOME = Path(os.environ['EGS_HOME'])
 
 
 def randomset():
@@ -142,13 +146,20 @@ def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
 #  - e.g. in tutor1, tutor2, etc.
 HERE  = Path(__file__).resolve().parent
 EGS_HOME = HERE.parent
+EGS_CONFIG = os.environ['EGS_CONFIG']
 USER_CODE = HERE.name
 PEGS_FILE = "tutor_data"
 
 def print_info():
+    print("egsfortran values", flush=True)
+    print("-----------------", flush=True)
     for name in ('egs_home', 'user_code', 'pegs_file'):
-        print(f"{name}: ", getattr(egsfortran.egs_io, name))
-
+        print(f"{name}: ", getattr(egsfortran.egs_io, name), flush=True)
+    print("\nEnvironment", flush=True)
+    print("-----------", flush=True)
+    print(f"HEN_HOUSE={str(HEN_HOUSE)}", flush=True)
+    print(f"EGS_HOME={str(EGS_HOME)}", flush=True)
+    print(f"EGS_CONFIG={str(EGS_CONFIG)}", flush=True)
 # ---------------------------------------------------------------------
 # STEP 1:  USER-OVERRIDE-OF-EGSnrc-MACROS
 # ---------------------------------------------------------------------
@@ -175,6 +186,9 @@ def print_info():
 # --------------------------------------------------------------------
 # egsfortran.egs_init()
 def init():
+    print("---Before setting pegs_file and user_code --", flush=True)
+    print_info()
+
     egsfortran.egs_set_defaults()
     egsfortran.egs_check_arguments()
     # print("COMMON IO")
@@ -188,8 +202,8 @@ def init():
     egsfortran.egs_io.user_code = f"{USER_CODE:<64}"
 
 
-    # print("---After setting pegs_file and user_code --")
-    # print_info()
+    print("\n---After setting pegs_file and user_code --", flush=True)
+    print_info()
 
     egsfortran.egs_init1()
     # ----- end equiv of egs_init
@@ -645,3 +659,4 @@ if __name__ == "__main__":
             main(-1)
             print("\n\n# e+   ----------------------------")
             main(+1)
+

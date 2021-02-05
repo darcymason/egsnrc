@@ -39,8 +39,10 @@ def known_in_out(filepath, in_types, out_types):
         else:
             yield inputs, outputs
 
+tutor4.init()
+
 class TestTutor4:
-    def test_output(self, capfd):
+    def xxxtest_output(self, capfd):
         """Test that (partially) Python tutor4 produces known output"""
 
         # Ensure proper random initial state
@@ -76,7 +78,7 @@ class TestTutor4:
     def test_compute_drange(self):
         "Calculate correct values for $COMPUTE-DRANGE in Python"
         # Compare against ones captured from TUTOR4 run with extra prints
-        tutor4.init()  # get all data loaded
+        # tutor4.init()  # get all data loaded
         # Known inputs for compute-drange from Mortran tutor4 run
         for inputs, expected in known_in_out(TEST_DATA / "compute-drange.txt",
             (int, int, float, float, int, float, float), float
@@ -88,27 +90,28 @@ class TestTutor4:
     def test_calc_tstep(self):
         "Calc correct values for modified $CALCULATE-TSTEP-FROM-DEMFP in Python"
         # Compare against ones captured from TUTOR4 run with extra prints
-        tutor4.init()  # get all data loaded
+        # tutor4.init()  # get all data loaded
         # Known inputs from Mortran tutor4 run
         for inputs, expected in known_in_out(TEST_DATA / "calc-tstep.txt",
             (int, int, int, int, float, float, float, float, float), float
         ):
             #
-            print("in ", ",".join(str(x) for x in inputs))
+            # print("in ", ",".join(str(x) for x in inputs))
 
             got = tutor4.calc_tstep_from_demfp(*inputs)
+            # print(got, expected)
             assert got == pytest.approx(expected,abs=0.0000001)
 
     def test_compute_eloss(self):
         "Calc correct values for $COMPUTE-ELOSS in Python"
         # Compare against ones captured from TUTOR4 run with extra prints
-        tutor4.init()  # get all data loaded
+        # tutor4.init()  # get all data loaded
         # Known inputs from Mortran tutor4 run
         for inputs, expected in known_in_out(TEST_DATA / "compute-eloss.txt",
             (int, int, float, float, float, int), float
         ):
             #
-            print("in ", ",".join(str(x) for x in inputs))
+            # print("in ", ",".join(str(x) for x in inputs))
             got = tutor4.compute_eloss(*inputs)
 
             assert got == pytest.approx(expected,abs=0.0000001)
@@ -116,19 +119,19 @@ class TestTutor4:
     def test_compute_eloss_g(self):
         "Calc correct values for $COMPUTE-ELOSS-G in Python"
         # Compare against ones captured from TUTOR4 run with extra prints
-        tutor4.init()  # get all data loaded
+        # tutor4.init()  # get all data loaded
         # Known input and output from Mortran tutor4 run
         for inputs, expected in known_in_out(TEST_DATA / "compute-eloss-g.txt",
             # lelec, medium, step, eke, elke, lelke, range_
             (int, int, float, float, float, int, float), float
         ):
             #
-            print("in ", ",".join(str(x) for x in inputs))
+            # print("in ", ",".join(str(x) for x in inputs))
             got = tutor4.compute_eloss_g(*inputs)
 
             assert got == pytest.approx(expected,abs=0.0000001)
 
-    def test_calculate_xi(self):
+    def xxxtest_calculate_xi(self):
         "Calc correct values for $CALCULATE-XI in Python"
         # Compare against ones captured from TUTOR4 run with extra prints
         tutor4.init()  # get all data loaded
