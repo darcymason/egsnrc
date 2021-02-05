@@ -40,39 +40,35 @@ jobs:
     - name: EGSnrc pre-reqs
       run: |
         sudo apt-get install -y gfortran gcc g++ make expect
-        mkdir -p git
 
     - name: Cache EGSnrc
       id: cache-EGSnrc
       uses: actions/cache@v2
       with:
-        path: git
+        path: ~/EGSnrc
         key: EGSnrc-${{ matrix.os }}
 
 
     - name: EGSnrc install
       if: ${{ steps.cache-EGSnrc.outputs.cache-hit != 'true' }}
-      working-directory: git
       run: |
+        cd
         git clone --depth 1 https://github.com/nrc-cnrc/EGSnrc.git
         cd EGSnrc
         HEN_HOUSE/scripts/configure.expect actions.conf 3 | tee configure.log
-        export HEN_HOUSE=/home/runner/work/git/EGSnrc/HEN_HOUSE
-        ls /home/runner/work
-        export EGS_HOME=egsnrc/egs_home/
-        export PY_EGS=egsnrc/HEN_HOUSE/src/
-        export EGS_CONFIG=/home/runner/work/git/EGSnrc/HEN_HOUSE/specs/actions.conf
-        alias m='/home/runner/work/git/EGSnrc/HEN_HOUSE/scripts/compile_user_code m'
+        cd /home/runner/work/egsnrc
 
     - name: Build egsfortran
       run: |
-        export EGS_CONFIG=/home/runner/work/git/EGSnrc/HEN_HOUSE/specs/actions.conf
-        export HEN_HOUSE=/home/runner/work/git/EGSnrc/HEN_HOUSE
-        export PY_EGS=egsnrc/HEN_HOUSE/src/
+        export WORK_BASE=/home/runner/work/egsnrc/egsnrc
+        export EGS_CONFIG=/home/runner/EGSnrc/HEN_HOUSE/specs/actions.conf
+        export HEN_HOUSE=/home/runner/EGSnrc/HEN_HOUSE
+        export EGS_HOME=$WORK_BASE/egsnrc/egs_home/
+        export PY_EGS=$WORK_BASE/egsnrc/HEN_HOUSE/src/
+        alias m='/home/runner/work/git/EGSnrc/HEN_HOUSE/scripts/compile_user_code m'
         python egsnrc/egs_home/tutor4/make_egsfortran.py
 
     - name: Test with pytest
       run: |
         python -m pip install pytest
-        cd egsnrc
         pytest
