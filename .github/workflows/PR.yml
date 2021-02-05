@@ -71,6 +71,8 @@ jobs:
 
     - name: Test with pytest
       run: |
+        cd egsnrc/egs_home/tutor4
+        python tutor4.py
         python -m pip install pytest
         python -c "from egsnrc import egsfortran"  # test if can import the lib
         python -m pytest -v
