@@ -94,9 +94,10 @@ class TestTutor4:
             (int, int, int, int, float, float, float, float, float), float
         ):
             #
-            print("in ", ",".join(str(x) for x in inputs))
+            # print("in ", ",".join(str(x) for x in inputs))
 
             got = tutor4.calc_tstep_from_demfp(*inputs)
+            # print(got, expected)
             assert got == pytest.approx(expected,abs=0.0000001)
 
     def test_compute_eloss(self):
@@ -108,7 +109,7 @@ class TestTutor4:
             (int, int, float, float, float, int), float
         ):
             #
-            print("in ", ",".join(str(x) for x in inputs))
+            # print("in ", ",".join(str(x) for x in inputs))
             got = tutor4.compute_eloss(*inputs)
 
             assert got == pytest.approx(expected,abs=0.0000001)
@@ -123,7 +124,7 @@ class TestTutor4:
             (int, int, float, float, float, int, float), float
         ):
             #
-            print("in ", ",".join(str(x) for x in inputs))
+            # print("in ", ",".join(str(x) for x in inputs))
             got = tutor4.compute_eloss_g(*inputs)
 
             assert got == pytest.approx(expected,abs=0.0000001)
