@@ -43,7 +43,7 @@ def known_in_out(filepath, in_types, out_types):
 tutor4.init()
 
 class TestTutor4:
-    def xxxtest_output(self, capfd):
+    def test_output(self, capfd):
         """Test that (partially) Python tutor4 produces known output"""
 
         # Ensure proper random initial state

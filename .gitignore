@@ -10,3 +10,5 @@ egsnrc/egsfortranmodule.c
 egsnrc/egs_home/**/*.mortlst
 egsnrc/egs_home/**/*.io
 .eggs/*
+egsnrc/*.code-workspace
+.vscode/*

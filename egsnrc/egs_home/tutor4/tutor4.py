@@ -9,6 +9,10 @@ from math import log  # for calculate_tstep_...
 # Get all common blocks
 from egsnrc.commons import *
 
+
+init_done = False  # run init() only once, else crashes (unknown reason)
+
+
 # Specific common blocks for this code
 #  COMMON block geom --------
 geom = egsfortran.geom
@@ -133,8 +137,8 @@ def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
             # even if not in the mortran call arguments,
             # unless intent(callback,hide) is used in f2py comments,
             # in which case, need to set `egsfortran.hownear = hownear`
-            egsfortran.electr(ircode,
-                howfar, hownear, calc_tstep_from_demfp,
+            egsfortran.electr(ircode, howfar, hownear,
+                calc_tstep_from_demfp,
                 compute_eloss, compute_eloss_g
             )
         # egsfortran.flushoutput()
@@ -149,6 +153,7 @@ EGS_HOME = HERE.parent
 EGS_CONFIG = os.environ['EGS_CONFIG']
 USER_CODE = HERE.name
 PEGS_FILE = "tutor_data"
+
 
 def print_info():
     print("egsfortran values", flush=True)
@@ -186,8 +191,12 @@ def print_info():
 # --------------------------------------------------------------------
 # egsfortran.egs_init()
 def init():
-    print("---Before setting pegs_file and user_code --", flush=True)
-    print_info()
+    global init_done
+
+    if init_done:
+        return
+    # print("---Before setting pegs_file and user_code --", flush=True)
+    # print_info()
 
     egsfortran.egs_set_defaults()
     egsfortran.egs_check_arguments()
@@ -202,8 +211,8 @@ def init():
     egsfortran.egs_io.user_code = f"{USER_CODE:<64}"
 
 
-    print("\n---After setting pegs_file and user_code --", flush=True)
-    print_info()
+    # print("\n---After setting pegs_file and user_code --", flush=True)
+    # print_info()
 
     egsfortran.egs_init1()
     # ----- end equiv of egs_init
@@ -277,12 +286,14 @@ def init():
     # Define initial variables for 20 MeV beam of electrons incident
     # perpendicular to the slab
 
+    init_done = True
+
 
 def main(iqin=-1):  # iqin here only to make generating validation data faster
     # The "in"s are local variables
     init()
-    et_control.exact_bca = False
-    et_control.spin_effects = True
+    # et_control.exact_bca = False
+    # et_control.spin_effects = True
     # iqin=-1  #                incident charge - electrons
     ein=20 + prm
     ei=20.0  #    20 MeV kinetic energy"
