@@ -611,9 +611,9 @@ def calculate_xi(lelec, medium, ekems, rmt2, rmsq, xccl, blccl, step):
     # Note that our chia2 is Moliere chia2/4
     # Note also that xcc is now old egs xcc**2
     xi = 0.5*xccl/p2/beta2*step
-    if spin_effects :
+    if spin_effects:
         elkems = log(ekems)
-        lelkems=eke1[medium_m1]*elkems+eke0[medium_m1]  # $ SET INTERVAL elkems,eke
+        lelkems=int(eke1[medium_m1]*elkems+eke0[medium_m1])  # $ SET INTERVAL elkems,eke
         lelkems_m1 = lelkems - 1  # ** 0-based
         if lelec < 0:
             # EVALUATE etap USING etae_ms(elkems)
@@ -637,7 +637,7 @@ def calculate_xi(lelec, medium, ekems, rmt2, rmsq, xccl, blccl, step):
 
     xi = xi*(log(1+1./chia2)-1/(1+chia2))
 
-    return xi
+    return xi, blccl
 
 
 if __name__ == "__main__":

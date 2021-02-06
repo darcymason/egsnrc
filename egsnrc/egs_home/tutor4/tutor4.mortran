@@ -252,6 +252,7 @@ REPLACE {$CALCULATE-XI(#);} WITH
       ]
       chia2 = chia2*etap; xi = xi*xi_corr;
       $EVALUATE ms_corr USING blcce(elkems);
+      $egs_info('(a,I4,E25.16e2)','mid lelkems,ms_corr', lelkems, ms_corr);
       blccl = blccl*ms_corr;
   ]
   ELSE [ xi_corr = 1; etap = 1; ]

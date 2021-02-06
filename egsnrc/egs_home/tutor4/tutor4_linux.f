@@ -8470,6 +8470,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                     xi = xi*xi_corr
                     ms_corr=blcce1(Lelkems,MEDIUM)*elkems+blcce0(Lelkems
      *              ,MEDIUM)
+                    write(i_log,'(a,I4,E25.16e2)') 'mid lelkems,ms_corr'
+     *              , lelkems, ms_corr
                     blccl = blccl*ms_corr
                   ELSE
                     xi_corr = 1
@@ -8587,6 +8589,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                     xi = xi*xi_corr
                     ms_corr=blcce1(Lelkems,MEDIUM)*elkems+blcce0(Lelkems
      *              ,MEDIUM)
+                    write(i_log,'(a,I4,E25.16e2)') 'mid lelkems,ms_corr'
+     *              , lelkems, ms_corr
                     blccl = blccl*ms_corr
                   ELSE
                     xi_corr = 1
