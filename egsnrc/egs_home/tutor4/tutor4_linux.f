@@ -8090,24 +8090,24 @@ Cf2py real*8 x,y,z,return_val
 Cf2py integer irl
 Cf2py return_val=hownear(x,y,z,irl)
       real*8 hownear
-Cf2py intent(callback) calc_tstep_from_demfp
+Cxxf2py intent(callback) calc_tstep_from_demfp
       EXTERNAL calc_tstep_from_demfp
-Cf2py real*8 demfp,sig, eke, elke,total_de
-Cf2py integer qel, lelec, medium, lelke
-Cf2py tstep=calc_tstep_from_demfp(qel,lelec,medium,lelke,demfp,sig,eke,e
-Clke,tota
+Cxxf2py real*8 demfp,sig, eke, elke,total_de
+Cxxf2py integer qel, lelec, medium, lelke
+Cxxf2py tstep=calc_tstep_from_demfp(qel,lelec,medium,lelke,demfp,sig,eke
+C,elke,to
       real*8 calc_tstep_from_demfp
-Cf2py intent(callback) compute_eloss
+Cxxf2py intent(callback) compute_eloss
       EXTERNAL compute_eloss
-Cf2py real*8 step, eke, elke, de
-Cf2py integer lelec, medium, lelke
-Cf2py de=compute_eloss(lelec, medium, step, eke, elke, lelke)
+Cxxf2py real*8 step, eke, elke, de
+Cxxf2py integer lelec, medium, lelke
+Cxxf2py de=compute_eloss(lelec, medium, step, eke, elke, lelke)
       real*8 compute_eloss
-Cf2py intent(callback) compute_eloss_g
+Cxxf2py intent(callback) compute_eloss_g
       EXTERNAL compute_eloss_g
-Cf2py real*8 step, eke, elke, range, de
-Cf2py integer lelec, medium, lelke
-Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
+Cxxf2py real*8 step, eke, elke, range, de
+Cxxf2py integer lelec, medium, lelke
+Cxxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       real*8 compute_eloss_g
       integer*4 IRCODE
       COMMON/QDEBUG/QDEBUG
@@ -8306,10 +8306,76 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 tstep = vacdst
                 sig0 = 1.E-15
               ELSE
-                total_de = demfp/sig
                 IF (( compute_tstep )) THEN
-                  tstep = calc_tstep_from_demfp(qel,lelec,medium,lelke,
-     *            demfp,sig,eke,elke,total_de)
+                  total_de = demfp/sig
+                  fedep = total_de
+                  ekef = eke - fedep
+                  IF (( ekef .LE. E_array(1,medium) )) THEN
+                    tstep = vacdst
+                  ELSE
+                    elkef = Log(ekef)
+                    Lelkef=eke1(MEDIUM)*elkef+eke0(MEDIUM)
+                    IF (( lelkef .EQ. lelke )) THEN
+                      fedep = 1 - ekef/eke
+                      elktmp = 0.5*(elke+elkef+0.25*fedep*fedep*(1+fedep
+     *                *(1+0.875*fedep)))
+                      lelktmp = lelke
+                      IF ((lelec .LT. 0)) THEN
+                        dedxmid=ededx1(Lelktmp,MEDIUM)*elktmp+ededx0(Lel
+     *                  ktmp,MEDIUM)
+                        dedxmid = 1/dedxmid
+                        aux = ededx1(lelktmp,medium)*dedxmid
+                      ELSE
+                        dedxmid=pdedx1(Lelktmp,MEDIUM)*elktmp+pdedx0(Lel
+     *                  ktmp,MEDIUM)
+                        dedxmid = 1/dedxmid
+                        aux = pdedx1(lelktmp,medium)*dedxmid
+                      END IF
+                      aux = aux*(1+2*aux)*(fedep/(2-fedep))**2/6
+                      tstep = fedep*eke*dedxmid*(1+aux)
+                    ELSE
+                      ekei = E_array(lelke,medium)
+                      elkei = (lelke - eke0(medium))/eke1(medium)
+                      fedep = 1 - ekei/eke
+                      elktmp = 0.5*(elke+elkei+0.25*fedep*fedep*(1+fedep
+     *                *(1+0.875*fedep)))
+                      lelktmp = lelke
+                      IF ((lelec .LT. 0)) THEN
+                        dedxmid=ededx1(Lelktmp,MEDIUM)*elktmp+ededx0(Lel
+     *                  ktmp,MEDIUM)
+                        dedxmid = 1/dedxmid
+                        aux = ededx1(lelktmp,medium)*dedxmid
+                      ELSE
+                        dedxmid=pdedx1(Lelktmp,MEDIUM)*elktmp+pdedx0(Lel
+     *                  ktmp,MEDIUM)
+                        dedxmid = 1/dedxmid
+                        aux = pdedx1(lelktmp,medium)*dedxmid
+                      END IF
+                      aux = aux*(1+2*aux)*(fedep/(2-fedep))**2/6
+                      tuss = fedep*eke*dedxmid*(1+aux)
+                      ekei = E_array(lelkef+1,medium)
+                      elkei = (lelkef + 1 - eke0(medium))/eke1(medium)
+                      fedep = 1 - ekef/ekei
+                      elktmp = 0.5*(elkei+elkef+0.25*fedep*fedep*(1+fede
+     *                p*(1+0.875*fedep)))
+                      lelktmp = lelkef
+                      IF ((lelec .LT. 0)) THEN
+                        dedxmid=ededx1(Lelktmp,MEDIUM)*elktmp+ededx0(Lel
+     *                  ktmp,MEDIUM)
+                        dedxmid = 1/dedxmid
+                        aux = ededx1(lelktmp,medium)*dedxmid
+                      ELSE
+                        dedxmid=pdedx1(Lelktmp,MEDIUM)*elktmp+pdedx0(Lel
+     *                  ktmp,MEDIUM)
+                        dedxmid = 1/dedxmid
+                        aux = pdedx1(lelktmp,medium)*dedxmid
+                      END IF
+                      aux = aux*(1+2*aux)*(fedep/(2-fedep))**2/6
+                      tstep = fedep*ekei*dedxmid*(1+aux)
+                      tstep=tstep+tuss+ range_ep(qel,lelke,medium)-range
+     *                _ep(qel,lelkef+1,medium)
+                    END IF
+                  END IF
                   total_tstep = tstep
                   compute_tstep = .false.
                 END IF
@@ -8391,8 +8457,50 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 domultiple = .false.
                 dosingle = .false.
                 callmsdist = .true.
-                de = compute_eloss_g(lelec,medium, tustep,eke,elke,lelke
-     *          ,range)
+                tuss = range - range_ep(qel,lelke,medium)/rhof
+                IF (( tuss .GE. tustep )) THEN
+                  IF (( lelec .LT. 0 )) THEN
+                    dedxmid=ededx1(Lelke,MEDIUM)*elke+ededx0(Lelke,MEDIU
+     *              M)
+                    aux = ededx1(lelke,medium)/dedxmid
+                  ELSE
+                    dedxmid=pdedx1(Lelke,MEDIUM)*elke+pdedx0(Lelke,MEDIU
+     *              M)
+                    aux = pdedx1(lelke,medium)/dedxmid
+                  END IF
+                  de = dedxmid*tustep*rhof
+                  fedep = de/eke
+                  de = de*(1-0.5*fedep*aux*(1-0.333333*fedep*(aux-1- 0.2
+     *            5*fedep*(2-aux*(4-aux)))))
+                ELSE
+                  lelktmp = lelke
+                  tuss = (range - tustep)*rhof
+                  IF (( tuss .LE. 0 )) THEN
+                    de = eke - TE(medium)*0.99
+                  ELSE
+4581                IF(tuss.GE.range_ep(qel,lelktmp,medium))GO TO 4582
+                      lelktmp = lelktmp - 1
+                    GO TO 4581
+4582                CONTINUE
+                    elktmp = (lelktmp+1-eke0(medium))/eke1(medium)
+                    eketmp = E_array(lelktmp+1,medium)
+                    tuss = (range_ep(qel,lelktmp+1,medium) - tuss)/rhof
+                    IF (( lelec .LT. 0 )) THEN
+                      dedxmid=ededx1(Lelktmp,MEDIUM)*elktmp+ededx0(Lelkt
+     *                mp,MEDIUM)
+                      aux = ededx1(lelktmp,medium)/dedxmid
+                    ELSE
+                      dedxmid=pdedx1(Lelktmp,MEDIUM)*elktmp+pdedx0(Lelkt
+     *                mp,MEDIUM)
+                      aux = pdedx1(lelktmp,medium)/dedxmid
+                    END IF
+                    de = dedxmid*tuss*rhof
+                    fedep = de/eketmp
+                    de = de*(1-0.5*fedep*aux*(1-0.333333*fedep*(aux-1- 0
+     *              .25*fedep*(2-aux*(4-aux)))))
+                    de = de + eke - eketmp
+                  END IF
+                END IF
                 tvstep = tustep
                 is_ch_step = .true.
                 IF ((transport_algorithm .EQ. 0)) THEN
@@ -8446,8 +8554,6 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                   dosingle = .false.
                   domultiple = .true.
                   ekems = eke - 0.5*tustep*dedx
-                  write(i_log,'(a, 2I4, 6E25.16e2)') 'in ', lelec, mediu
-     *            m, ekems, rmt2, rmsq, xccl, blccl, tustep
                   p2 = ekems*(ekems+rmt2)
                   beta2 = p2/(p2 + rmsq)
                   chia2 = xccl/(4*blccl*p2)
@@ -8470,15 +8576,12 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                     xi = xi*xi_corr
                     ms_corr=blcce1(Lelkems,MEDIUM)*elkems+blcce0(Lelkems
      *              ,MEDIUM)
-                    write(i_log,'(a,I4,E25.16e2)') 'mid lelkems,ms_corr'
-     *              , lelkems, ms_corr
                     blccl = blccl*ms_corr
                   ELSE
                     xi_corr = 1
                     etap = 1
                   END IF
                   xi = xi*(Log(1+1./chia2)-1/(1+chia2))
-                  write(i_log,'(a,2E25.16e2)') 'out ',xi, blccl
                   IF (( xi .LT. 0.1 )) THEN
                     ustep = tustep*(1 - xi*(0.5 - xi*0.166667))
                   ELSE
@@ -8505,13 +8608,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             IF ((ustep .LE. 0)) THEN
               IF ((ustep .LT. -1e-4)) THEN
                 ierust = ierust + 1
-                WRITE(6,4580)ierust,ustep,dedx,e(np)-prm, ir(np),irnew,i
+                WRITE(6,4590)ierust,ustep,dedx,e(np)-prm, ir(np),irnew,i
      *          rold,x(np),y(np),z(np)
-4580            FORMAT(i4,' Negative ustep = ',e12.5,' dedx=',F8.4,' ke=
+4590            FORMAT(i4,' Negative ustep = ',e12.5,' dedx=',F8.4,' ke=
      *',F8.4, ' ir,irnew,irold =',3i4,' x,y,z =',4e10.3)
                 IF ((ierust .GT. 1000)) THEN
-                  WRITE(6,4590)
-4590              FORMAT(////' Called exit---too many ustep errors'///)
+                  WRITE(6,4600)
+4600              FORMAT(////' Called exit---too many ustep errors'///)
                   call exit(1)
                 END IF
               END IF
@@ -8565,8 +8668,6 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               ELSE
                 IF (( vstep .LT. ustep0 )) THEN
                   ekems = eke - 0.5*tustep*vstep/ustep0*dedx
-                  write(i_log,'(a, 2I4, 6E25.16e2)') 'in ', lelec, mediu
-     *            m, ekems, rmt2, rmsq, xccl, blccl, vstep
                   p2 = ekems*(ekems+rmt2)
                   beta2 = p2/(p2 + rmsq)
                   chia2 = xccl/(4*blccl*p2)
@@ -8589,15 +8690,12 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                     xi = xi*xi_corr
                     ms_corr=blcce1(Lelkems,MEDIUM)*elkems+blcce0(Lelkems
      *              ,MEDIUM)
-                    write(i_log,'(a,I4,E25.16e2)') 'mid lelkems,ms_corr'
-     *              , lelkems, ms_corr
                     blccl = blccl*ms_corr
                   ELSE
                     xi_corr = 1
                     etap = 1
                   END IF
                   xi = xi*(Log(1+1./chia2)-1/(1+chia2))
-                  write(i_log,'(a,2E25.16e2)') 'out ',xi, blccl
                   IF (( xi .LT. 0.1 )) THEN
                     tvstep = vstep*(1 + xi*(0.5 + xi*0.333333))
                   ELSE
@@ -8624,13 +8722,95 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                   tvstep = tustep
                 END IF
               END IF
-              de = compute_eloss_g(lelec,medium, tvstep,eke,elke,lelke,r
-     *        ange)
+              tuss = range - range_ep(qel,lelke,medium)/rhof
+              IF (( tuss .GE. tvstep )) THEN
+                IF (( lelec .LT. 0 )) THEN
+                  dedxmid=ededx1(Lelke,MEDIUM)*elke+ededx0(Lelke,MEDIUM)
+                  aux = ededx1(lelke,medium)/dedxmid
+                ELSE
+                  dedxmid=pdedx1(Lelke,MEDIUM)*elke+pdedx0(Lelke,MEDIUM)
+                  aux = pdedx1(lelke,medium)/dedxmid
+                END IF
+                de = dedxmid*tvstep*rhof
+                fedep = de/eke
+                de = de*(1-0.5*fedep*aux*(1-0.333333*fedep*(aux-1- 0.25*
+     *          fedep*(2-aux*(4-aux)))))
+              ELSE
+                lelktmp = lelke
+                tuss = (range - tvstep)*rhof
+                IF (( tuss .LE. 0 )) THEN
+                  de = eke - TE(medium)*0.99
+                ELSE
+4611              IF(tuss.GE.range_ep(qel,lelktmp,medium))GO TO 4612
+                    lelktmp = lelktmp - 1
+                  GO TO 4611
+4612              CONTINUE
+                  elktmp = (lelktmp+1-eke0(medium))/eke1(medium)
+                  eketmp = E_array(lelktmp+1,medium)
+                  tuss = (range_ep(qel,lelktmp+1,medium) - tuss)/rhof
+                  IF (( lelec .LT. 0 )) THEN
+                    dedxmid=ededx1(Lelktmp,MEDIUM)*elktmp+ededx0(Lelktmp
+     *              ,MEDIUM)
+                    aux = ededx1(lelktmp,medium)/dedxmid
+                  ELSE
+                    dedxmid=pdedx1(Lelktmp,MEDIUM)*elktmp+pdedx0(Lelktmp
+     *              ,MEDIUM)
+                    aux = pdedx1(lelktmp,medium)/dedxmid
+                  END IF
+                  de = dedxmid*tuss*rhof
+                  fedep = de/eketmp
+                  de = de*(1-0.5*fedep*aux*(1-0.333333*fedep*(aux-1- 0.2
+     *            5*fedep*(2-aux*(4-aux)))))
+                  de = de + eke - eketmp
+                END IF
+              END IF
             ELSE
               tvstep = tustep
               IF (( .NOT.callmsdist )) THEN
-                de = compute_eloss_g(lelec,medium, tvstep,eke,elke,lelke
-     *          ,range)
+                tuss = range - range_ep(qel,lelke,medium)/rhof
+                IF (( tuss .GE. tvstep )) THEN
+                  IF (( lelec .LT. 0 )) THEN
+                    dedxmid=ededx1(Lelke,MEDIUM)*elke+ededx0(Lelke,MEDIU
+     *              M)
+                    aux = ededx1(lelke,medium)/dedxmid
+                  ELSE
+                    dedxmid=pdedx1(Lelke,MEDIUM)*elke+pdedx0(Lelke,MEDIU
+     *              M)
+                    aux = pdedx1(lelke,medium)/dedxmid
+                  END IF
+                  de = dedxmid*tvstep*rhof
+                  fedep = de/eke
+                  de = de*(1-0.5*fedep*aux*(1-0.333333*fedep*(aux-1- 0.2
+     *            5*fedep*(2-aux*(4-aux)))))
+                ELSE
+                  lelktmp = lelke
+                  tuss = (range - tvstep)*rhof
+                  IF (( tuss .LE. 0 )) THEN
+                    de = eke - TE(medium)*0.99
+                  ELSE
+4621                IF(tuss.GE.range_ep(qel,lelktmp,medium))GO TO 4622
+                      lelktmp = lelktmp - 1
+                    GO TO 4621
+4622                CONTINUE
+                    elktmp = (lelktmp+1-eke0(medium))/eke1(medium)
+                    eketmp = E_array(lelktmp+1,medium)
+                    tuss = (range_ep(qel,lelktmp+1,medium) - tuss)/rhof
+                    IF (( lelec .LT. 0 )) THEN
+                      dedxmid=ededx1(Lelktmp,MEDIUM)*elktmp+ededx0(Lelkt
+     *                mp,MEDIUM)
+                      aux = ededx1(lelktmp,medium)/dedxmid
+                    ELSE
+                      dedxmid=pdedx1(Lelktmp,MEDIUM)*elktmp+pdedx0(Lelkt
+     *                mp,MEDIUM)
+                      aux = pdedx1(lelktmp,medium)/dedxmid
+                    END IF
+                    de = dedxmid*tuss*rhof
+                    fedep = de/eketmp
+                    de = de*(1-0.5*fedep*aux*(1-0.333333*fedep*(aux-1- 0
+     *              .25*fedep*(2-aux*(4-aux)))))
+                    de = de + eke - eketmp
+                  END IF
+                END IF
               END IF
             END IF
             save_de = de
@@ -8782,13 +8962,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           rnno24 = rng_array(rng_seed)
           rng_seed = rng_seed + 1
           IF ((rnno24 .LE. ebr1)) THEN
-            go to 4600
+            go to 4630
           ELSE
             IF ((e(np) .LE. thmoll(medium) .AND. eii_flag .EQ. 0)) THEN
               IF ((ebr1 .LE. 0)) THEN
                 go to 4530
               END IF
-              go to 4600
+              go to 4630
             END IF
             IARG=8
             IF ((IAUSFL(IARG+1).NE.0)) THEN
@@ -8811,7 +8991,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         rnno25 = rng_array(rng_seed)
         rng_seed = rng_seed + 1
         IF ((rnno25 .LT. pbr1)) THEN
-          go to 4600
+          go to 4630
         END IF
         pbr2=pbr21(Lelke,MEDIUM)*elke+pbr20(Lelke,MEDIUM)
         IF ((rnno25 .LT. pbr2)) THEN
@@ -8840,7 +9020,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       GO TO 4531
 4532  CONTINUE
       return
-4600  IARG=6
+4630  IARG=6
       IF ((IAUSFL(IARG+1).NE.0)) THEN
         CALL AUSGAB(IARG)
       END IF
@@ -8874,7 +9054,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       IF ((IAUSFL(IARG+1).NE.0)) THEN
         CALL AUSGAB(IARG)
       END IF
-4610  CONTINUE
+4640  CONTINUE
       IF ((lelec .GT. 0)) THEN
         IF ((edep .LT. peie)) THEN
           IARG=28
@@ -8902,7 +9082,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       IF ((IAUSFL(IARG+1).NE.0)) THEN
         CALL AUSGAB(IARG)
       END IF
-      IF((idisc .EQ. 99))goto 4610
+      IF((idisc .EQ. 99))goto 4640
       np = np - 1
       ircode = 2
       return
@@ -9029,17 +9209,17 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       DATA MDLABL/' ','M','E','D','I','U','M','='/,LMDL/8/,LMDN/24/,DUNI
      *TO/1./
       DATA I1ST/1/,NSINSS/37/,MXSINC/1002/,ISTEST/0/,NRNA/1000/
-4620  FORMAT(1X,14I5)
-4630  FORMAT(1X,1PE14.5,4E14.5)
-4640  FORMAT(72A1)
+4650  FORMAT(1X,14I5)
+4660  FORMAT(1X,1PE14.5,4E14.5)
+4670  FORMAT(72A1)
       IF ((I1ST.NE.0)) THEN
         I1ST=0
-        DO 4651 J=1,3
+        DO 4681 J=1,3
           IF ((SMAXIR(J).LE.0.0)) THEN
             SMAXIR(J)=1E10
           END IF
-4651    CONTINUE
-4652    CONTINUE
+4681    CONTINUE
+4682    CONTINUE
         NISUB=MXSINC-2
         FNSSS=NSINSS
         WID=PI5D2/FLOAT(NISUB)
@@ -9047,7 +9227,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         ZEROS(1)=0.
         ZEROS(2)=PI
         ZEROS(3)=TWOPI
-        DO 4661 ISUB=1,MXSINC
+        DO 4691 ISUB=1,MXSINC
           SX=0.
           SY=0.
           SXX=0.
@@ -9055,27 +9235,27 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           XS0=WID*FLOAT(ISUB-2)
           XS1=XS0+WID
           IZ=0
-          DO 4671 IZZ=1,3
+          DO 4701 IZZ=1,3
             IF (((XS0.LE.ZEROS(IZZ)).AND.(ZEROS(IZZ).LE.XS1))) THEN
               IZ=IZZ
-              GO TO4672
+              GO TO4702
             END IF
-4671      CONTINUE
-4672      CONTINUE
+4701      CONTINUE
+4702      CONTINUE
           IF ((IZ.EQ.0)) THEN
             XSI=XS0
           ELSE
             XSI=ZEROS(IZ)
           END IF
-          DO 4681 ISS=1,NSINSS
+          DO 4711 ISS=1,NSINSS
             XS=WID*FLOAT(ISUB-2)+WSS*FLOAT(ISS-1)-XSI
             YS=SIN(XS+XSI)
             SX=SX+XS
             SY=SY+YS
             SXX=SXX+XS*XS
             SXY=SXY+XS*YS
-4681      CONTINUE
-4682      CONTINUE
+4711      CONTINUE
+4712      CONTINUE
           IF ((IZ.NE.0)) THEN
             SIN1(ISUB)=SXY/SXX
             SIN0(ISUB)=-SIN1(ISUB)*XSI
@@ -9084,8 +9264,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             SIN1(ISUB)=(FNSSS*SXY-SY*SX)/DEL
             SIN0(ISUB)=(SY*SXX-SX*SXY)/DEL - SIN1(ISUB)*XSI
           END IF
-4661    CONTINUE
-4662    CONTINUE
+4691    CONTINUE
+4692    CONTINUE
         SINC0=2.0
         SINC1=1.0/WID
         IF ((ISTEST.NE.0)) THEN
@@ -9093,8 +9273,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           RDEV=0.
           S2C2MN=10.
           S2C2MX=0.
-          DO 4691 ISUB=1,NISUB
-            DO 4701 ISS=1,NSINSS
+          DO 4721 ISUB=1,NISUB
+            DO 4731 ISS=1,NSINSS
               THETA=WID*FLOAT(ISUB-1)+WSS*FLOAT(ISS-1)
               CTHET=PI5D2-THETA
               SINTHE=sin(THETA)
@@ -9113,10 +9293,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 write(i_log,'(1PE20.7,4E20.7)') THETA,SINTHE,SINT,COSTHE
      *          ,COST
               END IF
-4701        CONTINUE
-4702        CONTINUE
-4691      CONTINUE
-4692      CONTINUE
+4731        CONTINUE
+4732        CONTINUE
+4721      CONTINUE
+4722      CONTINUE
           write(i_log,'(a,2i5)') ' SINE TESTS,MXSINC,NSINSS=',MXSINC,NSI
      *    NSS
           write(i_log,'(a,1PE16.8,3e16.8)') ' ADEV,RDEV,S2C2(MN,MX) =',
@@ -9125,7 +9305,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           RDEV=0.
           S2C2MN=10.
           S2C2MX=0.
-          DO 4711 IRN=1,NRNA
+          DO 4741 IRN=1,NRNA
             IF (( rng_seed .GT. 24 )) THEN
               call ranlux(rng_array)
               rng_seed = 1
@@ -9146,114 +9326,114 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             S2C2=SINTHE**2+COSTHE**2
             S2C2MN=min(S2C2MN,S2C2)
             S2C2MX=max(S2C2MX,S2C2)
-4711      CONTINUE
-4712      CONTINUE
+4741      CONTINUE
+4742      CONTINUE
           write(i_log,'(a,i7,a)') ' TEST AT ',NRNA,' RANDOM ANGLES IN (0
      *,5*PI/2)'
           write(i_log,'(1PE16.8,3E16.8)') ' ADEV,RDEV,S2C2(MN,MX) =', AD
      *    EV,RDEV,S2C2MN,S2C2MX
         END IF
         P=1.
-        DO 4721 I=1,50
+        DO 4751 I=1,50
           PWR2I(I)=P
           P=P/2.
-4721    CONTINUE
-4722    CONTINUE
+4751    CONTINUE
+4752    CONTINUE
       END IF
-      DO 4731 J=1,NMED
-4740    CONTINUE
-          DO 4741 I=1,3
+      DO 4761 J=1,NMED
+4770    CONTINUE
+          DO 4771 I=1,3
           IF ((IRAYLR(I).EQ.1.AND.MED(I).EQ.J)) THEN
             IRAYLM(J)=1
-            GO TO 4742
+            GO TO 4772
           END IF
-4741    CONTINUE
-4742    CONTINUE
-4731  CONTINUE
-4732  CONTINUE
+4771    CONTINUE
+4772    CONTINUE
+4761  CONTINUE
+4762  CONTINUE
       IPHOTONUC=0
-      DO 4751 J=1,NMED
-4760    CONTINUE
-          DO 4761 I=1,3
+      DO 4781 J=1,NMED
+4790    CONTINUE
+          DO 4791 I=1,3
           IF ((IPHOTONUCR(I).EQ.1.AND.MED(I).EQ.J)) THEN
             IPHOTONUCM(J)=1
             IPHOTONUC=1
-            GO TO 4762
+            GO TO 4792
           END IF
-4761    CONTINUE
-4762    CONTINUE
-4751  CONTINUE
-4752  CONTINUE
+4791    CONTINUE
+4792    CONTINUE
+4781  CONTINUE
+4782  CONTINUE
       write(i_log,'(a,i3)') ' ===> Photonuclear flag: ', iphotonuc
       IF((.NOT.is_pegsless))REWIND KMPI
       NM=0
-      DO 4771 IM=1,NMED
+      DO 4801 IM=1,NMED
         LOK(IM)=0
         IF ((IRAYLM(IM).EQ.1)) THEN
           write(i_log,'(a,i3/)') ' RAYLEIGH OPTION REQUESTED FOR MEDIUM
      *NUMBER',IM
         END IF
-4771  CONTINUE
-4772  CONTINUE
-      DO 4781 IM=1,NMED
+4801  CONTINUE
+4802  CONTINUE
+      DO 4811 IM=1,NMED
         IF ((IPHOTONUCM(IM).EQ.1)) THEN
           write(i_log,'(a,i3/)') ' PHOTONUCLEAR REQUESTED FOR MEDIUM NUM
      *BER',IM
         END IF
-4781  CONTINUE
-4782  CONTINUE
+4811  CONTINUE
+4812  CONTINUE
       IF ((.NOT.is_pegsless)) THEN
-4790    CONTINUE
-4791      CONTINUE
-4800      CONTINUE
-4801        CONTINUE
-            READ(KMPI,4640,END=4810)MBUF
-            DO 4821 IB=1,LMDL
-              IF((MBUF(IB).NE.MDLABL(IB)))GO TO 4801
-4821        CONTINUE
-4822        CONTINUE
-4830        CONTINUE
-              DO 4831 IM=1,NMED
-              DO 4841 IB=1,LMDN
-                IL=LMDL+IB
-                IF((MBUF(IL).NE.MEDIA(IB,IM)))GO TO 4831
-                IF((IB.EQ.LMDN))GO TO 4802
-4841          CONTINUE
-4842          CONTINUE
+4820    CONTINUE
+4821      CONTINUE
+4830      CONTINUE
 4831        CONTINUE
-4832        CONTINUE
-          GO TO 4801
-4802      CONTINUE
-          IF((LOK(IM).NE.0))GO TO 4800
+            READ(KMPI,4670,END=4840)MBUF
+            DO 4851 IB=1,LMDL
+              IF((MBUF(IB).NE.MDLABL(IB)))GO TO 4831
+4851        CONTINUE
+4852        CONTINUE
+4860        CONTINUE
+              DO 4861 IM=1,NMED
+              DO 4871 IB=1,LMDN
+                IL=LMDL+IB
+                IF((MBUF(IL).NE.MEDIA(IB,IM)))GO TO 4861
+                IF((IB.EQ.LMDN))GO TO 4832
+4871          CONTINUE
+4872          CONTINUE
+4861        CONTINUE
+4862        CONTINUE
+          GO TO 4831
+4832      CONTINUE
+          IF((LOK(IM).NE.0))GO TO 4830
           LOK(IM)=1
           NM=NM+1
-          read(kmpi,'(a)',err=4850) tmp_string
-          goto 4860
-4850      write(i_log,'(/a)') '***************** Error: '
+          read(kmpi,'(a)',err=4880) tmp_string
+          goto 4890
+4880      write(i_log,'(/a)') '***************** Error: '
           write(i_log,*) 'Error while reading pegs4 file'
           write(i_log,'(/a)') '***************** Quiting now.'
           call exit(1)
-4860      CONTINUE
-          read(tmp_string,1,ERR=4870)  (MBUF(I),I=1,5),RHO(IM),NNE(IM),I
+4890      CONTINUE
+          read(tmp_string,1,ERR=4900)  (MBUF(I),I=1,5),RHO(IM),NNE(IM),I
      *    UNRST(IM),EPSTFL(IM),IAPRIM(IM)
 1         FORMAT(5A1,5X,F11.0,4X,I2,9X,I1,9X,I1,9X,I1)
-          GO TO 4880
-4870      CONTINUE
+          GO TO 4910
+4900      CONTINUE
           write(i_log,*) 'Found medium with gas pressure'
           read(tmp_string,2) (MBUF(I),I=1,5),RHO(IM),NNE(IM),IUNRST(IM),
      *    EPSTFL(IM), IAPRIM(IM)
 2         FORMAT(5A1,5X,F11.0,4X,I2,26X,I1,9X,I1,9X,I1)
-4880      CONTINUE
-            DO 4881 IE=1,NNE(IM)
-            READ(KMPI,4890)(MBUF(I),I=1,6),(ASYM(IM,IE,I),I=1,2), ZELEM(
+4910      CONTINUE
+            DO 4911 IE=1,NNE(IM)
+            READ(KMPI,4920)(MBUF(I),I=1,6),(ASYM(IM,IE,I),I=1,2), ZELEM(
      *      IM,IE),WA(IM,IE),PZ(IM,IE),RHOZ(IM,IE)
-4890        FORMAT (6A1,2A1,3X,F3.0,3X,F9.0,4X,F12.0,6X,F12.0)
-4881      CONTINUE
-4882      CONTINUE
-          READ(KMPI,4630) RLC(IM),AE(IM),AP(IM),UE(IM),UP(IM)
+4920        FORMAT (6A1,2A1,3X,F3.0,3X,F9.0,4X,F12.0,6X,F12.0)
+4911      CONTINUE
+4912      CONTINUE
+          READ(KMPI,4660) RLC(IM),AE(IM),AP(IM),UE(IM),UP(IM)
           TE(IM)=AE(IM)-RM
           THMOLL(IM)=TE(IM)*2. + RM
-          READ(KMPI,4620) MSGE(IM),MGE(IM),MSEKE(IM),MEKE(IM),MLEKE(IM),
+          READ(KMPI,4650) MSGE(IM),MGE(IM),MSEKE(IM),MEKE(IM),MLEKE(IM),
      *    MCMFP(IM),MRANGE(IM),IRAYL
           NSGE=MSGE(IM)
           NGE=MGE(IM)
@@ -9262,25 +9442,25 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           NLEKE=MLEKE(IM)
           NCMFP=MCMFP(IM)
           NRANGE=MRANGE(IM)
-          READ(KMPI,4630)(DL1(I,IM),DL2(I,IM),DL3(I,IM),DL4(I,IM),DL5(I,
+          READ(KMPI,4660)(DL1(I,IM),DL2(I,IM),DL3(I,IM),DL4(I,IM),DL5(I,
      *    IM),DL6(I,IM),I=1,6)
-          READ(KMPI,4630)DELCM(IM),(ALPHI(I,IM),BPAR(I,IM),DELPOS(I,IM),
+          READ(KMPI,4660)DELCM(IM),(ALPHI(I,IM),BPAR(I,IM),DELPOS(I,IM),
      *    I=1,2)
-          READ(KMPI,4630)XR0(IM),TEFF0(IM),BLCC(IM),XCC(IM)
-          READ(KMPI,4630)EKE0(IM),EKE1(IM)
-          READ(KMPI,4630) (ESIG0(I,IM),ESIG1(I,IM),PSIG0(I,IM),PSIG1(I,I
+          READ(KMPI,4660)XR0(IM),TEFF0(IM),BLCC(IM),XCC(IM)
+          READ(KMPI,4660)EKE0(IM),EKE1(IM)
+          READ(KMPI,4660) (ESIG0(I,IM),ESIG1(I,IM),PSIG0(I,IM),PSIG1(I,I
      *    M),EDEDX0(I,IM),EDEDX1(I,IM),PDEDX0(I,IM),PDEDX1(I,IM),EBR10(I
      *    ,IM),EBR11(I,IM),PBR10(I,IM),PBR11(I,IM),PBR20(I,IM),PBR21(I,I
      *    M),TMXS0(I,IM),TMXS1(I,IM),I=1,NEKE)
-          READ(KMPI,4630)EBINDA(IM),GE0(IM),GE1(IM)
-          READ(KMPI,4630)(GMFP0(I,IM),GMFP1(I,IM),GBR10(I,IM),GBR11(I,IM
+          READ(KMPI,4660)EBINDA(IM),GE0(IM),GE1(IM)
+          READ(KMPI,4660)(GMFP0(I,IM),GMFP1(I,IM),GBR10(I,IM),GBR11(I,IM
      *    ),GBR20(I,IM),GBR21(I,IM),I=1,NGE)
           IF ((IRAYL.EQ.1)) THEN
-            READ(KMPI,4620) NGR(IM)
+            READ(KMPI,4650) NGR(IM)
             NGRIM=NGR(IM)
-            READ(KMPI,4630)RCO0(IM),RCO1(IM)
-            READ(KMPI,4630)(RSCT0(I,IM),RSCT1(I,IM),I=1,NGRIM)
-            READ(KMPI,4630)(COHE0(I,IM),COHE1(I,IM),I=1,NGE)
+            READ(KMPI,4660)RCO0(IM),RCO1(IM)
+            READ(KMPI,4660)(RSCT0(I,IM),RSCT1(I,IM),I=1,NGRIM)
+            READ(KMPI,4660)(COHE0(I,IM),COHE1(I,IM),I=1,NGE)
             write(i_log,'(a,i3,a)') ' Rayleigh data available for medium
      *', IM, ' in PEGS4 data set.'
           END IF
@@ -9308,9 +9488,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               END IF
             END IF
           END IF
-          IF((NM.GE.NMED))GO TO4792
-        GO TO 4791
-4792    CONTINUE
+          IF((NM.GE.NMED))GO TO4822
+        GO TO 4821
+4822    CONTINUE
         CLOSE (UNIT=KMPI)
         DUNITR=DUNIT
         IF ((DUNIT.LT.0.0)) THEN
@@ -9321,13 +9501,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           write(i_log,'(a,1PE14.5,E14.5,a)') ' DUNIT REQUESTED&USED ARE:
      * ', DUNITR,DUNIT,'(CM.)'
         END IF
-        DO 4901 IM=1,NMED
+        DO 4931 IM=1,NMED
           DFACT=RLC(IM)/DUNIT
           DFACTI=1.0/DFACT
           I=1
-            GO TO 4913
-4911        I=I+1
-4913        IF(I-(MEKE(IM)).GT.0)GO TO 4912
+            GO TO 4943
+4941        I=I+1
+4943        IF(I-(MEKE(IM)).GT.0)GO TO 4942
             ESIG0(I,IM)=ESIG0(I,IM)*DFACTI
             ESIG1(I,IM)=ESIG1(I,IM)*DFACTI
             PSIG0(I,IM)=PSIG0(I,IM)*DFACTI
@@ -9338,22 +9518,22 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             PDEDX1(I,IM)=PDEDX1(I,IM)*DFACTI
             TMXS0(I,IM)=TMXS0(I,IM)*DFACT
             TMXS1(I,IM)=TMXS1(I,IM)*DFACT
-          GO TO 4911
-4912      CONTINUE
+          GO TO 4941
+4942      CONTINUE
           TEFF0(IM)=TEFF0(IM)*DFACT
           BLCC(IM)=BLCC(IM)*DFACTI
           XCC(IM)=XCC(IM)*SQRT(DFACTI)
           RLDU(IM)=RLC(IM)/DUNIT
           I=1
-            GO TO 4923
-4921        I=I+1
-4923        IF(I-(MGE(IM)).GT.0)GO TO 4922
+            GO TO 4953
+4951        I=I+1
+4953        IF(I-(MGE(IM)).GT.0)GO TO 4952
             GMFP0(I,IM)=GMFP0(I,IM)*DFACT
             GMFP1(I,IM)=GMFP1(I,IM)*DFACT
-          GO TO 4921
-4922      CONTINUE
-4901    CONTINUE
-4902    CONTINUE
+          GO TO 4951
+4952      CONTINUE
+4931    CONTINUE
+4932    CONTINUE
         VACDST=VACDST*DUNITO/DUNIT
         DUNITO=DUNIT
       ELSE
@@ -9365,7 +9545,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         write(i_log,'(/a)') '***************** Quiting now.'
         call exit(1)
       END IF
-      DO 4931 JR=1,3
+      DO 4961 JR=1,3
         MD=MED(JR)
         IF (((MD.GE.1).AND.(MD.LE.NMED))) THEN
           ECUT(JR)=max(ECUT(JR),AE(MD))
@@ -9374,36 +9554,36 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             RHOR(JR)=RHO(MD)
           END IF
         END IF
-4931  CONTINUE
-4932  CONTINUE
+4961  CONTINUE
+4962  CONTINUE
       IF ((IBRDST.EQ.1)) THEN
-        DO 4941 IM=1,NMED
+        DO 4971 IM=1,NMED
           ZBRANG(IM)=0.0
           PZNORM=0.0
-          DO 4951 IE=1,NNE(IM)
+          DO 4981 IE=1,NNE(IM)
             ZBRANG(IM)= ZBRANG(IM)+PZ(IM,IE)*ZELEM(IM,IE)*(ZELEM(IM,IE)+
      *      1.0)
             PZNORM=PZNORM+PZ(IM,IE)
-4951      CONTINUE
-4952      CONTINUE
+4981      CONTINUE
+4982      CONTINUE
           ZBRANG(IM)=(8.116224E-05)*(ZBRANG(IM)/PZNORM)**(1./3.)
           LZBRANG(IM)=-log(ZBRANG(IM))
-4941    CONTINUE
-4942    CONTINUE
+4971    CONTINUE
+4972    CONTINUE
       END IF
       IF ((IPRDST.GT.0)) THEN
-        DO 4961 IM=1,NMED
+        DO 4991 IM=1,NMED
           ZBRANG(IM)=0.0
           PZNORM=0.0
-          DO 4971 IE=1,NNE(IM)
+          DO 5001 IE=1,NNE(IM)
             ZBRANG(IM)= ZBRANG(IM)+PZ(IM,IE)*ZELEM(IM,IE)*(ZELEM(IM,IE)+
      *      1.0)
             PZNORM=PZNORM+PZ(IM,IE)
-4971      CONTINUE
-4972      CONTINUE
+5001      CONTINUE
+5002      CONTINUE
           ZBRANG(IM)=(8.116224E-05)*(ZBRANG(IM)/PZNORM)**(1./3.)
-4961    CONTINUE
-4962    CONTINUE
+4991    CONTINUE
+4992    CONTINUE
       END IF
       IF ((toUpper(photon_xsections(:lnblnk1(photon_xsections))) .EQ. 'P
      *EGS4')) THEN
@@ -9445,15 +9625,15 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *  MED,' MEDIA.'
       END IF
       RETURN
-4810  write(i_log,'(a,i2//,a/,a/)') ' END OF FILE ON UNIT ',KMPI, ' PROG
+4840  write(i_log,'(a,i2//,a/,a/)') ' END OF FILE ON UNIT ',KMPI, ' PROG
      *RAM STOPPED IN HATCH BECAUSE THE', ' FOLLOWING NAMES WERE NOT RECO
      *GNIZED:'
-      DO 4981 IM=1,NMED
+      DO 5011 IM=1,NMED
         IF ((LOK(IM).NE.1)) THEN
           write(i_log,'(40x,a,24a1,a)') '''',(MEDIA(I,IM),I=1,LMDN),''''
         END IF
-4981  CONTINUE
-4982  CONTINUE
+5011  CONTINUE
+5012  CONTINUE
       STOP
       END
       subroutine fix_brems
@@ -9488,12 +9668,12 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       real*8 RMT2,  RMSQ,  AP,  AE,  UP,  UE,  TE,  THMOLL
       integer*4 medium,i
       real*8 Zt,Zb,Zf,Zg,Zv,fmax1,fmax2,Zi,pi,fc,xi,aux, XSIF,FCOULC
-      DO 4991 medium=1,nmed
+      DO 5021 medium=1,nmed
         log_ap(medium) = log(ap(medium))
         Zt = 0
         Zb = 0
         Zf = 0
-        DO 5001 i=1,NNE(medium)
+        DO 5031 i=1,NNE(medium)
           Zi = ZELEM(medium,i)
           pi = PZ(medium,i)
           fc = FCOULC(Zi)
@@ -9502,8 +9682,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           Zt = Zt + aux
           Zb = Zb - aux*Log(Zi)/3
           Zf = Zf + aux*fc
-5001    CONTINUE
-5002    CONTINUE
+5031    CONTINUE
+5032    CONTINUE
         Zv = (Zb - Zf)/Zt
         Zg = Zb/Zt
         fmax1 = 2*(20.863 + 4*Zg) - 2*(20.029 + 4*Zg)/3
@@ -9559,8 +9739,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         bpar(2,medium) = dl1(7,medium)/(3*dl1(8,medium) + dl1(7,medium))
         bpar(1,medium) = 12*dl1(8,medium)/(3*dl1(8,medium) + dl1(7,mediu
      *  m))
-4991  CONTINUE
-4992  CONTINUE
+5021  CONTINUE
+5022  CONTINUE
       return
       end
       real*8 function FCOULC(Z)
@@ -9669,16 +9849,16 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         radc_flag = 0
       END IF
       getd = .false.
-      DO 5011 j=1,3
+      DO 5041 j=1,3
         medium = med(j)
         IF (( medium .GT. 0 .AND. medium .LE. nmed)) THEN
           IF (( ibcmp(j) .GT. 0 )) THEN
             getd = .true.
-            GO TO5012
+            GO TO5042
           END IF
         END IF
-5011  CONTINUE
-5012  CONTINUE
+5041  CONTINUE
+5042  CONTINUE
       IF (( .NOT.getd )) THEN
         IF (( eadl_relax .AND. photon_xsections .EQ. 'xcom' )) THEN
           write(i_log,'(/a)') '***************** Error: '
@@ -9694,12 +9874,12 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       write(i_log,'(/a$)') 'Bound Compton scattering requested, reading
      *data ......'
       rewind(i_incoh)
-      DO 5021 j=1,18
+      DO 5051 j=1,18
         read(i_incoh,*)
-5021  CONTINUE
-5022  CONTINUE
+5051  CONTINUE
+5052  CONTINUE
       iz = 0
-      DO 5031 j=1,1538
+      DO 5061 j=1,1538
         read(i_incoh,*) iz_array(j),shn_array(j),ne_array(j), Jo_array(j
      *  ),be_array(j)
         Jo_array(j) = Jo_array(j)*137.
@@ -9719,17 +9899,17 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             binding_energies(shn_array(j),iz_array(j)) = be_array(j)*PRM
           END IF
         END IF
-5031  CONTINUE
-5032  CONTINUE
+5061  CONTINUE
+5062  CONTINUE
       write(i_log,*) ' Done'
       write(i_log,'(/a)') ' Initializing Bound Compton scattering ......
      *'
-      DO 5041 medium=1,nmed
+      DO 5071 medium=1,nmed
         pztot = 0
         nsh = 0
-        DO 5051 i=1,nne(medium)
+        DO 5081 i=1,nne(medium)
           iz = int(zelem(medium,i))
-          DO 5061 j=1,1538
+          DO 5091 j=1,1538
             IF (( iz .EQ. iz_array(j) )) THEN
               nsh = nsh + 1
               IF (( nsh .GT. 200 )) THEN
@@ -9745,10 +9925,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               eno_array(nsh,medium) = aux
               pztot = pztot + aux
             END IF
-5061      CONTINUE
-5062      CONTINUE
-5051    CONTINUE
-5052    CONTINUE
+5091      CONTINUE
+5092      CONTINUE
+5081    CONTINUE
+5082    CONTINUE
         IF (( nsh .EQ. 0 )) THEN
           write(i_log,'(/a)') '***************** Error: '
           write(i_log,'(a,i3,a)') ' Medium ',medium,' has zero shells! '
@@ -9758,53 +9938,53 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         n_shell(medium) = nsh
         write(i_log,'(a,i3,a,i3,a)') ' Medium ',medium,' has ',nsh,' she
      *lls: '
-        DO 5071 i=1,nsh
+        DO 5101 i=1,nsh
           j = shell_array(i,medium)
           eno_array(i,medium) = eno_array(i,medium)/pztot
           write(i_log,'(i4,i5,i4,f9.5,e10.3,f10.3)') i,j,shn_array(j),en
      *    o_array(i,medium), Jo_array(j),be_array(j)*PRM*1000.
           eno_array(i,medium) = -eno_array(i,medium)
           eno_atbin_array(i,medium) = i
-5071    CONTINUE
-5072    CONTINUE
+5101    CONTINUE
+5102    CONTINUE
         atav = 1./nsh
-        DO 5081 i=1,nsh-1
-          DO 5091 j_h=1,nsh-1
+        DO 5111 i=1,nsh-1
+          DO 5121 j_h=1,nsh-1
             IF (( eno_array(j_h,medium) .LT. 0 )) THEN
-              IF((abs(eno_array(j_h,medium)) .GT. atav))GO TO5092
+              IF((abs(eno_array(j_h,medium)) .GT. atav))GO TO5122
             END IF
-5091      CONTINUE
-5092      CONTINUE
-          DO 5101 j_l=1,nsh-1
+5121      CONTINUE
+5122      CONTINUE
+          DO 5131 j_l=1,nsh-1
             IF (( eno_array(j_l,medium) .LT. 0 )) THEN
-              IF((abs(eno_array(j_l,medium)) .LT. atav))GO TO5102
+              IF((abs(eno_array(j_l,medium)) .LT. atav))GO TO5132
             END IF
-5101      CONTINUE
-5102      CONTINUE
+5131      CONTINUE
+5132      CONTINUE
           aux = atav - abs(eno_array(j_l,medium))
           eno_array(j_h,medium) = eno_array(j_h,medium) + aux
           eno_array(j_l,medium) = -eno_array(j_l,medium)/atav + j_l
           eno_atbin_array(j_l,medium) = j_h
           IF((i .EQ. nsh-1))eno_array(j_h,medium) = 1 + j_h
-5081    CONTINUE
-5082    CONTINUE
-        DO 5111 i=1,nsh
+5111    CONTINUE
+5112    CONTINUE
+        DO 5141 i=1,nsh
           IF (( eno_array(i,medium) .LT. 0 )) THEN
             eno_array(i,medium) = 1 + i
           END IF
-5111    CONTINUE
-5112    CONTINUE
-5041  CONTINUE
-5042  CONTINUE
+5141    CONTINUE
+5142    CONTINUE
+5071  CONTINUE
+5072  CONTINUE
       write(i_log,'(a/)') ' ...... Done.'
       getd = .false.
-      DO 5121 j=1,3
+      DO 5151 j=1,3
         IF (( iedgfl(j) .GT. 0 .AND. iedgfl(j) .LE. 100 )) THEN
           getd = .true.
-          GO TO5122
+          GO TO5152
         END IF
-5121  CONTINUE
-5122  CONTINUE
+5151  CONTINUE
+5152  CONTINUE
       IF((getd))return
       write(i_log,'(/a)') '***************** Error: '
       write(i_log,'(/a,/a,/a,/a)') ' In subroutine init_compton: ', '
@@ -9931,12 +10111,12 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         rsh = rng_array(rng_seed)
         rng_seed = rng_seed + 1
         rsh = sigm*rsh
-        DO 5131 iele=1,nne(medium)
+        DO 5161 iele=1,nne(medium)
           iZ = int(zelem(medium,iele)+0.5)
           nsh = eii_no(medium,iele)
           IF (( nsh .GT. 0 )) THEN
             ifirst = eii_first(medium,iele)
-            DO 5141 ish=1,nsh
+            DO 5171 ish=1,nsh
               Uj = binding_energies(ish,iZ)
               IF (( ekin .GT. Uj .AND. (Uj .GT. te(medium) .OR. Uj .GT.
      *        ap(medium)) )) THEN
@@ -9958,11 +10138,11 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                   return
                 END IF
               END IF
-5141        CONTINUE
-5142        CONTINUE
+5171        CONTINUE
+5172        CONTINUE
           END IF
-5131    CONTINUE
-5132    CONTINUE
+5161    CONTINUE
+5162    CONTINUE
       END IF
       IF((ekin .LE. 2*te(medium)))return
       T0=EKIN/RM
@@ -9973,7 +10153,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       G2=T0*T0/E02
       G3=(2.*T0+1.)/E02
       GMAX=(1.+1.25*G2)
-5151  CONTINUE
+5181  CONTINUE
         IF (( rng_seed .GT. 24 )) THEN
           call ranlux(rng_array)
           rng_seed = 1
@@ -9990,9 +10170,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         rng_seed = rng_seed + 1
         REJF4=(1.+G2*BR*BR+R*(R-G3))
         RNNO28=GMAX*RNNO28
-        IF((RNNO28.LE.REJF4))GO TO5152
-      GO TO 5151
-5152  CONTINUE
+        IF((RNNO28.LE.REJF4))GO TO5182
+      GO TO 5181
+5182  CONTINUE
       PEKSE2=BR*EKIN
       PESE1=PEIE-PEKSE2
       PESE2=PEKSE2+PRM
@@ -10116,23 +10296,23 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           write(i_log,*) ' old PRESTA calculates default min. step-size
      *for BCA: '
           ecutmn = 1e30
-          DO 5161 i=1,3
+          DO 5191 i=1,3
             IF (( med(i) .GT. 0 .AND. med(i) .LE. nmed )) THEN
               ecutmn = Min(ecutmn,ecut(i))
             END IF
-5161      CONTINUE
-5162      CONTINUE
+5191      CONTINUE
+5192      CONTINUE
           write(i_log,*) '     minimum ECUT found: ',ecutmn
           tstbmn = 1e30
-          DO 5171 medium=1,nmed
+          DO 5201 medium=1,nmed
             tstbm = (ecutmn-prm)*(ecutmn+prm)/ecutmn**2
             tstbm = blcc(medium)*tstbm*(ecutmn/xcc(medium))**2
             aux = Log(tstbm)
             IF((aux .GT. 300))write(i_log,*) 'aux > 300 ? ',aux
             tstbm = Log(tstbm/aux)
             tstbmn = Min(tstbmn,tstbm)
-5171      CONTINUE
-5172      CONTINUE
+5201      CONTINUE
+5202      CONTINUE
           write(i_log,*) '     default BLCMIN is: ',tstbmn
           skindepth_for_bca = Exp(tstbmn)
           write(i_log,*) '     this corresponds to ',skindepth_for_bca,
@@ -10142,18 +10322,18 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         END IF
       END IF
       call init_ms_SR
-      DO 5181 medium=1,nmed
+      DO 5211 medium=1,nmed
         blcc(medium) = 1.16699413758864573*blcc(medium)
         xcc(medium) = xcc(medium)**2
-5181  CONTINUE
-5182  CONTINUE
+5211  CONTINUE
+5212  CONTINUE
       IF (( spin_effects )) THEN
         call init_spin
       END IF
       write(i_log,*) ' '
       esige_max = 0
       psige_max = 0
-      DO 5191 medium=1,nmed
+      DO 5221 medium=1,nmed
         sigee = 1E-15
         sigep = 1E-15
         neke = meke(medium)
@@ -10161,7 +10341,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         isp_monoton = .true.
         sige_old = -1
         sigp_old = -1
-        DO 5201 i=1,neke
+        DO 5231 i=1,neke
           ei = exp((float(i) - eke0(medium))/eke1(medium))
           eil = log(ei)
           leil = i
@@ -10177,8 +10357,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           IF((sig .GT. sigep))sigep = sig
           IF((sig .LT. sigp_old))isp_monoton = .false.
           sigp_old = sig
-5201    CONTINUE
-5202    CONTINUE
+5231    CONTINUE
+5232    CONTINUE
         write(i_log,*) ' Medium ',medium,' sige = ',sigee,sigep,' monoto
      *ne = ', ise_monoton,isp_monoton
         sig_ismonotone(0,medium) = ise_monoton
@@ -10187,13 +10367,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         psig_e(medium) = sigep
         IF((sigee .GT. esige_max))esige_max = sigee
         IF((sigep .GT. psige_max))psige_max = sigep
-5191  CONTINUE
-5192  CONTINUE
+5221  CONTINUE
+5222  CONTINUE
       write(i_log,*) ' '
       write(i_log,*) ' Initializing tmxs for estepe = ',estepe,' and xim
      *ax = ',ximax
       write(i_log,*) ' '
-      DO 5211 medium=1,nmed
+      DO 5241 medium=1,nmed
         ei = exp((1 - eke0(medium))/eke1(medium))
         eil = log(ei)
         leil = 1
@@ -10202,7 +10382,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         range_ep(0,1,medium) = 0
         range_ep(1,1,medium) = 0
         neke = meke(medium)
-        DO 5221 i=1,neke - 1
+        DO 5251 i=1,neke - 1
           eip1 = exp((float(i + 1) - eke0(medium))/eke1(medium))
           E_array(i+1,medium) = eip1
           eke = 0.5*(eip1+ei)
@@ -10217,8 +10397,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           range_ep(0,i+1,medium) = range_ep(0,i,medium) + (eip1-ei)/eded
      *    x*(1+aux*(1+2*aux)*((eip1-ei)/eke)**2/24)
           ei = eip1
-5221    CONTINUE
-5222    CONTINUE
+5251    CONTINUE
+5252    CONTINUE
         eil = (1 - eke0(medium))/eke1(medium)
         ei = Exp(eil)
         leil = 1
@@ -10233,7 +10413,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           estepx = estepe
         END IF
         si = estepx*ei/dedx0
-        DO 5231 i=1,neke - 1
+        DO 5261 i=1,neke - 1
           elke = (i + 1 - eke0(medium))/eke1(medium)
           eke = Exp(elke)
           lelke = i+1
@@ -10274,12 +10454,12 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           tmxs1(i,medium) = (sip1 - si)*eke1(medium)
           tmxs0(i,medium) = sip1 - tmxs1(i,medium)*elke
           si = sip1
-5231    CONTINUE
-5232    CONTINUE
+5261    CONTINUE
+5262    CONTINUE
         tmxs0(neke,medium) = tmxs0(neke - 1,medium)
         tmxs1(neke,medium) = tmxs1(neke - 1,medium)
-5211  CONTINUE
-5212  CONTINUE
+5241  CONTINUE
+5242  CONTINUE
       return
       end
       subroutine mscat(lambda,chia2,q1,elke,beta2,qel,medium, spin_effec
@@ -10329,7 +10509,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         END IF
         wsum = (1+lambda)*explambda
         IF (( sprob .LT. wsum )) THEN
-5240      CONTINUE
+5270      CONTINUE
           IF (( rng_seed .GT. 24 )) THEN
             call ranlux(rng_array)
             rng_seed = 1
@@ -10348,7 +10528,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             rnno = rng_array(rng_seed)
             rng_seed = rng_seed + 1
             IF (( rnno .GT. rejf )) THEN
-              GOTO 5240
+              GOTO 5270
             END IF
           END IF
           sint = sqrt(xi*(2 - xi))
@@ -10360,12 +10540,12 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           cost = 1
           sint = 0
           icount = 0
-5251      CONTINUE
+5281      CONTINUE
             icount = icount + 1
-            IF((icount .GT. 20))GO TO5252
+            IF((icount .GT. 20))GO TO5282
             wprob = wprob*lambda/icount
             wsum = wsum + wprob
-5260        CONTINUE
+5290        CONTINUE
             IF (( rng_seed .GT. 24 )) THEN
               call ranlux(rng_array)
               rng_seed = 1
@@ -10384,7 +10564,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               rnno = rng_array(rng_seed)
               rng_seed = rng_seed + 1
               IF (( rnno .GT. rejf )) THEN
-                GOTO 5260
+                GOTO 5290
               END IF
             END IF
             sinz = xi*(2 - xi)
@@ -10400,9 +10580,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               cost = cost*cosz - sint*sinz*Cos(phi)
               sint = Sqrt(Max(0.0,(1-cost)*(1+cost)))
             END IF
-            IF((( wsum .GT. sprob)))GO TO5252
-          GO TO 5251
-5252      CONTINUE
+            IF((( wsum .GT. sprob)))GO TO5282
+          GO TO 5281
+5282      CONTINUE
           return
         END IF
       END IF
@@ -10444,7 +10624,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           END IF
           find_index = .false.
         END IF
-5270    CONTINUE
+5300    CONTINUE
         IF (( rng_seed .GT. 24 )) THEN
           call ranlux(rng_array)
           rng_seed = 1
@@ -10485,7 +10665,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           rnno = rng_array(rng_seed)
           rng_seed = rng_seed + 1
           IF (( rnno .GT. rejf )) THEN
-            GOTO 5270
+            GOTO 5300
           END IF
         END IF
         sint = sqrt(xi*(2-xi))
@@ -10585,7 +10765,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       real*8 xi,rnno,rejf,spin_rejection,qzero
       logical spin_index
       spin_index = .true.
-5280  CONTINUE
+5310  CONTINUE
       IF (( rng_seed .GT. 24 )) THEN
         call ranlux(rng_array)
         rng_seed = 1
@@ -10604,7 +10784,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         END IF
         rnno = rng_array(rng_seed)
         rng_seed = rng_seed + 1
-        IF((rnno .GT. rejf))goto 5280
+        IF((rnno .GT. rejf))goto 5310
       END IF
       sint = sqrt(xi*(2 - xi))
       return
@@ -10634,22 +10814,22 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       write(i_log,'(/a,$)') 'Reading screened Rutherford MS data .......
      *........ '
       rewind(i_mscat)
-      DO 5291 i=0,63
-        DO 5301 j=0,7
+      DO 5321 i=0,63
+        DO 5331 j=0,7
           read(i_mscat,*) (ums_array(i,j,k),k=0,31)
           read(i_mscat,*) (fms_array(i,j,k),k=0,31)
           read(i_mscat,*) (wms_array(i,j,k),k=0,31-1)
           read(i_mscat,*) (ims_array(i,j,k),k=0,31-1)
-          DO 5311 k=0,31-1
+          DO 5341 k=0,31-1
             fms_array(i,j,k) = fms_array(i,j,k+1)/fms_array(i,j,k)-1
             ims_array(i,j,k) = ims_array(i,j,k)-1
-5311      CONTINUE
-5312      CONTINUE
+5341      CONTINUE
+5342      CONTINUE
           fms_array(i,j,31)=fms_array(i,j,31-1)
-5301    CONTINUE
-5302    CONTINUE
-5291  CONTINUE
-5292  CONTINUE
+5331    CONTINUE
+5332    CONTINUE
+5321  CONTINUE
+5322  CONTINUE
       write(i_log,'(a)') ' done '
       llammin = Log(1.)
       llammax = Log(1e5)
@@ -10748,10 +10928,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       real*4 tmp_4
       character c_2(2), c_4(4)
       equivalence (ii2,c_2), (tmp_4,c_4)
-      DO 5321 i=1,len(spin_file)
+      DO 5351 i=1,len(spin_file)
         spin_file(i:i) = ' '
-5321  CONTINUE
-5322  CONTINUE
+5351  CONTINUE
+5352  CONTINUE
       spin_file = hen_house(:lnblnk1(hen_house)) // 'data' // '/' // 'sp
      *inms.data'
       want_spin_unit = 61
@@ -10764,8 +10944,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       END IF
       rec_length = 276*4
       open(spin_unit,file=spin_file,form='unformatted',access='direct',
-     *status='old',recl=rec_length,err=5330)
-      read(spin_unit,rec=1,err=5340) data_version,endianess, espin_min,e
+     *status='old',recl=rec_length,err=5360)
+      read(spin_unit,rec=1,err=5370) data_version,endianess, espin_min,e
      *spin_max,b2spin_min,b2spin_max
       swap = endianess.ne.'1234'
       IF (( swap )) THEN
@@ -10800,18 +10980,18 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       IF (( fool_intel_optimizer )) THEN
         write(25,*) 'Energy grid:'
       END IF
-      DO 5351 i=1,n_ener
+      DO 5381 i=1,n_ener
         eloge = eloge + dloge
         earray(i) = exp(eloge)
         IF (( fool_intel_optimizer )) THEN
           write(25,*) i,earray(i)
         END IF
-5351  CONTINUE
-5352  CONTINUE
+5381  CONTINUE
+5382  CONTINUE
       dbeta2 = (b2spin_max - b2spin_min)/n_ener
       beta2 = b2spin_min
       earray(n_ener+1) = espin_max
-      DO 5361 i=n_ener+2,2*n_ener+1
+      DO 5391 i=n_ener+2,2*n_ener+1
         beta2 = beta2 + dbeta2
         IF (( beta2 .LT. 0.999 )) THEN
           earray(i) = prm*1000.0*(1/sqrt(1-beta2)-1)
@@ -10821,8 +11001,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         IF (( fool_intel_optimizer )) THEN
           write(25,*) i,earray(i)
         END IF
-5361  CONTINUE
-5362  CONTINUE
+5391  CONTINUE
+5392  CONTINUE
       espin_min = espin_min/1000
       espin_max = espin_max/1000
       dlener = Log(espin_max/espin_min)/15
@@ -10832,30 +11012,30 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       dbeta2i = 1/dbeta2
       dqq1 = 0.5/15
       dqq1i = 1/dqq1
-      DO 5371 medium=1,NMED
+      DO 5401 medium=1,NMED
         write(i_log,'(a,i4,a,$)') '  medium ',medium,' .................
      *.... '
-        DO 5381 iq=0,1
-          DO 5391 i=0, 31
+        DO 5411 iq=0,1
+          DO 5421 i=0, 31
             eta_array(iq,i)=0
             c_array(iq,i)=0
             g_array(iq,i)=0
-            DO 5401 j=0,15
-              DO 5411 k=0,31
+            DO 5431 j=0,15
+              DO 5441 k=0,31
                 spin_rej(medium,iq,i,j,k) = 0
-5411          CONTINUE
-5412          CONTINUE
-5401        CONTINUE
-5402        CONTINUE
-5391      CONTINUE
-5392      CONTINUE
-5381    CONTINUE
-5382    CONTINUE
+5441          CONTINUE
+5442          CONTINUE
+5431        CONTINUE
+5432        CONTINUE
+5421      CONTINUE
+5422      CONTINUE
+5411    CONTINUE
+5412    CONTINUE
         sum_Z2=0
         sum_A=0
         sum_pz=0
         sum_Z=0
-        DO 5421 i_ele=1,NNE(medium)
+        DO 5451 i_ele=1,NNE(medium)
           Z = ZELEM(medium,i_ele)
           iZ = int(Z+0.5)
           IF (( fool_intel_optimizer )) THEN
@@ -10867,13 +11047,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           sum_A = sum_A + PZ(medium,i_ele)*WA(medium,i_ele)
           sum_pz = sum_pz + PZ(medium,i_ele)
           Z23 = Z**0.6666667
-          DO 5431 iq=0,1
-            DO 5441 i=0, 31
+          DO 5461 iq=0,1
+            DO 5471 i=0, 31
               irec = 1 + (iz-1)*4*(n_ener+1) + 2*iq*(n_ener+1) + i+1
               IF (( fool_intel_optimizer )) THEN
                 write(25,*) '**** energy ',i,earray(i),irec
               END IF
-              read(spin_unit,rec=irec,err=5340) dum1,dum2,dum3,aux_o,fma
+              read(spin_unit,rec=irec,err=5370) dum1,dum2,dum3,aux_o,fma
      *        x_array,i2_array
               IF (( swap )) THEN
                 tmp_4 = dum1
@@ -10896,10 +11076,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               c_array(iq,i)=c_array(iq,i)+ tmp*(Log(1+1/eta)-1/(1+eta))*
      *        dum1*dum3
               g_array(iq,i)=g_array(iq,i)+tmp*dum2
-              DO 5451 j=0,15
+              DO 5481 j=0,15
                 tmp_4 = fmax_array(j)
                 IF((swap))call egs_swap_4(c_4)
-                DO 5461 k=0,31
+                DO 5491 k=0,31
                   ii2 = i2_array((n_point+1)*j + k+1)
                   IF((swap))call egs_swap_2(c_2)
                   ii4 = ii2
@@ -10908,44 +11088,44 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                   dum1 = dum1*tmp_4/65535
                   spin_rej(medium,iq,i,j,k) = spin_rej(medium,iq,i,j,k)
      *            + tmp*dum1
-5461            CONTINUE
-5462            CONTINUE
-5451          CONTINUE
-5452          CONTINUE
-5441        CONTINUE
-5442        CONTINUE
-5431      CONTINUE
-5432      CONTINUE
-5421    CONTINUE
-5422    CONTINUE
-        DO 5471 iq=0,1
-          DO 5481 i=0, 31
-            DO 5491 j=0,15
+5491            CONTINUE
+5492            CONTINUE
+5481          CONTINUE
+5482          CONTINUE
+5471        CONTINUE
+5472        CONTINUE
+5461      CONTINUE
+5462      CONTINUE
+5451    CONTINUE
+5452    CONTINUE
+        DO 5501 iq=0,1
+          DO 5511 i=0, 31
+            DO 5521 j=0,15
               fmax = 0
-              DO 5501 k=0,31
+              DO 5531 k=0,31
                 IF (( spin_rej(medium,iq,i,j,k) .GT. fmax )) THEN
                   fmax = spin_rej(medium,iq,i,j,k)
                 END IF
-5501          CONTINUE
-5502          CONTINUE
-              DO 5511 k=0,31
+5531          CONTINUE
+5532          CONTINUE
+              DO 5541 k=0,31
                 spin_rej(medium,iq,i,j,k) = spin_rej(medium,iq,i,j,k)/fm
      *          ax
-5511          CONTINUE
-5512          CONTINUE
-5491        CONTINUE
-5492        CONTINUE
-5481      CONTINUE
-5482      CONTINUE
-5471    CONTINUE
-5472    CONTINUE
+5541          CONTINUE
+5542          CONTINUE
+5521        CONTINUE
+5522        CONTINUE
+5511      CONTINUE
+5512      CONTINUE
+5501    CONTINUE
+5502    CONTINUE
         IF (( fool_intel_optimizer )) THEN
           write(25,*) 'Spin corrections as read in from file'
         END IF
-        DO 5521 i=0, 31
+        DO 5551 i=0, 31
           tau = earray(i)/prm*0.001
           beta2 = tau*(tau+2)/(tau+1)**2
-          DO 5531 iq=0,1
+          DO 5561 iq=0,1
             aux_o = Exp(eta_array(iq,i)/sum_Z2)/(fine*TF_constant)**2
             eta_array(iq,i) = 0.26112447*aux_o*blcc(medium)/xcc(medium)
             eta = aux_o/4/tau/(tau+2)
@@ -10954,14 +11134,14 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             g_array(iq,i) = g_array(iq,i)/sum_Z2/gamma
             c_array(iq,i) = c_array(iq,i)/sum_Z2/(Log(1+1/eta)-1/(1+eta)
      *      )
-5531      CONTINUE
-5532      CONTINUE
+5561      CONTINUE
+5562      CONTINUE
           IF (( fool_intel_optimizer )) THEN
             write(25,*) i,earray(i),eta_array(0,i),eta_array(1,i), c_arr
      *      ay(0,i),c_array(1,i),g_array(0,i),g_array(1,i)
           END IF
-5521    CONTINUE
-5522    CONTINUE
+5551    CONTINUE
+5552    CONTINUE
         eil = (1 - eke0(medium))/eke1(medium)
         e = Exp(eil)
         IF (( e .LE. espin_min )) THEN
@@ -10987,7 +11167,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         IF (( fool_intel_optimizer )) THEN
           write(25,*) 'Interpolation table for eta correction'
         END IF
-        DO 5541 i=1,neke - 1
+        DO 5571 i=1,neke - 1
           eil = (i+1 - eke0(medium))/eke1(medium)
           e = Exp(eil)
           IF (( e .LE. espin_min )) THEN
@@ -11019,8 +11199,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           END IF
           si1e = si2e
           si1p = si2p
-5541    CONTINUE
-5542    CONTINUE
+5571    CONTINUE
+5572    CONTINUE
         etae_ms1(neke,medium) = etae_ms1(neke-1,medium)
         etae_ms0(neke,medium) = etae_ms0(neke-1,medium)
         etap_ms1(neke,medium) = etap_ms1(neke-1,medium)
@@ -11028,22 +11208,22 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         IF (( fool_intel_optimizer )) THEN
           write(25,*) 'elarray:'
         END IF
-        DO 5551 i=0,15
+        DO 5581 i=0,15
           elarray(i) = Log(earray(i)/1000)
           farray(i) = c_array(0,i)
           IF (( fool_intel_optimizer )) THEN
             write(25,*) elarray(i),earray(i)
           END IF
-5551    CONTINUE
-5552    CONTINUE
-        DO 5561 i=15+1, 31-1
+5581    CONTINUE
+5582    CONTINUE
+        DO 5591 i=15+1, 31-1
           elarray(i) = Log(earray(i+1)/1000)
           farray(i) = c_array(0,i+1)
           IF (( fool_intel_optimizer )) THEN
             write(25,*) elarray(i),earray(i+1)
           END IF
-5561    CONTINUE
-5562    CONTINUE
+5591    CONTINUE
+5592    CONTINUE
         ndata =  31+1
         IF (( ue(medium) .GT. 1e5 )) THEN
           elarray(ndata-1) = Log(ue(medium))
@@ -11057,7 +11237,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         IF (( fool_intel_optimizer )) THEN
           write(25,*) 'Interpolation table for q1 correction (e-)'
         END IF
-        DO 5571 i=1,neke-1
+        DO 5601 i=1,neke-1
           eil = (i+1 - eke0(medium))/eke1(medium)
           si2e = spline(eil,elarray,af,bf,cf,df,ndata)
           q1ce_ms1(i,medium) = (si2e - si1e)*eke1(medium)
@@ -11067,28 +11247,28 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *      ium)
           END IF
           si1e = si2e
-5571    CONTINUE
-5572    CONTINUE
+5601    CONTINUE
+5602    CONTINUE
         q1ce_ms1(neke,medium) = q1ce_ms1(neke-1,medium)
         q1ce_ms0(neke,medium) = q1ce_ms0(neke-1,medium)
         IF (( fool_intel_optimizer )) THEN
           write(25,*) 'Postrons:'
         END IF
-        DO 5581 i=0,15
+        DO 5611 i=0,15
           farray(i) = c_array(1,i)
-5581    CONTINUE
-5582    CONTINUE
-        DO 5591 i=15+1, 31-1
+5611    CONTINUE
+5612    CONTINUE
+        DO 5621 i=15+1, 31-1
           farray(i) = c_array(1,i+1)
-5591    CONTINUE
-5592    CONTINUE
+5621    CONTINUE
+5622    CONTINUE
         call set_spline(elarray,farray,af,bf,cf,df,ndata)
         eil = (1 - eke0(medium))/eke1(medium)
         si1e = spline(eil,elarray,af,bf,cf,df,ndata)
         IF (( fool_intel_optimizer )) THEN
           write(25,*) 'Interpolation table for q1 correction (e+)'
         END IF
-        DO 5601 i=1,neke-1
+        DO 5631 i=1,neke-1
           eil = (i+1 - eke0(medium))/eke1(medium)
           si2e = spline(eil,elarray,af,bf,cf,df,ndata)
           q1cp_ms1(i,medium) = (si2e - si1e)*eke1(medium)
@@ -11098,25 +11278,25 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *      ium)
           END IF
           si1e = si2e
-5601    CONTINUE
-5602    CONTINUE
+5631    CONTINUE
+5632    CONTINUE
         q1cp_ms1(neke,medium) = q1cp_ms1(neke-1,medium)
         q1cp_ms0(neke,medium) = q1cp_ms0(neke-1,medium)
-        DO 5611 i=0,15
+        DO 5641 i=0,15
           farray(i) = g_array(0,i)
-5611    CONTINUE
-5612    CONTINUE
-        DO 5621 i=15+1, 31-1
+5641    CONTINUE
+5642    CONTINUE
+        DO 5651 i=15+1, 31-1
           farray(i) = g_array(0,i+1)
-5621    CONTINUE
-5622    CONTINUE
+5651    CONTINUE
+5652    CONTINUE
         call set_spline(elarray,farray,af,bf,cf,df,ndata)
         eil = (1 - eke0(medium))/eke1(medium)
         si1e = spline(eil,elarray,af,bf,cf,df,ndata)
         IF (( fool_intel_optimizer )) THEN
           write(25,*) 'Interpolation table for q2 correction (e-)'
         END IF
-        DO 5631 i=1,neke-1
+        DO 5661 i=1,neke-1
           eil = (i+1 - eke0(medium))/eke1(medium)
           si2e = spline(eil,elarray,af,bf,cf,df,ndata)
           q2ce_ms1(i,medium) = (si2e - si1e)*eke1(medium)
@@ -11126,25 +11306,25 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *      ium)
           END IF
           si1e = si2e
-5631    CONTINUE
-5632    CONTINUE
+5661    CONTINUE
+5662    CONTINUE
         q2ce_ms1(neke,medium) = q2ce_ms1(neke-1,medium)
         q2ce_ms0(neke,medium) = q2ce_ms0(neke-1,medium)
-        DO 5641 i=0,15
+        DO 5671 i=0,15
           farray(i) = g_array(1,i)
-5641    CONTINUE
-5642    CONTINUE
-        DO 5651 i=15+1, 31-1
+5671    CONTINUE
+5672    CONTINUE
+        DO 5681 i=15+1, 31-1
           farray(i) = g_array(1,i+1)
-5651    CONTINUE
-5652    CONTINUE
+5681    CONTINUE
+5682    CONTINUE
         call set_spline(elarray,farray,af,bf,cf,df,ndata)
         eil = (1 - eke0(medium))/eke1(medium)
         si1e = spline(eil,elarray,af,bf,cf,df,ndata)
         IF (( fool_intel_optimizer )) THEN
           write(25,*) 'Interpolation table for q2 correction (e+)'
         END IF
-        DO 5661 i=1,neke-1
+        DO 5691 i=1,neke-1
           eil = (i+1 - eke0(medium))/eke1(medium)
           si2e = spline(eil,elarray,af,bf,cf,df,ndata)
           q2cp_ms1(i,medium) = (si2e - si1e)*eke1(medium)
@@ -11154,13 +11334,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *      ium)
           END IF
           si1e = si2e
-5661    CONTINUE
-5662    CONTINUE
+5691    CONTINUE
+5692    CONTINUE
         q2cp_ms1(neke,medium) = q2cp_ms1(neke-1,medium)
         q2cp_ms0(neke,medium) = q2cp_ms0(neke-1,medium)
         tauc = te(medium)/prm
         si1e = 1
-        DO 5671 i=1,neke-1
+        DO 5701 i=1,neke-1
           eil = (i+1 - eke0(medium))/eke1(medium)
           e = Exp(eil)
           leil=i+1
@@ -11192,21 +11372,21 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           blcce1(i,medium) = (si2e - si1e)*eke1(medium)
           blcce0(i,medium) = si2e - blcce1(i,medium)*eil
           si1e = si2e
-5671    CONTINUE
-5672    CONTINUE
+5701    CONTINUE
+5702    CONTINUE
         blcce1(neke,medium) = blcce1(neke-1,medium)
         blcce0(neke,medium) = blcce0(neke-1,medium)
         write(i_log,'(a)') ' done'
-5371  CONTINUE
-5372  CONTINUE
+5401  CONTINUE
+5402  CONTINUE
       close(spin_unit)
       return
-5330  write(i_log,'(/a)') '***************** Error: '
+5360  write(i_log,'(/a)') '***************** Error: '
       write(i_log,'(a,a)') 'Failed to open spin data file ',spin_file(:l
      *nblnk1(spin_file))
       write(i_log,'(/a)') '***************** Quiting now.'
       call exit(1)
-5340  write(i_log,'(/a)') '***************** Error: '
+5370  write(i_log,'(/a)') '***************** Error: '
       write(i_log,*) 'Error while reading spin data file for element',iZ
       write(i_log,'(/a)') '***************** Quiting now.'
       call exit(1)
@@ -11291,37 +11471,37 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       integer*4 lnblnk1
       real*8 fine,TF_constant
       parameter (fine=137.03604,TF_constant=0.88534138)
-      DO 5681 i=1,len(spin_file)
+      DO 5711 i=1,len(spin_file)
         spin_file(i:i) = ' '
-5681  CONTINUE
-5682  CONTINUE
+5711  CONTINUE
+5712  CONTINUE
       spin_file = hen_house(:lnblnk1(hen_house)) // 'data' // '/' // 'sp
      *inms' // '/' // 'z000'
       length = lnblnk1(spin_file)
-      DO 5691 medium=1,NMED
+      DO 5721 medium=1,NMED
         write(i_log,'(a,i4,a,$)') '  Initializing spin data for medium '
      *  ,medium, ' ..................... '
-        DO 5701 iq=0,1
-          DO 5711 i=0, 31
+        DO 5731 iq=0,1
+          DO 5741 i=0, 31
             eta_array(iq,i)=0
             c_array(iq,i)=0
             g_array(iq,i)=0
-            DO 5721 j=0,15
-              DO 5731 k=0,31
+            DO 5751 j=0,15
+              DO 5761 k=0,31
                 spin_rej(medium,iq,i,j,k) = 0
-5731          CONTINUE
-5732          CONTINUE
-5721        CONTINUE
-5722        CONTINUE
-5711      CONTINUE
-5712      CONTINUE
-5701    CONTINUE
-5702    CONTINUE
+5761          CONTINUE
+5762          CONTINUE
+5751        CONTINUE
+5752        CONTINUE
+5741      CONTINUE
+5742      CONTINUE
+5731    CONTINUE
+5732    CONTINUE
         sum_Z2=0
         sum_A=0
         sum_pz=0
         sum_Z=0
-        DO 5741 i_ele=1,NNE(medium)
+        DO 5771 i_ele=1,NNE(medium)
           Z = ZELEM(medium,i_ele)
           iZ = int(Z+0.5)
           tmp = PZ(medium,i_ele)*Z*(Z+1)
@@ -11341,7 +11521,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             write(i_log,'(/a)') '***************** Quiting now.'
             call exit(1)
           END IF
-          open(spin_unit,file=spin_file,status='old',err=5750)
+          open(spin_unit,file=spin_file,status='old',err=5780)
           read(spin_unit,*) espin_min,espin_max,b2spin_min,b2spin_max
           read(spin_unit,*) n_ener,n_q,n_point
           IF (( n_ener .NE. 15 .OR. n_q .NE. 15 .OR. n_point .NE. 31)) T
@@ -11356,10 +11536,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           sum_A = sum_A + PZ(medium,i_ele)*WA(medium,i_ele)
           sum_pz = sum_pz + PZ(medium,i_ele)
           Z23 = Z**0.6666667
-          DO 5761 iq=0,1
+          DO 5791 iq=0,1
             read(spin_unit,*)
             read(spin_unit,*)
-            DO 5771 i=0, 31
+            DO 5801 i=0, 31
               read(spin_unit,'(a,g14.6)') string,earray(i)
               read(spin_unit,*) dum1,dum2,dum3,aux_o
               eta_array(iq,i)=eta_array(iq,i)+tmp*Log(Z23*aux_o)
@@ -11369,47 +11549,47 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               c_array(iq,i)=c_array(iq,i)+ tmp*(Log(1+1/eta)-1/(1+eta))*
      *        dum1*dum3
               g_array(iq,i)=g_array(iq,i)+tmp*dum2
-              DO 5781 j=0,15
+              DO 5811 j=0,15
                 read(spin_unit,*) tmp_array
-                DO 5791 k=0,31
+                DO 5821 k=0,31
                   spin_rej(medium,iq,i,j,k) = spin_rej(medium,iq,i,j,k)
      *            + tmp*tmp_array(k)
-5791            CONTINUE
-5792            CONTINUE
-5781          CONTINUE
-5782          CONTINUE
-5771        CONTINUE
-5772        CONTINUE
-5761      CONTINUE
-5762      CONTINUE
+5821            CONTINUE
+5822            CONTINUE
+5811          CONTINUE
+5812          CONTINUE
+5801        CONTINUE
+5802        CONTINUE
+5791      CONTINUE
+5792      CONTINUE
           close(spin_unit)
-5741    CONTINUE
-5742    CONTINUE
-        DO 5801 iq=0,1
-          DO 5811 i=0, 31
-            DO 5821 j=0,15
+5771    CONTINUE
+5772    CONTINUE
+        DO 5831 iq=0,1
+          DO 5841 i=0, 31
+            DO 5851 j=0,15
               fmax = 0
-              DO 5831 k=0,31
+              DO 5861 k=0,31
                 IF (( spin_rej(medium,iq,i,j,k) .GT. fmax )) THEN
                   fmax = spin_rej(medium,iq,i,j,k)
                 END IF
-5831          CONTINUE
-5832          CONTINUE
-              DO 5841 k=0,31
+5861          CONTINUE
+5862          CONTINUE
+              DO 5871 k=0,31
                 spin_rej(medium,iq,i,j,k) = spin_rej(medium,iq,i,j,k)/fm
      *          ax
-5841          CONTINUE
-5842          CONTINUE
-5821        CONTINUE
-5822        CONTINUE
-5811      CONTINUE
-5812      CONTINUE
-5801    CONTINUE
-5802    CONTINUE
-        DO 5851 i=0, 31
+5871          CONTINUE
+5872          CONTINUE
+5851        CONTINUE
+5852        CONTINUE
+5841      CONTINUE
+5842      CONTINUE
+5831    CONTINUE
+5832    CONTINUE
+        DO 5881 i=0, 31
           tau = earray(i)/prm*0.001
           beta2 = tau*(tau+2)/(tau+1)**2
-          DO 5861 iq=0,1
+          DO 5891 iq=0,1
             aux_o = Exp(eta_array(iq,i)/sum_Z2)/(fine*TF_constant)**2
             eta_array(iq,i) = 0.26112447*aux_o*blcc(medium)/xcc(medium)
             eta = aux_o/4/tau/(tau+2)
@@ -11418,10 +11598,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             g_array(iq,i) = g_array(iq,i)/sum_Z2/gamma
             c_array(iq,i) = c_array(iq,i)/sum_Z2/(Log(1+1/eta)-1/(1+eta)
      *      )
-5861      CONTINUE
-5862      CONTINUE
-5851    CONTINUE
-5852    CONTINUE
+5891      CONTINUE
+5892      CONTINUE
+5881    CONTINUE
+5882    CONTINUE
         espin_min = espin_min/1000
         espin_max = espin_max/1000
         dlener = Log(espin_max/espin_min)/15
@@ -11453,7 +11633,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           si1p = (1-aae)*eta_array(1,je) + aae*eta_array(1,je+1)
         END IF
         neke = meke(medium)
-        DO 5871 i=1,neke - 1
+        DO 5901 i=1,neke - 1
           eil = (i+1 - eke0(medium))/eke1(medium)
           e = Exp(eil)
           IF (( e .LE. espin_min )) THEN
@@ -11481,22 +11661,22 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           etap_ms0(i,medium) = si2p - etap_ms1(i,medium)*eil
           si1e = si2e
           si1p = si2p
-5871    CONTINUE
-5872    CONTINUE
+5901    CONTINUE
+5902    CONTINUE
         etae_ms1(neke,medium) = etae_ms1(neke-1,medium)
         etae_ms0(neke,medium) = etae_ms0(neke-1,medium)
         etap_ms1(neke,medium) = etap_ms1(neke-1,medium)
         etap_ms0(neke,medium) = etap_ms0(neke-1,medium)
-        DO 5881 i=0,15
+        DO 5911 i=0,15
           elarray(i) = Log(earray(i)/1000)
           farray(i) = c_array(0,i)
-5881    CONTINUE
-5882    CONTINUE
-        DO 5891 i=15+1, 31-1
+5911    CONTINUE
+5912    CONTINUE
+        DO 5921 i=15+1, 31-1
           elarray(i) = Log(earray(i+1)/1000)
           farray(i) = c_array(0,i+1)
-5891    CONTINUE
-5892    CONTINUE
+5921    CONTINUE
+5922    CONTINUE
         ndata =  31+1
         IF (( ue(medium) .GT. 1e5 )) THEN
           elarray(ndata-1) = Log(ue(medium))
@@ -11507,43 +11687,22 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         call set_spline(elarray,farray,af,bf,cf,df,ndata)
         eil = (1 - eke0(medium))/eke1(medium)
         si1e = spline(eil,elarray,af,bf,cf,df,ndata)
-        DO 5901 i=1,neke-1
+        DO 5931 i=1,neke-1
           eil = (i+1 - eke0(medium))/eke1(medium)
           si2e = spline(eil,elarray,af,bf,cf,df,ndata)
           q1ce_ms1(i,medium) = (si2e - si1e)*eke1(medium)
           q1ce_ms0(i,medium) = si2e - q1ce_ms1(i,medium)*eil
           si1e = si2e
-5901    CONTINUE
-5902    CONTINUE
-        q1ce_ms1(neke,medium) = q1ce_ms1(neke-1,medium)
-        q1ce_ms0(neke,medium) = q1ce_ms0(neke-1,medium)
-        DO 5911 i=0,15
-          farray(i) = c_array(1,i)
-5911    CONTINUE
-5912    CONTINUE
-        DO 5921 i=15+1, 31-1
-          farray(i) = c_array(1,i+1)
-5921    CONTINUE
-5922    CONTINUE
-        call set_spline(elarray,farray,af,bf,cf,df,ndata)
-        eil = (1 - eke0(medium))/eke1(medium)
-        si1e = spline(eil,elarray,af,bf,cf,df,ndata)
-        DO 5931 i=1,neke-1
-          eil = (i+1 - eke0(medium))/eke1(medium)
-          si2e = spline(eil,elarray,af,bf,cf,df,ndata)
-          q1cp_ms1(i,medium) = (si2e - si1e)*eke1(medium)
-          q1cp_ms0(i,medium) = si2e - q1cp_ms1(i,medium)*eil
-          si1e = si2e
 5931    CONTINUE
 5932    CONTINUE
-        q1cp_ms1(neke,medium) = q1cp_ms1(neke-1,medium)
-        q1cp_ms0(neke,medium) = q1cp_ms0(neke-1,medium)
+        q1ce_ms1(neke,medium) = q1ce_ms1(neke-1,medium)
+        q1ce_ms0(neke,medium) = q1ce_ms0(neke-1,medium)
         DO 5941 i=0,15
-          farray(i) = g_array(0,i)
+          farray(i) = c_array(1,i)
 5941    CONTINUE
 5942    CONTINUE
         DO 5951 i=15+1, 31-1
-          farray(i) = g_array(0,i+1)
+          farray(i) = c_array(1,i+1)
 5951    CONTINUE
 5952    CONTINUE
         call set_spline(elarray,farray,af,bf,cf,df,ndata)
@@ -11552,19 +11711,19 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         DO 5961 i=1,neke-1
           eil = (i+1 - eke0(medium))/eke1(medium)
           si2e = spline(eil,elarray,af,bf,cf,df,ndata)
-          q2ce_ms1(i,medium) = (si2e - si1e)*eke1(medium)
-          q2ce_ms0(i,medium) = si2e - q2ce_ms1(i,medium)*eil
+          q1cp_ms1(i,medium) = (si2e - si1e)*eke1(medium)
+          q1cp_ms0(i,medium) = si2e - q1cp_ms1(i,medium)*eil
           si1e = si2e
 5961    CONTINUE
 5962    CONTINUE
-        q2ce_ms1(neke,medium) = q2ce_ms1(neke-1,medium)
-        q2ce_ms0(neke,medium) = q2ce_ms0(neke-1,medium)
+        q1cp_ms1(neke,medium) = q1cp_ms1(neke-1,medium)
+        q1cp_ms0(neke,medium) = q1cp_ms0(neke-1,medium)
         DO 5971 i=0,15
-          farray(i) = g_array(1,i)
+          farray(i) = g_array(0,i)
 5971    CONTINUE
 5972    CONTINUE
         DO 5981 i=15+1, 31-1
-          farray(i) = g_array(1,i+1)
+          farray(i) = g_array(0,i+1)
 5981    CONTINUE
 5982    CONTINUE
         call set_spline(elarray,farray,af,bf,cf,df,ndata)
@@ -11573,15 +11732,36 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         DO 5991 i=1,neke-1
           eil = (i+1 - eke0(medium))/eke1(medium)
           si2e = spline(eil,elarray,af,bf,cf,df,ndata)
-          q2cp_ms1(i,medium) = (si2e - si1e)*eke1(medium)
-          q2cp_ms0(i,medium) = si2e - q2cp_ms1(i,medium)*eil
+          q2ce_ms1(i,medium) = (si2e - si1e)*eke1(medium)
+          q2ce_ms0(i,medium) = si2e - q2ce_ms1(i,medium)*eil
+          si1e = si2e
 5991    CONTINUE
 5992    CONTINUE
+        q2ce_ms1(neke,medium) = q2ce_ms1(neke-1,medium)
+        q2ce_ms0(neke,medium) = q2ce_ms0(neke-1,medium)
+        DO 6001 i=0,15
+          farray(i) = g_array(1,i)
+6001    CONTINUE
+6002    CONTINUE
+        DO 6011 i=15+1, 31-1
+          farray(i) = g_array(1,i+1)
+6011    CONTINUE
+6012    CONTINUE
+        call set_spline(elarray,farray,af,bf,cf,df,ndata)
+        eil = (1 - eke0(medium))/eke1(medium)
+        si1e = spline(eil,elarray,af,bf,cf,df,ndata)
+        DO 6021 i=1,neke-1
+          eil = (i+1 - eke0(medium))/eke1(medium)
+          si2e = spline(eil,elarray,af,bf,cf,df,ndata)
+          q2cp_ms1(i,medium) = (si2e - si1e)*eke1(medium)
+          q2cp_ms0(i,medium) = si2e - q2cp_ms1(i,medium)*eil
+6021    CONTINUE
+6022    CONTINUE
         q2cp_ms1(neke,medium) = q2cp_ms1(neke-1,medium)
         q2cp_ms0(neke,medium) = q2cp_ms0(neke-1,medium)
         tauc = te(medium)/prm
         si1e = 1
-        DO 6001 i=1,neke-1
+        DO 6031 i=1,neke-1
           eil = (i+1 - eke0(medium))/eke1(medium)
           e = Exp(eil)
           leil=i+1
@@ -11613,15 +11793,15 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           blcce1(i,medium) = (si2e - si1e)*eke1(medium)
           blcce0(i,medium) = si2e - blcce1(i,medium)*eil
           si1e = si2e
-6001    CONTINUE
-6002    CONTINUE
+6031    CONTINUE
+6032    CONTINUE
         blcce1(neke,medium) = blcce1(neke-1,medium)
         blcce0(neke,medium) = blcce0(neke-1,medium)
         write(i_log,'(a)') ' done'
-5691  CONTINUE
-5692  CONTINUE
+5721  CONTINUE
+5722  CONTINUE
       return
-5750  write(i_log,*) ' ******************** Error in init_spin *********
+5780  write(i_log,*) ' ******************** Error in init_spin *********
      *********** '
       write(i_log,'(a,a)') '  could not open file ',spin_file
       write(i_log,'(/a)') '***************** Error: '
@@ -11734,7 +11914,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       spin_index = .true.
       call mscat(lambda,chia2,xi,elke,beta2,qel,medium, spin_effects,fin
      *d_index,spin_index, w1,sint1)
-6011  CONTINUE
+6041  CONTINUE
         IF (( rng_seed .GT. 24 )) THEN
           call ranlux(rng_array)
           rng_seed = 1
@@ -11751,15 +11931,15 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         rng_seed = rng_seed + 1
         yphi2 = yphi*yphi
         rhophi2 = xphi2 + yphi2
-        IF(rhophi2.LE.1)GO TO6012
-      GO TO 6011
-6012  CONTINUE
+        IF(rhophi2.LE.1)GO TO6042
+      GO TO 6041
+6042  CONTINUE
       rhophi2 = 1/rhophi2
       cphi1 = (xphi2 - yphi2)*rhophi2
       sphi1 = 2*xphi*yphi*rhophi2
       call mscat(lambda,chia2,xi,elke,beta2,qel,medium, spin_effects,fin
      *d_index,spin_index, w2,sint2)
-6021  CONTINUE
+6051  CONTINUE
         IF (( rng_seed .GT. 24 )) THEN
           call ranlux(rng_array)
           rng_seed = 1
@@ -11776,9 +11956,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         rng_seed = rng_seed + 1
         yphi2 = yphi*yphi
         rhophi2 = xphi2 + yphi2
-        IF(rhophi2.LE.1)GO TO6022
-      GO TO 6021
-6022  CONTINUE
+        IF(rhophi2.LE.1)GO TO6052
+      GO TO 6051
+6052  CONTINUE
       rhophi2 = 1/rhophi2
       cphi2 = (xphi2 - yphi2)*rhophi2
       sphi2 = 2*xphi*yphi*rhophi2
@@ -11921,7 +12101,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       spin_index = .true.
       call mscat(lambda,chia2,xi,elke,beta2,qel,medium, spin_effects,fin
      *d_index,spin_index, ws,sint)
-6031  CONTINUE
+6061  CONTINUE
         IF (( rng_seed .GT. 24 )) THEN
           call ranlux(rng_array)
           rng_seed = 1
@@ -11938,9 +12118,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         rng_seed = rng_seed + 1
         yphi2 = yphi*yphi
         rhophi2 = xphi2 + yphi2
-        IF(rhophi2.LE.1)GO TO6032
-      GO TO 6031
-6032  CONTINUE
+        IF(rhophi2.LE.1)GO TO6062
+      GO TO 6061
+6062  CONTINUE
       rhophi2 = 1/rhophi2
       cphi = (xphi2 - yphi2)*rhophi2
       sphi = 2*xphi*yphi*rhophi2
@@ -12208,7 +12388,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           END IF
           del0 = eig*delcm(medium)
           Eavail = eig - rmt2
-6041      CONTINUE
+6071      CONTINUE
             IF (( rng_seed .GT. 24 )) THEN
               call ranlux(rng_array)
               rng_seed = 1
@@ -12258,9 +12438,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               rejf = dl4(l1,medium)+dl5(l1,medium)*log(delta+dl6(l1,medi
      *        um))
             END IF
-            IF((( rnno34*rejmax .LE. rejf )))GO TO6042
-          GO TO 6041
-6042      CONTINUE
+            IF((( rnno34*rejmax .LE. rejf )))GO TO6072
+          GO TO 6071
+6072      CONTINUE
           pese2 = Eminus
           pese1 = peig - pese2
           IF (( rng_seed .GT. 24 )) THEN
@@ -12300,7 +12480,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         ELSE
           iprdst_use = iprdst
         END IF
-        DO 6051 ichrg=1,2
+        DO 6081 ichrg=1,2
           IF ((ICHRG.EQ.1)) THEN
             ESE=PESE1
           ELSE
@@ -12358,7 +12538,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *      .0*(XIMID-0.5)**2)*( 1.0+0.25*LOG( ((1.0+ESEDER)*(1.0+ESEDEI
      *      )/(2.*TTEIG))**2+ZTARG*XIMID**2 ) )
             REJTOP=1.02*MAX(REJMIN,REJMID)
-6061        CONTINUE
+6091        CONTINUE
               IF (( rng_seed .GT. 24 )) THEN
                 call ranlux(rng_array)
                 rng_seed = 1
@@ -12377,9 +12557,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               THETA=SQRT(1.0/XITST-1.0)/TTESE
               REJTST_on_REJTOP = REJTST/REJTOP
               IF((((RTEST .LE. REJTST_on_REJTOP) .AND. (THETA .LT. PI) )
-     *        ))GO TO6062
-            GO TO 6061
-6062        CONTINUE
+     *        ))GO TO6092
+            GO TO 6091
+6092        CONTINUE
             SINTHE=SIN(THETA)
             COSTHE=COS(THETA)
           ELSE IF(( iprdst_use .EQ. 3 )) THEN
@@ -12418,8 +12598,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             NP=NP+1
             CALL UPHI(3,2)
           END IF
-6051    CONTINUE
-6052    CONTINUE
+6081    CONTINUE
+6082    CONTINUE
         iq(np) = iq2
         iq(np-1) = iq1
         return
@@ -12510,30 +12690,30 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       IF (( .NOT.is_initialized )) THEN
         is_initialized = .true.
         tiny_eta = 1e-6
-        DO 6071 i=1,250
+        DO 6101 i=1,250
           fmax_array(i) = -1
-6071    CONTINUE
-6072    CONTINUE
+6101    CONTINUE
+6102    CONTINUE
         kmax = 0
         kmin = 4.1*prm
-        DO 6081 i=1,nmed
+        DO 6111 i=1,nmed
           IF((up(i) .GT. kmax))kmax = UP(i)
-6081    CONTINUE
-6082    CONTINUE
+6111    CONTINUE
+6112    CONTINUE
         IF((kmax .LE. kmin))return
         dlogki = 250 - 1
         dlogki = dlogki/log(kmax/kmin)
         alogkm = 1 - dlogki*log(kmin)
         prmi = 1/prm
-        DO 6091 i=1,250
+        DO 6121 i=1,250
           k = 4.1*exp((i-1.)/dlogki)
           ebin_array(i) = k
           qmin = 4*k/(k*(k-1)+(k+1)*sqrt(k*(k-4)))
           qmax = (k*(k-1) + (k+1)*sqrt(k*(k-4)))/(2*k+1)
           qmin_array(i) = qmin
           wp_array(i) = log(qmax/qmin)
-6091    CONTINUE
-6092    CONTINUE
+6121    CONTINUE
+6122    CONTINUE
       END IF
       peig = e(np)
       IF((peig .LE. 4*prm))return
@@ -12563,7 +12743,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         END IF
       END IF
       k = ebin_array(i)
-6100  CONTINUE
+6130  CONTINUE
       IF (( rng_seed .GT. 24 )) THEN
         call ranlux(rng_array)
         rng_seed = 1
@@ -12631,7 +12811,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       pp_sntp2 = pp_sintp*pp_sintp
       D1 = pm2*(aux12+pp_sntp2)-b*b/4
       IF (( D1 .LE. 0 )) THEN
-        goto 6100
+        goto 6130
       END IF
       D = 2*pp_sintp*sqrt(D1)
       aux3 = 0.5/(aux12+pp_sntp2)
@@ -12655,7 +12835,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       pm_sintm = pm*sint_m
       cphi = (b + 2*pm*cost_m*aux1)/(2*pp_sintp*pm_sintm)
       IF (( abs(cphi) .GE. 1 )) THEN
-        goto 6100
+        goto 6130
       END IF
       sphi = sqrt(1-cphi*cphi)
       k3 = k*(pp*cost_p - Ep)
@@ -12746,7 +12926,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       pp_sntp2 = pp_sintp*pp_sintp
       D1 = pm2*(aux12+pp_sntp2)-b*b/4
       IF (( D1 .LE. 0 )) THEN
-        goto 6100
+        goto 6130
       END IF
       D = 2*pp_sintp*sqrt(D1)
       aux3 = 0.5/(aux12+pp_sntp2)
@@ -12760,7 +12940,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       pm_sintm = pm*sint_m
       cphi = (b + 2*pm*cost_m*aux1)/(2*pp_sintp*pm_sintm)
       IF (( abs(cphi) .GE. 1 )) THEN
-        goto 6100
+        goto 6130
       END IF
       sphi = sqrt(1-cphi*cphi)
       IF (( rng_seed .GT. 24 )) THEN
@@ -13011,16 +13191,16 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       IF (( iedgfl(irl) .NE. 0 )) THEN
         IF (( nne(medium) .EQ. 1 )) THEN
           iZ = int( zelem(medium,1) + 0.5 )
-          DO 6111 j=1,edge_number(iZ)
-            IF((peig .GE. edge_energies(j,iZ)))GO TO6112
-6111      CONTINUE
-6112      CONTINUE
+          DO 6141 j=1,edge_number(iZ)
+            IF((peig .GE. edge_energies(j,iZ)))GO TO6142
+6141      CONTINUE
+6142      CONTINUE
         ELSE
           aux = peig*peig
           aux1 = aux*peig
           aux = aux*Sqrt(peig)
           sigtot = 0
-          DO 6121 k=1,nne(medium)
+          DO 6151 k=1,nne(medium)
             iZ = int( zelem(medium,k) + 0.5 )
             IF (( iZ .LT. 1 .OR. iZ .GT. 100 )) THEN
               write(i_log,*) ' Error in PHOTO: '
@@ -13035,10 +13215,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               sigma = (edge_a(1,iZ) + edge_b(1,iZ)/peig + edge_c(1,iZ)/a
      *        ux + edge_d(1,iZ)/aux1)/peig
             ELSE
-              DO 6131 j=2,edge_number(iZ)
-                IF((peig .GE. edge_energies(j,iZ)))GO TO6132
-6131          CONTINUE
-6132          CONTINUE
+              DO 6161 j=2,edge_number(iZ)
+                IF((peig .GE. edge_energies(j,iZ)))GO TO6162
+6161          CONTINUE
+6162          CONTINUE
               sigma = edge_a(j,iZ) + gle*(edge_b(j,iZ) + gle*(edge_c(j,i
      *        Z) + gle*edge_d(j,iZ) ))
               sigma = Exp(sigma)
@@ -13047,8 +13227,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             sigtot = sigtot + sigma
             probs(k) = sigma
             ints(k) = j
-6121      CONTINUE
-6122      CONTINUE
+6151      CONTINUE
+6152      CONTINUE
           IF (( rng_seed .GT. 24 )) THEN
             call ranlux(rng_array)
             rng_seed = 1
@@ -13056,11 +13236,11 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           br = rng_array(rng_seed)
           rng_seed = rng_seed + 1
           br = br*sigtot
-          DO 6141 k=1,nne(medium)
+          DO 6171 k=1,nne(medium)
             br = br - probs(k)
-            IF((br .LE. 0))GO TO6142
-6141      CONTINUE
-6142      CONTINUE
+            IF((br .LE. 0))GO TO6172
+6171      CONTINUE
+6172      CONTINUE
           iZ = int( zelem(medium,k) + 0.5 )
           j = ints(k)
         END IF
@@ -13074,14 +13254,14 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           END IF
           br = rng_array(rng_seed)
           rng_seed = rng_seed + 1
-          DO 6151 k=1,5
+          DO 6181 k=1,5
             IF (( peig .GT. binding_energies(k,iZ) )) THEN
-              IF((br .LT. interaction_prob(k,iZ)))GO TO6152
+              IF((br .LT. interaction_prob(k,iZ)))GO TO6182
               br = (br - interaction_prob(k,iZ))/(1-interaction_prob(k,i
      *        Z))
             END IF
-6151      CONTINUE
-6152      CONTINUE
+6181      CONTINUE
+6182      CONTINUE
           IF ((eadl_relax .AND. k .GT. 4)) THEN
             iq(np) = -1
             e(np) = peig + prm
@@ -13104,7 +13284,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             GAMMA=EELEC/RM
             ALPHA=0.5*GAMMA-0.5+1./GAMMA
             RATIO=BETA/ALPHA
-6161        CONTINUE
+6191        CONTINUE
               IF (( rng_seed .GT. 24 )) THEN
                 call ranlux(rng_array)
                 rng_seed = 1
@@ -13137,9 +13317,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               END IF
               RNPHT2 = rng_array(rng_seed)
               rng_seed = rng_seed + 1
-              IF(RNPHT2.LE.0.5*(1.+GAMMA)*SINTH2*XI/GAMMA)GO TO6162
-            GO TO 6161
-6162        CONTINUE
+              IF(RNPHT2.LE.0.5*(1.+GAMMA)*SINTH2*XI/GAMMA)GO TO6192
+            GO TO 6191
+6192        CONTINUE
             SINTHE=SQRT(SINTH2)
             CALL UPHI(2,1)
           END IF
@@ -13159,13 +13339,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         IF (( prob_RR .LE. 0 )) THEN
           IF (( n_RR_warning .LT. 50 )) THEN
             n_RR_warning = n_RR_warning + 1
-            WRITE(6,6170)prob_RR
-6170        FORMAT('**** Warning, attempt to play Roussian Roulette with
+            WRITE(6,6200)prob_RR
+6200        FORMAT('**** Warning, attempt to play Roussian Roulette with
      * prob_RR<=0! ',g14.6)
           END IF
         ELSE
           ip = NPold
-6181      CONTINUE
+6211      CONTINUE
             IF (( iq(ip) .NE. 0 )) THEN
               IF (( rng_seed .GT. 24 )) THEN
                 call ranlux(rng_array)
@@ -13191,9 +13371,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             ELSE
               ip = ip+1
             END IF
-            IF(((ip .GT. np)))GO TO6182
-          GO TO 6181
-6182      CONTINUE
+            IF(((ip .GT. np)))GO TO6212
+          GO TO 6211
+6212      CONTINUE
           IF (( np .EQ. 0 )) THEN
             np = 1
             e(np) = 0
@@ -13350,7 +13530,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           br = rng_array(rng_seed)
           rng_seed = rng_seed + 1
           logE = log(peig)
-          DO 6191 k=nne(medium),1,-1
+          DO 6221 k=nne(medium),1,-1
             iZ = int( zelem(medium,k) + 0.5 )
             zpos = pe_zpos(iZ)
             IF (( iZ .LT. 1 .OR. iZ .GT. 100 )) THEN
@@ -13368,9 +13548,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             int_prob = pe_elem_prob(j,k,medium)+slope*(logE-pe_energy(j,
      *      zpos))
             br = br - exp(int_prob)
-            IF((br .LE. 0))GO TO6192
-6191      CONTINUE
-6192      CONTINUE
+            IF((br .LE. 0))GO TO6222
+6221      CONTINUE
+6222      CONTINUE
         END IF
         IF (( peig .LT. pe_be(zpos,pe_nshell(zpos)) .OR. pe_nshell(zpos)
      *   .EQ. 0 )) THEN
@@ -13384,7 +13564,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           br = rng_array(rng_seed)
           rng_seed = rng_seed + 1
           sigtot = 0
-          DO 6201 k=1,pe_nshell(zpos)
+          DO 6231 k=1,pe_nshell(zpos)
             IF (( peig .GT. pe_be(zpos,k) )) THEN
               slope = pe_xsection(j+1,zpos,k) - pe_xsection(j,zpos,k)
               slope = slope/(pe_energy(j+1,zpos)-pe_energy(j,zpos))
@@ -13392,10 +13572,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *        s))
               br = br - exp(int_prob)
               sigtot = sigtot + exp(int_prob)
-              IF((br .LE. 0))GO TO6202
+              IF((br .LE. 0))GO TO6232
             END IF
-6201      CONTINUE
-6202      CONTINUE
+6231      CONTINUE
+6232      CONTINUE
           IF ((k .GT. pe_nshell(zpos))) THEN
             iq(np) = -1
             e(np) = peig + prm
@@ -13418,7 +13598,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             GAMMA=EELEC/RM
             ALPHA=0.5*GAMMA-0.5+1./GAMMA
             RATIO=BETA/ALPHA
-6211        CONTINUE
+6241        CONTINUE
               IF (( rng_seed .GT. 24 )) THEN
                 call ranlux(rng_array)
                 rng_seed = 1
@@ -13451,9 +13631,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               END IF
               RNPHT2 = rng_array(rng_seed)
               rng_seed = rng_seed + 1
-              IF(RNPHT2.LE.0.5*(1.+GAMMA)*SINTH2*XI/GAMMA)GO TO6212
-            GO TO 6211
-6212        CONTINUE
+              IF(RNPHT2.LE.0.5*(1.+GAMMA)*SINTH2*XI/GAMMA)GO TO6242
+            GO TO 6241
+6242        CONTINUE
             SINTHE=SQRT(SINTH2)
             CALL UPHI(2,1)
           END IF
@@ -13473,13 +13653,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         IF (( prob_RR .LE. 0 )) THEN
           IF (( n_RR_warning .LT. 50 )) THEN
             n_RR_warning = n_RR_warning + 1
-            WRITE(6,6220)prob_RR
-6220        FORMAT('**** Warning, attempt to play Roussian Roulette with
+            WRITE(6,6250)prob_RR
+6250        FORMAT('**** Warning, attempt to play Roussian Roulette with
      * prob_RR<=0! ',g14.6)
           END IF
         ELSE
           ip = NPold
-6231      CONTINUE
+6261      CONTINUE
             IF (( iq(ip) .NE. 0 )) THEN
               IF (( rng_seed .GT. 24 )) THEN
                 call ranlux(rng_array)
@@ -13505,9 +13685,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             ELSE
               ip = ip+1
             END IF
-            IF(((ip .GT. np)))GO TO6232
-          GO TO 6231
-6232      CONTINUE
+            IF(((ip .GT. np)))GO TO6262
+          GO TO 6261
+6262      CONTINUE
           IF (( np .EQ. 0 )) THEN
             np = 1
             e(np) = 0
@@ -13615,66 +13795,66 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         call exit(1)
       END IF
       open(pe_sw_unit,file=pe_sw_file,status='old', form='UNFORMATTED',A
-     *CCESS='direct',recl=1, err=6240)
-      GOTO 6250
-6240  write(i_log,'(/a)') '***************** Error: '
+     *CCESS='direct',recl=1, err=6270)
+      GOTO 6280
+6270  write(i_log,'(/a)') '***************** Error: '
       write(i_log,'(2a)') 'egs_init_shellwise_pe: failed to open ', pe_s
      *w_file
       write(i_log,'(/a)') '***************** Quiting now.'
       call exit(1)
-6250  is_open = .true.
-      DO 6261 medio=1,nmed
-        DO 6271 i=1,nne(medio)
+6280  is_open = .true.
+      DO 6291 medio=1,nmed
+        DO 6301 i=1,nne(medio)
           pe_nshell(i*medio) = 0
           pe_nge(i*medio) = 0
           pe_zsorted(i,medio) = 0
-6271    CONTINUE
-6272    CONTINUE
-6261  CONTINUE
-6262  CONTINUE
-      DO 6281 l=1,100
+6301    CONTINUE
+6302    CONTINUE
+6291  CONTINUE
+6292  CONTINUE
+      DO 6311 l=1,100
         pe_zpos(l) = -1
-        DO 6291 k=1,500
+        DO 6321 k=1,500
           pe_energy(k,l) = 0.0
-          DO 6301 m=1,16
+          DO 6331 m=1,16
             pe_xsection(k,l,m) = 0.0
-6301      CONTINUE
-6302      CONTINUE
-6291    CONTINUE
-6292    CONTINUE
-        DO 6311 k=1,16
+6331      CONTINUE
+6332      CONTINUE
+6321    CONTINUE
+6322    CONTINUE
+        DO 6341 k=1,16
           pe_be(l,k) = -99
-6311    CONTINUE
-6312    CONTINUE
-6281  CONTINUE
-6282  CONTINUE
+6341    CONTINUE
+6342    CONTINUE
+6311  CONTINUE
+6312  CONTINUE
       curr_rec = 1
       iZpos = 0
       nz = egs_read_short(pe_sw_unit,curr_rec)
-      DO 6321 medio=1,nmed
-        DO 6331 i=1,nne(medio)
+      DO 6351 medio=1,nmed
+        DO 6361 i=1,nne(medio)
           z_sorted(i) = zelem(medio,i)
-6331    CONTINUE
-6332    CONTINUE
+6361    CONTINUE
+6362    CONTINUE
         call egs_heap_sort(nne(medio),z_sorted,sorted)
-        DO 6341 i=1,nne(medio)
+        DO 6371 i=1,nne(medio)
           pe_zsorted(i,medio) = z_sorted(i)
-6341    CONTINUE
-6342    CONTINUE
-        DO 6351 i=1,nne(medio)
+6371    CONTINUE
+6372    CONTINUE
+        DO 6381 i=1,nne(medio)
           iZ = z_sorted(i)
           is_there = .false.
-          DO 6361 j=1,medio-1
-            DO 6371 k=1,nne(j)
+          DO 6391 j=1,medio-1
+            DO 6401 k=1,nne(j)
               IF (( iZ .EQ. pe_zsorted(k,j) )) THEN
                 is_there = .true.
-                GO TO6372
+                GO TO6402
               END IF
-6371        CONTINUE
-6372        CONTINUE
-6361      CONTINUE
-6362      CONTINUE
-          IF((is_there))GO TO6351
+6401        CONTINUE
+6402        CONTINUE
+6391      CONTINUE
+6392      CONTINUE
+          IF((is_there))GO TO6381
           iZpos = iZpos + 1
           zread(iZpos) = iZ
           pe_zpos(iZ) = iZpos
@@ -13686,40 +13866,40 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           pe_nshell(iZpos) = i_nshell
           e_old = -1.0
           ish = 0
-          DO 6381 j=1,i_nge
+          DO 6411 j=1,i_nge
             e_r = egs_read_real(pe_sw_unit,curr_rec)
             sigma_r = egs_read_real(pe_sw_unit,curr_rec)
             pe_energy(j,iZpos) = e_r
             pe_xsection(j,iZpos,0) = sigma_r
             rest_xs(j,iZpos) = sigma_r
-            DO 6391 k=1,i_nshell
+            DO 6421 k=1,i_nshell
               sigma_r = egs_read_real(pe_sw_unit,curr_rec)
               pe_xsection(j,iZpos,k) = sigma_r
               rest_xs(j,iZpos) = rest_xs(j,iZpos) - sigma_r
-6391        CONTINUE
-6392        CONTINUE
+6421        CONTINUE
+6422        CONTINUE
             IF ((e_r - e_old .LT. 1e-15)) THEN
               pe_be(iZpos,i_nshell-ish) = e_r
               ish = ish + 1
             END IF
             e_old = e_r
-6381      CONTINUE
-6382      CONTINUE
-6351    CONTINUE
-6352    CONTINUE
-6321  CONTINUE
-6322  CONTINUE
-      pe_ne = iZpos
-      DO 6401 i=1,pe_ne
-        iZ = zread(i)
-        IF ((pe_nshell(i) .EQ. 0)) THEN
-          DO 6411 j=1,pe_nge(i)
-            pe_energy(j,i) = log(pe_energy(j,i))
 6411      CONTINUE
 6412      CONTINUE
-          GO TO6401
+6381    CONTINUE
+6382    CONTINUE
+6351  CONTINUE
+6352  CONTINUE
+      pe_ne = iZpos
+      DO 6431 i=1,pe_ne
+        iZ = zread(i)
+        IF ((pe_nshell(i) .EQ. 0)) THEN
+          DO 6441 j=1,pe_nge(i)
+            pe_energy(j,i) = log(pe_energy(j,i))
+6441      CONTINUE
+6442      CONTINUE
+          GO TO6431
         END IF
-        DO 6421 l=1,pe_nshell(i)
+        DO 6451 l=1,pe_nshell(i)
           IF (( pe_be(i,l) .NE. binding_energies(l,iZ))) THEN
             shift_required = .true.
             deltaEb = binding_energies(l,iZ)-pe_be(i,l)
@@ -13727,7 +13907,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             shift_required =.false.
           END IF
           is_there = .false.
-          DO 6431 j=1,pe_nge(i)
+          DO 6461 j=1,pe_nge(i)
             tmp_e(j,l) = pe_energy(j,i)
             tmp_xs(j,l) = pe_xsection(j,i,l)
             IF (( shift_required .AND. pe_energy(j,i) .GE. pe_be(i,l) ))
@@ -13744,13 +13924,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 new_e(j) = tmp_e(j,l)
               END IF
             END IF
-6431      CONTINUE
-6432      CONTINUE
+6461      CONTINUE
+6462      CONTINUE
           pe_be(i,l) = binding_energies(l,iZ)
-6421    CONTINUE
-6422    CONTINUE
-        DO 6441 l=2,pe_nshell(i)
-          DO 6451 j=1,pe_nge(i)
+6451    CONTINUE
+6452    CONTINUE
+        DO 6471 l=2,pe_nshell(i)
+          DO 6481 j=1,pe_nge(i)
             IF (( new_e(j) .GE. pe_be(i,l-1) )) THEN
               m = ibsearch(new_e(j),pe_nge(i),tmp_e(1,l))
               slope = log(tmp_xs(m+1,l)/tmp_xs(m,l))
@@ -13760,11 +13940,11 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *        j)/tmp_e(m,l))
               pe_xsection(j,i,l) = exp(pe_xsection(j,i,l))
             END IF
-6451      CONTINUE
-6452      CONTINUE
-6441    CONTINUE
-6442    CONTINUE
-        DO 6461 j=1,pe_nge(i)
+6481      CONTINUE
+6482      CONTINUE
+6471    CONTINUE
+6472    CONTINUE
+        DO 6491 j=1,pe_nge(i)
           IF (( j .LT. ib(pe_nshell(i)))) THEN
             new_e(j) = pe_energy(j,i)
           END IF
@@ -13775,23 +13955,23 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           pe_xsection(j,i,0) = pe_xsection(j,i,0) + slope*log(new_e(j)/p
      *    e_energy(m,i))
           pe_xsection(j,i,0) = exp(pe_xsection(j,i,0))
-          DO 6471 l=1,pe_nshell(i)
+          DO 6501 l=1,pe_nshell(i)
             pe_xsection(j,i,0) = pe_xsection(j,i,0) + pe_xsection(j,i,l)
-6471      CONTINUE
-6472      CONTINUE
-6461    CONTINUE
-6462    CONTINUE
-        DO 6481 j=1,pe_nge(i)
+6501      CONTINUE
+6502      CONTINUE
+6491    CONTINUE
+6492    CONTINUE
+        DO 6511 j=1,pe_nge(i)
           pe_energy(j,i) = log(new_e(j))
-          DO 6491 l=1,pe_nshell(i)
+          DO 6521 l=1,pe_nshell(i)
             pe_xsection(j,i,l) = log(pe_xsection(j,i,l)/pe_xsection(j,i,
      *      0))
-6491      CONTINUE
-6492      CONTINUE
-6481    CONTINUE
-6482    CONTINUE
-6401  CONTINUE
-6402  CONTINUE
+6521      CONTINUE
+6522      CONTINUE
+6511    CONTINUE
+6512    CONTINUE
+6431  CONTINUE
+6432  CONTINUE
       write(i_log,'(a/)') ' done'
       IF((is_open))close(pe_sw_unit)
       return
@@ -13895,8 +14075,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       np_old = np
       e_check = 0
       e_array(n_vac) = energy
-6500  CONTINUE
-6501    CONTINUE
+6530  CONTINUE
+6531    CONTINUE
         shell = vac_array(n_vac)
         Ei = e_array(n_vac)
         n_vac = n_vac - 1
@@ -13907,8 +14087,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           IF ((IAUSFL(IARG+1).NE.0)) THEN
             CALL AUSGAB(IARG)
           END IF
-          IF((n_vac .GT. 0))goto 6500
-          GO TO6502
+          IF((n_vac .GT. 0))goto 6530
+          GO TO6532
         END IF
         ish_relax = shell
         u_relax = Ei
@@ -13942,7 +14122,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             eta = (1-eta)*(1+eta)
             IF (( eta .GT. 1e-20 )) THEN
               eta = Sqrt(eta)
-6511          CONTINUE
+6541          CONTINUE
                 IF (( rng_seed .GT. 24 )) THEN
                   call ranlux(rng_array)
                   rng_seed = 1
@@ -13959,9 +14139,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 rng_seed = rng_seed + 1
                 yphi2 = yphi*yphi
                 rhophi2 = xphi2 + yphi2
-                IF(rhophi2.LE.1)GO TO6512
-              GO TO 6511
-6512          CONTINUE
+                IF(rhophi2.LE.1)GO TO6542
+              GO TO 6541
+6542          CONTINUE
               rhophi2 = 1/rhophi2
               cphi = (xphi2 - yphi2)*rhophi2
               sphi = 2*xphi*yphi*rhophi2
@@ -13984,8 +14164,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               CALL AUSGAB(IARG)
             END IF
           END IF
-          IF((n_vac .GT. 0))goto 6500
-          GO TO6502
+          IF((n_vac .GT. 0))goto 6530
+          GO TO6532
         END IF
         IF (( rng_seed .GT. 24 )) THEN
           call ranlux(rng_array)
@@ -13993,11 +14173,11 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         END IF
         eta = rng_array(rng_seed)
         rng_seed = rng_seed + 1
-        DO 6521 k=first_transition(shell),last_transition(shell)-1
+        DO 6551 k=first_transition(shell),last_transition(shell)-1
           eta = eta - relaxation_prob(k,iZ)
-          IF((eta .LE. 0))GO TO6522
-6521    CONTINUE
-6522    CONTINUE
+          IF((eta .LE. 0))GO TO6552
+6551    CONTINUE
+6552    CONTINUE
         final = final_state(k)
         finala = final
         IF (( final .LT. 100 )) THEN
@@ -14075,7 +14255,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           eta = (1-eta)*(1+eta)
           IF (( eta .GT. 1e-20 )) THEN
             eta = Sqrt(eta)
-6531        CONTINUE
+6561        CONTINUE
               IF (( rng_seed .GT. 24 )) THEN
                 call ranlux(rng_array)
                 rng_seed = 1
@@ -14092,9 +14272,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               rng_seed = rng_seed + 1
               yphi2 = yphi*yphi
               rhophi2 = xphi2 + yphi2
-              IF(rhophi2.LE.1)GO TO6532
-            GO TO 6531
-6532        CONTINUE
+              IF(rhophi2.LE.1)GO TO6562
+            GO TO 6561
+6562        CONTINUE
             rhophi2 = 1/rhophi2
             cphi = (xphi2 - yphi2)*rhophi2
             sphi = 2*xphi*yphi*rhophi2
@@ -14122,8 +14302,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             END IF
           END IF
         END IF
-      GO TO 6501
-6502  CONTINUE
+      GO TO 6531
+6532  CONTINUE
       return
       end
       subroutine egs_init_relax
@@ -14211,13 +14391,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       integer*4 nz, nshell, tr_type
       integer*4 ttype
       real*4 be_r, prob_r
-      DO 6541 iZ=1,100
-        DO 6551 k=1,30
+      DO 6571 iZ=1,100
+        DO 6581 k=1,30
           shell_eadl(iZ,k) = -1
-6551    CONTINUE
-6552    CONTINUE
-6541  CONTINUE
-6542  CONTINUE
+6581    CONTINUE
+6582    CONTINUE
+6571  CONTINUE
+6572  CONTINUE
       min_be = 0.001
       write(i_log,'(/a)') ' Reading EADL relaxation data ......'
       data_dir = hen_house(:lnblnk1(hen_house)) // 'data' // '/'
@@ -14231,34 +14411,34 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         call exit(1)
       END IF
       open(relax_unit,file=relax_file,status='old', form='UNFORMATTED',A
-     *CCESS='direct',recl=4, err=6560)
-      GOTO 6570
-6560  write(i_log,'(/a)') '***************** Error: '
+     *CCESS='direct',recl=4, err=6590)
+      GOTO 6600
+6590  write(i_log,'(/a)') '***************** Error: '
       write(i_log,'(2a)') 'egs_init_relax: failed to open ', relax_file
       write(i_log,'(/a)') '***************** Quiting now.'
       call exit(1)
-6570  is_open = .true.
+6600  is_open = .true.
       curr_rec = 1
       read(relax_unit,rec=curr_rec) nz
       shell_ntot = 0
       relax_ntot = 0
-      DO 6581 medio=1,nmed
-        DO 6591 i=1,nne(medio)
+      DO 6611 medio=1,nmed
+        DO 6621 i=1,nne(medio)
           z_sorted(i) = zelem(medio,i)
-6591    CONTINUE
-6592    CONTINUE
+6621    CONTINUE
+6622    CONTINUE
         call egs_heap_sort(nne(medio),z_sorted,sorted)
-        DO 6601 i=1,nne(medio)
+        DO 6631 i=1,nne(medio)
           iZ = z_sorted(i)
           is_there = .false.
-          DO 6611 j=1,shell_ntot
+          DO 6641 j=1,shell_ntot
             IF (( iZ .EQ. shell_Z(j) )) THEN
               is_there = .true.
-              GO TO6612
+              GO TO6642
             END IF
-6611      CONTINUE
-6612      CONTINUE
-          IF((is_there))GO TO6601
+6641      CONTINUE
+6642      CONTINUE
+          IF((is_there))GO TO6631
           pos = iZ + 1
           read(relax_unit,rec=pos) curr_rec
           read(relax_unit,rec=curr_rec) nshell
@@ -14272,7 +14452,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           END IF
           write(i_log,'(a,i3,a,i2,a)') '  Z = ',iZ,' has ',nshell,' shel
      *ls'
-          DO 6621 ish=shell_ntot+1,shell_ntot+nshell
+          DO 6651 ish=shell_ntot+1,shell_ntot+nshell
             curr_rec = curr_rec+1
             read(relax_unit,rec=curr_rec) shell_type(ish)
             curr_rec = curr_rec+1
@@ -14288,7 +14468,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             ELSE IF(( photon_xsections .EQ. 'epdl' )) THEN
               binding_energies(shell_num(ish),iZ) = shell_be(ish)
             END IF
-            DO 6631 k=1,ntran
+            DO 6661 k=1,ntran
               curr_rec = curr_rec+1
               read(relax_unit,rec=curr_rec) itmp(k)
               curr_rec = curr_rec+1
@@ -14299,22 +14479,22 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               ELSE
                 itmp(k) = itmp(k) + 65
               END IF
-6631        CONTINUE
-6632        CONTINUE
+6661        CONTINUE
+6662        CONTINUE
             IF (( shell_be(ish) .LT. min_be )) THEN
               relax_first(ish) = -1
               relax_ntran(ish) = -1
             ELSE
               sumw = 0
-              DO 6641 k=1,ntran
+              DO 6671 k=1,ntran
                 sumw = sumw + wtmp(k)
-6641          CONTINUE
-6642          CONTINUE
+6671          CONTINUE
+6672          CONTINUE
               IF (( sumw .GT. 1 )) THEN
-                DO 6651 k=1,ntran
+                DO 6681 k=1,ntran
                   wtmp(k) = wtmp(k)/sumw
-6651            CONTINUE
-6652            CONTINUE
+6681            CONTINUE
+6682            CONTINUE
               ELSE IF(( sumw .LT. 1 )) THEN
                 ntran = ntran + 1
                 itmp(ntran) = -1
@@ -14332,21 +14512,21 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               relax_ntran(ish) = ntran
               call prepare_alias_histogram(ntran,wtmp, relax_atbin(relax
      *        _ntot+1))
-              DO 6661 k=1,ntran
+              DO 6691 k=1,ntran
                 j = relax_ntot + k
                 relax_state(j) = itmp(k)
                 relax_prob(j) = wtmp(k)
-6661          CONTINUE
-6662          CONTINUE
+6691          CONTINUE
+6692          CONTINUE
               relax_ntot = relax_ntot + ntran
             END IF
-6621      CONTINUE
-6622      CONTINUE
+6651      CONTINUE
+6652      CONTINUE
           shell_ntot = shell_ntot + nshell
-6601    CONTINUE
-6602    CONTINUE
-6581  CONTINUE
-6582  CONTINUE
+6631    CONTINUE
+6632    CONTINUE
+6611  CONTINUE
+6612  CONTINUE
       write(i_log,'(a/)') ' ...... Done.'
       IF((is_open))close(relax_unit)
       return
@@ -14462,7 +14642,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       vac = shell
       Nvac = 0
       np_save = np
-6671  CONTINUE
+6701  CONTINUE
         IF (( Evac .LT. min_E .OR. relax_ntran(vac) .LT. 1 )) THEN
           edep = edep + Evac
           edep_local = Evac
@@ -14470,7 +14650,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           IF ((IAUSFL(IARG+1).NE.0)) THEN
             CALL AUSGAB(IARG)
           END IF
-          go to 6680
+          go to 6710
         END IF
         new_state = sample_alias_histogram(relax_ntran(vac), relax_prob(
      *  relax_first(vac)), relax_atbin(relax_first(vac)))
@@ -14536,7 +14716,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           sint = 1-cost*cost
           IF (( sint .GT. 0 )) THEN
             sint = sqrt(sint)
-6691        CONTINUE
+6721        CONTINUE
               IF (( rng_seed .GT. 24 )) THEN
                 call ranlux(rng_array)
                 rng_seed = 1
@@ -14553,9 +14733,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               rng_seed = rng_seed + 1
               yphi2 = yphi*yphi
               rhophi2 = xphi2 + yphi2
-              IF(rhophi2.LE.1)GO TO6692
-            GO TO 6691
-6692        CONTINUE
+              IF(rhophi2.LE.1)GO TO6722
+            GO TO 6721
+6722        CONTINUE
             rhophi2 = 1/rhophi2
             cphi = (xphi2 - yphi2)*rhophi2
             sphi = 2*xphi*yphi*rhophi2
@@ -14600,13 +14780,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             END IF
           END IF
         END IF
-6680    CONTINUE
-        IF((Nvac .EQ. 0))GO TO6672
+6710    CONTINUE
+        IF((Nvac .EQ. 0))GO TO6702
         vac = vacs(Nvac)
         Evac = shell_be(vac)
         Nvac = Nvac - 1
-      GO TO 6671
-6672  CONTINUE
+      GO TO 6701
+6702  CONTINUE
       return
       end
       subroutine init_triplet
@@ -14662,10 +14842,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *irst
       real*8 logE, f_new, f_old, spline
       IF((itriplet .EQ. 0))return
-      DO 6701 i=1,len(triplet_data_file)
+      DO 6731 i=1,len(triplet_data_file)
         triplet_data_file(i:i) = ' '
-6701  CONTINUE
-6702  CONTINUE
+6731  CONTINUE
+6732  CONTINUE
       triplet_data_file = hen_house(:lnblnk1(hen_house)) // 'data' // '/
      *' // 'triplet.data'
       want_triplet_unit = 63
@@ -14677,7 +14857,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         write(i_log,'(/a)') '***************** Quiting now.'
         call exit(1)
       END IF
-      open(triplet_unit,file=triplet_data_file,err=6710)
+      open(triplet_unit,file=triplet_data_file,err=6740)
       write(i_log,'(a,$)') ' init_triplet: reading triplet data ... '
       read(triplet_unit,*) ntrip
       IF (( ntrip .GT. 55 )) THEN
@@ -14686,70 +14866,70 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         write(i_log,'(/a)') '***************** Quiting now.'
         call exit(1)
       END IF
-      read(triplet_unit,*,err=6720) (energies(i),i=1,ntrip)
-      DO 6731 iel=1,100
+      read(triplet_unit,*,err=6750) (energies(i),i=1,ntrip)
+      DO 6761 iel=1,100
         read(triplet_unit,*)
-        read(triplet_unit,*,err=6720) (sig_pair(iel,i),i=1,ntrip)
-        read(triplet_unit,*,err=6720) (sig_triplet(iel,i),i=1,ntrip)
-6731  CONTINUE
-6732  CONTINUE
+        read(triplet_unit,*,err=6750) (sig_pair(iel,i),i=1,ntrip)
+        read(triplet_unit,*,err=6750) (sig_triplet(iel,i),i=1,ntrip)
+6761  CONTINUE
+6762  CONTINUE
       write(i_log,*) 'OK'
       ifirst = 0
-      DO 6741 i=1,ntrip
+      DO 6771 i=1,ntrip
         IF((ifirst .EQ. 0 .AND. energies(i) .GT. 4.01*rm))ifirst = i
         energies(i) = log(energies(i))
-6741  CONTINUE
-6742  CONTINUE
+6771  CONTINUE
+6772  CONTINUE
       log_4rm = log(4*rm)
       energies(ifirst-1) = log_4rm
       dl_triplet = (energies(ntrip) - log_4rm)/250
       dli_triplet = 1/dl_triplet
       bli_triplet = 1 - log_4rm/dl_triplet
-      DO 6751 imed=1,nmed
+      DO 6781 imed=1,nmed
         write(i_log,'(a,i3,a,$)') '   Preparing triplet fraction data fo
      *r medium ',imed,' ... '
         iz1 = zelem(imed,1) + 0.1
-        DO 6761 i=1,ntrip
+        DO 6791 i=1,ntrip
           sigp(i) = pz(imed,1)*sig_pair(iz1,i)
           sigt(i) = pz(imed,1)*sig_triplet(iz1,i)
-          DO 6771 iel=2,nne(imed)
+          DO 6801 iel=2,nne(imed)
             izi = zelem(imed,iel) + 0.1
             sigp(i) = sigp(i) + pz(imed,iel)*sig_pair(izi,i)
             sigt(i) = sigt(i) + pz(imed,iel)*sig_triplet(izi,i)
-6771      CONTINUE
-6772      CONTINUE
-6761    CONTINUE
-6762    CONTINUE
-        DO 6781 i=ifirst,ntrip
+6801      CONTINUE
+6802      CONTINUE
+6791    CONTINUE
+6792    CONTINUE
+        DO 6811 i=ifirst,ntrip
           f_triplet(i-ifirst+2) = sigt(i)/(sigp(i) + sigt(i))
-6781    CONTINUE
-6782    CONTINUE
+6811    CONTINUE
+6812    CONTINUE
         f_triplet(1) = 0
         call set_spline(energies(ifirst-1),f_triplet,as,bs,cs,ds,ntrip-i
      *  first+2)
         logE = log_4rm
         f_old = 0
-        DO 6791 i=1,250-1
+        DO 6821 i=1,250-1
           logE = logE + dl_triplet
           f_new = spline(logE,energies(ifirst-1),as,bs,cs,ds,ntrip-ifirs
      *    t+2)
           a_triplet(i,imed) = (f_new - f_old)*dli_triplet
           b_triplet(i,imed) = f_new - a_triplet(i,imed)*logE
           f_old = f_new
-6791    CONTINUE
-6792    CONTINUE
+6821    CONTINUE
+6822    CONTINUE
         write(i_log,*) 'OK'
-6751  CONTINUE
-6752  CONTINUE
+6781  CONTINUE
+6782  CONTINUE
       close(triplet_unit)
       return
-6710  CONTINUE
+6740  CONTINUE
       write(i_log,'(/a)') '***************** Error: '
       write(i_log,'(a,a)') ' init_triplet: failed to open the data file
      *', triplet_data_file(:lnblnk1(triplet_data_file))
       write(i_log,'(/a)') '***************** Quiting now.'
       call exit(1)
-6720  CONTINUE
+6750  CONTINUE
       write(i_log,'(/a)') '***************** Error: '
       write(i_log,*) ' init_triplet: error while reading triplet data '
       write(i_log,'(/a)') '***************** Quiting now.'
@@ -14791,13 +14971,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       write(i_log,'(a/,a)') 'Output from subroutine EDGSET:', '=========
      *====================='
       do_relax = .false.
-      DO 6801 j=1,3
+      DO 6831 j=1,3
         IF (( iedgfl(j) .GT. 0 .AND. iedgfl(j) .LE. 100 )) THEN
           do_relax = .true.
-          GO TO6802
+          GO TO6832
         END IF
-6801  CONTINUE
-6802  CONTINUE
+6831  CONTINUE
+6832  CONTINUE
       IF (( .NOT.do_relax )) THEN
         IF ((eadl_relax)) THEN
           write(i_log,'(/a)') '***************** Error: '
@@ -14814,64 +14994,64 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *..'
       got_data = .true.
       rewind(i_photo_relax)
-      DO 6811 i=1,100
+      DO 6841 i=1,100
         IF ((eadl_relax)) THEN
           read(i_photo_relax,*)
         ELSE
           read(i_photo_relax,*) j,(binding_energies(k,i),k=1,6)
-          DO 6821 k=1,6
+          DO 6851 k=1,6
             binding_energies(k,i) = binding_energies(k,i)*1e-6
-6821      CONTINUE
-6822      CONTINUE
+6851      CONTINUE
+6852      CONTINUE
         END IF
-6811  CONTINUE
-6812  CONTINUE
-      read(i_photo_relax,*)
-      DO 6831 i=1,100
-        read(i_photo_relax,*) j,(interaction_prob(k,i),k=1,5)
-        interaction_prob(6,i)=1.01
-6831  CONTINUE
-6832  CONTINUE
-      write(i_log,'(a)') ' Done'
-      write(i_log,'(/a$)') ' Reading simplified relaxation data .....'
-      read(i_photo_relax,*)
-      DO 6841 i=1,100
-        read(i_photo_relax,*) j,(relaxation_prob(k,i),k=1,19)
 6841  CONTINUE
 6842  CONTINUE
       read(i_photo_relax,*)
-      DO 6851 i=1,100
-        read(i_photo_relax,*) j,(relaxation_prob(k,i),k=20,26)
-6851  CONTINUE
-6852  CONTINUE
-      read(i_photo_relax,*)
       DO 6861 i=1,100
-        read(i_photo_relax,*) j,(relaxation_prob(k,i),k=27,32)
+        read(i_photo_relax,*) j,(interaction_prob(k,i),k=1,5)
+        interaction_prob(6,i)=1.01
 6861  CONTINUE
 6862  CONTINUE
+      write(i_log,'(a)') ' Done'
+      write(i_log,'(/a$)') ' Reading simplified relaxation data .....'
       read(i_photo_relax,*)
       DO 6871 i=1,100
-        read(i_photo_relax,*) j,(relaxation_prob(k,i),k=33,37)
+        read(i_photo_relax,*) j,(relaxation_prob(k,i),k=1,19)
 6871  CONTINUE
 6872  CONTINUE
       read(i_photo_relax,*)
       DO 6881 i=1,100
-        read(i_photo_relax,*) j,relaxation_prob(38,i)
+        read(i_photo_relax,*) j,(relaxation_prob(k,i),k=20,26)
 6881  CONTINUE
 6882  CONTINUE
+      read(i_photo_relax,*)
+      DO 6891 i=1,100
+        read(i_photo_relax,*) j,(relaxation_prob(k,i),k=27,32)
+6891  CONTINUE
+6892  CONTINUE
+      read(i_photo_relax,*)
+      DO 6901 i=1,100
+        read(i_photo_relax,*) j,(relaxation_prob(k,i),k=33,37)
+6901  CONTINUE
+6902  CONTINUE
+      read(i_photo_relax,*)
+      DO 6911 i=1,100
+        read(i_photo_relax,*) j,relaxation_prob(38,i)
+6911  CONTINUE
+6912  CONTINUE
       write(i_log,'(a)') ' Done'
       write(i_log,'(/a$)') ' Reading parametrized XCOM photo cross secti
      *on data .....'
       rewind(i_photo_cs)
-      DO 6891 i=1,100
+      DO 6921 i=1,100
         read(i_photo_cs,*) j,edge_number(i)
-        DO 6901 j=1,edge_number(i)
+        DO 6931 j=1,edge_number(i)
           read(i_photo_cs,*) edge_a(j,i),edge_b(j,i),edge_c(j,i), edge_d
      *    (j,i),edge_energies(j,i)
-6901    CONTINUE
-6902    CONTINUE
-6891  CONTINUE
-6892  CONTINUE
+6931    CONTINUE
+6932    CONTINUE
+6921  CONTINUE
+6922  CONTINUE
       write(i_log,'(a)') ' Done'
       IF ((eadl_relax)) THEN
         call egs_init_relax
@@ -14970,12 +15150,12 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       IRL=IR(NP)
       medium = med(irl)
       IF ((EIG .LE. PCUT(IRL))) THEN
-        GO TO 6910
+        GO TO 6940
       END IF
-6920  CONTINUE
-6921    CONTINUE
+6950  CONTINUE
+6951    CONTINUE
         IF ((WT(NP) .EQ. 0.0)) THEN
-          go to 6930
+          go to 6960
         END IF
         GLE=LOG(EIG)
         IF (( rng_seed .GT. 24 )) THEN
@@ -14989,14 +15169,14 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         END IF
         DPMFP=-LOG(RNNO35)
         IROLD=IR(NP)
-6940    CONTINUE
-6941      CONTINUE
+6970    CONTINUE
+6971      CONTINUE
           IF ((MEDIUM.NE.0)) THEN
             LGLE=GE1(MEDIUM)*GLE+GE0(MEDIUM)
             GMFPR0=GMFP1(LGLE,MEDIUM)*GLE+GMFP0(LGLE,MEDIUM)
           END IF
-6950      CONTINUE
-6951        CONTINUE
+6980      CONTINUE
+6981        CONTINUE
             IF ((MEDIUM.EQ.0)) THEN
               TSTEP=VACDST
             ELSE
@@ -15021,7 +15201,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               call howfar
             END IF
             IF ((IDISC.GT.0)) THEN
-              GO TO 6930
+              GO TO 6960
             END IF
             VSTEP=USTEP
             TVSTEP=VSTEP
@@ -15052,17 +15232,17 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               CALL AUSGAB(IARG)
             END IF
             IF ((EIG.LE.PCUT(IRL))) THEN
-              GO TO 6910
+              GO TO 6940
             END IF
-            IF((IDISC.LT.0))GO TO 6930
-            IF((MEDIUM.NE.MEDOLD))GO TO 6952
+            IF((IDISC.LT.0))GO TO 6960
+            IF((MEDIUM.NE.MEDOLD))GO TO 6982
             IF ((MEDIUM.NE.0.AND.DPMFP.LE.1.E-8)) THEN
-              GO TO 6942
+              GO TO 6972
             END IF
-          GO TO 6951
-6952      CONTINUE
-        GO TO 6941
-6942    CONTINUE
+          GO TO 6981
+6982      CONTINUE
+        GO TO 6971
+6972    CONTINUE
         IF ((IRAYLR(IRL).EQ.1)) THEN
           IF (( rng_seed .GT. 24 )) THEN
             call ranlux(rng_array)
@@ -15083,7 +15263,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             IF ((IAUSFL(IARG+1).NE.0)) THEN
               CALL AUSGAB(IARG)
             END IF
-            GOTO 6920
+            GOTO 6950
           END IF
         END IF
         IF ((IPHOTONUCR(IRL).EQ.1)) THEN
@@ -15103,7 +15283,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             IF ((IAUSFL(IARG+1).NE.0)) THEN
               CALL AUSGAB(IARG)
             END IF
-            GOTO 6920
+            GOTO 6950
           END IF
         END IF
         IF (( rng_seed .GT. 24 )) THEN
@@ -15124,9 +15304,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             CALL AUSGAB(IARG)
           END IF
           IF (( iq(np) .NE. 0 )) THEN
-            GO TO 6922
+            GO TO 6952
           ELSE
-            goto 6960
+            goto 6990
           END IF
         END IF
         GBR2=GBR21(LGLE,MEDIUM)*GLE+GBR20(LGLE,MEDIUM)
@@ -15140,7 +15320,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           IF ((IAUSFL(IARG+1).NE.0)) THEN
             CALL AUSGAB(IARG)
           END IF
-          IF((IQ(NP).NE.0))GO TO 6922
+          IF((IQ(NP).NE.0))GO TO 6952
         ELSE
           IARG=19
           IF ((IAUSFL(IARG+1).NE.0)) THEN
@@ -15154,15 +15334,15 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           IF ((IAUSFL(IARG+1).NE.0)) THEN
             CALL AUSGAB(IARG)
           END IF
-          IF((IQ(NP) .NE. 0))GO TO 6922
+          IF((IQ(NP) .NE. 0))GO TO 6952
         END IF
-6960    PEIG=E(NP)
+6990    PEIG=E(NP)
         EIG=PEIG
-        IF((EIG.LT.PCUT(IRL)))GO TO 6910
-      GO TO 6921
-6922  CONTINUE
+        IF((EIG.LT.PCUT(IRL)))GO TO 6940
+      GO TO 6951
+6952  CONTINUE
       RETURN
-6910  IF (( medium .GT. 0 )) THEN
+6940  IF (( medium .GT. 0 )) THEN
         IF ((EIG.GT.AP(MEDIUM))) THEN
           IDR=1
         ELSE
@@ -15179,7 +15359,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       IRCODE=2
       NP=NP-1
       RETURN
-6930  EDEP=PEIG
+6960  EDEP=PEIG
       IARG=3
       IF ((IAUSFL(IARG+1).NE.0)) THEN
         CALL AUSGAB(IARG)
@@ -15235,14 +15415,14 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       IF ((IAUSFL(IARG+1).NE.0)) THEN
         CALL AUSGAB(IARG)
       END IF
-      GO TO (6970,6980,6990),IENTRY
-      GO TO 7000
-6970  CONTINUE
+      GO TO (7000,7010,7020),IENTRY
+      GO TO 7030
+7000  CONTINUE
       SINTHE=sin(THETA)
       CTHET=PI5D2-THETA
       COSTHE=sin(CTHET)
-6980  CONTINUE
-7011  CONTINUE
+7010  CONTINUE
+7041  CONTINUE
         IF (( rng_seed .GT. 24 )) THEN
           call ranlux(rng_array)
           rng_seed = 1
@@ -15259,29 +15439,29 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         rng_seed = rng_seed + 1
         yphi2 = yphi*yphi
         rhophi2 = xphi2 + yphi2
-        IF(rhophi2.LE.1)GO TO7012
-      GO TO 7011
-7012  CONTINUE
+        IF(rhophi2.LE.1)GO TO7042
+      GO TO 7041
+7042  CONTINUE
       rhophi2 = 1/rhophi2
       cosphi = (xphi2 - yphi2)*rhophi2
       sinphi = 2*xphi*yphi*rhophi2
-6990  GO TO (7020,7030,7040),LVL
-      GO TO 7000
-7020  A=U(NP)
+7020  GO TO (7050,7060,7070),LVL
+      GO TO 7030
+7050  A=U(NP)
       B=V(NP)
       C=W(NP)
-      GO TO 7050
-7040  A=U(NP-1)
+      GO TO 7080
+7070  A=U(NP-1)
       B=V(NP-1)
       C=W(NP-1)
-7030  X(NP)=X(NP-1)
+7060  X(NP)=X(NP-1)
       Y(NP)=Y(NP-1)
       Z(NP)=Z(NP-1)
       IR(NP)=IR(NP-1)
       WT(NP)=WT(NP-1)
       DNEAR(NP)=DNEAR(NP-1)
       LATCH(NP)=LATCH(NP-1)
-7050  SINPS2=A*A+B*B
+7080  SINPS2=A*A+B*B
       IF ((SINPS2.LT.1.0E-20)) THEN
         U(NP)=SINTHE*COSPHI
         V(NP)=SINTHE*SINPHI
@@ -15301,7 +15481,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         CALL AUSGAB(IARG)
       END IF
       RETURN
-7000  write(i_log,'(/a)') '***************** Error: '
+7030  write(i_log,'(/a)') '***************** Error: '
       write(i_log,'(a,2i6)') ' STOPPED IN UPHI WITH IENTRY,LVL=',IENTRY,
      *LVL
       write(i_log,'(/a)') '***************** Quiting now.'
@@ -15402,16 +15582,16 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *_chunk, file_units, n_files,i_input,i_log,i_incoh, i_nist_data,i_m
      *scat,i_photo_cs,i_photo_relax, xsec_out
       logical is_batch,is_pegsless
-      DO 7061 i=1,len(tmp_string)
+      DO 7091 i=1,len(tmp_string)
         tmp_string(i:i) = ' '
-7061  CONTINUE
-7062  CONTINUE
+7091  CONTINUE
+7092  CONTINUE
       tmp_string = hen_house(:lnblnk1(hen_house)) // 'data' // '/'
       IF (( ibr_nist .EQ. 1 )) THEN
-        DO 7071 i=1,len(tmp1_string)
+        DO 7101 i=1,len(tmp1_string)
           tmp1_string(i:i) = ' '
-7071    CONTINUE
-7072    CONTINUE
+7101    CONTINUE
+7102    CONTINUE
         tmp1_string = tmp_string(:lnblnk1(tmp_string)) // 'nist_brems.da
      *ta'
         inquire(file=tmp1_string,exist=ex,opened=is_opened,number=itmp)
@@ -15436,10 +15616,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           i_nist_data = itmp
         END IF
       ELSE IF((ibr_nist .EQ. 2)) THEN
-        DO 7081 i=1,len(tmp1_string)
+        DO 7111 i=1,len(tmp1_string)
           tmp1_string(i:i) = ' '
-7081    CONTINUE
-7082    CONTINUE
+7111    CONTINUE
+7112    CONTINUE
         tmp1_string = tmp_string(:lnblnk1(tmp_string)) // 'nrc_brems.dat
      *a'
         inquire(file=tmp1_string,exist=ex,opened=is_opened,number=itmp)
@@ -15488,24 +15668,24 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         call exit(1)
       END IF
       read(i_nist_data,*) (energy_array(n),n=1,nmix)
-      DO 7091 n=1,nmix
+      DO 7121 n=1,nmix
         energy_array(n) = 1.0*energy_array(n)
-7091  CONTINUE
-7092  CONTINUE
+7121  CONTINUE
+7122  CONTINUE
       read(i_nist_data,*) (x_array(k),k=1,kmix)
       read(i_nist_data,*)
-      DO 7101 i=1,100
+      DO 7131 i=1,100
         read(i_nist_data,*) ((cs_array(n,k,i),n=1,nmix),k=1,kmix)
-7101  CONTINUE
-7102  CONTINUE
+7131  CONTINUE
+7132  CONTINUE
       close(i_nist_data)
-      DO 7111 k=1,kmix
+      DO 7141 k=1,kmix
         xi_array(k)=Log(1-x_array(k)+1e-6)
         IF (( fool_intel_optimizer )) THEN
           write(i_log,*) 'xi_array(k): ',xi_array(k)
         END IF
-7111  CONTINUE
-7112  CONTINUE
+7141  CONTINUE
+7142  CONTINUE
       ngauss = 64
       call gauss_legendre(0d0,1d0,x_gauss,w_gauss,ngauss)
       write(i_log,*) ' '
@@ -15515,20 +15695,20 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         write(i_log,*) 'Using NRC brems cross sections! '
       END IF
       write(i_log,*) ' '
-      DO 7121 medium=1,nmed
+      DO 7151 medium=1,nmed
         log_ap(medium) = log(ap(medium))
         write(i_log,*) ' Initializing brems data for medium ',medium,'..
      *.'
         emin = max(ae(medium) - rm, ap(medium))
-        DO 7131 i=1,nmix
-          IF((energy_array(i) .GE. emin))GO TO7132
-7131    CONTINUE
-7132    CONTINUE
+        DO 7161 i=1,nmix
+          IF((energy_array(i) .GE. emin))GO TO7162
+7161    CONTINUE
+7162    CONTINUE
         ifirst = i
-        DO 7141 i=nmix,1,-1
-          IF((energy_array(i) .LT. ue(medium) - rm))GO TO7142
-7141    CONTINUE
-7142    CONTINUE
+        DO 7171 i=nmix,1,-1
+          IF((energy_array(i) .LT. ue(medium) - rm))GO TO7172
+7171    CONTINUE
+7172    CONTINUE
         ilast = i+1
         IF (( ifirst .LT. 1 .OR. ilast .GT. nmix )) THEN
           write(i_log,*) ' init_nist_brems: data available only for '
@@ -15540,46 +15720,46 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           IF((ifirst .LT. 1))ifirst=1
           IF((ilast .GT. nmix))ilast = nmix
         END IF
-        DO 7151 i=ifirst,ilast
+        DO 7181 i=ifirst,ilast
           ii = i+1 - ifirst
           ee(ii) = energy_array(i)
           ele(ii) = log(ee(ii))
           sumA = 0
-          DO 7161 j=1,NNE(medium)
+          DO 7191 j=1,NNE(medium)
             sumA = sumA + pz(medium,j)*wa(medium,j)
-7161      CONTINUE
-7162      CONTINUE
+7191      CONTINUE
+7192      CONTINUE
           sumA = sumA*amu
-          DO 7171 k=1,kmix
+          DO 7201 k=1,kmix
             cs(ii,k) = 0
-            DO 7181 j=1,NNE(medium)
+            DO 7211 j=1,NNE(medium)
               Z = zelem(medium,j)
               iz = int(Z+0.1)
               Z = Z*Z/sumA
               cs(ii,k) = cs(ii,k) + pz(medium,j)*Z*cs_array(i,k,iz)
-7181        CONTINUE
-7182        CONTINUE
+7211        CONTINUE
+7212        CONTINUE
             csx(k) = Log(cs(ii,k))
-7171      CONTINUE
-7172      CONTINUE
+7201      CONTINUE
+7202      CONTINUE
           call set_spline(xi_array,csx,afx,bfx,cfx,dfx,kmix)
           cse(ii) = 0
           aux = Log(ee(ii)/ap(medium))
-          DO 7191 i_gauss=1,ngauss
+          DO 7221 i_gauss=1,ngauss
             xi = log(1 - ap(medium)/ee(ii)*exp(x_gauss(i_gauss)*aux)+1e-
      *      6)
             res = spline(xi,xi_array,afx,bfx,cfx,dfx,kmix)
             cse(ii) = cse(ii) + w_gauss(i_gauss)*exp(res)
-7191      CONTINUE
-7192      CONTINUE
-7151    CONTINUE
-7152    CONTINUE
+7221      CONTINUE
+7222      CONTINUE
+7181    CONTINUE
+7182    CONTINUE
         nener = ilast - ifirst + 1
         call set_spline(ele,cse,afe,bfe,cfe,dfe,nener)
         neke = meke(medium)
         sigee = 1E-15
         sigep = 1E-15
-        DO 7201 i=1,neke
+        DO 7231 i=1,neke
           eil = (float(i) - eke0(medium))/eke1(medium)
           ei = exp(eil)
           leil = i
@@ -15642,8 +15822,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           ededx=pdedx1(Leil,MEDIUM)*eil+pdedx0(Leil,MEDIUM)
           sige = si1_psig/ededx
           IF((sige .GT. sigep))sigep = sige
-7201    CONTINUE
-7202    CONTINUE
+7231    CONTINUE
+7232    CONTINUE
         esig1(neke,medium) = esig1(neke-1,medium)
         esig0(neke,medium) = esig0(neke-1,medium)
         ebr11(neke,medium) = ebr11(neke-1,medium)
@@ -15670,22 +15850,22 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         nb_dle(medium) = (nb_lemax(medium) - nb_lemin(medium))/(100-1)
         nb_dlei(medium) = 1/nb_dle(medium)
         eil = nb_lemin(medium) - nb_dle(medium)
-        DO 7211 i=1,100
+        DO 7241 i=1,100
           eil = eil + nb_dle(medium)
           ei = exp(eil)
-          DO 7221 ii=1,nener
-            IF((ei .LT. ee(ii)))GO TO7222
-7221      CONTINUE
-7222      CONTINUE
+          DO 7251 ii=1,nener
+            IF((ei .LT. ee(ii)))GO TO7252
+7251      CONTINUE
+7252      CONTINUE
           ii = ii-1
           IF((ii .LT. 1))ii = 1
           IF((ii .GT. nener-1))ii = nener-1
           ple = (eil - ele(ii))/(ele(ii+1)-ele(ii))
           qle = 1 - ple
-          DO 7231 k=1,kmix
+          DO 7261 k=1,kmix
             csx(k) = log(qle*cs(ii,k) + ple*cs(ii+1,k))
-7231      CONTINUE
-7232      CONTINUE
+7261      CONTINUE
+7262      CONTINUE
           call set_spline(xi_array,csx,afx,bfx,cfx,dfx,kmix)
           x = ap(medium)/ei
           aux = -log(x)
@@ -15693,13 +15873,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           res = spline(xi,xi_array,afx,bfx,cfx,dfx,kmix)
           nb_xdata(0,i,medium) = 0
           nb_fdata(0,i,medium) = exp(res)
-          DO 7241 k=1,kmix
-            IF((x_array(k) .GT. x))GO TO7242
-7241      CONTINUE
-7242      CONTINUE
+          DO 7271 k=1,kmix
+            IF((x_array(k) .GT. x))GO TO7272
+7271      CONTINUE
+7272      CONTINUE
           IF((k .GT. kmix))k = kmix
           ndat = 0
-          DO 7251 j=k+1,kmix-1
+          DO 7281 j=k+1,kmix-1
             ndat = ndat+1
             nb_xdata(ndat,i,medium) = log(x_array(j)/x)/aux
             nb_fdata(ndat,i,medium) = exp(csx(j))
@@ -15707,18 +15887,18 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               write(i_log,*) 'nb_xdata(ndat,i,medium): ', nb_xdata(ndat,
      *        i,medium)
             END IF
-7251      CONTINUE
-7252      CONTINUE
+7281      CONTINUE
+7282      CONTINUE
           ndat = ndat+1
           nb_xdata(ndat,i,medium) = 1
           nb_fdata(ndat,i,medium) = exp(csx(kmix))
-          IF((ndat .GE. 50))goto 7260
-7271      CONTINUE
+          IF((ndat .GE. 50))goto 7290
+7301      CONTINUE
             x_max_error = 0
             f_max_error = 0
             k_max_error = 0
             max_error = 0
-            DO 7281 k=0,ndat-1
+            DO 7311 k=0,ndat-1
               x = 0.5*(nb_xdata(k,i,medium) + nb_xdata(k+1,i,medium))
               f = 0.5*(nb_fdata(k,i,medium) + nb_fdata(k+1,i,medium))
               xi = log(1 - ap(medium)/ei*exp(x*aux)+1e-6)
@@ -15731,25 +15911,25 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 max_error = error
                 k_max_error = k
               END IF
-7281        CONTINUE
-7282        CONTINUE
+7311        CONTINUE
+7312        CONTINUE
             ndat = ndat+1
-            DO 7291 k=ndat,k_max_error+2,-1
+            DO 7321 k=ndat,k_max_error+2,-1
               nb_xdata(k,i,medium) = nb_xdata(k-1,i,medium)
               nb_fdata(k,i,medium) = nb_fdata(k-1,i,medium)
-7291        CONTINUE
-7292        CONTINUE
+7321        CONTINUE
+7322        CONTINUE
             nb_xdata(k_max_error+1,i,medium) = x_max_error
             nb_fdata(k_max_error+1,i,medium) = f_max_error
-            IF(((ndat .EQ. 50)))GO TO7272
-          GO TO 7271
-7272      CONTINUE
-7260      call prepare_alias_table(50,nb_xdata(0,i,medium), nb_fdata(0,i
+            IF(((ndat .EQ. 50)))GO TO7302
+          GO TO 7301
+7302      CONTINUE
+7290      call prepare_alias_table(50,nb_xdata(0,i,medium), nb_fdata(0,i
      *    ,medium),nb_wdata(1,i,medium),nb_idata(1,i,medium))
-7211    CONTINUE
-7212    CONTINUE
-7121  CONTINUE
-7122  CONTINUE
+7241    CONTINUE
+7242    CONTINUE
+7151  CONTINUE
+7152  CONTINUE
       write(i_log,*) ' '
       write(i_log,*) ' '
       return
@@ -15840,10 +16020,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       integer*4 itmp_4
       character c_4(4), ic_4(4)
       equivalence (tmp_4,c_4), (itmp_4, ic_4)
-      DO 7301 i=1,len(nrcp_file)
+      DO 7331 i=1,len(nrcp_file)
         nrcp_file(i:i) = ' '
-7301  CONTINUE
-7302  CONTINUE
+7331  CONTINUE
+7332  CONTINUE
       nrcp_file = hen_house(:lnblnk1(hen_house)) // 'data' // '/' // 'pa
      *ir_nrc1.data'
       want_nrcp_unit = 62
@@ -15857,8 +16037,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       END IF
       rec_length = 65*4
       open(nrcp_unit,file=nrcp_file,form='unformatted',access='direct',
-     *status='old',recl=rec_length,err=7310)
-      read(nrcp_unit,rec=1,err=7320) emin, emax, ne, nb, endian, cdum
+     *status='old',recl=rec_length,err=7340)
+      read(nrcp_unit,rec=1,err=7350) emin, emax, ne, nb, endian, cdum
       IF (( ichar(endian) .EQ. 0 )) THEN
         endianess = '1234'
       ELSE
@@ -15906,63 +16086,63 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       nrcp_dlei = 1/nrcp_dle
       nbb = nb/2
       ddx = sqrt(0.5)/nbb
-      DO 7331 ix=0,nbb
+      DO 7361 ix=0,nbb
         xx = ddx*ix
         nrcp_xdata(ix+1) = xx*xx
-7331  CONTINUE
-7332  CONTINUE
+7361  CONTINUE
+7362  CONTINUE
       do ix=nbb-1,0,-1
         xx = ddx*ix
         nrcp_xdata(nb-ix) = 1 - xx*xx
       end do
-      DO 7351 medium=1,NMED
+      DO 7381 medium=1,NMED
         write(i_log,'(a,i4,a,$)') '  medium ',medium,' .................
      *.... '
-        DO 7361 ie=1,84
-          DO 7371 ix=1,65
+        DO 7391 ie=1,84
+          DO 7401 ix=1,65
             nrcp_fdata(ix,ie,medium) = 0
-7371      CONTINUE
-7372      CONTINUE
-7361    CONTINUE
-7362    CONTINUE
-        DO 7381 i_ele=1,NNE(medium)
+7401      CONTINUE
+7402      CONTINUE
+7391    CONTINUE
+7392    CONTINUE
+        DO 7411 i_ele=1,NNE(medium)
           Z = ZELEM(medium,i_ele)
           iz = int(Z+0.5)
           tmp = PZ(medium,i_ele)*Z*Z
           irec = (iz-1)*ne + 2
-          DO 7391 ie=1,84
-            read(nrcp_unit,rec=irec,err=7320) tarray
-            DO 7401 ix=1,65
+          DO 7421 ie=1,84
+            read(nrcp_unit,rec=irec,err=7350) tarray
+            DO 7431 ix=1,65
               tmp_4 = tarray(ix)
               IF (( swap )) THEN
                 call egs_swap_4(c_4)
               END IF
               nrcp_fdata(ix,ie,medium)=nrcp_fdata(ix,ie,medium)+tmp*tmp_
      *        4
-7401        CONTINUE
-7402        CONTINUE
+7431        CONTINUE
+7432        CONTINUE
             irec = irec + 1
-7391      CONTINUE
-7392      CONTINUE
-7381    CONTINUE
-7382    CONTINUE
-        DO 7411 ie=1,84
-          call prepare_alias_table(nb-1,nrcp_xdata,nrcp_fdata(1,ie,mediu
-     *    m), nrcp_wdata(1,ie,medium),nrcp_idata(1,ie,medium))
+7421      CONTINUE
+7422      CONTINUE
 7411    CONTINUE
 7412    CONTINUE
+        DO 7441 ie=1,84
+          call prepare_alias_table(nb-1,nrcp_xdata,nrcp_fdata(1,ie,mediu
+     *    m), nrcp_wdata(1,ie,medium),nrcp_idata(1,ie,medium))
+7441    CONTINUE
+7442    CONTINUE
         write(i_log,'(a)') ' done'
-7351  CONTINUE
-7352  CONTINUE
+7381  CONTINUE
+7382  CONTINUE
       write(i_log,*) ' '
       close(nrcp_unit)
       return
-7310  CONTINUE
+7340  CONTINUE
       write(i_log,'(/a)') '***************** Error: '
       write(i_log,*) 'Failed to open NRC pair data file'
       write(i_log,'(/a)') '***************** Quiting now.'
       call exit(1)
-7320  CONTINUE
+7350  CONTINUE
       write(i_log,'(/a)') '***************** Error: '
       write(i_log,*) 'I/O error while reading NRC pair data file'
       write(i_log,'(/a)') '***************** Quiting now.'
@@ -16031,7 +16211,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       real*8 rtmp
       integer*4 i
       IF((n .LT. 1))return
-      DO 7421 i=1,n
+      DO 7451 i=1,n
         IF (( rng_seed .GT. 24 )) THEN
           call ranlux(rng_array)
           rng_seed = 1
@@ -16039,8 +16219,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         rtmp = rng_array(rng_seed)
         rng_seed = rng_seed + 1
         rarray(i) = rtmp
-7421  CONTINUE
-7422  CONTINUE
+7451  CONTINUE
+7452  CONTINUE
       return
       end
       subroutine eii_init
@@ -16144,25 +16324,25 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       real*8 cons
       parameter (cons = 0.153536)
       data occn_numbers/2,2,2,4/
-      DO 7431 j=1,100
+      DO 7461 j=1,100
         eii_nshells(j) = 0
-7431  CONTINUE
-7432  CONTINUE
-      DO 7441 j=1,1
+7461  CONTINUE
+7462  CONTINUE
+      DO 7471 j=1,1
         eii_nsh(j) = 0
-7441  CONTINUE
-7442  CONTINUE
+7471  CONTINUE
+7472  CONTINUE
       IF (( eii_flag .EQ. 0 )) THEN
         return
       END IF
       getd = .false.
-      DO 7451 j=1,3
+      DO 7481 j=1,3
         IF (( iedgfl(j) .GT. 0 .AND. iedgfl(j) .LE. 100 )) THEN
           getd = .true.
-          GO TO7452
+          GO TO7482
         END IF
-7451  CONTINUE
-7452  CONTINUE
+7481  CONTINUE
+7482  CONTINUE
       IF (( .NOT.getd )) THEN
         write(i_log,'(/a)') '***************** Error: '
         write(i_log,'(/a,/a,/a,/a)') ' In subroutine eii_init: ', '   Sc
@@ -16173,34 +16353,34 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         call exit(1)
       END IF
       e_eii_min = 1e30
-      DO 7461 imed=1,nmed
+      DO 7491 imed=1,nmed
         IF((ae(imed)-rm .LT. e_eii_min))e_eii_min = ae(imed) - rm
         IF((ap(imed) .LT. e_eii_min))e_eii_min = ap(imed)
-7461  CONTINUE
-7462  CONTINUE
+7491  CONTINUE
+7492  CONTINUE
       write(i_log,*) ' '
       write(i_log,*) 'eii_init: minimum threshold energy found: ',e_eii_
      *min
-      DO 7471 imed=1,nmed
-        DO 7481 iele=1,nne(imed)
+      DO 7501 imed=1,nmed
+        DO 7511 iele=1,nne(imed)
           iZ = int(zelem(imed,iele)+0.5)
           IF (( eii_nshells(iZ) .EQ. 0 )) THEN
             nsh = 0
-            DO 7491 ish=1,4
+            DO 7521 ish=1,4
               IF((binding_energies(ish,iZ) .GT. e_eii_min))nsh = nsh+1
-7491        CONTINUE
-7492        CONTINUE
+7521        CONTINUE
+7522        CONTINUE
             eii_nshells(iZ) = nsh
           END IF
-7481    CONTINUE
-7482    CONTINUE
-7471  CONTINUE
-7472  CONTINUE
-      nsh = 0
-      DO 7501 iZ=1,100
-        nsh = nsh + eii_nshells(iZ)
+7511    CONTINUE
+7512    CONTINUE
 7501  CONTINUE
 7502  CONTINUE
+      nsh = 0
+      DO 7531 iZ=1,100
+        nsh = nsh + eii_nshells(iZ)
+7531  CONTINUE
+7532  CONTINUE
       IF (( nsh .EQ. 0 )) THEN
         write(i_log,*) '*** EII requested but no shells with binding ene
      *rgies '
@@ -16223,13 +16403,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       write(i_log,*) 'eii_init: number of shells to simulate EII: ',nsh
       nsh_tot = nsh
       tmp_array(1) = 0
-      DO 7511 j=2,100
+      DO 7541 j=2,100
         tmp_array(j) = tmp_array(j-1) + eii_nshells(j-1)
-7511  CONTINUE
-7512  CONTINUE
-      DO 7521 imed=1,nmed
+7541  CONTINUE
+7542  CONTINUE
+      DO 7551 imed=1,nmed
         nsh = 0
-        DO 7531 iele=1,nne(imed)
+        DO 7561 iele=1,nne(imed)
           iZ = int(zelem(imed,iele)+0.5)
           eii_no(imed,iele) = eii_nshells(iZ)
           nsh = nsh + eii_nshells(iZ)
@@ -16238,15 +16418,15 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           ELSE
             eii_first(imed,iele) = 0
           END IF
-7531    CONTINUE
-7532    CONTINUE
+7561    CONTINUE
+7562    CONTINUE
         eii_nsh(imed) = nsh
-7521  CONTINUE
-7522  CONTINUE
-      DO 7541 i=1,len(eii_file)
+7551  CONTINUE
+7552  CONTINUE
+      DO 7571 i=1,len(eii_file)
         eii_file(i:i) = ' '
-7541  CONTINUE
-7542  CONTINUE
+7571  CONTINUE
+7572  CONTINUE
       eii_file = hen_house(:lnblnk1(hen_house)) // 'data' // '/' // 'eii
      *_'// eii_xfile(:lnblnk1(eii_xfile)) //'.data'
       want_eii_unit = 62
@@ -16258,16 +16438,16 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         call exit(1)
       END IF
       open(eii_unit,file=eii_file(:lnblnk1(eii_file)),status='old',err=7
-     *550)
+     *580)
       write(i_log,'(//a,a)') 'Opened EII data file ',eii_file(:lnblnk1(e
      *ii_file))
       write(i_log,'(a,$)') ' eii_init: reading EII data ... '
-      read(eii_unit,*,err=7560,end=7560) nskip
-      DO 7571 j=1,nskip
-        read(eii_unit,*,err=7560,end=7560)
-7571  CONTINUE
-7572  CONTINUE
-      read(eii_unit,*,err=7560,end=7560) emax,nbin
+      read(eii_unit,*,err=7590,end=7590) nskip
+      DO 7601 j=1,nskip
+        read(eii_unit,*,err=7590,end=7590)
+7601  CONTINUE
+7602  CONTINUE
+      read(eii_unit,*,err=7590,end=7590) emax,nbin
       IF (( nbin .NE. 250 )) THEN
         write(i_log,'(/a)') '***************** Error: '
         write(i_log,*) 'Inconsistent EII data file'
@@ -16278,8 +16458,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         eii_out = egs_open_file(93,0,1,'.eiixsec')
       END IF
       ii = 0
-      DO 7581 j=1,100
-        read(eii_unit,*,err=7560,end=7560) iZ,nsh
+      DO 7611 j=1,100
+        read(eii_unit,*,err=7590,end=7590) iZ,nsh
         IF ((xsec_out .EQ. 1 .AND. eii_nshells(iZ) .GT. 0)) THEN
           write(eii_out,*) '================================='
           write(eii_out,'(a,i3)') 'EII xsections for element Z = ',iZ
@@ -16297,9 +16477,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           write(i_log,'(/a)') '***************** Quiting now.'
           call exit(1)
         END IF
-        DO 7591 ish=1,nsh
-          read(eii_unit,*,err=7560,end=7560) fmax
-          read(eii_unit,*,err=7560,end=7560) aux_array
+        DO 7621 ish=1,nsh
+          read(eii_unit,*,err=7590,end=7590) fmax
+          read(eii_unit,*,err=7590,end=7590) aux_array
           IF ((ish.GT.1 .AND. ish .LT. 5)) THEN
             fmax = fmax*eii_L_factor
           END IF
@@ -16329,7 +16509,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             eii_a(ii) = nbin
             eii_a(ii) = eii_a(ii)/log(emax/binding_energies(ish,iZ))
             eii_b(ii) = 1 - eii_a(ii)*log(binding_energies(ish,iZ))
-            DO 7601 k=1,nbin
+            DO 7631 k=1,nbin
               IF (( k .GT. 1 )) THEN
                 sigo = fmax*aux_array(k-1)
               ELSE
@@ -16343,42 +16523,42 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 write(eii_out,'(f12.2,2X,10f9.2)') Exp((k+1-eii_b(ii))/e
      *          ii_a(ii))*1000.0,fmax*aux_array(k)
               END IF
-7601        CONTINUE
-7602        CONTINUE
+7631        CONTINUE
+7632        CONTINUE
           END IF
-7591    CONTINUE
-7592    CONTINUE
+7621    CONTINUE
+7622    CONTINUE
         IF (( ii .EQ. nsh_tot )) THEN
-          GO TO7582
+          GO TO7612
         END IF
-7581  CONTINUE
-7582  CONTINUE
+7611  CONTINUE
+7612  CONTINUE
       close(eii_unit)
       IF ((xsec_out .EQ. 1)) THEN
         close(eii_out)
       END IF
       write(i_log,*) ' OK '
       write(i_log,*) ' '
-      DO 7611 imed=1,nmed
+      DO 7641 imed=1,nmed
         Ec = ae(imed) - rm
         Ecc = min(Ec,ap(imed))
         sum_z=0
         sum_pz=0
         sum_a=0
         sum_wa=0
-        DO 7621 iele=1,nne(imed)
+        DO 7651 iele=1,nne(imed)
           sum_z = sum_z + pz(imed,iele)*zelem(imed,iele)
           sum_pz = sum_pz + pz(imed,iele)
           sum_wa = sum_wa + rhoz(imed,iele)
           sum_a = sum_a + pz(imed,iele)*wa(imed,iele)
-7621    CONTINUE
-7622    CONTINUE
+7651    CONTINUE
+7652    CONTINUE
         con_med = rho(imed)/1.6605655/sum_a
         eii_cons(imed) = con_med
         IF (( eii_nsh(imed) .GT. 0 )) THEN
           is_monotone = .true.
           sigma_max = 0
-          DO 7631 j=1,meke(imed)
+          DO 7661 j=1,meke(imed)
             loge = (j - eke0(imed))/eke1(imed)
             e = Exp(loge)
             tau = e/rm
@@ -16402,10 +16582,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             sum_occn=0
             sum_sigma=0
             sum_dedx=0
-            DO 7641 iele=1,nne(imed)
+            DO 7671 iele=1,nne(imed)
               iZ = int(zelem(imed,iele)+0.5)
               sum_sh = 0
-              DO 7651 ish=1,eii_no(imed,iele)
+              DO 7681 ish=1,eii_no(imed,iele)
                 jj = eii_first(imed,iele) + ish - 1
                 jjj = eii_sh(jj)
                 U = binding_energies(jjj,iZ)
@@ -16430,11 +16610,11 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                   sum_sigma = sum_sigma + sig_j
                   sum_dedx = sum_dedx + sig_j*av_E
                 END IF
-7651          CONTINUE
-7652          CONTINUE
+7681          CONTINUE
+7682          CONTINUE
               sum_occn = sum_occn + sum_sh*pz(imed,iele)
-7641        CONTINUE
-7642        CONTINUE
+7671        CONTINUE
+7672        CONTINUE
             sigm = sigm + sum_sigma
             dedx = dedx - sum_dedx
             aux = Ec/e
@@ -16469,8 +16649,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             sigm_old = sigm
             sigma_old = sigma
             wbrem_old = wbrem
-7631      CONTINUE
-7632      CONTINUE
+7661      CONTINUE
+7662      CONTINUE
           ededx1(meke(imed),imed) = ededx1(meke(imed)-1,imed)
           ededx0(meke(imed),imed) = ededx0(meke(imed)-1,imed)
           esig1(meke(imed),imed) = esig1(meke(imed)-1,imed)
@@ -16482,14 +16662,14 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           sig_ismonotone(0,imed) = is_monotone
           esig_e(imed) = sigma_max
         END IF
-7611  CONTINUE
-7612  CONTINUE
+7641  CONTINUE
+7642  CONTINUE
       return
-7560  write(i_log,'(/a)') '***************** Error: '
+7590  write(i_log,'(/a)') '***************** Error: '
       write(i_log,*) 'I/O error while reading EII data'
       write(i_log,'(/a)') '***************** Quiting now.'
       call exit(1)
-7550  write(i_log,'(/a)') '***************** Error: '
+7580  write(i_log,'(/a)') '***************** Error: '
       write(i_log,'(//a,a,/a,/a/)') 'Failed to open EII data file ',eii_
      *file(:lnblnk1(eii_file)), 'Make sure file exists in your $HEN_HOUS
      *E/data directory!', '****BEWARE of case sensitive file names!!!'
@@ -16586,7 +16766,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       fm_h = 2 + c1 - c2
       IF((fm_h .LT. 1))fm_h = 1
       prob = fm_h + prob_s
-7661  CONTINUE
+7691  CONTINUE
         IF (( rng_seed .GT. 24 )) THEN
           call ranlux(rng_array)
           rng_seed = 1
@@ -16614,9 +16794,9 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           wx = 1/(r2*xmax**3+1-r2)**0.333333333
           frej = 1 - log(wx)/fm_s
         END IF
-        IF((( r3 .LT. frej )))GO TO7662
-      GO TO 7661
-7662  CONTINUE
+        IF((( r3 .LT. frej )))GO TO7692
+      GO TO 7691
+7692  CONTINUE
       wx = wx*Uj
       h1 = (peie + prm)/T
       pese1 = peie - wx
@@ -16717,19 +16897,19 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       END IF
       IF (( which .EQ. 1 )) THEN
         has_r = .false.
-        DO 7671 medium=ifirst,ilast
+        DO 7701 medium=ifirst,ilast
           IF (( iraylm(medium) .EQ. 1 )) THEN
             has_r = .true.
           END IF
-7671    CONTINUE
-7672    CONTINUE
+7701    CONTINUE
+7702    CONTINUE
         IF((.NOT.has_r))return
       END IF
       write(i_log,*) ' '
-      DO 7681 medium=ifirst,ilast
+      DO 7711 medium=ifirst,ilast
         write(i_log,'(a,a,a,i3,a,f9.5)') 'Scaling ',strings(which+1),' x
      *-section data for medium', medium,' with ',fac
-        DO 7691 j=1,mge(medium)
+        DO 7721 j=1,mge(medium)
           gle = (j - ge0(medium))/ge1(medium)
           gmfp = gmfp0(j,medium) + gmfp1(j,medium)*gle
           gbr1 = gbr10(j,medium) + gbr11(j,medium)*gle
@@ -16774,8 +16954,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           gbr1_old = gbr1
           gbr2_old = gbr2
           cohfac_old = cohfac
-7691    CONTINUE
-7692    CONTINUE
+7721    CONTINUE
+7722    CONTINUE
         gmfp1(mge(medium),medium) = gmfp1(mge(medium)-1,medium)
         gmfp0(mge(medium),medium) = gmfp0(mge(medium)-1,medium)
         gbr11(mge(medium),medium) = gbr11(mge(medium)-1,medium)
@@ -16784,8 +16964,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         gbr20(mge(medium),medium) = gbr20(mge(medium)-1,medium)
         cohe1(mge(medium),medium) = cohe1(mge(medium)-1,medium)
         cohe0(mge(medium),medium) = cohe0(mge(medium)-1,medium)
-7681  CONTINUE
-7682  CONTINUE
+7711  CONTINUE
+7712  CONTINUE
       return
       end
       subroutine egs_init_user_photon(prefix,comp_prefix,photonuc_prefix
@@ -16931,7 +17111,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         call exit(1)
       END IF
       tmp_string = photo_file
-      open(photo_unit,file=photo_file,status='old',err=7700)
+      open(photo_unit,file=photo_file,status='old',err=7730)
       pair_unit = 84
       pair_unit = egs_get_unit(pair_unit)
       IF (( pair_unit .LT. 1 )) THEN
@@ -16942,7 +17122,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         call exit(1)
       END IF
       tmp_string = pair_file
-      open(pair_unit,file=pair_file,status='old',err=7700)
+      open(pair_unit,file=pair_file,status='old',err=7730)
       triplet_unit = 85
       triplet_unit = egs_get_unit(triplet_unit)
       IF (( triplet_unit .LT. 1 )) THEN
@@ -16953,7 +17133,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         call exit(1)
       END IF
       tmp_string = triplet_file
-      open(triplet_unit,file=triplet_file,status='old',err=7700)
+      open(triplet_unit,file=triplet_file,status='old',err=7730)
       rayleigh_unit = 86
       rayleigh_unit = egs_get_unit(rayleigh_unit)
       IF (( rayleigh_unit .LT. 1 )) THEN
@@ -16964,7 +17144,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         call exit(1)
       END IF
       tmp_string = rayleigh_file
-      open(rayleigh_unit,file=rayleigh_file,status='old',err=7700)
+      open(rayleigh_unit,file=rayleigh_file,status='old',err=7730)
       IF (( ibcmp(1) .GT. 1 )) THEN
         compton_unit = 88
         compton_unit = egs_get_unit(compton_unit)
@@ -16976,7 +17156,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           call exit(1)
         END IF
         tmp_string = compton_file
-        open(compton_unit,file=compton_file,status='old',err=7700)
+        open(compton_unit,file=compton_file,status='old',err=7730)
       END IF
       IF (( iphotonuc .EQ. 1 )) THEN
         photonuc_unit = 89
@@ -16989,7 +17169,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           call exit(1)
         END IF
         tmp_string = photonuc_file
-        open(photonuc_unit,file=photonuc_file,status='old',err=7700)
+        open(photonuc_unit,file=photonuc_file,status='old',err=7730)
       END IF
       IF (( out .EQ. 1 )) THEN
         ounit = egs_open_file(87,0,1,'.xsections')
@@ -17012,11 +17192,11 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *leigh','(fraction)','(fraction)','with Rayleigh'
         END IF
       END IF
-      DO 7711 iz=1,100
+      DO 7741 iz=1,100
         read(photo_unit,*) ndat
         read(photo_unit,*) (etmp(k),ftmp(k),k=1,ndat)
         k = 0
-        DO 7721 j=ndat,2,-1
+        DO 7751 j=ndat,2,-1
           IF (( etmp(j)-etmp(j-1) .LT. 1e-5 )) THEN
             k = k+1
             IF (( k .LE. 30 )) THEN
@@ -17028,16 +17208,16 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               write(i_log,'(/a)') '***************** Quiting now.'
               call exit(1)
             END IF
-            IF((.NOT.eadl_relax .AND. k .GE. 4))GO TO7722
+            IF((.NOT.eadl_relax .AND. k .GE. 4))GO TO7752
           END IF
-7721    CONTINUE
-7722    CONTINUE
-7711  CONTINUE
-7712  CONTINUE
+7751    CONTINUE
+7752    CONTINUE
+7741  CONTINUE
+7742  CONTINUE
       IF ((mcdf_pe_xsections)) THEN
         call egs_read_shellwise_pe()
       END IF
-      DO 7731 medium=1,nmed
+      DO 7761 medium=1,nmed
         mge(medium) = 2000
         nge = 2000
         ge1(medium) = nge-1
@@ -17050,19 +17230,19 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         END IF
         sumZ=0
         sumA=0
-        DO 7741 i=1,nne(medium)
+        DO 7771 i=1,nne(medium)
           z_sorted(i) = zelem(medium,i)
           sumZ = sumZ + pz(medium,i)*zelem(medium,i)
           sumA = sumA + pz(medium,i)*wa(medium,i)
-7741    CONTINUE
-7742    CONTINUE
+7771    CONTINUE
+7772    CONTINUE
         con1 = sumZ*rho(medium)/(sumA*1.6605655)
         con2 = rho(medium)/(sumA*1.6605655)
         call egs_heap_sort(nne(medium),z_sorted,sorted)
-        DO 7751 i=1,nne(medium)
+        DO 7781 i=1,nne(medium)
           pz_sorted(i) = pz(medium,sorted(i))
-7751    CONTINUE
-7752    CONTINUE
+7781    CONTINUE
+7782    CONTINUE
         IF ((mcdf_pe_xsections)) THEN
           call egsi_get_shell_data(medium,nge,nne(medium),z_sorted,pz_so
      *    rted, ge1(medium),ge0(medium),sig_photo)
@@ -17095,32 +17275,32 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               call exit(1)
             END IF
             bc_dle = log(bc_emax/bc_emin)/(bc_ne-1)
-            DO 7761 j=1,bc_ne
+            DO 7791 j=1,bc_ne
               bc_data(j) = 0
-7761        CONTINUE
-7762        CONTINUE
+7791        CONTINUE
+7792        CONTINUE
             iz_old = 1
-            DO 7771 i=1,nne(medium)
+            DO 7801 i=1,nne(medium)
               iz = int(z_sorted(i)+0.5)
-              DO 7781 j=iz_old,iz
+              DO 7811 j=iz_old,iz
                 read(compton_unit,*) (bc_tmp(k),k=1,bc_ne)
-7781          CONTINUE
-7782          CONTINUE
-              DO 7791 j=1,bc_ne
+7811          CONTINUE
+7812          CONTINUE
+              DO 7821 j=1,bc_ne
                 bc_data(j)=bc_data(j)+pz_sorted(i)*z_sorted(i)*bc_tmp(j)
-7791          CONTINUE
-7792          CONTINUE
+7821          CONTINUE
+7822          CONTINUE
               iz_old = iz+1
-7771        CONTINUE
-7772        CONTINUE
-            DO 7801 j=1,bc_ne
-              bc_data(j)=log(bc_data(j)/sumZ)
 7801        CONTINUE
 7802        CONTINUE
+            DO 7831 j=1,bc_ne
+              bc_data(j)=log(bc_data(j)/sumZ)
+7831        CONTINUE
+7832        CONTINUE
           END IF
         END IF
         call egs_init_rayleigh(medium,sig_rayleigh)
-        DO 7811 i=1,nge
+        DO 7841 i=1,nge
           gle = (i - ge0(medium))/ge1(medium)
           e = exp(gle)
           sig_KN = sumZ*egs_KN_sigma0(e)
@@ -17175,8 +17355,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           gbr2_old = gbr2
           cohe_old = cohe
           photonuc_old = photonuc
-7811    CONTINUE
-7812    CONTINUE
+7841    CONTINUE
+7842    CONTINUE
         gmfp1(nge,medium) = gmfp1(nge-1,medium)
         gmfp0(nge,medium) = gmfp - gmfp1(nge,medium)*gle
         gbr11(nge,medium) = gbr11(nge-1,medium)
@@ -17188,8 +17368,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         photonuc1(nge,medium) = photonuc1(nge-1,medium)
         photonuc0(nge,medium) = photonuc - photonuc1(nge,medium)*gle
         write(i_log,'(a)') 'OK'
-7731  CONTINUE
-7732  CONTINUE
+7761  CONTINUE
+7762  CONTINUE
       close(photo_unit)
       close(pair_unit)
       close(triplet_unit)
@@ -17204,7 +17384,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         close(ounit)
       END IF
       return
-7700  CONTINUE
+7730  CONTINUE
       write(i_log,'(/a)') '***************** Error: '
       write(i_log,'(//a,a)') 'Failed to open data file ',tmp_string(:lnb
      *lnk1(tmp_string))
@@ -17286,18 +17466,18 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       ncustom=0
       write(dummy,'(24a1)')(media(j,medium),j=1,24)
       ff_file=' '
-      DO 7821 i=1,1
+      DO 7851 i=1,1
         IF ((lnblnk1(iray_ff_file(i)).NE.0)) THEN
           ncustom = ncustom + 1
         END IF
-7821  CONTINUE
-7822  CONTINUE
-      DO 7831 i=1,ncustom
+7851  CONTINUE
+7852  CONTINUE
+      DO 7861 i=1,ncustom
         IF ((dummy(:lnblnk1(dummy)) .EQ. iray_ff_media(i))) THEN
           ff_file = iray_ff_file(i)
         END IF
-7831  CONTINUE
-7832  CONTINUE
+7861  CONTINUE
+7862  CONTINUE
       ff_unit = egs_get_unit(0)
       IF (( ff_unit .LT. 1 )) THEN
         write(i_log,'(/a)') '***************** Error: '
@@ -17308,26 +17488,26 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       END IF
       IF (( lnblnk1(ff_file) .GT. 0)) THEN
         open(ff_unit,file=ff_file(:lnblnk1(ff_file)), status='old',err=7
-     *  840)
-        GOTO 7850
-7840    write(i_log,'(/a)') '***************** Error: '
+     *  870)
+        GOTO 7880
+7870    write(i_log,'(/a)') '***************** Error: '
         write(i_log,'(2a)') 'egs_init_rayleigh: failed to open custom ff
      * file ', ff_file(:lnblnk1(ff_file))
         write(i_log,'(/a)') '***************** Quiting now.'
         call exit(1)
-7850    write(i_log,'(/2a)') 'Opened custom ff file ',ff_file(:lnblnk1(f
+7880    write(i_log,'(/2a)') 'Opened custom ff file ',ff_file(:lnblnk1(f
      *  f_file))
         j = 0
-7861    CONTINUE
+7891    CONTINUE
           j = j + 1
           read(ff_unit,*,IOSTAT=EOF) xsc, fsc
-          IF((EOF .LT. 0))GO TO7862
+          IF((EOF .LT. 0))GO TO7892
           IF ((j .LE. 100)) THEN
             xgrid(j,medium)=xsc
             ff(j,medium)=fsc
           END IF
-        GO TO 7861
-7862    CONTINUE
+        GO TO 7891
+7892    CONTINUE
         nff = j-1
         IF ((nff .GT. 100)) THEN
           write(i_log,'(/a)') '***************** Error: '
@@ -17340,44 +17520,44 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         IF((xgrid(1,medium) .LT. 1e-6))xgrid(1,medium) = 1e-4
         write(*,*) '\n  -> ', nff, ' values of mol. ff read!'
         sumA = 0.0
-        DO 7871 j=1,nne(medium)
+        DO 7901 j=1,nne(medium)
           sumA=sumA+PZ(medium,j)*WA(medium,j)
-7871    CONTINUE
-7872    CONTINUE
-        DO 7881 j=1,MGE(medium)
+7901    CONTINUE
+7902    CONTINUE
+        DO 7911 j=1,MGE(medium)
           gle=(j-GE0(medium))/GE1(medium)
           e=exp(gle)
           sig_rayleigh(j)=egs_rayleigh_sigma(medium,e,nff, xgrid(1,mediu
      *    m),ff(1,medium))*sumA
-7881    CONTINUE
-7882    CONTINUE
+7911    CONTINUE
+7912    CONTINUE
       ELSE
-        DO 7891 i=1,len(afac_file)
+        DO 7921 i=1,len(afac_file)
           afac_file(i:i) = ' '
-7891    CONTINUE
-7892    CONTINUE
+7921    CONTINUE
+7922    CONTINUE
         afac_file = hen_house(:lnblnk1(hen_house))//'pegs4'//'/'//'pgs4f
      *orm.dat'
         open(ff_unit,file=afac_file(:lnblnk1(afac_file)), status='old',e
-     *  rr=7900)
-        GOTO 7910
-7900    write(i_log,'(/a)') '***************** Error: '
+     *  rr=7930)
+        GOTO 7940
+7930    write(i_log,'(/a)') '***************** Error: '
         write(i_log,'(2a)') 'egs_init_rayleigh: failed to open atomic ff
      * file', afac_file(:lnblnk1(afac_file))
         write(i_log,'(/a)') '***************** Quiting now.'
         call exit(1)
-7910    read(ff_unit,*) xval, aff
-        DO 7921 i=1,100
+7940    read(ff_unit,*) xval, aff
+        DO 7951 i=1,100
           ff(i,medium) = 0.0
           xgrid(i,medium)=xval(i)
-          DO 7931 j=1,nne(medium)
+          DO 7961 j=1,nne(medium)
             ff(i,medium)=ff(i,medium)+PZ(medium,j)*aff(i,int(zelem(mediu
      *      m,j)))**2
-7931      CONTINUE
-7932      CONTINUE
+7961      CONTINUE
+7962      CONTINUE
           ff(i,medium) = sqrt(ff(i,medium))
-7921    CONTINUE
-7922    CONTINUE
+7951    CONTINUE
+7952    CONTINUE
         nff = 100
         IF((xgrid(1,medium) .LT. 1e-6))xgrid(1,medium) = 1e-4
         write(i_log,'(/a,i4,a)') '  -> ', nff, ' atomic ff values comput
@@ -17392,13 +17572,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       ne=MGE(medium)
       dle=log(up(medium)/ap(medium))/(ne-1)
       dlei=1/dle
-      DO 7941 i=1,ne-1
+      DO 7971 i=1,ne-1
         gle = (i - ge0(medium))/ge1(medium)
         pmax1(i,medium)=(pe_array(i+1,medium)-pe_array(i,medium))*ge1(me
      *  dium)
         pmax0(i,medium)=pe_array(i,medium)-pmax1(i,medium)*gle
-7941  CONTINUE
-7942  CONTINUE
+7971  CONTINUE
+7972  CONTINUE
       pmax0(ne,medium)=pmax0(ne-1,medium)
       pmax1(ne,medium)=pmax1(ne-1,medium)
       return
@@ -17482,32 +17662,32 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         write(i_log,'(/a)') '***************** Quiting now.'
         call exit(1)
       END IF
-      DO 7951 i=1,len(afac_file)
+      DO 7981 i=1,len(afac_file)
         afac_file(i:i) = ' '
-7951  CONTINUE
-7952  CONTINUE
+7981  CONTINUE
+7982  CONTINUE
       afac_file = hen_house(:lnblnk1(hen_house))//'pegs4'//'/'//'pgs4for
      *m.dat'
       open(ff_unit,file=afac_file(:lnblnk1(afac_file)),status='old',err=
-     *7900)
-      GOTO 7910
-7900  write(i_log,'(/a)') '***************** Error: '
+     *7930)
+      GOTO 7940
+7930  write(i_log,'(/a)') '***************** Error: '
       write(i_log,'(2a)') 'egs_init_rayleigh_sampling: failed to open at
      *omic ff file ', afac_file(:lnblnk1(afac_file))
       write(i_log,'(/a)') '***************** Quiting now.'
       call exit(1)
-7910  read(ff_unit,*) xval, aff
-      DO 7961 i=1,100
+7940  read(ff_unit,*) xval, aff
+      DO 7991 i=1,100
         ff(i,medium) = 0.0
         xgrid(i,medium)=xval(i)
-        DO 7971 j=1,nne(medium)
+        DO 8001 j=1,nne(medium)
           ff(i,medium)=ff(i,medium)+PZ(medium,j)*aff(i,int(zelem(medium,
      *    j)))**2
-7971    CONTINUE
-7972    CONTINUE
+8001    CONTINUE
+8002    CONTINUE
         ff(i,medium) = sqrt(ff(i,medium))
-7961  CONTINUE
-7962  CONTINUE
+7991  CONTINUE
+7992  CONTINUE
       nff = 100
       IF((xgrid(1,medium) .LT. 1e-6))xgrid(1,medium) = 1e-4
       write(i_log,'(/a,i4,a)') '  -> ', nff, ' atomic ff values computed
@@ -17519,13 +17699,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *edium),emin,emax, pe_array(1,medium),100, fcum(1,medium),i_array(1
      *,medium), b_array(1,medium),c_array(1,medium))
       ne=MGE(medium)
-      DO 7981 i=1,ne-1
+      DO 8011 i=1,ne-1
         gle = (i - ge0(medium))/ge1(medium)
         pmax1(i,medium)=(pe_array(i+1,medium)-pe_array(i,medium))*ge1(me
      *  dium)
         pmax0(i,medium)=pe_array(i,medium)-pmax1(i,medium)*gle
-7981  CONTINUE
-7982  CONTINUE
+8011  CONTINUE
+8012  CONTINUE
       pmax0(ne,medium)=pmax0(ne-1,medium)
       pmax1(ne,medium)=pmax1(ne-1,medium)
       return
@@ -17541,7 +17721,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       C2=C*C
       xmax=E/hc
       egs_rayleigh_sigma = 0.0
-      DO 7991 i=1,ndat-1
+      DO 8021 i=1,ndat-1
         IF((x(i) .EQ. 0.0))x(i) = zero()
         IF((x(i+1) .EQ. 0.0))x(i+1) = zero()
         IF((f(i) .EQ. 0.0))f(i) = zero()
@@ -17560,10 +17740,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         raysig = raysig*f(i)*f(i)/pow_x1
         egs_rayleigh_sigma = egs_rayleigh_sigma + raysig
         IF ((x(i+1).GT.xmax)) THEN
-          GO TO7992
+          GO TO8022
         END IF
-7991  CONTINUE
-7992  CONTINUE
+8021  CONTINUE
+8022  CONTINUE
       egs_rayleigh_sigma = 0.49893439187842413747*C*egs_rayleigh_sigma
       return
       end
@@ -17584,14 +17764,14 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       dwi = 100-1
       pmax=pmax1(Lgle,MEDIUM)*gle+pmax0(Lgle,MEDIUM)
       xmax = hc_i*e
-8001  CONTINUE
+8031  CONTINUE
         IF (( rng_seed .GT. 24 )) THEN
           call ranlux(rng_array)
           rng_seed = 1
         END IF
         rnnray1 = rng_array(rng_seed)
         rng_seed = rng_seed + 1
-8011    CONTINUE
+8041    CONTINUE
           IF (( rng_seed .GT. 24 )) THEN
             call ranlux(rng_array)
             rng_seed = 1
@@ -17602,23 +17782,23 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           ibin = 1 + rnnray0*dwi
           ib = i_array(ibin,medium)
           IF (( i_array(ibin+1,medium) .GT. ib )) THEN
-8021        CONTINUE
-              IF((rnnray0.LT.fcum(ib+1,medium)))GO TO8022
+8051        CONTINUE
+              IF((rnnray0.LT.fcum(ib+1,medium)))GO TO8052
               ib=ib+1
-            GO TO 8021
-8022        CONTINUE
+            GO TO 8051
+8052        CONTINUE
           END IF
           rnnray0 = (rnnray0 - fcum(ib,medium))*c_array(ib,medium)
           xv = xgrid(ib,medium)*exp(log(1+rnnray0)*b_array(ib,medium))
-          IF(((xv .LT. xmax)))GO TO8012
-        GO TO 8011
-8012    CONTINUE
+          IF(((xv .LT. xmax)))GO TO8042
+        GO TO 8041
+8042    CONTINUE
         xv = xv/e
         costhe = 1 - twice_hc2*xv*xv
         csqthe=costhe*costhe
-        IF((( 2*rnnray1 .LT. 1 + csqthe )))GO TO8002
-      GO TO 8001
-8002  CONTINUE
+        IF((( 2*rnnray1 .LT. 1 + csqthe )))GO TO8032
+      GO TO 8031
+8032  CONTINUE
       sinthe=sqrt(1.0-csqthe)
       return
       end
@@ -17644,13 +17824,13 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       DATA RM,PRM,PRMT2,PZERO/0.5109989461,0.5109989461,1.0219978922,0.D
      *0/
       write(*,'(a$)') '      preparing data for Rayleigh sampling ... '
-      DO 8031 i=1,ndat
+      DO 8061 i=1,ndat
         IF((f(i) .EQ. 0.0))f(i) = zero()
-8031  CONTINUE
-8032  CONTINUE
+8061  CONTINUE
+8062  CONTINUE
       sum0=0
       fcum(1)=0
-      DO 8041 i=1,ndat-1
+      DO 8071 i=1,ndat-1
         b = log(f(i+1)/f(i))/log(x(i+1)/x(i))
         b_array(i) = b
         x1 = x(i)
@@ -17659,17 +17839,17 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         pow_x2 = x2**(2*b)
         sum0=sum0+f(i)*f(i)*(x2*x2*pow_x2-x1*x1*pow_x1)/((1+b)*pow_x1)
         fcum(i+1) = sum0
-8041  CONTINUE
-8042  CONTINUE
+8071  CONTINUE
+8072  CONTINUE
       dle = log(emax/emin)/(ne-1)
       i = 1
-      DO 8051 j=1,ne
+      DO 8081 j=1,ne
         e = emin*exp(dle*(j-1))
         xmax = 20.607544d0*2*e/prm
-        DO 8061 k=i,ndat-1
-          IF((xmax .GE. x(k) .AND. xmax .LT. x(k+1)))GO TO8062
-8061    CONTINUE
-8062    CONTINUE
+        DO 8091 k=i,ndat-1
+          IF((xmax .GE. x(k) .AND. xmax .LT. x(k+1)))GO TO8092
+8091    CONTINUE
+8092    CONTINUE
         i = k
         b = b_array(i)
         x1 = x(i)
@@ -17678,32 +17858,32 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         pow_x2 = x2**(2*b)
         pe_array(j) = fcum(i) + f(i)*f(i)*(x2*x2*pow_x2-x1*x1*pow_x1)/((
      *  1+b)*pow_x1)
-8051  CONTINUE
-8052  CONTINUE
+8081  CONTINUE
+8082  CONTINUE
       i_array(ncbin) = i
       anorm = 1d0/sqrt(pe_array(ne))
       anorm1 = 1.005d0/pe_array(ne)
       anorm2 = 1d0/pe_array(ne)
-      DO 8071 j=1,ne
+      DO 8101 j=1,ne
         pe_array(j) = pe_array(j)*anorm1
         IF((pe_array(j) .GT. 1))pe_array(j) = 1
-8071  CONTINUE
-8072  CONTINUE
-      DO 8081 j=1,ndat
+8101  CONTINUE
+8102  CONTINUE
+      DO 8111 j=1,ndat
         f(j) = f(j)*anorm
         fcum(j) = fcum(j)*anorm2
         c_array(j) = (1+b_array(j))/(x(j)*f(j))**2
-8081  CONTINUE
-8082  CONTINUE
+8111  CONTINUE
+8112  CONTINUE
       dw = 1d0/(ncbin-1)
       xold = x(1)
       ibin = 1
       b = b_array(1)
       pow_x1 = x(1)**(2*b)
       i_array(1) = 1
-      DO 8091 i=2,ncbin-1
+      DO 8121 i=2,ncbin-1
         w = dw
-8101    CONTINUE
+8131    CONTINUE
           x1 = xold
           x2 = x(ibin+1)
           t = x1*x1*x1**(2*b)
@@ -17712,21 +17892,21 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           IF (( aux .GT. w )) THEN
             xold = exp(log(t+w*(1+b)*pow_x1/f(ibin)/f(ibin))/(2+2*b))
             i_array(i) = ibin
-            GO TO8102
+            GO TO8132
           END IF
           w = w - aux
           xold = x2
           ibin = ibin+1
           b = b_array(ibin)
           pow_x1 = xold**(2*b)
-        GO TO 8101
-8102    CONTINUE
-8091  CONTINUE
-8092  CONTINUE
-      DO 8111 j=1,ndat
+        GO TO 8131
+8132    CONTINUE
+8121  CONTINUE
+8122  CONTINUE
+      DO 8141 j=1,ndat
         b_array(j) = 0.5/(1 + b_array(j))
-8111  CONTINUE
-8112  CONTINUE
+8141  CONTINUE
+8142  CONTINUE
       write(*,'(a /)') 'done'
       return
       end
@@ -17811,14 +17991,14 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *0/
       rewind(iunit)
       iz_old = 0
-      DO 8121 k=1,n
+      DO 8151 k=1,n
         data(k) = 0
-8121  CONTINUE
-8122  CONTINUE
-      DO 8131 i=1,ne
+8151  CONTINUE
+8152  CONTINUE
+      DO 8161 i=1,ne
         iiz = int(zsorted(i)+0.5)
-        DO 8141 iz=iz_old+1,iiz
-          read(iunit,*,err=8150) ndat
+        DO 8171 iz=iz_old+1,iiz
+          read(iunit,*,err=8180) ndat
           IF (( ndat .GT. 2000 )) THEN
             write(i_log,'(/a)') '***************** Error: '
             write(i_log,*) 'Too many input data points. Max. is ',2000
@@ -17826,26 +18006,26 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             call exit(1)
           END IF
           IF (( flag .EQ. 0 .OR. flag .EQ. 3)) THEN
-            read(iunit,*,err=8150) (etmp(k),ftmp(k),k=1,ndat)
+            read(iunit,*,err=8180) (etmp(k),ftmp(k),k=1,ndat)
           ELSE
-            read(iunit,*,err=8150) (etmp(k+1),ftmp(k+1), k=1,ndat)
+            read(iunit,*,err=8180) (etmp(k+1),ftmp(k+1), k=1,ndat)
             IF (( flag .EQ. 1 )) THEN
               eth = 2*rm
             ELSE
               eth = 4*rm
             END IF
             ndat = ndat + 1
-            DO 8161 k=2,ndat
+            DO 8191 k=2,ndat
               ftmp(k) = ftmp(k) - 3*log(1-eth/exp(etmp(k)))
-8161        CONTINUE
-8162        CONTINUE
+8191        CONTINUE
+8192        CONTINUE
             ftmp(1) = ftmp(2)
             etmp(1) = log(eth)
           END IF
-8141    CONTINUE
-8142    CONTINUE
+8171    CONTINUE
+8172    CONTINUE
         iz_old = iiz
-        DO 8171 k=1,n
+        DO 8201 k=1,n
           gle = (k - ge0)/ge1
           e = exp(gle)
           IF (( gle .LT. etmp(1) .OR. gle .GE. etmp(ndat) )) THEN
@@ -17865,10 +18045,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               sig = 0
             END IF
           ELSE
-            DO 8181 kk=1,ndat-1
-              IF((gle .GE. etmp(kk) .AND. gle .LT. etmp(kk+1)))GO TO8182
-8181        CONTINUE
-8182        CONTINUE
+            DO 8211 kk=1,ndat-1
+              IF((gle .GE. etmp(kk) .AND. gle .LT. etmp(kk+1)))GO TO8212
+8211        CONTINUE
+8212        CONTINUE
             IF (( flag .NE. 3)) THEN
               p = (gle - etmp(kk))/(etmp(kk+1) - etmp(kk))
               sig = exp(p*ftmp(kk+1) + (1-p)*ftmp(kk))
@@ -17880,12 +18060,12 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           IF(((flag .EQ. 1 .OR. flag .EQ. 2) .AND. e .GT. eth))sig = sig
      *    *(1-eth/e)**3
           data(k) = data(k) + pz_sorted(i)*sig
-8171    CONTINUE
-8172    CONTINUE
-8131  CONTINUE
-8132  CONTINUE
+8201    CONTINUE
+8202    CONTINUE
+8161  CONTINUE
+8162  CONTINUE
       return
-8150  CONTINUE
+8180  CONTINUE
       write(i_log,'(/a)') '***************** Error: '
       write(i_log,*) 'Error while reading user photon cross sections fro
      *m unit ', iunit
@@ -17946,25 +18126,25 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       real*4 etmp(2000),ftmp(2000)
       real*4 gle,sig,p
       integer*4 i,j,k,kk,iz,zpos,imed
-      DO 8191 k=1,n
+      DO 8221 k=1,n
         data(k) = 0
-8191  CONTINUE
-8192  CONTINUE
-      DO 8201 k=1,ne
+8221  CONTINUE
+8222  CONTINUE
+      DO 8231 k=1,ne
         sigma(k) = 0
-8201  CONTINUE
-8202  CONTINUE
-      DO 8211 i=1,ne
+8231  CONTINUE
+8232  CONTINUE
+      DO 8241 i=1,ne
         iz = int(zsorted(i)+0.5)
         zpos = pe_zpos(iz)
         ndat = pe_nge(zpos)
-        DO 8221 k=1,ndat
+        DO 8251 k=1,ndat
           pe_elem_prob(k,i,imed) = pz_sorted(i)*pe_xsection(k,zpos,0)
           etmp(k) = pe_energy(k,zpos)
           ftmp(k) = log(pe_xsection(k,zpos,0))
-8221    CONTINUE
-8222    CONTINUE
-        DO 8231 k=1,n
+8251    CONTINUE
+8252    CONTINUE
+        DO 8261 k=1,n
           gle = (k - ge0)/ge1
           IF (( gle .LT. etmp(1) .OR. gle .GE. etmp(ndat) )) THEN
             write(i_log,'(/a)') '***************** Error: '
@@ -17974,29 +18154,29 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             write(i_log,'(/a)') '***************** Quiting now.'
             call exit(1)
           ELSE
-            DO 8241 kk=1,ndat-1
-              IF((gle .GE. etmp(kk) .AND. gle .LT. etmp(kk+1)))GO TO8242
-8241        CONTINUE
-8242        CONTINUE
+            DO 8271 kk=1,ndat-1
+              IF((gle .GE. etmp(kk) .AND. gle .LT. etmp(kk+1)))GO TO8272
+8271        CONTINUE
+8272        CONTINUE
             p = (gle - etmp(kk))/(etmp(kk+1) - etmp(kk))
             sig = exp(p*ftmp(kk+1) + (1-p)*ftmp(kk))
           END IF
           data(k) = data(k) + pz_sorted(i)*sig
-8231    CONTINUE
-8232    CONTINUE
-8211  CONTINUE
-8212  CONTINUE
-      DO 8251 i=1,ne
+8261    CONTINUE
+8262    CONTINUE
+8241  CONTINUE
+8242  CONTINUE
+      DO 8281 i=1,ne
         iz = int(zsorted(i)+0.5)
         zpos = pe_zpos(iz)
         ndat = pe_nge(zpos)
-        DO 8261 k=1,ndat
+        DO 8291 k=1,ndat
           sig = sigmaMedium(imed,pe_energy(k,zpos))
           pe_elem_prob(k,i,imed) = log(pe_elem_prob(k,i,imed)/sig)
-8261    CONTINUE
-8262    CONTINUE
-8251  CONTINUE
-8252  CONTINUE
+8291    CONTINUE
+8292    CONTINUE
+8281  CONTINUE
+8282  CONTINUE
       return
       end
       real*8 function sigmaMedium(imed, logE)
@@ -18017,7 +18197,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       real*8 logE, slope, sigma
       integer*4 k,imed,Z,zpos,m,ibsearch
       sigmaMedium = 0
-      DO 8271 k=1,nne(imed)
+      DO 8301 k=1,nne(imed)
         Z = int( zelem(imed,k) + 0.5 )
         zpos = pe_zpos(Z)
         m = ibsearch(logE,pe_nge(zpos),pe_energy(1,zpos))
@@ -18027,8 +18207,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         sigma = sigma + slope*(logE - pe_energy(m,zpos))
         sigma = exp(sigma)
         sigmaMedium = sigmaMedium + pz(imed,k)*sigma
-8271  CONTINUE
-8272  CONTINUE
+8301  CONTINUE
+8302  CONTINUE
       return
       end
       subroutine egs_heap_sort(n,rarray,jarray)
@@ -18037,14 +18217,14 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       real*8 rarray(*)
       integer*4 i,ir,j,l,ira
       real*8 rra
-      DO 8281 i=1,n
+      DO 8311 i=1,n
         jarray(i)=i
-8281  CONTINUE
-8282  CONTINUE
+8311  CONTINUE
+8312  CONTINUE
       IF((n .LT. 2))return
       l=n/2+1
       ir=n
-8291  CONTINUE
+8321  CONTINUE
         IF ((l .GT. 1)) THEN
           l=l-1
           rra=rarray(l)
@@ -18063,8 +18243,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         END IF
         i=l
         j=l+l
-8301    CONTINUE
-          IF((j .GT. ir))GO TO8302
+8331    CONTINUE
+          IF((j .GT. ir))GO TO8332
           IF ((j .LT. ir)) THEN
             IF((rarray(j) .LT. rarray(j+1)))j=j+1
           END IF
@@ -18076,12 +18256,12 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           ELSE
             j=ir+1
           END IF
-        GO TO 8301
-8302    CONTINUE
+        GO TO 8331
+8332    CONTINUE
         rarray(i)=rra
         jarray(i)=ira
-      GO TO 8291
-8292  CONTINUE
+      GO TO 8321
+8322  CONTINUE
       return
       end
       SUBROUTINE PHOTONUC
