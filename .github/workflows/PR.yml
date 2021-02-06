@@ -87,8 +87,14 @@ jobs:
         # cd egsnrc/egs_home/tutor4
         # python tutor4.py
         # cd ../../../
-        python -m pip install pytest
+        python -m pip install pytest pytest-cov
         echo python -c "from egsnrc import egsfortran"
         python -c "from egsnrc import egsfortran"  # test if can import the lib
         echo python -m pytest -v
-        python -m pytest -v
+        python -m pytest -v --cov=egsnrc
+
+    - name: Upload coverage to Codecov
+      if: ${{ success() }}
+      uses: codecov/codecov-action@v1
+      with:
+        verbose: true
