@@ -30,19 +30,6 @@ HEN_HOUSE = Path(os.environ["HEN_HOUSE"])
 EGS_HOME = Path(os.environ['EGS_HOME'])
 
 
-def randomset():
-    global rng_seed, rng_array
-
-    if rng_seed > 24:
-        ranlux(rng_array)
-        rng_seed = 1
-
-    random_num = rng_array[rng_seed-1]
-    rng_seed += 1
-
-    return random_num
-
-
 # ******************************************************************
 #                                National Research Council of Canada
 def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
