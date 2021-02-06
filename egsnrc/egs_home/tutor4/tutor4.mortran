@@ -126,7 +126,7 @@ REPLACE {$XXXCALCULATE-TSTEP-FROM-DEMFP;} WITH  "Remove XXX for generating test 
 }
 ;
 
-REPLACE {$XXXCALCULATE-TSTEP-FROM-DEMFP;} WITH
+REPLACE {$CALCULATE-TSTEP-FROM-DEMFP;} WITH
 "        ============================"
 {;
   total_de = demfp/sig;
@@ -141,7 +141,7 @@ REPLACE {$XXXCALCULATE-TSTEP-FROM-DEMFP;} WITH
 ;
 
 
-REPLACE {$XXXCOMPUTE-ELOSS(#,#,#,#,#);} WITH
+REPLACE {$COMPUTE-ELOSS(#,#,#,#,#);} WITH
 "        =========================="
 {;
   {P5} = compute_eloss(lelec, medium, {P1},{P2},{P3},{P4});
@@ -221,7 +221,7 @@ REPLACE {$XXXCOMPUTE-ELOSS-G(#,#,#,#,#);} WITH
 ;
 
 
-REPLACE {$XXXCOMPUTE-ELOSS-G(#,#,#,#,#);} WITH
+REPLACE {$COMPUTE-ELOSS-G(#,#,#,#,#);} WITH
 "        ============================"
 {
   {P5} = compute_eloss_g(lelec,medium, {P1},{P2},{P3},{P4},range);
@@ -229,7 +229,7 @@ REPLACE {$XXXCOMPUTE-ELOSS-G(#,#,#,#,#);} WITH
 ;
 
 
-REPLACE {$XXXCALCULATE-XI(#);} WITH
+REPLACE {$CALCULATE-XI(#);} WITH
 {
   $egs_info('(a, 2I4, 6E25.16e2)','in ',
   lelec, medium, ekems, rmt2, rmsq, xccl, blccl, {P1});

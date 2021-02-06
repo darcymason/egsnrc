@@ -1003,25 +1003,25 @@ EXTERNAL hownear;
 "f2py return_val=hownear(x,y,z,irl)"
 $REAL hownear;
 
-"xxf2py intent(callback) calc_tstep_from_demfp"
+"f2py intent(callback) calc_tstep_from_demfp"
 EXTERNAL calc_tstep_from_demfp;
-"xxf2py real*8 demfp,sig, eke, elke,total_de"
-"xxf2py integer qel, lelec, medium, lelke"
-"xxf2py tstep=calc_tstep_from_demfp(qel,lelec,medium,lelke,demfp,sig,eke,elke,total_de)"
+"f2py real*8 demfp,sig, eke, elke,total_de"
+"f2py integer qel, lelec, medium, lelke"
+"f2py tstep=calc_tstep_from_demfp(qel,lelec,medium,lelke,demfp,sig,eke,elke,total_de)"
 $REAL calc_tstep_from_demfp;
 
-"xxf2py intent(callback) compute_eloss"
+"f2py intent(callback) compute_eloss"
 EXTERNAL compute_eloss;
-"xxf2py real*8 step, eke, elke, de"
-"xxf2py integer lelec, medium, lelke"
-"xxf2py de=compute_eloss(lelec, medium, step, eke, elke, lelke)"
+"f2py real*8 step, eke, elke, de"
+"f2py integer lelec, medium, lelke"
+"f2py de=compute_eloss(lelec, medium, step, eke, elke, lelke)"
 $REAL compute_eloss;
 
-"xxf2py intent(callback) compute_eloss_g"
+"f2py intent(callback) compute_eloss_g"
 EXTERNAL compute_eloss_g;
-"xxf2py real*8 step, eke, elke, range, de"
-"xxf2py integer lelec, medium, lelke"
-"xxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)"
+"f2py real*8 step, eke, elke, range, de"
+"f2py integer lelec, medium, lelke"
+"f2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)"
 $REAL compute_eloss_g;
 
 !NOCOMMENTS;
