@@ -155,3 +155,7 @@ class TestTutor4:
                 assert a_got == pytest.approx(a_expected,abs=0.0000001)
 
         et_control.exact_bca = False
+
+    def test_pi_zero(self):
+        with pytest.raises(NotImplementedError):
+            tutor4.shower(2, 100, 0, 0, 0, 0, 0, 1, 1, 1)

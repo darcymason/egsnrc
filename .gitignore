@@ -12,3 +12,5 @@ egsnrc/egs_home/**/*.io
 .eggs/*
 egsnrc/*.code-workspace
 .vscode/*
+htmlcov/*
+.coverage

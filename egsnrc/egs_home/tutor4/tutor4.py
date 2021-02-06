@@ -95,29 +95,30 @@ def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
         # PI-ZERO OPTION
         # if EI <= PI0MSQ) [OUTPUT EI;    corrected Oct 24 1995 e-mail Hideo H
         #                   noted by      Dr.  Muroyama at Nagoya University
-        if ei**2 <= pi0msq:
-            msg = (
-                ' Stopped in subroutine SHOWER---PI-ZERO option invoked'
-                f' but the total energy was too small (EI={ei} MeV)'
-            )
-            raise ValueError(msg)
+        raise NotImplementedError("egsnrc Python not tested for PI-ZERO")
+        # if ei**2 <= pi0msq:
+        #     msg = (
+        #         ' Stopped in subroutine SHOWER---PI-ZERO option invoked'
+        #         f' but the total energy was too small (EI={ei} MeV)'
+        #     )
+        #     raise ValueError(msg)
 
-        csth = randomset()
-        dcsth=csth; dei=ei; dpi=dsqrt(dei*dei-pi0msq)
-        deg=dei+dpi*dcsth; dpgl=dpi+dei*dcsth; dcosth=dpgl/deg
-        costhe=dcosth; sinthe=dsqrt(1.0-dcosth*dcosth)  # "1.D0" -> "1.0" ???
-        iq[0]=0; e[0]=deg/2.
-        egsfortran.uphi(2,1)
-        stack.np=2
-        deg=dei-dpi*dcsth; dpgl=dpi-dei*dcsth; dcosth=dpgl/deg
-        costhe=dcosth; sinthe=-dsqrt(1.0-dcosth*dcosth)  # "1.D0" -> "1.0" ???
-        iq[2-1]=0; e[2-1]=deg/2.
-        egsfortran.uphi(3,2)
+        # csth = randomset()
+        # dcsth=csth; dei=ei; dpi=dsqrt(dei*dei-pi0msq)
+        # deg=dei+dpi*dcsth; dpgl=dpi+dei*dcsth; dcosth=dpgl/deg
+        # costhe=dcosth; sinthe=dsqrt(1.0-dcosth*dcosth)  # "1.D0" -> "1.0" ???
+        # iq[0]=0; e[0]=deg/2.
+        # egsfortran.uphi(2,1)
+        # stack.np=2
+        # deg=dei-dpi*dcsth; dpgl=dpi-dei*dcsth; dcosth=dpgl/deg
+        # costhe=dcosth; sinthe=-dsqrt(1.0-dcosth*dcosth)  # "1.D0" -> "1.0" ???
+        # iq[2-1]=0; e[2-1]=deg/2.
+        # egsfortran.uphi(3,2)
 
 
     while np > 0:
         #  DEFAULT FOR $ KERMA-INSERT; IS ; (NULL)
-        if  iq[np-1] == 0:
+        if  iq[np-1] == 0:  # -1 for ** 0-based in Python
             egsfortran.photon(ircode, howfar)
         else:
             # Note, callbacks have to be passed as extra parameters
@@ -198,8 +199,8 @@ def init():
     egsfortran.egs_io.user_code = f"{USER_CODE:<64}"
 
 
-    # print("\n---After setting pegs_file and user_code --", flush=True)
-    # print_info()
+    print("\n---After setting pegs_file and user_code --", flush=True)
+    print_info()
 
     egsfortran.egs_init1()
     # ----- end equiv of egs_init
@@ -352,29 +353,30 @@ def howfar():
            COMMON GEOM contains ZBOUND
     """
 
-    if ir[np-1] == 3:  # terminate this history: it is past the plate
+    np_m1 = np - 1  # ** 0-based arrays
+    if ir[np_m1] == 3:  # terminate this history: it is past the plate
         epcont.idisc = 1
         return
 
-    if ir[np-1] == 2:  # We are in the Ta plate - check the geometry
-        if w[np-1] > 0.0:  # going forward - consider first since  most frequent
-            tval = (zbound - z[np-1]) / w[np-1]  # tval is dist to boundary
+    if ir[np_m1] == 2:  # We are in the Ta plate - check the geometry
+        if w[np_m1] > 0.0:  # going forward - consider first since  most frequent
+            tval = (zbound - z[np_m1]) / w[np_m1]  # tval is dist to boundary
             #                                     in this direction
             # if tval > ustep, can take requested step, fall through to `return`
             if tval <= ustep:
                 epcont.ustep = tval
                 epcont.irnew = 3
-        elif w[np-1] < 0.0:  # going back towards origin
-            tval = -z[np-1] / w[np-1]  # distance to plane at origin
+        elif w[np_m1] < 0.0:  # going back towards origin
+            tval = -z[np_m1] / w[np_m1]  # distance to plane at origin
             # if tval > ustep, can take requested step, fall through to `return`
             if tval <= ustep:
                 epcont.ustep = tval
                 epcont.irnew = 1
-        # else w[np-1] == 0.0, cannot hit boundary
+        # else w[np_m1] == 0.0, cannot hit boundary
         return
 
     # Not region 3 or 2, must be 1, region with source
-    if w[np-1] >  0.0:  # this must be a source particle on z=0 boundary
+    if w[np_m1] >  0.0:  # this must be a source particle on z=0 boundary
         epcont.ustep = 0.0
         epcont.irnew = 2
     else:
