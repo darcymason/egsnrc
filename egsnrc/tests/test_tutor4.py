@@ -26,8 +26,9 @@ def known_in_out(filepath, in_types, out_types):
         inputs = [typ(x.strip()) for x, typ in zip(inputs, in_types)]
 
         out_line = next(gen)
-        if not out_line.startswith("out "):
-            raise ValueError("'out' line must follow 'in' line")
+        while not out_line.startswith("out "):
+            out_line = next(gen)
+
         outputs = out_line[4:].split() # split after 'out '
         if not isinstance(out_types, (list, tuple)):
             out_types = (out_types,)
@@ -131,10 +132,10 @@ class TestTutor4:
 
             assert got == pytest.approx(expected,abs=0.0000001)
 
-    def xxxtest_calculate_xi(self):
+    def test_calculate_xi(self):
         "Calc correct values for $CALCULATE-XI in Python"
         # Compare against ones captured from TUTOR4 run with extra prints
-        tutor4.init()  # get all data loaded
+        # tutor4.init()  # get all data loaded
 
         # Need setting here to get to IF conditions where this code applies
         from egsnrc.commons import et_control
@@ -142,12 +143,12 @@ class TestTutor4:
 
         # Known input and output from Mortran/Fortran tutor4 run
         for inputs, expected in known_in_out(TEST_DATA / "calc-xi.txt",
-            # medium, ekems, rmt2, rmsq, xccl, blccl, step
-            (int, float, float, float, float, float, float), (float, float)
+            # lelec, medium, ekems, rmt2, rmsq, xccl, blccl, step
+            (int, int, float, float, float, float, float, float),
+            (float, float)
         ):
             #
             # print("in ", ",".join(str(x) for x in inputs))
-
 
             got = tutor4.calculate_xi(*inputs)
             if isinstance(got, (list, tuple)):
