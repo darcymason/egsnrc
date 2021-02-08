@@ -434,12 +434,12 @@ def electr() -> int:
                         is_ch_step = True
 
                         if transport_algorithm == PRESTA_II:
-                        egsfortran.msdist_pII(
-                            # Inputs
-                            eke,de,tustep,rhof,medium,qel,spin_effects,
-                            u[np_m1],v[np_m1],w[np_m1],x[np_m1],y[np_m1],z[np_m1],
-                            # Outputs
-                            uscat,vscat,wscat,xtrans,ytrans,ztrans,ustep
+                            egsfortran.msdist_pII(
+                                # Inputs
+                                eke,de,tustep,rhof,medium,qel,spin_effects,
+                                u[np_m1],v[np_m1],w[np_m1],x[np_m1],y[np_m1],z[np_m1],
+                                # Outputs
+                                uscat,vscat,wscat,xtrans,ytrans,ztrans,ustep
                         )
                         else:
                             egsfortran.msdist_pI(
@@ -609,7 +609,7 @@ def electr() -> int:
                             medium_m1 = medium - 1  # ** 0-based
                         # End inline replace: $ electron_region_change; ----
 
-                    if ustep != 0):
+                    if ustep != 0:
                         iarg=TRANAUSA
                         if iausfl[iarg+1] != 0:
                             ausgab(iarg)
@@ -618,8 +618,8 @@ def electr() -> int:
                         break # XXX
                     if ustep != 0 and idisc < 0:
                         goto_USER_ELECTRON_DISCARD = True
-                        break # XXX
-                    NEXT :TSTEP:  # (Start again at :TSTEP:)
+                        break # XXX break again to get to outer loop???
+                    # XXX NEXT :TSTEP:  # (Start again at :TSTEP:)
 
                 # Go try another big step in (possibly) new medium
                 epcont.vstep = ustep
@@ -712,7 +712,6 @@ def electr() -> int:
                     add_work_em_field  # e-loss or gain in em field
                 if add_work_em_field2:
                     add_work_em_field2  # EEMF implementation
-                # Default for $ ADD-WORK-EM-FIELD; is ; (null)
                 ekef = eke - de  # (final kinetic energy)
                 epcont.eold = eie  # save old value
                 epcont.enew = eold - de  # energy at end of transport
@@ -746,11 +745,14 @@ def electr() -> int:
                         chia2 = xcc[medium_m1]/(4*blcc[medium_m1]*p2)
                         if spin_effects:
                             elkems = log(ekems)
-                            Lelkems=eke1[medium_m1]*elkems+eke0[medium_m1]
+                            lelkems=int(eke1[medium_m1]*elkems+eke0[medium_m1])
+                            lelkems = lelkems - 1  # ** 0-based
                             if lelec < 0:
-                                etap = etae_ms1[Lelkems,medium_m1*elkems+ etae_ms0[Lelkems,medium_m1]  # EVALUATE etap USING etae_ms(elkems)]
+                                # EVALUATE etap USING etae_ms(elkems)]
+                                etap = etae_ms1[lelkems_m1,medium_m1]*elkems+ etae_ms0[lelkems_m1,medium_m1]
                             else:
-                                etap = etap_ms1[Lelkems,medium_m1]*elkems+ etap_ms0[Lelkems,medium_m1]  # EVALUATE etap USING etap_ms(elkems)
+                                # EVALUATE etap USING etap_ms(elkems)
+                                etap = etap_ms1[lelkems_m1,medium_m1]*elkems+ etap_ms0[lelkems_m1,medium_m1]
                             chia2 = chia2*etap
 
                         sscat(chia2,elkems,beta2,qel,medium,
@@ -786,7 +788,7 @@ def electr() -> int:
                     epcont.y_final = ytrans
                     epcont.z_final = ztrans
                 else:
-                    IF not EM_MACROS_ACTIVE:
+                    if not EM_MACROS_ACTIVE:
                         epcont.x_final = x[np_m1] + u[np_m1]*vstep
                         epcont.y_final = y[np_m1] + v[np_m1]*vstep
                         epcont.z_final = z[np_m1] + w[np_m1]*vstep
@@ -831,15 +833,16 @@ def electr() -> int:
                 #     but the old region => confusion in the geometry routine
                 #     is very likely.      Jan 27 2004
                 if irnew == irl and eie <= ecut[irl_m1]:
-                goto_ECUT_DISCARD = True
-                break # XXX
+                    goto_ECUT_DISCARD = True
+                    break # XXX
 
                 useful.medold = medium
                 if medium != 0:
                     ekeold = eke
                     epcont.eke = eie - rm # update kinetic energy
                     epcont.elke = log(eke)
-                    lelkems = eke1[medium_m1]*elkems + eke0[medium_m1]
+                    lelkems = int(eke1[medium_m1]*elkems + eke0[medium_m1])
+                    lelkems_m1 = lelkems - 1
 
                 if irnew != irold:
                     # --- Inline replace: $ electron_region_change; -----
@@ -869,7 +872,7 @@ def electr() -> int:
                     break # XXX
 
                 if medium != medold:
-                    NEXT :TSTEP:
+                    continue  # XXX NEXT :TSTEP:
 
                 if user_controls_tstep_recursion:
                     user_controls_tstep_recursion()
@@ -885,8 +888,8 @@ def electr() -> int:
                         demfp = 0
                 # End inline replace: $ UPDATE_DEMFP; ----
 
-            if demfp < epsemfp:
-                break  # end ustep loop
+                if demfp < epsemfp:
+                    break  # end ustep loop
 
             # Compute final sigma to see if resample is needed.
             # this will take the energy variation of the sigma into
@@ -914,8 +917,8 @@ def electr() -> int:
             sigratio = sigf/sig0
             rfict = randomset()
 
-        if rfict <= sigratio:
-            break   # end tstep loop
+            if rfict <= sigratio:
+                break   # end tstep loop
 
         #  Now sample electron interaction
         if lelec < 0:
@@ -1014,7 +1017,8 @@ def electr() -> int:
             iarg=ANNIHFAUSA
             if iausfl[iarg-1+1] != 0:  # ** 0-based
                 ausgab(iarg)
-            EXIT :NEWELECTRON: # i.e., in order to return to shower
+            # XXX needs label
+            break  # EXIT :NEWELECTRON: # i.e., in order to return to shower
             # After annihilation the gammas are bound to be the lowest energy
             # particles, so return and follow them.
         # end pbr2 else
@@ -1025,7 +1029,7 @@ def electr() -> int:
     # ---------------------------------------------
     # Bremsstrahlung-call section
     # ---------------------------------------------
-    if goto_EBREMS:  XXX
+    if goto_EBREMS:  # XXX
         iarg=BREMAUSB
         if iausfl[iarg-1+1] != 0:  # ** 0-based
             ausgab(iarg)
@@ -1042,7 +1046,7 @@ def electr() -> int:
         else:
             # Electron was selected
             goto_NEWELECTRON = True
-            break # XXX
+            # break # XXX
 
     # ---------------------------------------------
     # Electron cutoff energy discard section
@@ -1072,8 +1076,9 @@ def electr() -> int:
         if iausfl[iarg-1+1] != 0:  # ** 0-based
             ausgab(iarg)
 
-    if goto_POSITRON_ANNIHILATION:  XXX # NRCC extension 86/9/12
-        XXX
+    if goto_POSITRON_ANNIHILATION:  # XXX # NRCC extension 86/9/12
+        need_something
+        #XXX
     if lelec > 0:
         # It's a positron. Produce annihilation gammas if edep < peie
         if edep < peie:
@@ -1118,7 +1123,7 @@ def electr() -> int:
 
     if idisc == 99:
         goto_POSITRON_ANNIHILATION = True
-        break # XXX
+        # break # XXX
 
     stack.np -= 1
     ircode = 2

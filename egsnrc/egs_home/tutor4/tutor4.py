@@ -2,6 +2,7 @@
 from pathlib import Path
 import os
 from egsnrc import egsfortran
+from egsnrc.electr import electr
 import logging
 import numpy  # cannot use `np` as is an EGS var!!
 from math import log  # for calculate_tstep_...
