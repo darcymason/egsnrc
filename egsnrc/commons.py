@@ -25,7 +25,7 @@ np = stack.np
 npold = stack.npold
 
 #  COMMON block media --------
-media_ = egsfortran.media
+media_ = egsfortran.media  # underscore because `media`* is also an attribute
 rlc = media_.rlc
 rldu = media_.rldu
 rho = media_.rho
@@ -38,7 +38,7 @@ mcmfp = media_.mcmfp
 mrange = media_.mrange
 iraylm = media_.iraylm
 iphotonucm = media_.iphotonucm
-media = media_.media
+media = media_.media  # * see note for `media_`
 iphotonuc = media_.iphotonuc
 nmed = media_.nmed
 eii_xfile = media_.eii_xfile

@@ -354,6 +354,7 @@ def howfar():
     """
 
     np_m1 = np - 1  # ** 0-based arrays
+
     if ir[np_m1] == 3:  # terminate this history: it is past the plate
         epcont.idisc = 1
         return
@@ -431,7 +432,7 @@ def compute_drange(lelec, medium, eke1, eke2, lelke1, elke1, elke2):
         Current medium
 
     Returns
-        -------
+    -------
     REAL
         path-length traveled going from energy `eke1` to `eke2`
 
