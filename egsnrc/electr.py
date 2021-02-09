@@ -10,8 +10,6 @@ from egsnrc.calcfuncs import (
 from math import log
 # EMPTY CALLBACKS ----
 calculate_elastic_scattering_mfp = None
-calculate_tstep_from_demfp = None
-calculate_xi = None
 call_howfar_in_electr = None
 call_user_electron = None
 check_negative_ustep = None
@@ -21,6 +19,8 @@ de_fluctuation = None
 (Provides a user hook for Landau/Vavilov processes)
 """
 
+add_work_em_field = None
+add_work_em_field2 = None
 electron_region_change = None
 electron_track_end = None
 emfield_initiate_set_tustep = None
@@ -48,6 +48,7 @@ select_electron_mfp = None
 set_angles_em_field = None
 set_skindepth = None
 set_tvstep = None
+set_tvstep_em_field = None
 set_ustep = None
 set_ustep_em_field = None
 start_new_particle = None
@@ -59,7 +60,7 @@ ierust = 0 # To count negative ustep's
 
 
 # Define ebrems as is used in several places
-def ebrems():
+def ebrems(ausgab):
     if iausfl[BREMAUSB-1+1] != 0:  # ** 0-based
         ausgab(BREMAUSB)
     egsfortran.brems()
@@ -74,7 +75,7 @@ def ebrems():
 
 # ******************************************************************
 #                                NATIONAL RESEARCH COUNCIL OF CANADA
-def electr(hownear, howfar) -> int:
+def electr(hownear, howfar, ausgab) -> int:
     # ******************************************************************
     #    This subroutine has been almost completely recoded to include
     #    the EGSnrc enhancements.
@@ -87,6 +88,7 @@ def electr(hownear, howfar) -> int:
     # ******************************************************************
 
     global ierust
+    global costhe, sinthe
 
     # --- Inline replace: $ CALL_USER_ELECTRON -----
     if call_user_electron:
@@ -431,8 +433,8 @@ def electr(hownear, howfar) -> int:
 
                     # IF(tustep <= tperp and tustep > skindepth)
                     # This statement changed to be consistent with PRESTA-I
-                    count_all_steps = count_all_steps + 1
-                    is_ch_step = False
+                    ch_steps.count_all_steps += 1
+                    ch_steps.is_ch_step = False
                     if tustep <= tperp and (not exact_bca or tustep > skindepth):
                         # We are further way from a boundary than a skindepth, so
                         # perform a normal condensed-history step
@@ -762,7 +764,7 @@ def electr(hownear, howfar) -> int:
                         if spin_effects:
                             elkems = log(ekems)
                             lelkems=int(eke1[medium_m1]*elkems+eke0[medium_m1])
-                            lelkems = lelkems - 1  # ** 0-based
+                            lelkems_m1 = lelkems - 1  # ** 0-based
                             if lelec < 0:
                                 # EVALUATE etap USING etae_ms(elkems)]
                                 etap = etae_ms1[lelkems_m1,medium_m1]*elkems+ etae_ms0[lelkems_m1,medium_m1]
@@ -771,7 +773,7 @@ def electr(hownear, howfar) -> int:
                                 etap = etap_ms1[lelkems_m1,medium_m1]*elkems+ etap_ms0[lelkems_m1,medium_m1]
                             chia2 = chia2*etap
 
-                        sscat(chia2,elkems,beta2,qel,medium,
+                        egsfortran.sscat(chia2,elkems,beta2,qel,medium,
                                     spin_effects,costhe,sinthe)
                     else:
                         theta  = 0 # No deflection in single scattering model
@@ -810,7 +812,7 @@ def electr(hownear, howfar) -> int:
                         epcont.z_final = z[np_m1] + w[np_m1]*vstep
                     if domultiple or dosingle:
                         u_tmp = u[np_m1]; v_tmp = v[np_m1]; w_tmp = w[np_m1]
-                        uphi(2,1) # Apply the deflection, save call to uphi if
+                        egsfortran.uphi(2,1) # Apply the deflection, save call to uphi if
                                         # no deflection in a single scattering mode
                         epcont.u_final = u[np_m1]; epcont.v_final = v[np_m1]; epcont.w_final = w[np_m1]
                         u[np_m1] = u_tmp; v[np_m1] = v_tmp; w[np_m1] = w_tmp
@@ -904,7 +906,7 @@ def electr(hownear, howfar) -> int:
                         demfp = 0
                 # End inline replace: $ UPDATE_DEMFP; ----
 
-                if demfp < epsemfp:
+                if demfp < EPSEMFP:
                     break  # end ustep loop
                 # loop on ustep ----------------------------------------------
 
@@ -958,7 +960,7 @@ def electr(hownear, howfar) -> int:
             rnno24 = randomset()
             if rnno24 <= ebr1:
                 # It was bremsstrahlung
-                ebrems()
+                ebrems(ausgab)
                 if iq[np_m1] != 0:
                     continue  # new-electron loop
                 return ircode  # Photon was selected, return to shower
@@ -974,7 +976,7 @@ def electr(hownear, howfar) -> int:
                 if ebr1 <= 0: # Brems not allowed either.
                     continue  #  NEW-ELECTRON loop
                 # It was bremsstrahlung
-                ebrems()
+                ebrems(ausgab)
                 if iq[np_m1] != 0:
                     continue  # new-electron loop
                 return ircode  # Photon was selected, return to shower
@@ -1004,7 +1006,7 @@ def electr(hownear, howfar) -> int:
         rnno25 = randomset()
         if rnno25 < pbr1:
             # It was bremsstrahlung
-            ebrems()
+            ebrems(ausgab)
             if iq[np_m1] != 0:
                 continue  # new-electron loop
             return ircode  # Photon was selected, return to shower

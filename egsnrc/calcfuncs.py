@@ -32,20 +32,20 @@ def compute_drange(lelec, medium, eke1, eke2, lelke1, elke1, elke2):
 
     # *** -1 for 0-based in Python
     lelktmp = lelke1 - 1 # was = lelke1
-    medium -= 1
+    medium_m1 = medium - 1
 
     if lelec < 0:
         # $EVALUATE dedxmid USING ededx(elktmp)
-        dedxmid = ededx1[lelktmp,medium]*elktmp+ ededx0[lelktmp,medium]
+        dedxmid = ededx1[lelktmp,medium_m1]*elktmp+ ededx0[lelktmp,medium_m1]
         dedxmid = 1/dedxmid
-        aux = ededx1[lelktmp,medium]*dedxmid
-        #  aux = ededx1(lelktmp,medium)/dedxmid"
+        aux = ededx1[lelktmp,medium_m1]*dedxmid
+        #  aux = ededx1(lelktmp,medium_m1)/dedxmid"
     else:
         # $EVALUATE dedxmid USING pdedx(elktmp)
-        dedxmid = pdedx1[lelktmp,medium]*elktmp+ pdedx0[lelktmp,medium]
+        dedxmid = pdedx1[lelktmp,medium_m1]*elktmp+ pdedx0[lelktmp,medium_m1]
         dedxmid = 1/dedxmid
-        aux = pdedx1[lelktmp,medium]*dedxmid
-        #  aux = pdedx1(lelktmp,medium)/dedxmid
+        aux = pdedx1[lelktmp,medium_m1]*dedxmid
+        #  aux = pdedx1(lelktmp,medium_m1)/dedxmid
 
     aux = aux*(1+2*aux)*(fedep/(2-fedep))**2/6
 

@@ -85,7 +85,7 @@ def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
     u[0]=ui; v[0]=vi; w[0]=wi
 
 
-    # TRANSFER PROPERTIES TO [0] FROM I
+    # TRANSFER PROPERTIES TO [0] FROM I  # ** 0-based, is [1] in Mortran
     x[0]=xi; y[0]=yi; z[0]=zi
     ir[0]=iri
     wt[0]=wti
@@ -130,7 +130,7 @@ def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
             #     calc_tstep_from_demfp,
             #     compute_eloss, compute_eloss_g
             # )
-            ircode = electr(hownear, howfar)
+            ircode = electr(hownear, howfar, ausgab)
         # egsfortran.flushoutput()
     # ---------------- end of subroutine shower
 
@@ -415,6 +415,30 @@ def hownear(x, y, z, irl):
     # else in region 1 or 3, can't return anything sensible
     raise ValueError(f'Called hownear in region {irl}')
 
+
+def ausgab(iarg):
+    """
+    In this AUSGAB routine for tutor4, we score the energy deposited
+    in the various regions. This amounts to the total energy
+    reflected, deposited and transmitted by the slab.
+
+    For IARG=0, an electron or photon step is about to occur and we
+    score the energy deposited, if any. Note that only electrons
+    deposit energy during a step, and due to our geometry, electrons
+    only take steps in region 2 - however there is no need to check.
+    For IARG=1,2 and 4, particles have been discarded for falling
+    below various energy cutoffs and all their energy is deposited
+    locally (in fact EDEP = particles kinetic energy).
+    For IARG=3, we are discarding the particle since it is in
+    region 1 or 3, so score its energy.
+    """
+    if iwatch > 0:
+        egsfortran.watch(iarg, iwatch)  # handles printouts of data
+                                        # iwatch is passed in score
+
+    if iarg <= 4:
+        irl = ir[np-1] # pick up current region number  ** 0-based
+        escore[irl-1] += edep
 
 
 

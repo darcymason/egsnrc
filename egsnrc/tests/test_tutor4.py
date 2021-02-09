@@ -4,6 +4,7 @@ from pathlib import Path
 pytest.importorskip("egsnrc.egsfortran")  # from numpy.f2py, used while in transition
 from egsnrc import egsfortran
 from egsnrc.egs_home.tutor4 import tutor4
+from egsnrc import calcfuncs
 
 HERE  = Path(__file__).resolve().parent
 TEST_DATA = HERE / "data"
@@ -85,7 +86,7 @@ class TestTutor4:
             (int, int, float, float, int, float, float), float
         ):
             # compute_drange(lelec, medium, eke1, eke2, lelke1, elke1, elke2)
-            got = tutor4.compute_drange(*inputs)
+            got = calcfuncs.compute_drange(*inputs)
             assert got == pytest.approx(expected,abs=0.0000001)
 
     def test_calc_tstep(self):
@@ -99,7 +100,7 @@ class TestTutor4:
             #
             # print("in ", ",".join(str(x) for x in inputs))
 
-            got = tutor4.calc_tstep_from_demfp(*inputs)
+            got = calcfuncs.calc_tstep_from_demfp(*inputs)
             # print(got, expected)
             assert got == pytest.approx(expected,abs=0.0000001)
 
@@ -113,7 +114,7 @@ class TestTutor4:
         ):
             #
             # print("in ", ",".join(str(x) for x in inputs))
-            got = tutor4.compute_eloss(*inputs)
+            got = calcfuncs.compute_eloss(*inputs)
 
             assert got == pytest.approx(expected,abs=0.0000001)
 
@@ -128,7 +129,7 @@ class TestTutor4:
         ):
             #
             # print("in ", ",".join(str(x) for x in inputs))
-            got = tutor4.compute_eloss_g(*inputs)
+            got = calcfuncs.compute_eloss_g(*inputs)
 
             assert got == pytest.approx(expected,abs=0.0000001)
 
@@ -150,7 +151,7 @@ class TestTutor4:
             #
             # print("in ", ",".join(str(x) for x in inputs))
 
-            got = tutor4.calculate_xi(*inputs)
+            got = calcfuncs.calculate_xi(*inputs)
             for a_got, a_expected in zip(got, expected):
                 assert a_got == pytest.approx(a_expected,abs=0.0000001)
 
