@@ -1,18 +1,20 @@
 from egsnrc.randoms import randomset
 from egsnrc.params import *
+from egsnrc.commons import *
 
+from egsnrc.calcfuncs import (
+    calc_tstep_from_demfp, calculate_xi, compute_drange,
+    compute_eloss, compute_eloss_g
+)
+
+from math import log
 # EMPTY CALLBACKS ----
 calculate_elastic_scattering_mfp = None
 calculate_tstep_from_demfp = None
 calculate_xi = None
 call_howfar_in_electr = None
-call_hownear = None
 call_user_electron = None
 check_negative_ustep = None
-compute_drange = None
-compute_eloss = None
-compute_eloss_g = None
-compute_range = None
 
 de_fluctuation = None
 """Allows the user to change the ionization loss.
@@ -55,9 +57,24 @@ user_range_discard = None
 
 ierust = 0 # To count negative ustep's
 
+
+# Define ebrems as is used in several places
+def ebrems():
+    if iausfl[BREMAUSB-1+1] != 0:  # ** 0-based
+        ausgab(BREMAUSB)
+    egsfortran.brems()
+
+    if particle_selection_brems:
+        particle_selection_brems()
+
+    if iausfl[BREMAUSA-1+1] != 0:  # ** 0-based
+        ausgab(BREMAUSA)
+
+
+
 # ******************************************************************
 #                                NATIONAL RESEARCH COUNCIL OF CANADA
-def electr() -> int:
+def electr(hownear, howfar) -> int:
     # ******************************************************************
     #    This subroutine has been almost completely recoded to include
     #    the EGSnrc enhancements.
@@ -107,13 +124,14 @@ def electr() -> int:
         medium_m1 = medium - 1
     # End inline replace: $ start_new_particle; ----
 
+
+    # Flags to break out of loops
+    user_electron_discard = False
+    ecut_discard = False
+    # ************************************************************************
     while True:  # :NEWELECTRON: LOOP
         # Go once through this loop for each 'new' electron whose charge and
         # energy has not been checked
-
-        # ** 0-based array
-        np_m1 = np - 1
-        irl_m1 = irl - 1
 
         # Save charge in local variable
         # (iq = -1 for electrons, 0 for photons and 1 for positrons)
@@ -124,16 +142,16 @@ def electr() -> int:
         eie   = peie  # energy incident electron (conversion to single)
 
         if eie <= ecut[irl_m1]:
-            goto_ECUT_DISCARD = True
-            break # XXX
+            ecut_discard = True
+            break
             # (Ecut is the lower transport threshold.)
 
         # useful.medium = med[irl_m1] # (This renders the above assignment redundant!)
         # The above assignment is unnecessary, IK, June 2003
 
         if wt[np_m1] == 0.0:
-            goto_USER_ELECTRON_DISCARD = True
-            break # XXX # added May 01
+            user_electron_discard = True  # added May 01
+            break
 
         while True:  # :TSTEP: LOOP
             # Go through this loop each time we recompute distance to an interaction
@@ -153,7 +171,7 @@ def electr() -> int:
                     rnne1 = randomset()
                     if rnne1 == 0.0:
                         rnne1=1.e-30
-                    demfp = max(-log(rnne1), epsemfp)
+                    demfp = max(-log(rnne1), EPSEMFP)
                 # End inline replace: $ SELECT_ELECTRON_MFP; ----
                 # demfp = differential electron mean free path
 
@@ -186,7 +204,8 @@ def electr() -> int:
                                 # EVALUATE dedx0 USING pdedx(elke)
                                 dedx0 = pdedx1[lelke_m1, medium_m1]*elke+ pdedx0[lelke_m1, medium_m1]
                                 sigf = sigf/dedx0
-                        # End inline replace: $ EVALUATE_SIGF; ---- sig0 = sigf
+                        # End inline replace: $ EVALUATE_SIGF; ----
+                        sig0 = sigf
                     else:
                         if lelec < 0:
                             sig0 = esig_e[medium_m1]
@@ -203,7 +222,7 @@ def electr() -> int:
                 # this is left for now
 
             # end non-vacuum test
-
+            # ----------------------------------------------------------------
             while True:  # :USTEP: LOOP
                 # Here for each check with user geometry.
                 # Compute size of maximum acceptable step, which is limited
@@ -255,6 +274,7 @@ def electr() -> int:
                     else:
                         # --- Inline replace: $ CALCULATE_TSTEP_FROM_DEMFP; -----
                         if compute_tstep:
+                            total_de = demfp/sig
                             epcont.tstep = calc_tstep_from_demfp(qel,lelec,medium,lelke,
                                                         demfp,sig,eke,elke,total_de)
                             total_tstep = tstep
@@ -280,21 +300,17 @@ def electr() -> int:
 
                     # Compute the range to E_min[medium_m1] (e_min is the first
                     # energy in the table). Do not go more than range.
-                    # Don't replace this macro and don't override range, because
+                    # Don't replace this macro and don't override range_, because
                     # the energy loss evaluation below relies on the accurate
-                    # (and self-consistent) evaluation of range!
+                    # (and self-consistent) evaluation of range_!
                     # --- Inline replace: $ COMPUTE_RANGE; -----
                     #         ===============
-                    if do_range :
-                        ekei = e_array[lelke-1, medium_m1]  # ** 0-based
-                        elkei = (lelke - eke0[medium_m1]) / eke1[medium_m1]
-                        range_ = compute_drange(
-                            lelec, medium, eke, ekei, lelke, elke, elkei
-                        )
-                        range_ = range_ + range_ep[qel, lelke_m1, medium_m1]
-                        do_range = False
-
-                    range_ = range_ / rhof
+                    ekei = e_array[lelke-1, medium_m1]  # ** 0-based
+                    elkei = (lelke - eke0[medium_m1]) / eke1[medium_m1]
+                    range_ = compute_drange(
+                        lelec, medium, eke, ekei, lelke, elke, elkei
+                    )
+                    range_ = (range_ + range_ep[qel, lelke_m1, medium_m1]) / rhof
                     # End inline replace: $ COMPUTE_RANGE; ----
 
                     # The RANDOMIZE-TUSTEP option as coded by AFB forced the
@@ -307,13 +323,12 @@ def electr() -> int:
                     else:
                         tmxs = min(tmxs,smaxir[irl_m1])
 
-                    epcont.tustep = min(tstep,tmxs,range)
+                    epcont.tustep = min(tstep,tmxs,range_)
                     # optional tustep restriction in EM field
 
 
                     # --- Inline replace: $ CALL_HOWNEAR(tperp); -----
-                    if call_hownear:
-                        tperp = hownear()
+                    tperp = hownear(x[np_m1], y[np_m1], z[np_m1], irl)
                     # End inline replace: $ CALL_HOWNEAR(tperp); ----
 
                     dnear[np_m1] = tperp
@@ -324,11 +339,12 @@ def electr() -> int:
                     if range_discard:
                         range_discard()
                     elif i_do_rr[irl_m1] == 1 and e[np_m1] < e_max_rr[irl_m1]:
-                        if tperp >= range:
+                        if tperp >= range_:
                             # particle cannot escape local region
-                            epcont.idisc = 50 + 49*iq[np_m1] # 1 for electrons, 99 for positrons
-                            goto_USER_ELECTRON_DISCARD = True
-                            break # XXX
+                            # set idisc 1 for electrons, 99 for positrons
+                            epcont.idisc = 50 + 49*iq[np_m1]
+                            user_electron_discard = True
+                            break
                     # End inline replace: $ RANGE_DISCARD; ----
 
                     if user_range_discard:
@@ -533,8 +549,8 @@ def electr() -> int:
                 # Now see if user requested discard
                 if idisc > 0: # idisc is returned by howfar:
                     # User requested immediate discard
-                    goto_USER_ELECTRON_DISCARD = True
-                    break # XXX
+                    user_electron_discard = True
+                    break
 
                 # --- Inline replace: $ CHECK_NEGATIVE_USTEP; -----
                 if check_negative_ustep:
@@ -614,12 +630,12 @@ def electr() -> int:
                         if iausfl[iarg+1] != 0:
                             ausgab(iarg)
                     if eie <= ecut[irl_m1]:
-                        goto_ECUT_DISCARD = True
-                        break # XXX
+                        ecut_discard = True
+                        break
                     if ustep != 0 and idisc < 0:
-                        goto_USER_ELECTRON_DISCARD = True
-                        break # XXX break again to get to outer loop???
-                    # XXX NEXT :TSTEP:  # (Start again at :TSTEP:)
+                        user_electron_discard = True
+                        break
+                    break  # out of ustep (next :TSTEP:)
 
                 # Go try another big step in (possibly) new medium
                 epcont.vstep = ustep
@@ -769,7 +785,7 @@ def electr() -> int:
 
                 # Now transport, deduct energy loss, and do multiple scatter.
                 epcont.e_range =  range_
-                # ******* trying to save evaluation of range.
+                # ******* trying to save evaluation of range_.
                 # range_ = range_ - tvstep*rhof
                 # ********/
 
@@ -833,8 +849,8 @@ def electr() -> int:
                 #     but the old region => confusion in the geometry routine
                 #     is very likely.      Jan 27 2004
                 if irnew == irl and eie <= ecut[irl_m1]:
-                    goto_ECUT_DISCARD = True
-                    break # XXX
+                    ecut_discard = True
+                    break
 
                 useful.medold = medium
                 if medium != 0:
@@ -862,17 +878,17 @@ def electr() -> int:
                     ausgab(iarg)
 
                 if eie <= ecut[irl_m1]:
-                    goto_ECUT_DISCARD = True
-                    break # XXX
+                    ecut_discard = True
+                    break
 
                 # Now check for deferred discard request.  May have been set
                 # by either howfar, or one of the transport ausgab calls
                 if idisc < 0:
-                    goto_USER_ELECTRON_DISCARD = True
-                    break # XXX
+                    user_electron_discard = True
+                    break
 
                 if medium != medold:
-                    continue  # XXX NEXT :TSTEP:
+                    break  # leave ustep loop (NEXT :TSTEP:)
 
                 if user_controls_tstep_recursion:
                     user_controls_tstep_recursion()
@@ -890,6 +906,10 @@ def electr() -> int:
 
                 if demfp < epsemfp:
                     break  # end ustep loop
+                # loop on ustep ----------------------------------------------
+
+            if user_electron_discard or ecut_discard:
+                break  # from tstep loop
 
             # Compute final sigma to see if resample is needed.
             # this will take the energy variation of the sigma into
@@ -919,13 +939,17 @@ def electr() -> int:
 
             if rfict <= sigratio:
                 break   # end tstep loop
+        # loop on TSTEP ====================================================
+
+        if user_electron_discard or ecut_discard:
+            break  # from new-electron loop
 
         #  Now sample electron interaction
         if lelec < 0:
             # e-,check branching ratio
             # --- Inline replace: $ EVALUATE_EBREM_FRACTION; -----
             if evaluate_ebrem_fraction:
-                evaluate_ebrem_fraction()
+                ebr1 = evaluate_ebrem_fraction()
             else:
                 # EVALUATE ebr1 USING ebr1(elke)
                 ebr1 = ebr11[lelke_m1, medium_m1]*elke+ ebr10[lelke_m1, medium_m1]
@@ -934,44 +958,44 @@ def electr() -> int:
             rnno24 = randomset()
             if rnno24 <= ebr1:
                 # It was bremsstrahlung
-                goto_EBREMS = True
-                break # XXX
-            else:
-                # It was Moller, but first check the kinematics.
-                # However, if EII is on, we should still permit an interaction
-                # even if E<moller threshold as EII interactions go down to
-                # the ionization threshold which may be less than thmoll.
-                if e[np_m1] <= thmoll[medium_m1] and eii_flag == 0:
-                    # (thmoll = lower Moller threshold)
-                    # Not enough energy for Moller, so
-                    # force it to be a bremsstrahlung---provided ok kinematically.
-                    if ebr1 <= 0:
-                        goto_NEWELECTRON = True
-                        break # XXX
-                        # Brems not allowed either.
-                    goto_EBREMS = True
-                    break # XXX
+                ebrems()
+                if iq[np_m1] != 0:
+                    continue  # new-electron loop
+                return ircode  # Photon was selected, return to shower
 
-                iarg=MOLLAUSB
-                if iausfl[iarg-1+1] != 0:  # ** 0-based
-                    ausgab(iarg)
-                moller()
-                if particle_selection_moller:
-                    particle_selection_moller()
+            # It was Moller, but first check the kinematics.
+            # However, if EII is on, we should still permit an interaction
+            # even if E<moller threshold as EII interactions go down to
+            # the ionization threshold which may be less than thmoll.
+            if e[np_m1] <= thmoll[medium_m1] and eii_flag == 0:
+                # (thmoll = lower Moller threshold)
+                # Not enough energy for Moller, so
+                # force it to be a bremsstrahlung---provided ok kinematically.
+                if ebr1 <= 0: # Brems not allowed either.
+                    continue  #  NEW-ELECTRON loop
+                # It was bremsstrahlung
+                ebrems()
+                if iq[np_m1] != 0:
+                    continue  # new-electron loop
+                return ircode  # Photon was selected, return to shower
 
-                iarg=MOLLAUSA
-                if iausfl[iarg-1+1] != 0:  # ** 0-based
-                    ausgab(iarg)
-                if iq[np_m1] == 0 :
-                    return ircode
+            if iausfl[MOLLAUSB-1+1] != 0:  # ** 0-based
+                ausgab(MOLLAUSB)
+            egsfortran.moller()
+            if particle_selection_moller:
+                particle_selection_moller()
 
-            goto_NEWELECTRON = True
-            break # XXX # Electron is lowest energy-follow it
+            if iausfl[MOLLAUSA-1+1] != 0:  # ** 0-based
+                ausgab(MOLLAUSA)
+            if iq[np_m1] == 0:
+                return ircode
+
+            continue  # NEW-ELECTRON loop Electron is lowest energy-follow it
 
         # e+ interaction. pbr1 = brems/(brems + bhabha + annih
         # --- Inline replace: $ EVALUATE_PBREM_FRACTION; -----
         if evaluate_pbrem_fraction:
-            evaluate_pbrem_fraction()
+            pbr1 = evaluate_pbrem_fraction()
         else:
             # EVALUATE pbr1 USING pbr1(elke)
             pbr1 = pbr11[lelke_m1, medium_m1]*elke+ pbr10[lelke_m1, medium_m1]
@@ -979,14 +1003,17 @@ def electr() -> int:
 
         rnno25 = randomset()
         if rnno25 < pbr1:
-            goto_EBREMS = True
-            break # XXX # It was bremsstrahlung
+            # It was bremsstrahlung
+            ebrems()
+            if iq[np_m1] != 0:
+                continue  # new-electron loop
+            return ircode  # Photon was selected, return to shower
 
         # Decide between bhabha and annihilation
         # pbr2 is (brems + bhabha)/(brems + bhabha + annih)
         # --- Inline replace: $ EVALUATE_BHABHA_FRACTION; -----
         if evaluate_bhabha_fraction:
-            evaluate_bhabha_fraction()
+            prb2 = evaluate_bhabha_fraction()
         else:
             # EVALUATE pbr2 USING pbr2(elke)
             pbr2 = pbr21[lelke_m1, medium_m1]*elke+ pbr20[lelke_m1, medium_m1]
@@ -994,139 +1021,103 @@ def electr() -> int:
 
         if rnno25 < pbr2:
             # It is bhabha
-            iarg=BHABAUSB
-            if iausfl[iarg-1+1] != 0:  # ** 0-based
-                ausgab(iarg)
-            bhabha()
+            if iausfl[BHABAUSB-1+1] != 0:  # ** 0-based
+                ausgab(BHABAUSB)
+            egsfortran.bhabha()
             if particle_selection_bhabha:
                 particle_selection_bhabha()
-            iarg=BHABAUSA
-            if iausfl[iarg-1+1] != 0:  # ** 0-based
-                ausgab(iarg)
+            if iausfl[BHABAUSA-1+1] != 0:  # ** 0-based
+                ausgab(BHABAUSA)
             if iq[np_m1] == 0:
                 return ircode
         else:
             # It is in-flight annihilation
-            iarg=ANNIHFAUSB
-            if iausfl[iarg-1+1] != 0:  # ** 0-based
-                ausgab(iarg)
-            annih()
+            if iausfl[ANNIHFAUSB-1+1] != 0:  # ** 0-based
+                ausgab(ANNIHFAUSB)
+            egsfortran.annih()
             if particle_selection_annih:
                 particle_selection_annih()
 
-            iarg=ANNIHFAUSA
-            if iausfl[iarg-1+1] != 0:  # ** 0-based
-                ausgab(iarg)
-            # XXX needs label
-            break  # EXIT :NEWELECTRON: # i.e., in order to return to shower
+            if iausfl[ANNIHFAUSA-1+1] != 0:  # ** 0-based
+                ausgab(ANNIHFAUSA)
+            break  # EXIT NEW-ELECTRON loop, in order to return to shower
             # After annihilation the gammas are bound to be the lowest energy
             # particles, so return and follow them.
         # end pbr2 else
 
-    # loop on newelectron
+    # loop on NEW-ELECTRON ***************************************************
 
-    return ircode  # i.e., return to shower
+    # Done NEW-ELECTRON loop, tally and return
+    if not (user_electron_discard or ecut_discard):
+        return ircode
     # ---------------------------------------------
-    # Bremsstrahlung-call section
+    # User requested electron discard section
     # ---------------------------------------------
-    if goto_EBREMS:  # XXX
-        iarg=BREMAUSB
-        if iausfl[iarg-1+1] != 0:  # ** 0-based
-            ausgab(iarg)
-        brems()
-        if particle_selection_brems:
-            particle_selection_brems()
+    if user_electron_discard:
+        epcont.idisc = abs(idisc)
 
-        iarg=BREMAUSA
-        if iausfl[iarg-1+1] != 0:  # ** 0-based
-            ausgab(iarg)
-        if iq[np_m1] == 0:
-            # Photon was selected.
-            return ircode  # i.e., return to shower
+        if lelec < 0 or idisc == 99:
+            epcont.edep =  e[np_m1] - prm
         else:
-            # Electron was selected
-            goto_NEWELECTRON = True
-            # break # XXX
+            epcont.edep =  e[np_m1] + prm
 
+        if iausfl[USERDAUS-1+1] != 0:  # ** 0-based
+            ausgab(USERDAUS)
+
+        if idisc != 99:
+            stack.np -= 1
+            ircode = 2
+            return ircode  # i.e., return to shower
+        # else close up below
     # ---------------------------------------------
     # Electron cutoff energy discard section
     # ---------------------------------------------
-    if goto_ECUT_DISCARD:  XXX
-    if medium > 0:
-        if eie > ae[medium_m1]:
-            idr = EGSCUTAUS
-            if lelec < 0:
-                epcont.edep = e[np_m1] - prm
+    elif ecut_discard:
+        if medium > 0:
+            if eie > ae[medium_m1]:
+                idr = EGSCUTAUS
+                if lelec < 0:
+                    epcont.edep = e[np_m1] - prm
+                else:
+                    epcont.edep = peie - prm
             else:
-                epcont.edep = peie-prm
+                idr = PEGSCUTAUS
+                epcont.edep =  e[np_m1] - prm
         else:
-            idr = PEGSCUTAUS
+            idr = EGSCUTAUS
             epcont.edep =  e[np_m1] - prm
-    else:
-        idr = EGSCUTAUS
-        epcont.edep =  e[np_m1] - prm
 
-
-    # Define electron_track_end if you wish to modify the
-    # treatment of track ends
-    if electron_track_end:
-        electron_track_end()
-    else:
-        iarg=idr
-        if iausfl[iarg-1+1] != 0:  # ** 0-based
-            ausgab(iarg)
-
-    if goto_POSITRON_ANNIHILATION:  # XXX # NRCC extension 86/9/12
-        need_something
-        #XXX
-    if lelec > 0:
-        # It's a positron. Produce annihilation gammas if edep < peie
-        if edep < peie:
-            iarg=ANNIHRAUSB
+        # Define electron_track_end if you wish to modify the
+        # treatment of track ends
+        if electron_track_end:
+            electron_track_end()
+        else:
+            iarg=idr
             if iausfl[iarg-1+1] != 0:  # ** 0-based
                 ausgab(iarg)
+
+    # in Mortran code, above two flags fall through into positron_annihilation
+    #  and its following np and ircode setting
+
+    if lelec > 0:  # positron_annihilation:  # NRCC extension 86/9/12
+        # It's a positron. Produce annihilation gammas if edep < peie
+        if edep < peie:
+            if iausfl[ANNIHRAUSB-1+1] != 0:  # ** 0-based
+                ausgab(ANNIHRAUSB)
             annih_at_rest()
             if particle_selection_annihrest:
                 particle_selection_annihrest()
 
-            iarg=ANNIHRAUSA
-            if iausfl[iarg-1+1] != 0:  # ** 0-based
-                ausgab(iarg)
+            if iausfl[ANNIHRAUSA-1+1] != 0:  # ** 0-based
+                ausgab(ANNIHRAUSA)
             # Now discard the positron and take normal return to follow
             # the annihilation gammas.
             return ircode # i.e., return to shower
 
-    # end of positron block
-
+    # Final clean-up for any paths not exited some other way
     stack.np -= 1
-    #  np_m1 = np - 1  # ** 0-based - not needed since not used again
-    ircode = 2 # tell shower an e- or un-annihilated
-                # e+ has been discarded
 
-    return ircode  # i.e., return to shower
-
-    # ---------------------------------------------
-    # User requested electron discard section
-    # ---------------------------------------------
-    if goto_USER_ELECTRON_DISCARD:  XXX
-
-    epcont.idisc = abs(idisc)
-
-    if lelec < 0 or idisc == 99:
-        epcont.edep =  e[np_m1] - prm
-    else:
-        epcont.edep =  e[np_m1] + prm
-
-    iarg=USERDAUS
-    if iausfl[iarg-1+1] != 0:  # ** 0-based
-        ausgab(iarg)
-
-    if idisc == 99:
-        goto_POSITRON_ANNIHILATION = True
-        # break # XXX
-
-    stack.np -= 1
+    # tell shower an e- or un-annihilated e+ has been discarded
     ircode = 2
 
     return ircode  # i.e., return to shower
-    # End of subroutine electr
