@@ -1098,6 +1098,7 @@ $start_new_particle;
                                 "interaction in the USTEP loop
         eke = eie - rm; "moved here so that kinetic energy will be known"
                         "to user even for a vacuum step, IK January 2000"
+        $egs_info('(a,e16.8,a)', 'New TSTEP, eke=', eke, '==================');
         IF(medium ~= 0)
         [
             "Not vacuum. Must sample to see how far to next interaction.
@@ -1107,7 +1108,7 @@ $start_new_particle;
                 "                                       demfp = -log(rnne1);
                 "($RANDOMSET is a macro'ed random number generator)
                 "(demfp = differential electron mean free path)
-
+            $egs_info('(a,e16.8)', 'non-vac, demfp=', demfp);
             elke = log(eke);
             "(eke = kinetic energy, rm = rest mass, all in units of MeV)
             $SET INTERVAL elke,eke; "Prepare to approximate cross section
@@ -1120,7 +1121,7 @@ $start_new_particle;
                "$SET INTERVAL is not necessary at this point. However, to not"
                "completely alter the logic of the TSTEP and USTEP loops,"
                "this is left for now"
-
+            $egs_info('(a,e16.8)', 'sig0=', sig0);
         ] "end non-vacuum test
 
         :USTEP:LOOP
@@ -1128,6 +1129,7 @@ $start_new_particle;
             "Here for each check with user geometry.
             "Compute size of maximum acceptable step, which is limited
             "by multiple scattering or other approximations.
+            $egs_info('(a)', 'New ustep ---------------------');
             IF(medium = 0)
             [
                     "vacuum
@@ -1176,16 +1178,19 @@ $start_new_particle;
                 ELSE
                 [
                     $CALCULATE-TSTEP-FROM-DEMFP;
-                ] "end sig if-else
 
+                ] "end sig if-else
+                $egs_info('(a,e16.8)', 'ustep non-vac, calc tstep=', tstep);
                 "calculate stopping power"
                 IF(lelec < 0) [$EVALUATE dedx0 USING ededx(elke);] "e-"
                 ELSE          [$EVALUATE dedx0 USING pdedx(elke);] "e+"
                 dedx  = rhof*dedx0;
+                $egs_info('(a,e16.8)', 'dedx=', dedx);
 
                 "Determine maximum step-size (Formerly $SET-TUSTEP)
                 $EVALUATE tmxs USING tmxs(elke);
                 tmxs = tmxs/rhof;
+                $egs_info('(a,e16.8)', 'tmxs=', tmxs);
 
                 "Compute the range to E_min(medium) (e_min is the first
                 "energy in the table). Do not go more than range.
@@ -1193,6 +1198,7 @@ $start_new_particle;
                 "the energy loss evaluation below relies on the accurate
                 "(and self-consistent) evaluation of range!
                 $COMPUTE-RANGE;
+                $egs_info('(a,e16.8)', 'range=', range);
 
                 "The RANDOMIZE-TUSTEP option as coded by AFB forced the
                 "electrons to approach discrete events (Moller,brems etc.)
@@ -1209,9 +1215,12 @@ $start_new_particle;
                     tmxs = min(tmxs,smaxir(irl));
                 ]
                 tustep = min(tstep,tmxs,range);
+                $egs_info('(a,e16.8)', 'tustep=', tustep);
                 $SET-TUSTEP-EM-FIELD; "optional tustep restriction in EM field
 
                 $CALL-HOWNEAR(tperp);
+                $egs_info('(a,4e16.8)', 'tperp, xyz=', tperp,
+                x(np), y(np), z(np));
                 dnear(np) = tperp;
                 $RANGE-DISCARD;       "optional regional range rejection for"
                                       "particles below e_max_rr if i_do_rr set"
@@ -1290,6 +1299,8 @@ $start_new_particle;
 
                     IF (transport_algorithm = $PRESTA-II)
                     [
+                      $egs_info('(a,6e16.8)', 'PrestaII xyz,uvw=',
+                      x(np),y(np),z(np),u(np),v(np),w(np));
                       call msdist_pII
                       (
                         "Inputs
@@ -1301,6 +1312,8 @@ $start_new_particle;
                     ]
                     ELSE
                     [
+                      $egs_info('(a,6e16.8)', 'Presta-I, xyz,uvw=',
+                      x(np),y(np),z(np),u(np),v(np),w(np));
                       call msdist_pI
                       (
                         "Inputs
@@ -1310,6 +1323,9 @@ $start_new_particle;
                         uscat,vscat,wscat,xtrans,ytrans,ztrans,ustep
                       );
                     ]
+                    $egs_info('(a,7e16.8)', 'presta out: uvwcat,xyztrans,ustep',
+                      uscat,vscat,wscat,xtrans,ytrans,ztrans,ustep);
+
                 ]
                 ELSE
                 [
@@ -1369,6 +1385,8 @@ $start_new_particle;
                     [
                         callhowfar = .true.;
                     ]
+                    "$egs_info('(a,2e16.8)', 'Boundary crossing used, exact_bca,
+                    "ustep=',exact_bca,ustep);
                 ]
             ] "end non-vacuum test
 
@@ -1479,6 +1497,8 @@ $start_new_particle;
                   $COMPUTE-ELOSS-G(tvstep,eke,elke,lelke,de);
                ]
             ]
+            $egs_info('(a,2e16.8)', 'Setting TVSTEP tvstep, de=',
+                      tvstep, de);
 
             $SET-TVSTEP-EM-FIELD; "additional path length correction in em field
                 "( Calculates tvstep given vstep
@@ -1524,6 +1544,7 @@ $start_new_particle;
                     call mscat(lambda,chia2,xi,elkems,beta2,qel,medium,
                                spin_effects,findindex,spin_index,
                                costhe,sinthe);
+                    $egs_info('(a)', 'Multiple scattering called');
                 ]
                 ELSE
                 [
@@ -1544,6 +1565,7 @@ $start_new_particle;
                        ]
                        call sscat(chia2,elkems,beta2,qel,medium,
                                   spin_effects,costhe,sinthe);
+                       $egs_info('(a)', 'Single scattering called');
                     ]
                     ELSE
                     [
@@ -1595,6 +1617,8 @@ $start_new_particle;
                     call uphi(2,1); "Apply the deflection, save call to uphi if
                                     "no deflection in a single scattering mode
                     u_final = u(np); v_final = v(np); w_final = w(np);
+                    $egs_info('(a,3e16.8)', 'Called UPHI: final uvw=',
+                        u_final, v_final, w_final);
                     u(np) = u_tmp; v(np) = v_tmp; w(np) = w_tmp;
                 ]
                 ELSE [ u_final = u(np); v_final = v(np); w_final = w(np); ]
@@ -1606,7 +1630,8 @@ $start_new_particle;
 
             x(np) = x_final; y(np) = y_final; z(np) = z_final;
             u(np) = u_final; v(np) = v_final; w(np) = w_final;
-
+            $egs_info('(a,6e16.8)', 'Transport: new xyz/uvw=',
+              x(np),y(np),z(np),u(np),v(np),w(np));
             dnear(np) = dnear(np) - vstep;
             irold = ir(np); "save previous region
             $SET-ANGLES-EM-FIELD;
@@ -3262,10 +3287,14 @@ subroutine sscat(chia2,elke,beta2,qel,medium,spin_effects,cost,sint);
 implicit none;
 
 $REAL    chia2,elke,beta2,cost,sint;
+!COMMENTS;
+"f2py intent(inout) cost, sint"
+!NOCOMMENTS;
 $INTEGER qel,medium;
 $LOGICAL spin_effects;
 
 COMIN/RANDOM/;
+;COMIN/EGS-IO/;  "$egs_info needs this"
 
 $REAL    xi,rnno,rejf,spin_rejection,qzero;
 $LOGICAL spin_index;
@@ -3286,6 +3315,7 @@ IF( spin_effects ) [
     IF( rnno > rejf ) goto :RETRY-SPIN:;
 ]
 sint = sqrt(xi*(2 - xi));
+$egs_info('(a,3e16.8)', 'sscat: chia2 sint cost=', chia2, sint, cost);
 return;
 end;
 
@@ -6740,7 +6770,7 @@ $EVALUATE COSTHE USING SIN(CTHET);
 " CPHI=PI5D2-PHI;$SET INTERVAL CPHI,SINC;
 " $EVALUATE COSPHI USING SIN(CPHI);
 $SELECT-AZIMUTHAL-ANGLE(cosphi,sinphi);
-
+$egs_info('(a,2e16.8)','UPHI: cosphi, sinphi=',cosphi,sinphi);
 "   USE THE FOLLOWING ENTRY FOR THE SECOND OF TWO PARTICLES WHEN WE"
 "   KNOW TWO PARTICLES HAVE A RELATIONSHIP IN THEIR CORRECTIONS.   "
 "   NOTE: SINTHE AND COSTHE CAN BE CHANGED OUTSIDE THROUGH COMMON. "

@@ -38,9 +38,9 @@ def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
     # ******************************************************************
 
     # stack
-    global e, x, y, z, u, v, w, dnear, wt, iq, ir, latch, latchi, np, npold
+    # global e, x, y, z, u, v, w, dnear, wt, iq, ir, latch, latchi, np, npold
     # uphiot
-    global theta, sinthe, costhe, sinphi, cosphi, pi, twopi, pi5d2
+    # global theta, sinthe, costhe, sinphi, cosphi, pi, twopi, pi5d2
 
     # msg = ", ".join(f"{x}={locals()[x]}" for x in "iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti".split(","))
     # logger.info(f"Called shower with {msg}")
@@ -296,7 +296,7 @@ def main(iqin=-1):  # iqin here only to make generating validation data faster
     # ---------------------------------------------------------------------
     # initiate the shower 10 times
 
-    ncase=10  # INITIATE THE SHOWER NCASE TIMES
+    ncase=1  # INITIATE THE SHOWER NCASE TIMES
 
     for i in range(ncase):
         if (iwatch != 0) and (iwatch != 4):

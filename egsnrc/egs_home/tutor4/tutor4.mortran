@@ -286,7 +286,7 @@ end;
 
 "********************************************************************"
 "                                                                    "
-SUBROUTINE XXXAUSGAB(IARG);
+SUBROUTINE AUSGAB(IARG);
 "                                                                    "
 " In this AUSGAB routine for tutor4, we score the energy deposited   "
 "  in the various regions. This amounts to the total energy          "

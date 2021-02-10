@@ -7,8 +7,13 @@ from egsnrc.calcfuncs import (
     calc_tstep_from_demfp, calculate_xi, compute_drange,
     compute_eloss, compute_eloss_g
 )
+from egsnrc.uphi import uphi
 
 from math import log
+
+import logging
+logger = logging.getLogger("egsnrc")
+
 
 # EMPTY CALLBACKS ----
 calculate_elastic_scattering_mfp = None
@@ -69,7 +74,7 @@ def tstep_ustep(
                                 # interaction in the USTEP loop
         epcont.eke = eie - rm  # moved here so that kinetic energy will be known
                         # to user even for a vacuum step, IK January 2000
-
+        logger.info(f'New TSTEP, eke={eke} ===================')
         if medium != 0:
             # Not vacuum. Must sample to see how far to next interaction.
             # --- Inline replace: $ SELECT_ELECTRON_MFP; -----
@@ -83,6 +88,7 @@ def tstep_ustep(
             # End inline replace: $ SELECT_ELECTRON_MFP; ----
             # demfp = differential electron mean free path
 
+            logger.info(f'non-vac, demfp={demfp}')
             epcont.elke = log(eke)
             # (eke = kinetic energy, rm = rest mass, all in units of MeV)
 
@@ -128,13 +134,14 @@ def tstep_ustep(
             # $ SET INTERVAL is not necessary at this point. However, to not
             # completely alter the logic of the TSTEP and USTEP loops,
             # this is left for now
-
+            logger.info(f'sig0={sig0}')
         # end non-vacuum test
         # ----------------------------------------------------------------
         while True:  # :USTEP: LOOP
             # Here for each check with user geometry.
             # Compute size of maximum acceptable step, which is limited
             # by multiple scattering or other approximations.
+            logger.info("New USTEP -----------------------------")
             if medium == 0:  # vacuum
                 epcont.tstep = vacdst
                 epcont.tustep = epcont.ustep = tstep
@@ -191,7 +198,7 @@ def tstep_ustep(
                     epcont.tstep = total_tstep / rhof #  non-default density scaling
                     # End inline replace: $ CALCULATE_TSTEP_FROM_DEMFP; ----
                 # end sig if-else
-
+                logger.info(f'ustep non-vac, calc tstep={tstep}')
                 # calculate stopping power
                 if lelec < 0:
                     # EVALUATE dedx0 USING ededx(elke)] # e-
@@ -200,12 +207,12 @@ def tstep_ustep(
                     # EVALUATE dedx0 USING pdedx(elke) # e+
                     dedx0 = pdedx1[lelke_m1, medium_m1]*elke+ pdedx0[lelke_m1, medium_m1]
                 dedx = rhof*dedx0
-
+                logger.info(f'dedx={dedx}')
                 # Determine maximum step-size (Formerly $ SET-TUSTEP)
                 # EVALUATE tmxs USING tmxs(elke)
                 tmxs = tmxs1[lelke_m1, medium_m1]*elke+ tmxs0[lelke_m1, medium_m1]
                 tmxs = tmxs/rhof
-
+                logger.info(f'tmxs={tmxs}')
                 # Compute the range to E_min[medium_m1] (e_min is the first
                 # energy in the table). Do not go more than range.
                 # Don't replace this macro and don't override range_, because
@@ -220,7 +227,7 @@ def tstep_ustep(
                 )
                 range_ = (range_ + range_ep[qel, lelke_m1, medium_m1]) / rhof
                 # End inline replace: $ COMPUTE_RANGE; ----
-
+                logger.info(f'range_={range_}')
                 # The RANDOMIZE-TUSTEP option as coded by AFB forced the
                 # electrons to approach discrete events (Moller,brems etc.)
                 # only in a single scattering mode => waste of CPU time.
@@ -232,13 +239,14 @@ def tstep_ustep(
                     tmxs = min(tmxs,smaxir[irl_m1])
 
                 epcont.tustep = min(tstep,tmxs,range_)
+                logger.info(f'tustep={tustep}')
                 # optional tustep restriction in EM field
 
 
                 # --- Inline replace: $ CALL_HOWNEAR(tperp); -----
                 tperp = hownear(x[np_m1], y[np_m1], z[np_m1], irl)
                 # End inline replace: $ CALL_HOWNEAR(tperp); ----
-
+                logger.info(f'tperp={tperp} = hownear({x[np_m1]}, {y[np_m1]}, {z[np_m1]}, {irl})')
                 dnear[np_m1] = tperp
 
                 # --- Inline replace: $ RANGE_DISCARD; -----
@@ -357,6 +365,10 @@ def tstep_ustep(
                     is_ch_step = True
 
                     if transport_algorithm == PRESTA_II:
+                        logger.info(
+                            f'PrestaII xyz,uvw={x[np_m1]},{y[np_m1]},{z[np_m1]},'
+                            f'{u[np_m1]},{v[np_m1]},{w[np_m1]}'
+                        )
                         egsfortran.msdist_pii(  # msdist_pII but for case issues
                             # Inputs
                             eke,de,tustep,rhof,medium,qel,spin_effects,
@@ -372,6 +384,9 @@ def tstep_ustep(
                             # Outputs
                             uscat,vscat,wscat,xtrans,ytrans,ztrans,ustep
                         )
+                    logger.info(
+                        f'presta out: uvwcat,xyztrans,ustep {uscat},{vscat},{wscat}'
+                        f',{xtrans},{ytrans},{ztrans},{ustep}')
                 else:
                     # We are within a skindepth from a boundary, invoke
                     # one of the various boundary-crossing algorithms
@@ -613,6 +628,7 @@ def tstep_ustep(
                     # --- Inline replace: $ COMPUTE_ELOSS_G(tvstep,eke,elke,lelke,de); -----
                     de = compute_eloss_g(lelec, medium, tvstep, eke, elke, lelke, range_)
 
+            logger.info(f'Setting TVSTEP tvstep, de= {tvstep},{de}')
             if set_tvstep_em_field:
                 set_tvstep_em_field()
                 # additional path length correction in em field
@@ -657,6 +673,7 @@ def tstep_ustep(
                     mscat(lambda_,chia2,xi,elkems,beta2,qel,medium,
                             spin_effects,findindex,spin_index,
                             costhe,sinthe)
+                    logger.info('Multiple scattering called')
                 elif dosingle:
                     # Single scattering
                     ekems = max(ekef,ecut[irl_m1]-rm)
@@ -677,6 +694,7 @@ def tstep_ustep(
 
                     egsfortran.sscat(chia2,elkems,beta2,qel,medium,
                                 spin_effects,costhe,sinthe)
+                    logger.info('Single scattering called')
                 else:
                     theta  = 0 # No deflection in single scattering model
                     sinthe = 0
@@ -713,11 +731,12 @@ def tstep_ustep(
                     epcont.y_final = y[np_m1] + v[np_m1]*vstep
                     epcont.z_final = z[np_m1] + w[np_m1]*vstep
                 if domultiple or dosingle:
-                    u_tmp = u[np_m1]; v_tmp = v[np_m1]; w_tmp = w[np_m1]
-                    egsfortran.uphi(2,1) # Apply the deflection, save call to uphi if
+                    uvw_tmp = (u[np_m1], v[np_m1], w[np_m1])
+                    uphi(2,1) # Apply the deflection, save call to uphi if
                                     # no deflection in a single scattering mode
                     epcont.u_final = u[np_m1]; epcont.v_final = v[np_m1]; epcont.w_final = w[np_m1]
-                    u[np_m1] = u_tmp; v[np_m1] = v_tmp; w[np_m1] = w_tmp
+                    logger.info(f'Called UPHI: final uvw={u_final},{v_final},{w_final}')
+                    u[np_m1], v[np_m1], w[np_m1] = uvw_tmp
                 else:
                     epcont.u_final = u[np_m1]; epcont.v_final = v[np_m1]; epcont.w_final = w[np_m1]
 
@@ -729,6 +748,10 @@ def tstep_ustep(
             x[np_m1] = x_final; y[np_m1] = y_final; z[np_m1] = z_final
             u[np_m1] = u_final; v[np_m1] = v_final; w[np_m1] = w_final
 
+            logger.info(
+                f"Transport: new xyz/uvw={x[np_m1]} {y[np_m1]} {z[np_m1]}"
+                f" {u[np_m1]} {v[np_m1]} {w[np_m1]}"
+            )
             dnear[np_m1] = dnear[np_m1] - vstep
             epcont.irold = ir[np_m1] # save previous region
 
