@@ -60,6 +60,15 @@ def tstep_ustep(
     """
     global costhe, sinthe
 
+    # Define output variables from egsfortran functions, to avoid error message
+    # For f2py, need 'scalar' which are rank-0 arrays
+    uscat = numpy.array(0, dtype=numpy.float64)  # just need to define something
+    vscat = numpy.array(0, dtype=numpy.float64)
+    wscat = numpy.array(0, dtype=numpy.float64)
+    xtrans = numpy.array(0, dtype=numpy.float64)
+    ytrans = numpy.array(0, dtype=numpy.float64)
+    ztrans = numpy.array(0, dtype=numpy.float64)
+
     qel = 0 if lelec == -1 else 1  # for array indexing
     medium_m1 = medium - 1  # ** 0-based
     irl_m1 = irl - 1
@@ -502,7 +511,7 @@ def tstep_ustep(
             if ustep == 0 or medium == 0:
                 # Do fast step in vacuum
                 if ustep != 0:
-                    if em_macros_active:
+                    if EM_MACROS_ACTIVE:
                         epcont.edep = pzero # no energy loss in vacuum
                         # transport in EMF in vacuum:
                         # only a B or and E field can be active

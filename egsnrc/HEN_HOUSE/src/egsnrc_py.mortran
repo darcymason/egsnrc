@@ -4146,7 +4146,9 @@ $REAL
     zf,    "final z-position after transport
     ustep  "straight line distance between the initial and final position
 ;
-
+!COMMENTS;
+"f2py intent(inout) us, vs, ws, xf, yf, zf, ustep"
+!NOCOMMENTS;
 " Local variables
 " ===============
 $REAL

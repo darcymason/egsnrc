@@ -21,3 +21,5 @@ PEGSCUTAUS: numpy.int32 = 2
 ANNIHRAUSB: numpy.int32 = 28
 ANNIHRAUSA: numpy.int32 = 14
 USERDAUS: numpy.int32 = 3
+
+EM_MACROS_ACTIVE = False

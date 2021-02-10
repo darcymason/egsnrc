@@ -8259,6 +8259,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
 4561      CONTINUE
           compute_tstep = .true.
           eke = eie - rm
+          write(i_log,'(a,e16.8,a)') 'New TSTEP, eke=', eke, '==========
+     *========'
           IF ((medium .NE. 0)) THEN
             IF (( rng_seed .GT. 24 )) THEN
               call ranlux(rng_array)
@@ -8270,6 +8272,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               RNNE1=1.E-30
             END IF
             DEMFP=MAX(-LOG(RNNE1),1.E-8)
+            write(i_log,'(a,e16.8)') 'non-vac, demfp=', demfp
             elke = log(eke)
             Lelke=eke1(MEDIUM)*elke+eke0(MEDIUM)
             IF (( sig_ismonotone(qel,medium) )) THEN
@@ -8290,9 +8293,11 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 sig0 = psig_e(medium)
               END IF
             END IF
+            write(i_log,'(a,e16.8)') 'sig0=', sig0
           END IF
 4570      CONTINUE
 4571        CONTINUE
+            write(i_log,'(a)') 'New ustep ---------------------'
             IF ((medium .EQ. 0)) THEN
               tstep = vacdst
               ustep = tstep
@@ -8315,14 +8320,18 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 END IF
                 tstep = total_tstep/rhof
               END IF
+              write(i_log,'(a,e16.8)') 'ustep non-vac, calc tstep=', tst
+     *        ep
               IF ((lelec .LT. 0)) THEN
                 dedx0=ededx1(Lelke,MEDIUM)*elke+ededx0(Lelke,MEDIUM)
               ELSE
                 dedx0=pdedx1(Lelke,MEDIUM)*elke+pdedx0(Lelke,MEDIUM)
               END IF
               dedx = rhof*dedx0
+              write(i_log,'(a,e16.8)') 'dedx=', dedx
               tmxs=tmxs1(Lelke,MEDIUM)*elke+tmxs0(Lelke,MEDIUM)
               tmxs = tmxs/rhof
+              write(i_log,'(a,e16.8)') 'tmxs=', tmxs
               ekei = E_array(lelke,medium)
               elkei = (lelke - eke0(medium))/eke1(medium)
               fedep = 1 - ekei/eke
@@ -8343,6 +8352,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               aux = aux*(1+2*aux)*(fedep/(2-fedep))**2/6
               range = fedep*eke*dedxmid*(1+aux)
               range = (range + range_ep(qel,lelke,medium))/rhof
+              write(i_log,'(a,e16.8)') 'range=', range
               random_tustep = .false.
               IF ((random_tustep)) THEN
                 IF (( rng_seed .GT. 24 )) THEN
@@ -8356,7 +8366,10 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 tmxs = min(tmxs,smaxir(irl))
               END IF
               tustep = min(tstep,tmxs,range)
+              write(i_log,'(a,e16.8)') 'tustep=', tustep
               tperp = hownear(x(np),y(np),z(np),irl)
+              write(i_log,'(a,4e16.8)') 'tperp, xyz=', tperp, x(np), y(n
+     *        p), z(np)
               dnear(np) = tperp
               IF (( i_do_rr(irl) .EQ. 1 .AND. e(np) .LT. e_max_rr(irl) )
      *        ) THEN
@@ -8396,14 +8409,20 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 tvstep = tustep
                 is_ch_step = .true.
                 IF ((transport_algorithm .EQ. 0)) THEN
+                  write(i_log,'(a,6e16.8)') 'PrestaII xyz,uvw=', x(np),y
+     *            (np),z(np),u(np),v(np),w(np)
                   call msdist_pII (  eke,de,tustep,rhof,medium,qel,spin_
      *            effects, u(np),v(np),w(np),x(np),y(np),z(np),  uscat,v
      *            scat,wscat,xtrans,ytrans,ztrans,ustep )
                 ELSE
+                  write(i_log,'(a,6e16.8)') 'Presta-I, xyz,uvw=', x(np),
+     *            y(np),z(np),u(np),v(np),w(np)
                   call msdist_pI (  eke,de,tustep,rhof,medium,qel,spin_e
      *            ffects, u(np),v(np),w(np),x(np),y(np),z(np),  uscat,vs
      *            cat,wscat,xtrans,ytrans,ztrans,ustep )
                 END IF
+                write(i_log,'(a,7e16.8)') 'presta out: uvwcat,xyztrans,u
+     *step', uscat,vscat,wscat,xtrans,ytrans,ztrans,ustep
               ELSE
                 callmsdist = .false.
                 IF ((exact_bca)) THEN
@@ -8633,6 +8652,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *          ,range)
               END IF
             END IF
+            write(i_log,'(a,2e16.8)') 'Setting TVSTEP tvstep, de=', tvst
+     *      ep, de
             save_de = de
             edep = de
             ekef = eke - de
@@ -8646,6 +8667,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 spin_index = .true.
                 call mscat(lambda,chia2,xi,elkems,beta2,qel,medium, spin
      *          _effects,findindex,spin_index, costhe,sinthe)
+                write(i_log,'(a)') 'Multiple scattering called'
               ELSE
                 IF ((dosingle)) THEN
                   ekems = Max(ekef,ecut(irl)-rm)
@@ -8666,6 +8688,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                   END IF
                   call sscat(chia2,elkems,beta2,qel,medium, spin_effects
      *            ,costhe,sinthe)
+                  write(i_log,'(a)') 'Single scattering called'
                 ELSE
                   theta = 0
                   sinthe = 0
@@ -8695,6 +8718,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 u_final = u(np)
                 v_final = v(np)
                 w_final = w(np)
+                write(i_log,'(a,3e16.8)') 'Called UPHI: final uvw=', u_f
+     *          inal, v_final, w_final
                 u(np) = u_tmp
                 v(np) = v_tmp
                 w(np) = w_tmp
@@ -8714,6 +8739,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             u(np) = u_final
             v(np) = v_final
             w(np) = w_final
+            write(i_log,'(a,6e16.8)') 'Transport: new xyz/uvw=', x(np),y
+     *      (np),z(np),u(np),v(np),w(np)
             dnear(np) = dnear(np) - vstep
             irold = ir(np)
             peie = peie - edep
@@ -10577,11 +10604,25 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
      *t)
       implicit none
       real*8 chia2,elke,beta2,cost,sint
+Cf2py intent(inout) cost, sint
       integer*4 qel,medium
       logical spin_effects
       common/randomm/ rng_array(24), seeds(25), rng_seed
       real*8 rng_array
       integer*4 rng_seed,  seeds
+      common /egs_io/ file_extensions(20), file_units(20), user_code,  i
+     *nput_file,  output_file, pegs_file,  hen_house,  egs_home,  work_d
+     *ir,  host_name,  n_parallel,  i_parallel,  first_parallel, n_max_p
+     *arallel, n_chunk,  n_files, i_input,  i_log,  i_incoh,  i_nist_dat
+     *a,  i_mscat,  i_photo_cs,  i_photo_relax,  xsec_out,  is_batch,  i
+     *s_pegsless
+      character input_file*256, output_file*256, pegs_file*256, file_ext
+     *ensions*10, hen_house*128, egs_home*128, work_dir*128, user_code*6
+     *4, host_name*64
+      integer*4 n_parallel, i_parallel, first_parallel,n_max_parallel, n
+     *_chunk, file_units, n_files,i_input,i_log,i_incoh, i_nist_data,i_m
+     *scat,i_photo_cs,i_photo_relax, xsec_out
+      logical is_batch,is_pegsless
       real*8 xi,rnno,rejf,spin_rejection,qzero
       logical spin_index
       spin_index = .true.
@@ -10607,6 +10648,8 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         IF((rnno .GT. rejf))goto 5280
       END IF
       sint = sqrt(xi*(2 - xi))
+      write(i_log,'(a,3e16.8)') 'sscat: chia2 sint cost=', chia2, sint,
+     *cost
       return
       end
       subroutine init_ms_SR
@@ -11636,6 +11679,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       integer*4 med, qel
       logical spin_effects
       real*8 us,  vs,  ws,  xf,  yf,  zf,  ustep
+Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       real*8 b,  blccc,  xcccc,  c,  eta,eta1,  chia2,  chilog,  cphi0,
      *  cphi1,  cphi2,  w1,  w2,  w1v2,  delta,  e,  elke,  beta2,  etap
      *,  xi_corr,  ms_corr, tau,  tau2,  epsilon,  epsilonp,  temp,temp1
@@ -15265,6 +15309,7 @@ Cf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       rhophi2 = 1/rhophi2
       cosphi = (xphi2 - yphi2)*rhophi2
       sinphi = 2*xphi*yphi*rhophi2
+      write(i_log,'(a,2e16.8)') 'UPHI: cosphi, sinphi=',cosphi,sinphi
 6990  GO TO (7020,7030,7040),LVL
       GO TO 7000
 7020  A=U(NP)
