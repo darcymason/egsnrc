@@ -4,6 +4,8 @@ from egsnrc.commons import *
 from egsnrc.constants import *
 from egsnrc.electr_steps import tstep_ustep
 
+import logging
+logger = logging.getLogger('egsnrc')
 
 # EMPTY CALLBACKS ----
 call_user_electron = None
@@ -121,7 +123,7 @@ def electr(hownear, howfar, ausgab) -> int:
         # The above assignment is unnecessary, IK, June 2003
 
         if wt[np_m1] == 0.0:
-            user_electron_discard = True  # added May 01
+            particle_outcome = USER_ELECTRON_DISCARD
             break
 
         # Follow the one particle  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -134,10 +136,10 @@ def electr(hownear, howfar, ausgab) -> int:
             ircode = lelke
             return ircode
 
-        lelke_m1 = lelke - 1  # ** 0-based
-
         if particle_outcome in (USER_ELECTRON_DISCARD, ECUT_DISCARD):
             break  # from new-electron loop
+
+        lelke_m1 = lelke - 1  # ** 0-based
 
         #  Now sample electron interaction
         if lelec < 0:
@@ -151,9 +153,11 @@ def electr(hownear, howfar, ausgab) -> int:
             # End inline replace: $ EVALUATE_EBREM_FRACTION; ----
 
             rnno24 = randomset()
+            logger.info(f'random rnno24={rnno24}')
             if rnno24 <= ebr1:
                 # It was bremsstrahlung
                 ebrems(ausgab)
+                np_m1 = np - 1 # if new particle
                 if iq[np_m1] != 0:
                     continue  # new-electron loop
                 return ircode  # Photon was selected, return to shower
@@ -170,6 +174,7 @@ def electr(hownear, howfar, ausgab) -> int:
                     continue  #  NEW-ELECTRON loop
                 # It was bremsstrahlung
                 ebrems(ausgab)
+                np_m1 = np - 1 # if new particle
                 if iq[np_m1] != 0:
                     continue  # new-electron loop
                 return ircode  # Photon was selected, return to shower
@@ -182,6 +187,7 @@ def electr(hownear, howfar, ausgab) -> int:
 
             if iausfl[MOLLAUSA-1+1] != 0:  # ** 0-based
                 ausgab(MOLLAUSA)
+            np_m1 = np - 1 # if new particle
             if iq[np_m1] == 0:
                 return ircode
 
@@ -197,9 +203,11 @@ def electr(hownear, howfar, ausgab) -> int:
         # End inline replace: $ EVALUATE_PBREM_FRACTION; ----
 
         rnno25 = randomset()
+        logger.info(f'random rnno25={rnno25}')
         if rnno25 < pbr1:
             # It was bremsstrahlung
             ebrems(ausgab)
+            np_m1 = np - 1 # if new particle
             if iq[np_m1] != 0:
                 continue  # new-electron loop
             return ircode  # Photon was selected, return to shower
@@ -223,6 +231,7 @@ def electr(hownear, howfar, ausgab) -> int:
                 particle_selection_bhabha()
             if iausfl[BHABAUSA-1+1] != 0:  # ** 0-based
                 ausgab(BHABAUSA)
+            np_m1 = np - 1 # if new particle
             if iq[np_m1] == 0:
                 return ircode
         else:
@@ -232,10 +241,11 @@ def electr(hownear, howfar, ausgab) -> int:
             egsfortran.annih()
             if particle_selection_annih:
                 particle_selection_annih()
-
+            np_m1 = np - 1 # changing particles
             if iausfl[ANNIHFAUSA-1+1] != 0:  # ** 0-based
                 ausgab(ANNIHFAUSA)
-            break  # EXIT NEW-ELECTRON loop, in order to return to shower
+
+            return ircode  # EXIT NEW-ELECTRON loop, return to shower
             # After annihilation the gammas are bound to be the lowest energy
             # particles, so return and follow them.
         # end pbr2 else

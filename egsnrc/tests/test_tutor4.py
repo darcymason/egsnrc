@@ -6,6 +6,11 @@ from egsnrc import egsfortran
 from egsnrc.egs_home.tutor4 import tutor4
 from egsnrc import calcfuncs
 
+import logging
+logger = logging.getLogger("egsnrc")
+
+
+
 HERE  = Path(__file__).resolve().parent
 TEST_DATA = HERE / "data"
 TUTOR4_PATH = HERE.parent / "egs_home" / "tutor4" / "tutor4.py"
@@ -47,11 +52,14 @@ class TestTutor4:
     def test_output(self, capfd):
         """Test that (partially) Python tutor4 produces known output"""
 
+        logger.setLevel(logging.FATAL)
         # Ensure proper random initial state
         # (other tests use ranlux)
+
         egsfortran.init_ranlux(1,0)
         tutor4.main()
         captured = capfd.readouterr()
+
 
         # Test last line of history 10
         lines = captured.out.splitlines()

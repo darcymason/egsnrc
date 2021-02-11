@@ -53,13 +53,22 @@ REPLACE {$MXSTACK} WITH {15}"less than 15 particles on stack at once"
 "Define a common to pass information to the geometry routine HOWFAR"
 REPLACE {;COMIN/GEOM/;} WITH {;COMMON/GEOM/ZBOUND;$REAL ZBOUND;}
 
+
 REPLACE {$CALL-HOWNEAR(#);} WITH {
+   ;CALL HOWNEAR({P1},X(NP),Y(NP),Z(NP),IRL);}
+
+REPLACE {$pyegs_debug(#,#);} WITH { write(i_log,{P1}) {P2}; };
+
+REPLACE {$XXXCALL-HOWNEAR(#);} WITH {
    ";$egs_info('(a,3e16.8)','HOWNEAR inputs=',x(np),y(np),z(np));"
    ;{P1} = hownear(x(np),y(np),z(np),irl);
    "$egs_info('(a,e16.8)', 'Return value=', {P1});"
    }
 
-REPLACE {$XXXCOMPUTE-DRANGE(#,#,#,#,#,#);} WITH
+
+
+
+REPLACE {$XXYCOMPUTE-DRANGE(#,#,#,#,#,#);} WITH
 "        ============================="
 {
   $egs_info('(a,I4, I4, 2F14.9,I4,2F14.9)','in ',
@@ -87,7 +96,7 @@ REPLACE {$XXXCOMPUTE-DRANGE(#,#,#,#,#,#);} WITH
 }
 ;
 
-REPLACE {$XXXCALCULATE-TSTEP-FROM-DEMFP;} WITH  "Remove XXX for generating test data"
+REPLACE {$XXYCALCULATE-TSTEP-FROM-DEMFP;} WITH  "Remove XXX for gen test data"
 "        ============================"
 {;
   IF( compute_tstep ) [
@@ -126,7 +135,7 @@ REPLACE {$XXXCALCULATE-TSTEP-FROM-DEMFP;} WITH  "Remove XXX for generating test 
 }
 ;
 
-REPLACE {$CALCULATE-TSTEP-FROM-DEMFP;} WITH
+REPLACE {$XXXCALCULATE-TSTEP-FROM-DEMFP;} WITH
 "        ============================"
 {;
   total_de = demfp/sig;
@@ -141,14 +150,14 @@ REPLACE {$CALCULATE-TSTEP-FROM-DEMFP;} WITH
 ;
 
 
-REPLACE {$COMPUTE-ELOSS(#,#,#,#,#);} WITH
+REPLACE {$XXXCOMPUTE-ELOSS(#,#,#,#,#);} WITH
 "        =========================="
 {;
   {P5} = compute_eloss(lelec, medium, {P1},{P2},{P3},{P4});
 }
 ;
 
-REPLACE {$XXXCOMPUTE-ELOSS(#,#,#,#,#);} WITH
+REPLACE {$XXYCOMPUTE-ELOSS(#,#,#,#,#);} WITH
 "        =========================="
 {;
   $egs_info('(a, 2I4, 3E25.16e2,I4)','in ',
@@ -175,7 +184,7 @@ REPLACE {$XXXCOMPUTE-ELOSS(#,#,#,#,#);} WITH
 ;
 
 
-REPLACE {$XXXCOMPUTE-ELOSS-G(#,#,#,#,#);} WITH
+REPLACE {$XXYCOMPUTE-ELOSS-G(#,#,#,#,#);} WITH
 "        ============================"
 {
   "lelec, medium, step, eke, elke, lelke, range_"
@@ -221,7 +230,7 @@ REPLACE {$XXXCOMPUTE-ELOSS-G(#,#,#,#,#);} WITH
 ;
 
 
-REPLACE {$COMPUTE-ELOSS-G(#,#,#,#,#);} WITH
+REPLACE {$XXXCOMPUTE-ELOSS-G(#,#,#,#,#);} WITH
 "        ============================"
 {
   {P5} = compute_eloss_g(lelec,medium, {P1},{P2},{P3},{P4},range);
@@ -229,7 +238,7 @@ REPLACE {$COMPUTE-ELOSS-G(#,#,#,#,#);} WITH
 ;
 
 
-REPLACE {$CALCULATE-XI(#);} WITH
+REPLACE {$XXYCALCULATE-XI(#);} WITH
 {
   $egs_info('(a, 2I4, 6E25.16e2)','in ',
   lelec, medium, ekems, rmt2, rmsq, xccl, blccl, {P1});
@@ -283,6 +292,35 @@ SUBROUTINE dummyxxx;
 "       USEFUL contains PRM"
 
 end;
+
+
+SUBROUTINE HOWNEAR(tperp, x, y, z, irl);
+"                                                                     "
+" The following is a general specification of HOWNEAR                 "
+"   Given a particle at (x,y,z) in region irl, HOWNEAR answers the    "
+"   question, What is the distance to the closest boundary?           "
+"                                                                     "
+"  In general this can be a complex subroutine.                       "
+"  Note that this subroutine must be linked to $CALL-HOWNEAR(#)       "
+"                                                                     "
+"*********************************************************************"
+$IMPLICIT-NONE;
+$REAL tperp, x,y,z;
+$INTEGER irl;
+
+;COMIN/GEOM/; "       COMMON GEOM contains ZBOUND"
+
+IF(irl = 3) [OUTPUT;('Called HOWNEAR in region 3'); RETURN;]
+
+ELSEIF(irl = 2)["We are in the Ta plate - check the geometry"
+    tperp = min(z, (ZBOUND - z) );
+]
+
+ELSEIF(irl = 1)[OUTPUT;('Called HOWNEAR in region 1'); RETURN;]
+
+END;"end of subroutine hownear"
+
+
 
 "********************************************************************"
 "                                                                    "

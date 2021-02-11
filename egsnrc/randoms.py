@@ -1,6 +1,9 @@
 from egsnrc.egsfortran import ranlux, randomm
 from egsnrc.commons import rng_seed, rng_array
 
+import logging
+logger = logging.getLogger("egsnrc")
+
 
 def randomset():
     global rng_seed
@@ -12,6 +15,7 @@ def randomset():
     random_num = rng_array[rng_seed-1]
     randomm.rng_seed += 1
 
+    # logger.info(f"** Random: {random_num} **")
     return random_num
 
 

@@ -2486,9 +2486,12 @@ REPLACE {$SELECT-AZIMUTHAL-ANGLE(#,#);} WITH
 LOOP
 [
     $RANDOMSET xphi;
+    $pyegs_debug('(a,e16.8)','azim random xphi=',xphi);
     xphi  = 2*xphi - 1;
     xphi2 = xphi*xphi;
     $RANDOMSET yphi;
+    $pyegs_debug('(a,e16.8)','azim random yphi=',yphi);
+    call flush(i_log);
     yphi2  = yphi*yphi;
     rhophi2 = xphi2 + yphi2;
 ]WHILE(rhophi2 > 1);

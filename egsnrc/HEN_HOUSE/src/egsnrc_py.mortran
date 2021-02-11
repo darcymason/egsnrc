@@ -916,6 +916,7 @@ aux = ko*(ko-Uj)*temp; aux1 = aux-Uj;
 pzmax2 = aux1*aux1/(2*aux+Uj*Uj);
 :RETRY-PZ-old:;
 $RANDOMSET rnno18;
+
 IF( rnno18 < 0.5 ) [
     rnno18 = Max(1e-30,2*rnno18);
     pz = 0.5*(1-Sqrt(1-2*Log(rnno18)))/Jo_array(j);
@@ -996,32 +997,32 @@ $IMPLICIT-NONE;
 !COMMENTS;
 "xxf2py intent(callback) howfar"
 EXTERNAL howfar;
-"f2py intent(callback) hownear"
-EXTERNAL hownear;
-"f2py real*8 x,y,z,return_val"
-"f2py integer irl"
-"f2py return_val=hownear(x,y,z,irl)"
-$REAL hownear;
+"xf2py intent(callback) hownear"
+"EXTERNAL hownear;
+"xf2py real*8 x,y,z,return_val"
+"xf2py integer irl"
+"xf2py return_val=hownear(x,y,z,irl)"
+"$REAL hownear;
 
-"f2py intent(callback) calc_tstep_from_demfp"
-EXTERNAL calc_tstep_from_demfp;
-"f2py real*8 demfp,sig, eke, elke,total_de"
-"f2py integer qel, lelec, medium, lelke"
-"f2py tstep=calc_tstep_from_demfp(qel,lelec,medium,lelke,demfp,sig,eke,elke,total_de)"
+"xf2py intent(callback) calc_tstep_from_demfp"
+"EXTERNAL calc_tstep_from_demfp;
+"xf2py real*8 demfp,sig, eke, elke,total_de"
+"xf2py integer qel, lelec, medium, lelke"
+"xf2py tstep=calc_tstep_from_demfp(qel,lelec,medium,lelke,demfp,sig,eke,elke,total_de)"
 $REAL calc_tstep_from_demfp;
 
-"f2py intent(callback) compute_eloss"
-EXTERNAL compute_eloss;
-"f2py real*8 step, eke, elke, de"
-"f2py integer lelec, medium, lelke"
-"f2py de=compute_eloss(lelec, medium, step, eke, elke, lelke)"
+"xf2py intent(callback) compute_eloss"
+"xEXTERNAL compute_eloss;
+"xf2py real*8 step, eke, elke, de"
+"xf2py integer lelec, medium, lelke"
+"xf2py de=compute_eloss(lelec, medium, step, eke, elke, lelke)"
 $REAL compute_eloss;
 
-"f2py intent(callback) compute_eloss_g"
-EXTERNAL compute_eloss_g;
-"f2py real*8 step, eke, elke, range, de"
-"f2py integer lelec, medium, lelke"
-"f2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)"
+"xf2py intent(callback) compute_eloss_g"
+"EXTERNAL compute_eloss_g;
+"xf2py real*8 step, eke, elke, range, de"
+"xf2py integer lelec, medium, lelke"
+"xf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)"
 $REAL compute_eloss_g;
 
 !NOCOMMENTS;
@@ -1098,7 +1099,9 @@ $start_new_particle;
                                 "interaction in the USTEP loop
         eke = eie - rm; "moved here so that kinetic energy will be known"
                         "to user even for a vacuum step, IK January 2000"
-        $egs_info('(a,e16.8,a)', 'New TSTEP, eke=', eke, '==================');
+
+        "$egs_info('(a,e16.8,a)', 'New TSTEP, eke=', eke, '==================');"
+
         IF(medium ~= 0)
         [
             "Not vacuum. Must sample to see how far to next interaction.
@@ -1108,7 +1111,13 @@ $start_new_particle;
                 "                                       demfp = -log(rnne1);
                 "($RANDOMSET is a macro'ed random number generator)
                 "(demfp = differential electron mean free path)
-            $egs_info('(a,e16.8)', 'non-vac, demfp=', demfp);
+
+            $pyegs_debug('(a,e16.8)','random rnne1=',rnne1);
+            call flush(i_log);
+            "$egs_info('(a,e16.8,a)','** Random: ', rnne1, ' **');"
+
+            "$egs_info('(a,e16.8)', 'non-vac, demfp=', demfp);"
+
             elke = log(eke);
             "(eke = kinetic energy, rm = rest mass, all in units of MeV)
             $SET INTERVAL elke,eke; "Prepare to approximate cross section
@@ -1121,7 +1130,9 @@ $start_new_particle;
                "$SET INTERVAL is not necessary at this point. However, to not"
                "completely alter the logic of the TSTEP and USTEP loops,"
                "this is left for now"
-            $egs_info('(a,e16.8)', 'sig0=', sig0);
+
+            "$egs_info('(a,e16.8)', 'sig0=', sig0);"
+
         ] "end non-vacuum test
 
         :USTEP:LOOP
@@ -1129,7 +1140,7 @@ $start_new_particle;
             "Here for each check with user geometry.
             "Compute size of maximum acceptable step, which is limited
             "by multiple scattering or other approximations.
-            $egs_info('(a)', 'New ustep ---------------------');
+            "$egs_info('(a)', 'New ustep ---------------------');"
             IF(medium = 0)
             [
                     "vacuum
@@ -1180,17 +1191,18 @@ $start_new_particle;
                     $CALCULATE-TSTEP-FROM-DEMFP;
 
                 ] "end sig if-else
-                $egs_info('(a,e16.8)', 'ustep non-vac, calc tstep=', tstep);
+                "$egs_info('(a,e16.8)', 'ustep non-vac, calc tstep=', tstep);"
                 "calculate stopping power"
                 IF(lelec < 0) [$EVALUATE dedx0 USING ededx(elke);] "e-"
                 ELSE          [$EVALUATE dedx0 USING pdedx(elke);] "e+"
                 dedx  = rhof*dedx0;
-                $egs_info('(a,e16.8)', 'dedx=', dedx);
+
+                "$egs_info('(a,e16.8)', 'dedx=', dedx);"
 
                 "Determine maximum step-size (Formerly $SET-TUSTEP)
                 $EVALUATE tmxs USING tmxs(elke);
                 tmxs = tmxs/rhof;
-                $egs_info('(a,e16.8)', 'tmxs=', tmxs);
+                "$egs_info('(a,e16.8)', 'tmxs=', tmxs);"
 
                 "Compute the range to E_min(medium) (e_min is the first
                 "energy in the table). Do not go more than range.
@@ -1198,7 +1210,7 @@ $start_new_particle;
                 "the energy loss evaluation below relies on the accurate
                 "(and self-consistent) evaluation of range!
                 $COMPUTE-RANGE;
-                $egs_info('(a,e16.8)', 'range=', range);
+                "$egs_info('(a,e16.8)', 'range=', range);"
 
                 "The RANDOMIZE-TUSTEP option as coded by AFB forced the
                 "electrons to approach discrete events (Moller,brems etc.)
@@ -1208,6 +1220,8 @@ $start_new_particle;
                 IF(random_tustep)
                 [
                     $RANDOMSET rnnotu;
+                    $pyegs_debug('(a,e16.8)','random rnnotu=',rnnotu);
+                    call flush(i_log);
                     tmxs = rnnotu*min(tmxs,smaxir(irl));
                 ]
                 ELSE
@@ -1215,12 +1229,14 @@ $start_new_particle;
                     tmxs = min(tmxs,smaxir(irl));
                 ]
                 tustep = min(tstep,tmxs,range);
-                $egs_info('(a,e16.8)', 'tustep=', tustep);
+                "$egs_info('(a,e16.8)', 'tustep=', tustep);"
                 $SET-TUSTEP-EM-FIELD; "optional tustep restriction in EM field
 
                 $CALL-HOWNEAR(tperp);
-                $egs_info('(a,4e16.8)', 'tperp, xyz=', tperp,
-                x(np), y(np), z(np));
+
+                "$egs_info('(a,4e16.8)', 'tperp, xyz=', tperp,"
+                "x(np), y(np), z(np));"
+
                 dnear(np) = tperp;
                 $RANGE-DISCARD;       "optional regional range rejection for"
                                       "particles below e_max_rr if i_do_rr set"
@@ -1299,8 +1315,9 @@ $start_new_particle;
 
                     IF (transport_algorithm = $PRESTA-II)
                     [
-                      $egs_info('(a,6e16.8)', 'PrestaII xyz,uvw=',
-                      x(np),y(np),z(np),u(np),v(np),w(np));
+                      "$egs_info('(a,6e16.8)', 'PrestaII xyz,uvw=',"
+                      " x(np),y(np),z(np),u(np),v(np),w(np));"
+
                       call msdist_pII
                       (
                         "Inputs
@@ -1312,8 +1329,9 @@ $start_new_particle;
                     ]
                     ELSE
                     [
-                      $egs_info('(a,6e16.8)', 'Presta-I, xyz,uvw=',
-                      x(np),y(np),z(np),u(np),v(np),w(np));
+                      "$egs_info('(a,6e16.8)', 'Presta-I, xyz,uvw=',"
+                      "x(np),y(np),z(np),u(np),v(np),w(np));"
+
                       call msdist_pI
                       (
                         "Inputs
@@ -1323,8 +1341,9 @@ $start_new_particle;
                         uscat,vscat,wscat,xtrans,ytrans,ztrans,ustep
                       );
                     ]
-                    $egs_info('(a,7e16.8)', 'presta out: uvwcat,xyztrans,ustep',
-                      uscat,vscat,wscat,xtrans,ytrans,ztrans,ustep);
+
+                    "$egs_info('(a,7e16.8)', 'presta out: uvwcat,xyztrans,ustep',"
+                    "  uscat,vscat,wscat,xtrans,ytrans,ztrans,ustep);"
 
                 ]
                 ELSE
@@ -1339,6 +1358,10 @@ $start_new_particle;
                         domultiple = .false.; "Do not do multiple scattering
                         "Sample the distance to a single scattering event
                         $RANDOMSET rnnoss;
+
+                        $pyegs_debug('(a,e16.8)','random rnnoss=',rnnoss);
+                        call flush(i_log);
+
                         IF( rnnoss < 1.e-30 ) [
                             rnnoss = 1.e-30;
                         ]
@@ -1453,6 +1476,7 @@ $start_new_particle;
                 IF(ustep ~= 0) [$AUSCALL($TRANAUSA);]
                 IF(eie <= ecut(irl)) [go to :ECUT-DISCARD:;]
                 IF(ustep ~= 0 & idisc < 0) [go to :USER-ELECTRON-DISCARD:;]
+                $pyegs_debug('(a)', 'next tstep');
                 NEXT :TSTEP: ; "(Start again at :TSTEP:)
 
             ] "Go try another big step in (possibly) new medium
@@ -1497,8 +1521,9 @@ $start_new_particle;
                   $COMPUTE-ELOSS-G(tvstep,eke,elke,lelke,de);
                ]
             ]
-            $egs_info('(a,2e16.8)', 'Setting TVSTEP tvstep, de=',
-                      tvstep, de);
+
+            "$egs_info('(a,2e16.8)', 'Setting TVSTEP tvstep, de=',"
+            "          tvstep, de);"
 
             $SET-TVSTEP-EM-FIELD; "additional path length correction in em field
                 "( Calculates tvstep given vstep
@@ -1544,7 +1569,7 @@ $start_new_particle;
                     call mscat(lambda,chia2,xi,elkems,beta2,qel,medium,
                                spin_effects,findindex,spin_index,
                                costhe,sinthe);
-                    $egs_info('(a)', 'Multiple scattering called');
+                    "$egs_info('(a)', 'Multiple scattering called');"
                 ]
                 ELSE
                 [
@@ -1565,7 +1590,7 @@ $start_new_particle;
                        ]
                        call sscat(chia2,elkems,beta2,qel,medium,
                                   spin_effects,costhe,sinthe);
-                       $egs_info('(a)', 'Single scattering called');
+                       "$egs_info('(a)', 'Single scattering called');"
                     ]
                     ELSE
                     [
@@ -1617,8 +1642,10 @@ $start_new_particle;
                     call uphi(2,1); "Apply the deflection, save call to uphi if
                                     "no deflection in a single scattering mode
                     u_final = u(np); v_final = v(np); w_final = w(np);
-                    $egs_info('(a,3e16.8)', 'Called UPHI: final uvw=',
-                        u_final, v_final, w_final);
+
+                    "$egs_info('(a,3e16.8)', 'Called UPHI: final uvw=',"
+                    "    u_final, v_final, w_final);"
+
                     u(np) = u_tmp; v(np) = v_tmp; w(np) = w_tmp;
                 ]
                 ELSE [ u_final = u(np); v_final = v(np); w_final = w(np); ]
@@ -1630,8 +1657,10 @@ $start_new_particle;
 
             x(np) = x_final; y(np) = y_final; z(np) = z_final;
             u(np) = u_final; v(np) = v_final; w(np) = w_final;
-            $egs_info('(a,6e16.8)', 'Transport: new xyz/uvw=',
-              x(np),y(np),z(np),u(np),v(np),w(np));
+
+            "$egs_info('(a,6e16.8)', 'Transport: new xyz/uvw=',"
+            "  x(np),y(np),z(np),u(np),v(np),w(np));"
+
             dnear(np) = dnear(np) - vstep;
             irold = ir(np); "save previous region
             $SET-ANGLES-EM-FIELD;
@@ -1682,8 +1711,11 @@ $start_new_particle;
               go to :USER-ELECTRON-DISCARD:;
             ]
 
-            IF(medium ~= medold) NEXT :TSTEP:;
-
+            IF(medium ~= medold) [
+                $pyegs_debug('(a)', 'medium ~= medold, next tstep');
+                call flush(i_log);
+                NEXT :TSTEP:;
+            ]
             $USER_CONTROLS_TSTEP_RECURSION;
                 "NRCC update 87/12/08--default is null
 
@@ -1701,6 +1733,9 @@ $start_new_particle;
 
         $RANDOMSET rfict;
 
+        $pyegs_debug('(a,e16.8)','random rfict=',rfict);
+        call flush(i_log);
+
     ] UNTIL (rfict <= sigratio) ; "end tstep loop
 
     " Now sample electron interaction
@@ -1711,6 +1746,10 @@ $start_new_particle;
         $EVALUATE-EBREM-FRACTION;
           "Default is $EVALUATE ebr1 USING ebr1(elke);"
         $RANDOMSET rnno24;
+
+        $pyegs_debug('(a,e16.8)','random rnno24=',rnno24);
+        call flush(i_log);
+
         IF(rnno24 <= ebr1)
         [
             "It was bremsstrahlung
@@ -1750,6 +1789,10 @@ $start_new_particle;
     $EVALUATE-PBREM-FRACTION;
        "Default is $EVALUATE pbr1 USING pbr1(elke);"
     $RANDOMSET rnno25;
+
+    $pyegs_debug('(a,e16.8)','random rnno25=',rnno25);
+    call flush(i_log);
+
     IF(rnno25 < pbr1) [go to :EBREMS:;] "It was bremsstrahlung
     "Decide between bhabha and annihilation
     "pbr2 is (brems + bhabha)/(brems + bhabha + annih)
@@ -3315,7 +3358,9 @@ IF( spin_effects ) [
     IF( rnno > rejf ) goto :RETRY-SPIN:;
 ]
 sint = sqrt(xi*(2 - xi));
-$egs_info('(a,3e16.8)', 'sscat: chia2 sint cost=', chia2, sint, cost);
+
+"$egs_info('(a,3e16.8)', 'sscat: chia2 sint cost=', chia2, sint, cost);"
+
 return;
 end;
 
@@ -4113,6 +4158,8 @@ subroutine msdist_pII
 
 $IMPLICIT-NONE;
 
+;COMIN/EGS-IO/;  " XXX temp for debugging "
+
 " Input variables
 " ===============
 $REAL
@@ -4374,6 +4421,7 @@ subroutine msdist_pI
 );
 
 $IMPLICIT-NONE;
+;COMIN/EGS-IO/;  " XXX temp for debugging "
 
 " Input variables
 " ===============
@@ -6723,6 +6771,7 @@ $IMPLICIT-NONE;
 $COMIN-UPHI;     "DEFAULT REPLACEMENT PRODUCES THE FOLLOWING:
                  "COMIN/DEBUG,EPCONT,STACK,UPHIIN,UPHIOT,RANDOM/;
 
+
 "Input variables"
 integer  IENTRY,LVL; "entry switches"
 
@@ -6772,7 +6821,9 @@ $EVALUATE COSTHE USING SIN(CTHET);
 " CPHI=PI5D2-PHI;$SET INTERVAL CPHI,SINC;
 " $EVALUATE COSPHI USING SIN(CPHI);
 $SELECT-AZIMUTHAL-ANGLE(cosphi,sinphi);
-$egs_info('(a,2e16.8)','UPHI: cosphi, sinphi=',cosphi,sinphi);
+
+"$egs_info('(a,2e16.8)','UPHI: cosphi, sinphi=',cosphi,sinphi);"
+
 "   USE THE FOLLOWING ENTRY FOR THE SECOND OF TWO PARTICLES WHEN WE"
 "   KNOW TWO PARTICLES HAVE A RELATIONSHIP IN THEIR CORRECTIONS.   "
 "   NOTE: SINTHE AND COSTHE CAN BE CHANGED OUTSIDE THROUGH COMMON. "

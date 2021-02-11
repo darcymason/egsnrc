@@ -10,6 +10,12 @@ from math import log  # for calculate_tstep_...
 # Get all common blocks
 from egsnrc.commons import *
 
+from egsnrc.calcfuncs import (
+    calc_tstep_from_demfp,
+    compute_eloss, compute_eloss_g
+)
+
+
 
 init_done = False  # run init() only once, else crashes (unknown reason)
 
@@ -126,7 +132,7 @@ def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
             # even if not in the mortran call arguments,
             # unless intent(callback,hide) is used in f2py comments,
             # in which case, need to set `egsfortran.hownear = hownear`
-            # egsfortran.electr(ircode, howfar, hownear,
+            # egsfortran.electr(ircode, howfar) #, hownear,
             #     calc_tstep_from_demfp,
             #     compute_eloss, compute_eloss_g
             # )
@@ -259,10 +265,13 @@ def init():
     # ---------------------------------------------------------------------
     # Print header for output - which is all AUSGAB does in this case
     # print("                 Kinetic Energy(MeV)  charge  angle w.r.t.Z axis-degrees")
+    # for i in range(len(iausfl)):
+    #     iausfl[i] = 1
     for i in range(3):
         escore[i] = 0.0  # zero scoring array before starting
 
-    score.iwatch=1  # This determines the type and amount of output
+    # XXX set 2 for debugging
+    score.iwatch = 1  # This determines the type and amount of output
                     # =1 => print info about each interaction
                     # =2 => print info about same + each electron step
                     # =4 => create a file to be displayed by EGS_Windows
@@ -296,7 +305,7 @@ def main(iqin=-1):  # iqin here only to make generating validation data faster
     # ---------------------------------------------------------------------
     # initiate the shower 10 times
 
-    ncase=1  # INITIATE THE SHOWER NCASE TIMES
+    ncase=10 # XXX  # INITIATE THE SHOWER NCASE TIMES
 
     for i in range(ncase):
         if (iwatch != 0) and (iwatch != 4):
@@ -305,7 +314,8 @@ def main(iqin=-1):  # iqin here only to make generating validation data faster
             f"    1{ei:9.3f}{iqin:4}{irin:4}"
             f"{xin:8.3f}{yin:8.3f}{zin:8.3f}"
             f"{uin:7.3f}{vin:7.3f}{win:7.3f}"  # should be 8.3 like x,y,z but get extra spaces
-            f"{latchi:10}{wtin:10.3E}"
+            f"{latchi:10}{wtin:10.3E}",
+            flush=True
             )
             shower(iqin,ein,xin,yin,zin,uin,vin,win,irin,wtin)
             egsfortran.watch(-1,iwatch)  # print a message that this history is over
@@ -359,6 +369,7 @@ def howfar():
 
     if ir[np_m1] == 3:  # terminate this history: it is past the plate
         epcont.idisc = 1
+        logger.info("howfar  irl 3, idisc = 1")
         return
 
     if ir[np_m1] == 2:  # We are in the Ta plate - check the geometry
@@ -376,15 +387,18 @@ def howfar():
                 epcont.ustep = tval
                 epcont.irnew = 1
         # else w[np_m1] == 0.0, cannot hit boundary
+        logger.info("howfar region 2")
         return
 
     # Not region 3 or 2, must be 1, region with source
     if w[np_m1] >  0.0:  # this must be a source particle on z=0 boundary
         epcont.ustep = 0.0
         epcont.irnew = 2
+        logger.info("howfar region 1 going to 2")
     else:
         # it must be a reflected particle-discard it
         epcont.idisc = 1
+        logger.info("howfar reflected region 1, idisc=1")
 
 
 def hownear(x, y, z, irl):
