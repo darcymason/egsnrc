@@ -294,6 +294,11 @@ SUBROUTINE dummyxxx;
 end;
 
 
+SUBROUTINE flush_output;
+  call flush();
+END;
+
+
 SUBROUTINE HOWNEAR(tperp, x, y, z, irl);
 "                                                                     "
 " The following is a general specification of HOWNEAR                 "

@@ -15,7 +15,7 @@ _3X = "   "
 _6X = "      "
 _7X = "       "
 header = "".join(
-    ("\n\n"," "*39,' NP',_3X,'ENERGY  Q REGION    X',_7X,
+    ("\n\n"," "*38,' NP',_3X,'ENERGY  Q REGION    X',_7X,
     'Y',_7X,'Z',_6X,'U',_6X,'V',_6X,'W',_6X,'LATCH',_2X,'WEIGHT\n'
     )
 )
@@ -53,11 +53,15 @@ second_message = {
 def std_data(msg, ip, ke):
     """ip must be already -1 for 0-based arrays in Python"""
     return (
-        f"{msg:<35}:{ip:5}{ke:9.3f}{iq[ip]:4}{ir[ip]:4}"
+        f"{msg:<35}:{ip+1:5}{ke:9.3f}{iq[ip]:4}{ir[ip]:4}"
         f"{x[ip]:8.3f}{y[ip]:8.3f}{z[ip]:8.3f}"
         f"{u[ip]:7.3f}{v[ip]:7.3f}{w[ip]:7.3f}"
         f"{latch[ip]:10}{wt[ip]:10.3E}"
     )
+
+# def log_it(s):
+#     logger.debug(icount)
+#     logger.debug(s)
 
 
 def watch(iarg, iwatch):
@@ -126,7 +130,7 @@ def watch(iarg, iwatch):
             # WRITE(graph_unit,:GRAPHICS_FORMAT:) 0,0,0,0.0,0.0,0.0,0.0,jhstry
             # jhstry += 1
         else:
-            log_it(f" END OF HISTORY {jhstry:8}   " + "*"*40)
+            log_it(f" END OF HISTORY{jhstry:8}   " + "*"*40 + "\n")
             jhstry += 1
             icount += 2
             return
@@ -158,9 +162,14 @@ def watch(iarg, iwatch):
     if iarg == 0:
         if iwatch == 2:
             icount += 1
-            log_it(std_data('           STEP ABOUT TO OCCUR', np_m1, ke))
-        else:
-            return
+            log_it(std_data('          STEP ABOUT TO OCCUR', np_m1, ke))
+            msg = '    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP'
+            log_it(
+                f"{msg:<35}:    {ustep:13.4E}{tustep:13.4E}{vstep:13.4E}"
+                f"{tvstep:13.4E}{edep:13.4E}"
+            )
+            icount += 1
+        return
 
     if iarg in arg_messages:
         icount += 1
@@ -174,10 +183,10 @@ def watch(iarg, iwatch):
             for ip_m1 in range(npold_m1, np):
                 if iq[ip_m1] == -1:
                     ke = e[ip_m1] - rm
-                    msg = '          Resulting electron'
+                    msg = '         Resulting electron'
                 else:
                     ke = e[ip_m1]
-                    msg = '          Resulting photon'
+                    msg = '         Resulting photon'
                 icount += 1
                 log_it(std_data(msg, ip_m1, ke))
         else:  # splitting case--e- is always at NPold
@@ -270,14 +279,6 @@ def watch(iarg, iwatch):
             msg = '         Now on top of stack'
             icount += 1
             log_it(std_data(msg, np_m1, ke))
-
-    if iarg == 0 and iwatch == 2:
-        msg = '    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP'
-        log_it(
-            f"{msg:<35}:    {ustep:13.4E},{tustep:13.4E},{vstep:13.4E},"
-            f"{tvstep:13.4E},{edep:13.4E}"
-        )
-        icount += 1
 
     if np == 1 or iarg == 0:
         return

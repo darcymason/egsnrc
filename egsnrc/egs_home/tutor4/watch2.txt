@@ -1,0 +1,842 @@
+
+---After setting pegs_file and user_code --
+egsfortran values
+-----------------
+egs_home:  b'/home/darcy/git/egsnrc/egsnrc/egs_home/                                                                                         '
+user_code:  b'tutor4                                                          '
+pegs_file:  b'tutor_data                                                                                                                                                                                                                                                      '
+
+Environment
+-----------
+HEN_HOUSE=/home/darcy/git/EGSnrc/HEN_HOUSE
+EGS_HOME=/home/darcy/git/egsnrc/egsnrc/egs_home
+EGS_CONFIG=/home/darcy/git/EGSnrc/HEN_HOUSE/specs/linux.conf
+  Start tutor1
+
+ CALL HATCH to get cross-section data
+
+================================================================================
+EGSnrc version 4 for x86_64-unknown-linux-gnu          Fri Feb 12 14:00:17 2021
+================================================================================
+configuration............................................linux
+user code................................................tutor4
+pegs file................................................tutor_data on HEN_HOUSE
+using host...............................................DESKTOP-DNF8ELT
+output file(s)...........................................
+================================================================================
+ ===> Photonuclear flag:   0
+ RAYLEIGH OPTION REQUESTED FOR MEDIUM NUMBER  1
+
+ Rayleigh data available for medium  1 in PEGS4 data set.
+
+(Re)-initializing photon cross sections with files from the series: xcom
+
+ Compton cross sections: default
+ Using Compton cross sections from /home/darcy/git/EGSnrc/HEN_HOUSE/data/compton_sigma.data
+ Working on medium   1 ... 
+  ->  100 atomic ff values computed!
+      preparing data for Rayleigh sampling ... done
+
+OK
+
+Reading screened Rutherford MS data ...............  done 
+
+
+Reading spin data base from /home/darcy/git/EGSnrc/HEN_HOUSE/data/spinms.data
+EGSnrc spin data, version 2.0   
+Data generated on a machine with 1234 endianess
+The endianess of this CPU is 1234
+Ranges:      1.00   100.00  0.30054  1.00000
+
+
+  medium    1 .....................  done
+  
+  Medium            1  sige =    1.7946410123827996        1.7870816572288755       monotone =  T T
+  
+  Initializing tmxs for estepe =   0.25000000000000000       and ximax =   0.50000000000000000     
+  
+
+Bound Compton scattering requested, reading data ......  Done
+
+ Initializing Bound Compton scattering ......
+ Medium   1 has  21 shells: 
+   1  861   1  0.02740 0.141E+01    67.416
+   2  862   2  0.02740 0.503E+01    11.681
+   3  863   3  0.02740 0.247E+01    11.136
+   4  864   4  0.05479 0.271E+01     9.881
+   5  865   5  0.02740 0.111E+02     2.708
+   6  866   6  0.02740 0.652E+01     2.469
+   7  867   7  0.05479 0.696E+01     2.194
+   8  868   8  0.05479 0.452E+01     1.793
+   9  869   9  0.08219 0.462E+01     1.735
+  10  870  10  0.02740 0.234E+02     0.563
+  11  871  11  0.02740 0.148E+02     0.462
+  12  872  12  0.05479 0.158E+02     0.402
+  13  873  13  0.05479 0.121E+02     0.239
+  14  874  14  0.08219 0.124E+02     0.227
+  15  875  15  0.02740 0.607E+02     0.068
+  16  876  16  0.02740 0.414E+02     0.042
+  17  877  17  0.05479 0.444E+02     0.034
+  18  878  18  0.08219 0.117E+02     0.025
+  19  879  19  0.10959 0.118E+02     0.023
+  20  880  20  0.05479 0.944E+02     0.008
+  21  881  21  0.01370 0.221E+03     0.008
+ ...... Done.
+
+Output from subroutine EDGSET:
+==============================
+ Atomic relaxations requested! 
+
+ Reading simplified photo-absorption data ..... Done
+
+ Reading simplified relaxation data ..... Done
+
+ Reading parametrized XCOM photo cross section data ..... Done
+
+ Reading EADL relaxation data ......
+  Z =  73 has 22 shells
+ ...... Done.
+
+ EGSnrc SUCCESSFULLY 'HATCHED' FOR ONE MEDIUM.
+
+ knock-on electrons can be created and any electron followed down to
+                                          0.189 MeV kinetic energy
+ brem photons can be created and any photon followed down to      
+                                          0.010 MeV
+
+
+                                       NP   ENERGY  Q REGION    X       Y       Z      U      V      W      LATCH  WEIGHT
+
+
+ INITIAL SHOWER VALUES             :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.3612E-05   1.3612E-05   1.3612E-05   1.3612E-05   2.2954E-04
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000 -0.000 -0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       9.1659E-06   9.1659E-06   9.1659E-06   9.1659E-06   1.5457E-04
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2  -0.000  -0.000   0.000 -0.001  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.9122E-06   4.9122E-06   4.9122E-06   4.9122E-06   8.2836E-05
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2  -0.000   0.000   0.000 -0.000 -0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.7998E-06   7.7998E-06   7.7998E-06   7.7998E-06   1.3153E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000  -0.000   0.000 -0.001 -0.001  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.5490E-05   3.5490E-05   3.5490E-05   3.5490E-05   5.9847E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000  -0.000   0.000 -0.000 -0.001  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.0979E-05   7.0979E-05   7.0979E-05   7.0979E-05   1.1969E-03
+          STEP ABOUT TO OCCUR      :    1   19.998  -1   2  -0.000  -0.000   0.000 -0.001  0.001  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.4196E-04   1.4196E-04   1.4196E-04   1.4196E-04   2.3939E-03
+          STEP ABOUT TO OCCUR      :    1   19.995  -1   2  -0.000   0.000   0.000 -0.003  0.004  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.8391E-04   2.8392E-04   2.8391E-04   2.8392E-04   4.7877E-03
+          STEP ABOUT TO OCCUR      :    1   19.990  -1   2  -0.000   0.000   0.001 -0.001  0.007  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.6780E-04   5.6782E-04   5.6780E-04   5.6782E-04   9.5751E-03
+          STEP ABOUT TO OCCUR      :    1   19.981  -1   2  -0.000   0.000   0.001  0.001  0.039  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.1355E-03   1.1355E-03   1.1355E-03   1.1355E-03   1.9147E-02
+          STEP ABOUT TO OCCUR      :    1   19.962  -1   2  -0.000   0.000   0.002 -0.005  0.037  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.2692E-03   2.2700E-03   2.2692E-03   2.2700E-03   3.8276E-02
+          STEP ABOUT TO OCCUR      :    1   19.923  -1   2   0.000   0.000   0.005  0.084  0.063  0.994         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.5306E-03   4.5313E-03   4.5306E-03   4.5313E-03   7.6396E-02
+          STEP ABOUT TO OCCUR      :    1   19.847  -1   2   0.001   0.000   0.009  0.102  0.084  0.991         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       9.0179E-03   9.0235E-03   9.0179E-03   9.0235E-03   1.5210E-01
+          STEP ABOUT TO OCCUR      :    1   19.695  -1   2   0.001   0.002   0.018  0.011  0.109  0.994         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.9467E-03   3.9482E-03   3.9467E-03   3.9482E-03   6.6538E-02
+ bremsstrahlung  about to occur    :    1   19.628  -1   2   0.001   0.002   0.022 -0.083  0.077  0.994         0 1.000E+00
+         Resulting electron        :    1   18.667  -1   2   0.001   0.002   0.022 -0.083  0.077  0.994         0 1.000E+00
+         Resulting photon          :    2    0.961   0   2   0.001   0.002   0.022 -0.091  0.078  0.993         0 1.000E+00
+
+
+                                       NP   ENERGY  Q REGION    X       Y       Z      U      V      W      LATCH  WEIGHT
+
+          STEP ABOUT TO OCCUR      :    2    0.961   0   2   0.001   0.002   0.022 -0.091  0.078  0.993         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.8666E-02   2.5938E-01   7.8666E-02   7.8666E-02   0.0000E+00
+ Discard -user request             :    2    0.961   0   3  -0.006   0.008   0.100 -0.091  0.078  0.993         0 1.000E+00
+         Now on top of stack       :    1   18.667  -1   2   0.001   0.002   0.022 -0.083  0.077  0.994         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   18.667  -1   2   0.001   0.002   0.022 -0.083  0.077  0.994         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.1864E-02   2.1904E-02   2.1864E-02   2.1904E-02   3.6828E-01
+          STEP ABOUT TO OCCUR      :    1   18.299  -1   2  -0.000   0.006   0.043  0.072  0.197  0.978         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.0354E-02   1.0389E-02   1.0354E-02   1.0389E-02   1.7457E-01
+ bremsstrahlung  about to occur    :    1   18.125  -1   2   0.001   0.008   0.053  0.201  0.361  0.911         0 1.000E+00
+         Resulting electron        :    1   18.049  -1   2   0.001   0.008   0.053  0.201  0.361  0.911         0 1.000E+00
+         Resulting photon          :    2    0.076   0   2   0.001   0.008   0.053  0.200  0.367  0.909         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.076   0   2   0.001   0.008   0.053  0.200  0.367  0.909         0 1.000E+00
+         Now on top of stack       :    1   18.049  -1   2   0.001   0.008   0.053  0.201  0.361  0.911         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   18.049  -1   2   0.001   0.008   0.053  0.201  0.361  0.911         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.5798E-02   4.6689E-02   4.5798E-02   4.6689E-02   7.8364E-01
+          STEP ABOUT TO OCCUR      :    1   17.265  -1   2   0.000   0.025   0.096 -0.193  0.305  0.933         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.9679E-03   3.9688E-03   3.9679E-03   3.9688E-03   6.6550E-02
+          STEP ABOUT TO OCCUR      :    1   17.199  -1   2  -0.000   0.026   0.100 -0.223  0.328  0.918         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.8559E-04   2.8559E-04   2.8559E-04   2.8559E-04   4.7885E-03
+          STEP ABOUT TO OCCUR      :    1   17.194  -1   2  -0.001   0.026   0.100 -0.211  0.334  0.919         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       6.5902E-06   6.5902E-06   6.5902E-06   6.5902E-06   1.1050E-04
+          STEP ABOUT TO OCCUR      :    1   17.194  -1   2  -0.001   0.026   0.100 -0.200  0.334  0.921         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.6982E-06   2.6982E-06   2.6982E-06   2.6982E-06   4.5239E-05
+          STEP ABOUT TO OCCUR      :    1   17.194  -1   2  -0.001   0.026   0.100 -0.200  0.334  0.921         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.4615E-05   1.4615E-05   1.4615E-05   1.4615E-05   2.4505E-04
+
+
+                                       NP   ENERGY  Q REGION    X       Y       Z      U      V      W      LATCH  WEIGHT
+
+          STEP ABOUT TO OCCUR      :    1   17.193  -1   2  -0.001   0.026   0.100 -0.200  0.335  0.921         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.3665E-06   1.1690E-05   1.3665E-06   1.3665E-06   2.2911E-05
+ Discard -user request             :    1   17.193  -1   3  -0.001   0.026   0.100 -0.200  0.335  0.921         0 1.000E+00
+ END OF HISTORY       1   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.1194E-06   2.1194E-06   2.1194E-06   2.1194E-06   3.5740E-05
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000 -0.001 -0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.7335E-06   2.7335E-06   2.7335E-06   2.7335E-06   4.6095E-05
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2  -0.000  -0.000   0.000 -0.000  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.0915E-06   4.0915E-06   4.0915E-06   4.0915E-06   6.8996E-05
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2  -0.000  -0.000   0.000 -0.001  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.8484E-05   2.8484E-05   2.8484E-05   2.8484E-05   4.8034E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000 -0.001  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.4436E-06   5.4436E-06   5.4436E-06   5.4436E-06   9.1798E-05
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000 -0.001 -0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.9130E-06   3.9130E-06   3.9130E-06   3.9130E-06   6.5987E-05
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000  0.000 -0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       9.2329E-06   9.2329E-06   9.2329E-06   9.2329E-06   1.5570E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.0130E-06   1.0130E-06   1.0130E-06   1.0130E-06   1.7082E-05
+ bremsstrahlung  about to occur    :    1   19.999  -1   2  -0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+         Resulting electron        :    1   19.951  -1   2  -0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+         Resulting photon          :    2    0.048   0   2  -0.000   0.000   0.000  0.018 -0.011  1.000         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.048   0   2  -0.000   0.000   0.000  0.018 -0.011  1.000         0 1.000E+00
+         Now on top of stack       :    1   19.951  -1   2  -0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   19.951  -1   2  -0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.7031E-05   5.7031E-05   5.7031E-05   5.7031E-05   9.6165E-04
+          STEP ABOUT TO OCCUR      :    1   19.950  -1   2  -0.000  -0.000   0.000  0.001 -0.003  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.1406E-04   1.1406E-04   1.1406E-04   1.1406E-04   1.9233E-03
+          STEP ABOUT TO OCCUR      :    1   19.948  -1   2   0.000   0.000   0.000  0.005 -0.001  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.2812E-04   2.2812E-04   2.2812E-04   2.2812E-04   3.8465E-03
+          STEP ABOUT TO OCCUR      :    1   19.944  -1   2   0.000   0.000   0.000  0.002  0.007  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.5622E-04   4.5624E-04   4.5622E-04   4.5624E-04   7.6930E-03
+          STEP ABOUT TO OCCUR      :    1   19.937  -1   2  -0.000   0.000   0.001 -0.022  0.007  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       9.1240E-04   9.1241E-04   9.1240E-04   9.1241E-04   1.5384E-02
+          STEP ABOUT TO OCCUR      :    1   19.921  -1   2  -0.000   0.000   0.002 -0.022  0.009  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.8242E-03   1.8245E-03   1.8242E-03   1.8245E-03   3.0762E-02
+          STEP ABOUT TO OCCUR      :    1   19.891  -1   2  -0.000   0.000   0.004  0.013 -0.055  0.998         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.6472E-03   3.6487E-03   3.6472E-03   3.6487E-03   6.1513E-02
+          STEP ABOUT TO OCCUR      :    1   19.829  -1   2  -0.000  -0.000   0.007 -0.028 -0.037  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.2798E-03   7.2886E-03   7.2798E-03   7.2886E-03   1.2286E-01
+          STEP ABOUT TO OCCUR      :    1   19.706  -1   2  -0.000  -0.001   0.015  0.064 -0.104  0.993         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.4450E-02   1.4548E-02   1.4450E-02   1.4548E-02   2.4514E-01
+          STEP ABOUT TO OCCUR      :    1   19.461  -1   2   0.000  -0.003   0.029  0.263 -0.155  0.952         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.8722E-02   2.8779E-02   2.8722E-02   2.8779E-02   4.8458E-01
+          STEP ABOUT TO OCCUR      :    1   18.976  -1   2   0.007  -0.009   0.056  0.262 -0.138  0.955         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.4512E-02   3.4669E-02   3.4512E-02   3.4669E-02   5.8314E-01
+ bremsstrahlung  about to occur    :    1   18.393  -1   2   0.013  -0.016   0.089  0.065 -0.253  0.965         0 1.000E+00
+         Resulting electron        :    1    8.074  -1   2   0.013  -0.016   0.089  0.065 -0.253  0.965         0 1.000E+00
+         Resulting photon          :    2   10.319   0   2   0.013  -0.016   0.089  0.039 -0.268  0.963         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    2   10.319   0   2   0.013  -0.016   0.089  0.039 -0.268  0.963         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.1026E-02   2.0454E-01   1.1026E-02   1.1026E-02   0.0000E+00
+ Discard -user request             :    2   10.319   0   3   0.013  -0.019   0.100  0.039 -0.268  0.963         0 1.000E+00
+         Now on top of stack       :    1    8.074  -1   2   0.013  -0.016   0.089  0.065 -0.253  0.965         0 1.000E+00
+
+
+                                       NP   ENERGY  Q REGION    X       Y       Z      U      V      W      LATCH  WEIGHT
+
+          STEP ABOUT TO OCCUR      :    1    8.074  -1   2   0.013  -0.016   0.089  0.065 -0.253  0.965         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.0526E-02   1.0615E-02   1.0526E-02   1.0615E-02   1.7216E-01
+          STEP ABOUT TO OCCUR      :    1    7.902  -1   2   0.013  -0.017   0.100 -0.129 -0.010  0.992         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.0755E-04   2.0755E-04   2.0755E-04   2.0755E-04   3.3645E-03
+          STEP ABOUT TO OCCUR      :    1    7.898  -1   2   0.013  -0.017   0.100 -0.137 -0.026  0.990         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.8593E-06   1.0640E-05   1.8593E-06   1.8593E-06   3.0140E-05
+ Discard -user request             :    1    7.898  -1   3   0.013  -0.017   0.100 -0.137 -0.026  0.990         0 1.000E+00
+ END OF HISTORY       2   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.7076E-06   2.7076E-06   2.7076E-06   2.7076E-06   4.5660E-05
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.026  0.017  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.2292E-07   4.2292E-07   4.2292E-07   4.2292E-07   7.1318E-06
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.000 -0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.3304E-05   1.3304E-05   1.3304E-05   1.3304E-05   2.2436E-04
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.029 -0.012  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.9828E-06   2.9828E-06   2.9828E-06   2.9828E-06   5.0300E-05
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000  -0.000   0.000  0.015  0.016  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.0563E-05   1.0563E-05   1.0563E-05   1.0563E-05   1.7813E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2   0.000   0.000   0.000 -0.014  0.026  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.9977E-05   2.9977E-05   2.9977E-05   2.9977E-05   5.0551E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000 -0.012  0.031  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.9939E-05   5.9939E-05   5.9939E-05   5.9939E-05   1.0108E-03
+          STEP ABOUT TO OCCUR      :    1   19.998  -1   2  -0.000   0.000   0.000 -0.012  0.027  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.1985E-04   1.1985E-04   1.1985E-04   1.1985E-04   2.0210E-03
+          STEP ABOUT TO OCCUR      :    1   19.996  -1   2  -0.000   0.000   0.000  0.005  0.014  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.3966E-04   2.3968E-04   2.3966E-04   2.3968E-04   4.0418E-03
+          STEP ABOUT TO OCCUR      :    1   19.992  -1   2  -0.000   0.000   0.000  0.008  0.039  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.7921E-04   4.7921E-04   4.7921E-04   4.7921E-04   8.0810E-03
+          STEP ABOUT TO OCCUR      :    1   19.984  -1   2   0.000   0.000   0.001 -0.002  0.032  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       9.5804E-04   9.5819E-04   9.5804E-04   9.5819E-04   1.6158E-02
+          STEP ABOUT TO OCCUR      :    1   19.968  -1   2   0.000   0.000   0.002  0.028  0.066  0.997         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.9144E-03   1.9147E-03   1.9144E-03   1.9147E-03   3.2285E-02
+          STEP ABOUT TO OCCUR      :    1   19.935  -1   2   0.000   0.000   0.004  0.048  0.075  0.996         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.8202E-03   3.8213E-03   3.8202E-03   3.8213E-03   6.4428E-02
+          STEP ABOUT TO OCCUR      :    1   19.871  -1   2   0.000   0.001   0.008 -0.008  0.098  0.995         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.5413E-03   7.6213E-03   7.5413E-03   7.6213E-03   1.2847E-01
+          STEP ABOUT TO OCCUR      :    1   19.742  -1   2   0.002   0.001   0.015  0.350  0.067  0.934         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       6.3721E-03   6.3813E-03   6.3721E-03   6.3813E-03   1.0755E-01
+ bremsstrahlung  about to occur    :    1   19.635  -1   2   0.004   0.001   0.021  0.224  0.010  0.975         0 1.000E+00
+         Resulting electron        :    1    9.101  -1   2   0.004   0.001   0.021  0.224  0.010  0.975         0 1.000E+00
+         Resulting photon          :    2   10.534   0   2   0.004   0.001   0.021  0.250  0.047  0.967         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    2   10.534   0   2   0.004   0.001   0.021  0.250  0.047  0.967         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.0807E-02   2.0807E-02   2.0807E-02   2.0807E-02   0.0000E+00
+ Pair production about to occur    :    2   10.534   0   2   0.010   0.002   0.041  0.250  0.047  0.967         0 1.000E+00
+          Resulting pair           :    2    8.268   1   2   0.010   0.002   0.041  0.335 -0.023  0.942         0 1.000E+00
+                                   :    3    1.244  -1   2   0.010   0.002   0.041  0.189  0.096  0.977         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    3    1.244  -1   2   0.010   0.002   0.041  0.189  0.096  0.977         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.0489E-03   3.8044E-03   3.0489E-03   3.8044E-03   5.9313E-02
+          STEP ABOUT TO OCCUR      :    3    1.184  -1   2   0.008   0.001   0.043 -0.650 -0.313  0.692         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.3146E-03   3.5484E-03   3.3146E-03   3.5484E-03   5.5496E-02
+          STEP ABOUT TO OCCUR      :    3    1.129  -1   2   0.006  -0.000   0.045 -0.436 -0.351  0.829         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.9018E-03   3.3056E-03   2.9018E-03   3.3056E-03   5.1858E-02
+          STEP ABOUT TO OCCUR      :    3    1.077  -1   2   0.006  -0.003   0.046  0.041 -0.998  0.037         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.9890E-03   3.0676E-03   2.9890E-03   3.0676E-03   4.8287E-02
+
+
+                                       NP   ENERGY  Q REGION    X       Y       Z      U      V      W      LATCH  WEIGHT
+
+          STEP ABOUT TO OCCUR      :    3    1.029  -1   2   0.006  -0.006   0.046  0.067 -0.859  0.508         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.7839E-03   2.8717E-03   2.7839E-03   2.8717E-03   4.5390E-02
+ Discard  AE,AP<E<ECUT             :    3    0.983  -1   2   0.005  -0.008   0.047 -0.565 -0.825  0.001         0 1.000E+00
+         Now on top of stack       :    2    8.268   1   2   0.010   0.002   0.041  0.335 -0.023  0.942         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    2    8.268   1   2   0.010   0.002   0.041  0.335 -0.023  0.942         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.5094E-02   3.5507E-02   3.5094E-02   3.5507E-02   5.7423E-01
+ bremsstrahlung  about to occur    :    2    7.694   1   2   0.010  -0.002   0.076 -0.313 -0.052  0.948         0 1.000E+00
+         Resulting photon          :    2    8.195   1   2   0.010  -0.002   0.076 -0.313 -0.052  0.948         0 1.000E+00
+         Resulting photon          :    3    0.010   0   2   0.010  -0.002   0.076 -0.322 -0.052  0.945         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    3    0.010   0   2   0.010  -0.002   0.076 -0.322 -0.052  0.945         0 1.000E+00
+         Now on top of stack       :    2    7.684   1   2   0.010  -0.002   0.076 -0.313 -0.052  0.948         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    2    7.684   1   2   0.010  -0.002   0.076 -0.313 -0.052  0.948         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.1008E-02   1.1048E-02   1.1008E-02   1.1048E-02   1.7823E-01
+ bremsstrahlung  about to occur    :    2    7.505   1   2   0.005  -0.004   0.086 -0.391 -0.362  0.846         0 1.000E+00
+         Resulting photon          :    2    7.908   1   2   0.005  -0.004   0.086 -0.391 -0.362  0.846         0 1.000E+00
+         Resulting photon          :    3    0.108   0   2   0.005  -0.004   0.086 -0.431 -0.421  0.798         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    3    0.108   0   2   0.005  -0.004   0.086 -0.431 -0.421  0.798         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.8078E-02   2.3808E-02   1.8078E-02   1.8078E-02   0.0000E+00
+ Discard -user request             :    3    0.108   0   3  -0.003  -0.012   0.100 -0.431 -0.421  0.798         0 1.000E+00
+         Now on top of stack       :    2    7.397   1   2   0.005  -0.004   0.086 -0.391 -0.362  0.846         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    2    7.397   1   2   0.005  -0.004   0.086 -0.391 -0.362  0.846         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.4142E-02   1.4429E-02   1.4142E-02   1.4429E-02   2.3229E-01
+          STEP ABOUT TO OCCUR      :    2    7.165   1   2  -0.003  -0.010   0.096 -0.692 -0.414  0.591         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.0057E-03   4.0066E-03   4.0057E-03   4.0066E-03   6.4436E-02
+          STEP ABOUT TO OCCUR      :    2    7.101   1   2  -0.006  -0.011   0.098 -0.772 -0.336  0.540         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.0138E-04   3.0140E-04   3.0138E-04   3.0140E-04   4.8461E-03
+ bremsstrahlung  about to occur    :    2    7.096   1   2  -0.006  -0.011   0.098 -0.774 -0.360  0.521         0 1.000E+00
+         Resulting photon          :    2    7.390   1   2  -0.006  -0.011   0.098 -0.774 -0.360  0.521         0 1.000E+00
+         Resulting photon          :    3    0.217   0   2  -0.006  -0.011   0.098 -0.704 -0.347  0.619         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    3    0.217   0   2  -0.006  -0.011   0.098 -0.704 -0.347  0.619         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.6259E-03   1.0259E-01   2.6259E-03   2.6259E-03   0.0000E+00
+ Discard -user request             :    3    0.217   0   3  -0.008  -0.012   0.100 -0.704 -0.347  0.619         0 1.000E+00
+         Now on top of stack       :    2    6.879   1   2  -0.006  -0.011   0.098 -0.774 -0.360  0.521         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    2    6.879   1   2  -0.006  -0.011   0.098 -0.774 -0.360  0.521         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.6246E-03   1.6253E-03   1.6246E-03   1.6253E-03   2.6089E-02
+          STEP ABOUT TO OCCUR      :    2    6.853   1   2  -0.007  -0.012   0.099 -0.746 -0.414  0.522         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.3177E-04   7.3265E-04   7.3177E-04   7.3265E-04   1.1759E-02
+          STEP ABOUT TO OCCUR      :    2    6.841   1   2  -0.008  -0.012   0.100 -0.642 -0.487  0.592         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.4111E-04   3.4112E-04   3.4111E-04   3.4112E-04   5.4743E-03
+          STEP ABOUT TO OCCUR      :    2    6.835   1   2  -0.008  -0.012   0.100 -0.657 -0.463  0.594         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.3997E-04   1.3998E-04   1.3997E-04   1.3998E-04   2.2463E-03
+          STEP ABOUT TO OCCUR      :    2    6.833   1   2  -0.008  -0.013   0.100 -0.667 -0.476  0.573         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.7234E-05   5.7235E-05   5.7234E-05   5.7235E-05   9.1849E-04
+          STEP ABOUT TO OCCUR      :    2    6.832   1   2  -0.008  -0.013   0.100 -0.659 -0.486  0.574         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.2221E-06   3.2221E-06   3.2221E-06   3.2221E-06   5.1707E-05
+          STEP ABOUT TO OCCUR      :    2    6.832   1   2  -0.008  -0.013   0.100 -0.577 -0.575  0.581         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.0053E-05   2.0053E-05   2.0053E-05   2.0053E-05   3.2180E-04
+          STEP ABOUT TO OCCUR      :    2    6.832   1   2  -0.008  -0.013   0.100 -0.476 -0.634  0.609         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.0389E-06   5.0389E-06   5.0389E-06   5.0389E-06   8.0862E-05
+          STEP ABOUT TO OCCUR      :    2    6.832   1   2  -0.008  -0.013   0.100 -0.494 -0.703  0.512         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.1448E-07   3.1448E-07   3.1448E-07   3.1448E-07   5.0466E-06
+          STEP ABOUT TO OCCUR      :    2    6.832   1   2  -0.008  -0.013   0.100 -0.426 -0.671  0.607         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.4590E-06   1.4590E-06   1.4590E-06   1.4590E-06   2.3414E-05
+          STEP ABOUT TO OCCUR      :    2    6.832   1   2  -0.008  -0.013   0.100 -0.441 -0.740  0.508         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.3510E-05   1.7292E-05   1.3510E-05   1.3510E-05   2.1681E-04
+ Discard -user request             :    2    6.831   1   3  -0.008  -0.013   0.100 -0.441 -0.740  0.508         0 1.000E+00
+         Now on top of stack       :    1    9.101  -1   2   0.004   0.001   0.021  0.224  0.010  0.975         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1    9.101  -1   2   0.004   0.001   0.021  0.224  0.010  0.975         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.2078E-03   2.2106E-03   2.2078E-03   2.2106E-03   3.6066E-02
+
+
+                                       NP   ENERGY  Q REGION    X       Y       Z      U      V      W      LATCH  WEIGHT
+
+ Moller   about to occur           :    1    9.065  -1   2   0.005   0.001   0.023  0.043 -0.157  0.987         0 1.000E+00
+          Resulting electrons      :    1    8.828  -1   2   0.005   0.001   0.023  0.078 -0.119  0.990         0 1.000E+00
+                                   :    2    0.237  -1   2   0.005   0.001   0.023 -0.575 -0.728  0.372         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.237  -1   2   0.005   0.001   0.023 -0.575 -0.728  0.372         0 1.000E+00
+         Now on top of stack       :    1    8.828  -1   2   0.005   0.001   0.023  0.078 -0.119  0.990         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1    8.828  -1   2   0.005   0.001   0.023  0.078 -0.119  0.990         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.2872E-02   2.3052E-02   2.2872E-02   2.3052E-02   3.7524E-01
+          STEP ABOUT TO OCCUR      :    1    8.453  -1   2   0.007  -0.003   0.045 -0.123 -0.235  0.964         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.5171E-02   4.5463E-02   4.5171E-02   4.5463E-02   7.3775E-01
+          STEP ABOUT TO OCCUR      :    1    7.715  -1   2  -0.006  -0.009   0.088 -0.457 -0.073  0.887         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.1716E-02   1.1877E-02   1.1716E-02   1.1877E-02   1.9220E-01
+          STEP ABOUT TO OCCUR      :    1    7.523  -1   2  -0.012  -0.008   0.098 -0.471  0.412  0.780         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.8238E-03   1.8285E-03   1.8238E-03   1.8285E-03   2.9571E-02
+          STEP ABOUT TO OCCUR      :    1    7.494  -1   2  -0.013  -0.007   0.100 -0.607  0.279  0.744         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.2953E-04   4.3072E-04   4.2953E-04   4.3072E-04   6.9648E-03
+          STEP ABOUT TO OCCUR      :    1    7.487  -1   2  -0.013  -0.007   0.100 -0.727  0.261  0.635         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.2404E-04   1.2404E-04   1.2404E-04   1.2404E-04   2.0056E-03
+          STEP ABOUT TO OCCUR      :    1    7.485  -1   2  -0.013  -0.007   0.100 -0.726  0.258  0.637         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.5409E-05   4.5411E-05   4.5409E-05   4.5411E-05   7.3427E-04
+          STEP ABOUT TO OCCUR      :    1    7.484  -1   2  -0.013  -0.007   0.100 -0.729  0.280  0.625         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.0448E-05   1.0448E-05   1.0448E-05   1.0448E-05   1.6894E-04
+          STEP ABOUT TO OCCUR      :    1    7.484  -1   2  -0.013  -0.007   0.100  0.206 -0.014  0.978         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.5091E-06   5.5091E-06   5.5091E-06   5.5091E-06   8.9079E-05
+          STEP ABOUT TO OCCUR      :    1    7.484  -1   2  -0.013  -0.007   0.100  0.784  0.538  0.310         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.8638E-06   1.8638E-06   1.8638E-06   1.8638E-06   3.0137E-05
+          STEP ABOUT TO OCCUR      :    1    7.484  -1   2  -0.013  -0.007   0.100  0.202 -0.008  0.979         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.1112E-06   1.1112E-06   1.1112E-06   1.1112E-06   1.7967E-05
+          STEP ABOUT TO OCCUR      :    1    7.484  -1   2  -0.013  -0.007   0.100 -0.051  0.873  0.484         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       6.6592E-06   1.1827E-05   6.6592E-06   6.6592E-06   1.0768E-04
+ Discard -user request             :    1    7.484  -1   3  -0.013  -0.007   0.100 -0.051  0.873  0.484         0 1.000E+00
+ END OF HISTORY       3   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.0622E-05   1.0622E-05   1.0622E-05   1.0622E-05   1.7913E-04
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.305 -0.835  0.457         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.8922E-06   5.8922E-06   5.8922E-06   5.8922E-06   9.9361E-05
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000  -0.000   0.000  0.238 -0.779 -0.581         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.2936E-05   2.7024E-05   2.2936E-05   2.2936E-05   3.8677E-04
+ Discard -user request             :    1   19.999  -1   1   0.000  -0.000   0.000  0.238 -0.779 -0.581         0 1.000E+00
+ END OF HISTORY       4   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.6037E-06   2.6037E-06   2.6037E-06   2.6037E-06   4.3908E-05
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.179  0.871  0.457         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.0118E-05   1.0118E-05   1.0118E-05   1.0118E-05   1.7063E-04
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.949  0.202  0.244         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.9603E-06   4.9603E-06   4.9603E-06   4.9603E-06   8.3647E-05
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.223  0.949  0.223         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.4184E-07   5.4184E-07   5.4184E-07   5.4184E-07   9.1373E-06
+
+
+                                       NP   ENERGY  Q REGION    X       Y       Z      U      V      W      LATCH  WEIGHT
+
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000 -0.582  0.711 -0.394         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.0130E-05   2.0130E-05   2.0130E-05   2.0130E-05   3.3945E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000 -0.064  0.866  0.497         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.6167E-06   1.6167E-06   1.6167E-06   1.6167E-06   2.7263E-05
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000 -0.818  0.555 -0.151         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.4327E-06   2.4327E-06   2.4327E-06   2.4327E-06   4.1024E-05
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000  0.048  0.966  0.255         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.2938E-05   2.2938E-05   2.2938E-05   2.2938E-05   3.8681E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000 -0.673  0.333  0.660         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.2788E-06   7.2788E-06   7.2788E-06   7.2788E-06   1.2274E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000  0.321  0.641  0.697         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.9040E-06   4.9040E-06   4.9040E-06   4.9040E-06   8.2698E-05
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000  0.616  0.729 -0.298         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.5368E-06   2.5368E-06   2.5368E-06   2.5368E-06   4.2779E-05
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000  0.173  0.080 -0.982         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.9076E-07   1.9076E-07   1.9076E-07   1.9076E-07   3.2168E-06
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000 -0.797  0.046 -0.602         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.1334E-05   1.1334E-05   1.1334E-05   1.1334E-05   1.9113E-04
+          STEP ABOUT TO OCCUR      :    1   19.998  -1   2  -0.000   0.000   0.000 -0.322  0.909 -0.264         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.7473E-05   2.7473E-05   2.7473E-05   2.7473E-05   4.6328E-04
+          STEP ABOUT TO OCCUR      :    1   19.998  -1   2  -0.000   0.000   0.000 -0.402  0.570  0.717         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.0858E-06   1.0858E-06   1.0858E-06   1.0858E-06   1.8309E-05
+          STEP ABOUT TO OCCUR      :    1   19.998  -1   2  -0.000   0.000   0.000 -0.995 -0.020  0.096         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       9.6009E-06   9.6009E-06   9.6009E-06   9.6009E-06   1.6190E-04
+          STEP ABOUT TO OCCUR      :    1   19.998  -1   2  -0.000   0.000   0.000 -0.531  0.577 -0.621         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.9209E-06   4.1623E-06   2.9209E-06   2.9209E-06   4.9256E-05
+ Discard -user request             :    1   19.998  -1   1  -0.000   0.000   0.000 -0.531  0.577 -0.621         0 1.000E+00
+ END OF HISTORY       5   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.7049E-05   2.7049E-05   2.7049E-05   2.7049E-05   4.5614E-04
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.692  0.559  0.457         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.8484E-05   2.8484E-05   2.8484E-05   2.8484E-05   4.8034E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2   0.000   0.000   0.000  0.692  0.559  0.457         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.0077E-05   4.0077E-05   4.0077E-05   4.0077E-05   6.7583E-04
+          STEP ABOUT TO OCCUR      :    1   19.998  -1   2   0.000   0.000   0.000  0.690  0.563  0.456         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.8390E-05   5.8390E-05   5.8390E-05   5.8390E-05   9.8465E-04
+          STEP ABOUT TO OCCUR      :    1   19.997  -1   2   0.000   0.000   0.000  0.686  0.567  0.455         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       8.4931E-05   8.4932E-05   8.4931E-05   8.4932E-05   1.4322E-03
+          STEP ABOUT TO OCCUR      :    1   19.996  -1   2   0.000   0.000   0.000  0.683  0.565  0.463         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.2377E-04   1.2377E-04   1.2377E-04   1.2377E-04   2.0872E-03
+          STEP ABOUT TO OCCUR      :    1   19.994  -1   2   0.000   0.000   0.000  0.688  0.551  0.473         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.8155E-04   1.8156E-04   1.8155E-04   1.8156E-04   3.0616E-03
+          STEP ABOUT TO OCCUR      :    1   19.991  -1   2   0.000   0.000   0.000  0.676  0.574  0.462         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.6597E-04   2.6599E-04   2.6597E-04   2.6599E-04   4.4853E-03
+          STEP ABOUT TO OCCUR      :    1   19.986  -1   2   0.001   0.000   0.000  0.676  0.559  0.480         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.9145E-04   3.9149E-04   3.9145E-04   3.9149E-04   6.6017E-03
+          STEP ABOUT TO OCCUR      :    1   19.980  -1   2   0.001   0.001   0.001  0.710  0.549  0.441         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.7056E-04   5.7068E-04   5.7056E-04   5.7068E-04   9.6232E-03
+
+
+                                       NP   ENERGY  Q REGION    X       Y       Z      U      V      W      LATCH  WEIGHT
+
+          STEP ABOUT TO OCCUR      :    1   19.970  -1   2   0.001   0.001   0.001  0.685  0.586  0.433         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       8.2214E-04   8.2235E-04   8.2214E-04   8.2235E-04   1.3867E-02
+          STEP ABOUT TO OCCUR      :    1   19.956  -1   2   0.002   0.001   0.001  0.677  0.612  0.409         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.1723E-03   1.1728E-03   1.1723E-03   1.1728E-03   1.9776E-02
+          STEP ABOUT TO OCCUR      :    1   19.936  -1   2   0.003   0.002   0.002  0.734  0.571  0.368         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.6253E-03   1.6255E-03   1.6253E-03   1.6255E-03   2.7408E-02
+          STEP ABOUT TO OCCUR      :    1   19.909  -1   2   0.004   0.003   0.002  0.744  0.580  0.333         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.2035E-03   2.2039E-03   2.2035E-03   2.2039E-03   3.7158E-02
+          STEP ABOUT TO OCCUR      :    1   19.872  -1   2   0.005   0.004   0.003  0.794  0.518  0.318         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.1993E-04   3.1994E-04   3.1993E-04   3.1994E-04   5.3939E-03
+ Moller   about to occur           :    1   19.867  -1   2   0.006   0.005   0.003  0.793  0.517  0.324         0 1.000E+00
+          Resulting electrons      :    1   19.664  -1   2   0.006   0.005   0.003  0.784  0.516  0.345         0 1.000E+00
+                                   :    2    0.203  -1   2   0.006   0.005   0.003  0.652  0.254 -0.714         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.203  -1   2   0.006   0.005   0.003  0.652  0.254 -0.714         0 1.000E+00
+         Now on top of stack       :    1   19.664  -1   2   0.006   0.005   0.003  0.784  0.516  0.345         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   19.664  -1   2   0.006   0.005   0.003  0.784  0.516  0.345         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.0325E-03   3.0331E-03   3.0325E-03   3.0331E-03   5.1113E-02
+          STEP ABOUT TO OCCUR      :    1   19.612  -1   2   0.008   0.006   0.004  0.759  0.527  0.382         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.1572E-03   4.1583E-03   4.1572E-03   4.1583E-03   7.0067E-02
+          STEP ABOUT TO OCCUR      :    1   19.542  -1   2   0.011   0.008   0.006  0.817  0.492  0.300         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.3487E-03   5.6035E-03   5.3487E-03   5.6035E-03   9.4403E-02
+          STEP ABOUT TO OCCUR      :    1   19.448  -1   2   0.016   0.011   0.006  0.818  0.398 -0.414         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       6.4413E-03   6.4420E-03   6.4413E-03   6.4420E-03   1.0851E-01
+          STEP ABOUT TO OCCUR      :    1   19.339  -1   2   0.021   0.013   0.004  0.851  0.348 -0.393         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.7946E-03   3.7971E-03   3.7946E-03   3.7971E-03   6.3947E-02
+          STEP ABOUT TO OCCUR      :    1   19.275  -1   2   0.025   0.014   0.002  0.868  0.301 -0.395         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       6.3799E-04   6.3809E-04   6.3799E-04   6.3809E-04   1.0745E-02
+ bremsstrahlung  about to occur    :    1   19.265  -1   2   0.025   0.015   0.002  0.855  0.320 -0.408         0 1.000E+00
+         Resulting electron        :    1   19.167  -1   2   0.025   0.015   0.002  0.855  0.320 -0.408         0 1.000E+00
+         Resulting photon          :    2    0.098   0   2   0.025   0.015   0.002  0.852  0.415 -0.319         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.098   0   2   0.025   0.015   0.002  0.852  0.415 -0.319         0 1.000E+00
+         Now on top of stack       :    1   19.167  -1   2   0.025   0.015   0.002  0.855  0.320 -0.408         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   19.167  -1   2   0.025   0.015   0.002  0.855  0.320 -0.408         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.0903E-03   2.0904E-03   2.0903E-03   2.0904E-03   3.5194E-02
+          STEP ABOUT TO OCCUR      :    1   19.132  -1   2   0.027   0.015   0.001  0.839  0.364 -0.404         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.2523E-03   1.2523E-03   1.2523E-03   1.2523E-03   2.1083E-02
+          STEP ABOUT TO OCCUR      :    1   19.111  -1   2   0.028   0.016   0.001  0.832  0.362 -0.420         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.3626E-04   7.3634E-04   7.3626E-04   7.3634E-04   1.2396E-02
+          STEP ABOUT TO OCCUR      :    1   19.098  -1   2   0.029   0.016   0.000  0.827  0.347 -0.442         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.0997E-04   4.0997E-04   4.0997E-04   4.0997E-04   6.9015E-03
+          STEP ABOUT TO OCCUR      :    1   19.091  -1   2   0.029   0.016   0.000  0.834  0.339 -0.437         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.3141E-04   2.3141E-04   2.3141E-04   2.3141E-04   3.8956E-03
+          STEP ABOUT TO OCCUR      :    1   19.087  -1   2   0.029   0.016   0.000  0.842  0.318 -0.435         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.3168E-04   1.3168E-04   1.3168E-04   1.3168E-04   2.2167E-03
+          STEP ABOUT TO OCCUR      :    1   19.085  -1   2   0.029   0.016   0.000  0.841  0.332 -0.427         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.5107E-05   7.5107E-05   7.5107E-05   7.5107E-05   1.2643E-03
+          STEP ABOUT TO OCCUR      :    1   19.084  -1   2   0.029   0.016   0.000  0.844  0.329 -0.425         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.3177E-05   4.3177E-05   4.3177E-05   4.3177E-05   7.2682E-04
+          STEP ABOUT TO OCCUR      :    1   19.083  -1   2   0.029   0.016   0.000  0.841  0.331 -0.428         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.1175E-06   7.1175E-06   7.1175E-06   7.1175E-06   1.1981E-04
+          STEP ABOUT TO OCCUR      :    1   19.083  -1   2   0.029   0.016   0.000  0.876  0.371 -0.309         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.1181E-05   1.1181E-05   1.1181E-05   1.1181E-05   1.8822E-04
+
+
+                                       NP   ENERGY  Q REGION    X       Y       Z      U      V      W      LATCH  WEIGHT
+
+          STEP ABOUT TO OCCUR      :    1   19.083  -1   2   0.029   0.016   0.000  0.869  0.450 -0.205         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.0844E-05   1.0844E-05   1.0844E-05   1.0844E-05   1.8255E-04
+          STEP ABOUT TO OCCUR      :    1   19.083  -1   2   0.029   0.016   0.000  0.835  0.441 -0.330         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.5597E-06   2.5597E-06   2.5597E-06   2.5597E-06   4.3089E-05
+          STEP ABOUT TO OCCUR      :    1   19.083  -1   2   0.029   0.016   0.000  0.766  0.473 -0.436         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.9104E-06   7.9104E-06   7.9104E-06   7.9104E-06   1.3316E-04
+          STEP ABOUT TO OCCUR      :    1   19.082  -1   2   0.029   0.016   0.000  0.836  0.437 -0.332         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.1079E-05   1.1079E-05   1.1079E-05   1.1079E-05   1.8650E-04
+          STEP ABOUT TO OCCUR      :    1   19.082  -1   2   0.029   0.016   0.000  0.887  0.410 -0.215         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.6766E-05   1.6766E-05   1.6766E-05   1.6766E-05   2.8224E-04
+          STEP ABOUT TO OCCUR      :    1   19.082  -1   2   0.029   0.016   0.000  0.821  0.520 -0.236         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       9.2528E-06   9.2528E-06   9.2528E-06   9.2528E-06   1.5576E-04
+          STEP ABOUT TO OCCUR      :    1   19.082  -1   2   0.029   0.016   0.000  0.888  0.416 -0.197         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.1262E-05   1.1262E-05   1.1262E-05   1.1262E-05   1.8958E-04
+          STEP ABOUT TO OCCUR      :    1   19.082  -1   2   0.029   0.016   0.000  0.901  0.324 -0.288         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.8589E-08   3.8589E-08   3.8589E-08   3.8589E-08   6.4959E-07
+          STEP ABOUT TO OCCUR      :    1   19.082  -1   2   0.029   0.016   0.000  0.863  0.295 -0.410         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.5632E-07   1.9898E-06   1.5632E-07   1.5632E-07   2.6315E-06
+ Discard -user request             :    1   19.082  -1   1   0.029   0.016   0.000  0.863  0.295 -0.410         0 1.000E+00
+ END OF HISTORY       6   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.6912E-05   2.6912E-05   2.6912E-05   2.6912E-05   4.5383E-04
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.074 -0.107  0.991         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       6.4850E-06   6.4850E-06   6.4850E-06   6.4850E-06   1.0936E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2   0.000  -0.000   0.000  0.187 -0.041  0.982         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.3342E-05   3.3342E-05   3.3342E-05   3.3342E-05   5.6226E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2   0.000  -0.000   0.000  0.185 -0.040  0.982         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       6.6082E-05   6.6083E-05   6.6082E-05   6.6083E-05   1.1144E-03
+          STEP ABOUT TO OCCUR      :    1   19.998  -1   2   0.000  -0.000   0.000  0.194 -0.036  0.980         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.3092E-04   1.3092E-04   1.3092E-04   1.3092E-04   2.2078E-03
+          STEP ABOUT TO OCCUR      :    1   19.996  -1   2   0.000  -0.000   0.000  0.210 -0.029  0.977         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.5905E-04   2.5906E-04   2.5905E-04   2.5906E-04   4.3685E-03
+          STEP ABOUT TO OCCUR      :    1   19.991  -1   2   0.000  -0.000   0.001  0.216 -0.023  0.976         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.1186E-04   5.1187E-04   5.1186E-04   5.1187E-04   8.6317E-03
+          STEP ABOUT TO OCCUR      :    1   19.983  -1   2   0.000  -0.000   0.001  0.206 -0.036  0.978         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.0113E-03   1.0116E-03   1.0113E-03   1.0116E-03   1.7058E-02
+          STEP ABOUT TO OCCUR      :    1   19.965  -1   2   0.000  -0.000   0.002  0.177 -0.018  0.984         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.0005E-03   2.0007E-03   2.0005E-03   2.0007E-03   3.3736E-02
+          STEP ABOUT TO OCCUR      :    1   19.932  -1   2   0.001  -0.000   0.004  0.181 -0.050  0.982         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.9622E-03   3.9651E-03   3.9622E-03   3.9651E-03   6.6853E-02
+          STEP ABOUT TO OCCUR      :    1   19.865  -1   2   0.001  -0.000   0.008  0.125  0.084  0.989         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.8739E-03   7.8774E-03   7.8739E-03   7.8774E-03   1.3279E-01
+          STEP ABOUT TO OCCUR      :    1   19.732  -1   2   0.002   0.000   0.016  0.006  0.063  0.998         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       8.5128E-03   8.5166E-03   8.5128E-03   8.5166E-03   1.4353E-01
+ bremsstrahlung  about to occur    :    1   19.589  -1   2   0.002   0.001   0.024 -0.041  0.047  0.998         0 1.000E+00
+         Resulting electron        :    1   19.578  -1   2   0.002   0.001   0.024 -0.041  0.047  0.998         0 1.000E+00
+         Resulting photon          :    2    0.010   0   2   0.002   0.001   0.024 -0.014  0.046  0.999         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.010   0   2   0.002   0.001   0.024 -0.014  0.046  0.999         0 1.000E+00
+         Now on top of stack       :    1   19.578  -1   2   0.002   0.001   0.024 -0.041  0.047  0.998         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   19.578  -1   2   0.002   0.001   0.024 -0.041  0.047  0.998         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.3820E-02   2.4193E-02   2.3820E-02   2.4193E-02   4.0749E-01
+
+
+                                       NP   ENERGY  Q REGION    X       Y       Z      U      V      W      LATCH  WEIGHT
+
+          STEP ABOUT TO OCCUR      :    1   19.171  -1   2   0.007   0.004   0.047  0.438  0.205  0.876         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.6842E-02   4.7189E-02   4.6842E-02   4.7189E-02   7.9387E-01
+          STEP ABOUT TO OCCUR      :    1   18.377  -1   2   0.032   0.011   0.087  0.560  0.086  0.824         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.3358E-02   1.3393E-02   1.3358E-02   1.3393E-02   2.2508E-01
+          STEP ABOUT TO OCCUR      :    1   18.152  -1   2   0.039   0.010   0.098  0.532 -0.081  0.843         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.3270E-03   2.3279E-03   2.3270E-03   2.3279E-03   3.9111E-02
+          STEP ABOUT TO OCCUR      :    1   18.113  -1   2   0.040   0.010   0.100  0.501 -0.152  0.852         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.5161E-04   3.5162E-04   3.5161E-04   3.5162E-04   5.9073E-03
+          STEP ABOUT TO OCCUR      :    1   18.107  -1   2   0.041   0.010   0.100  0.500 -0.135  0.856         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.1799E-05   5.1799E-05   5.1799E-05   5.1799E-05   8.7025E-04
+          STEP ABOUT TO OCCUR      :    1   18.106  -1   2   0.041   0.010   0.100  0.499 -0.134  0.856         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       8.7228E-06   2.1751E-05   8.7228E-06   8.7228E-06   1.4655E-04
+ Discard -user request             :    1   18.106  -1   3   0.041   0.010   0.100  0.499 -0.134  0.856         0 1.000E+00
+ END OF HISTORY       7   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       8.8306E-06   8.8306E-06   8.8306E-06   8.8306E-06   1.4891E-04
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000 -0.014  0.023  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.8261E-06   7.8261E-06   7.8261E-06   7.8261E-06   1.3198E-04
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2  -0.000   0.000   0.000 -0.037  0.010  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.0354E-05   1.0354E-05   1.0354E-05   1.0354E-05   1.7460E-04
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2  -0.000   0.000   0.000 -0.020 -0.011  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.5939E-05   1.5939E-05   1.5939E-05   1.5939E-05   2.6878E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000 -0.022  0.016  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.2935E-05   4.2935E-05   4.2935E-05   4.2935E-05   7.2403E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2  -0.000   0.000   0.000 -0.020  0.018  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       8.5854E-05   8.5854E-05   8.5854E-05   8.5854E-05   1.4478E-03
+          STEP ABOUT TO OCCUR      :    1   19.997  -1   2  -0.000   0.000   0.000 -0.024  0.013  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.7168E-04   1.7168E-04   1.7168E-04   1.7168E-04   2.8951E-03
+          STEP ABOUT TO OCCUR      :    1   19.994  -1   2  -0.000   0.000   0.000 -0.021 -0.002  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.4332E-04   3.4332E-04   3.4332E-04   3.4332E-04   5.7894E-03
+          STEP ABOUT TO OCCUR      :    1   19.988  -1   2  -0.000   0.000   0.001 -0.017  0.001  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       6.8654E-04   6.8657E-04   6.8654E-04   6.8657E-04   1.1577E-02
+          STEP ABOUT TO OCCUR      :    1   19.977  -1   2  -0.000  -0.000   0.001 -0.035 -0.003  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.3711E-03   1.3728E-03   1.3711E-03   1.3728E-03   2.3148E-02
+          STEP ABOUT TO OCCUR      :    1   19.954  -1   2  -0.000   0.000   0.003  0.043  0.152  0.988         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.7299E-03   2.7321E-03   2.7299E-03   2.7321E-03   4.6066E-02
+          STEP ABOUT TO OCCUR      :    1   19.908  -1   2  -0.000   0.001   0.005  0.005  0.143  0.990         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.4311E-03   5.4387E-03   5.4311E-03   5.4387E-03   9.1690E-02
+          STEP ABOUT TO OCCUR      :    1   19.816  -1   2   0.000   0.001   0.011  0.124  0.120  0.985         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.0799E-02   1.0806E-02   1.0799E-02   1.0806E-02   1.8213E-01
+          STEP ABOUT TO OCCUR      :    1   19.634  -1   2   0.002   0.001   0.021  0.198 -0.035  0.980         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.1415E-02   2.1481E-02   2.1415E-02   2.1481E-02   3.6186E-01
+          STEP ABOUT TO OCCUR      :    1   19.272  -1   2   0.009  -0.000   0.042  0.436 -0.093  0.895         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.5852E-02   3.6045E-02   3.5852E-02   3.6045E-02   6.0663E-01
+ Moller   about to occur           :    1   18.665  -1   2   0.024  -0.004   0.074  0.307 -0.067  0.949         0 1.000E+00
+          Resulting electrons      :    1   18.166  -1   2   0.024  -0.004   0.074  0.283 -0.096  0.954         0 1.000E+00
+                                   :    2    0.500  -1   2   0.024  -0.004   0.074  0.691  0.576  0.437         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.500  -1   2   0.024  -0.004   0.074  0.691  0.576  0.437         0 1.000E+00
+         Now on top of stack       :    1   18.166  -1   2   0.024  -0.004   0.074  0.283 -0.096  0.954         0 1.000E+00
+
+
+                                       NP   ENERGY  Q REGION    X       Y       Z      U      V      W      LATCH  WEIGHT
+
+          STEP ABOUT TO OCCUR      :    1   18.166  -1   2   0.024  -0.004   0.074  0.283 -0.096  0.954         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       6.6621E-03   6.6654E-03   6.6621E-03   6.6654E-03   1.1198E-01
+ bremsstrahlung  about to occur    :    1   18.054  -1   2   0.026  -0.004   0.080  0.350 -0.050  0.935         0 1.000E+00
+         Resulting electron        :    1   17.863  -1   2   0.026  -0.004   0.080  0.350 -0.050  0.935         0 1.000E+00
+         Resulting photon          :    2    0.191   0   2   0.026  -0.004   0.080  0.324 -0.033  0.945         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    2    0.191   0   2   0.026  -0.004   0.080  0.324 -0.033  0.945         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.0728E-02   6.7531E-02   2.0728E-02   2.0728E-02   0.0000E+00
+ Discard -user request             :    2    0.191   0   3   0.033  -0.005   0.100  0.324 -0.033  0.945         0 1.000E+00
+         Now on top of stack       :    1   17.863  -1   2   0.026  -0.004   0.080  0.350 -0.050  0.935         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   17.863  -1   2   0.026  -0.004   0.080  0.350 -0.050  0.935         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.9518E-02   1.9597E-02   1.9518E-02   1.9597E-02   3.2895E-01
+          STEP ABOUT TO OCCUR      :    1   17.534  -1   2   0.034  -0.004   0.098  0.322  0.039  0.946         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.0556E-03   2.0561E-03   2.0556E-03   2.0561E-03   3.4500E-02
+          STEP ABOUT TO OCCUR      :    1   17.499  -1   2   0.035  -0.004   0.100  0.338  0.007  0.941         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.2178E-04   1.2178E-04   1.2178E-04   1.2178E-04   2.0432E-03
+          STEP ABOUT TO OCCUR      :    1   17.497  -1   2   0.035  -0.004   0.100  0.347  0.015  0.938         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.3228E-06   7.3228E-06   7.3228E-06   7.3228E-06   1.2286E-04
+          STEP ABOUT TO OCCUR      :    1   17.497  -1   2   0.035  -0.004   0.100  0.335 -0.016  0.942         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.0286E-07   2.5474E-06   5.0286E-07   5.0286E-07   8.4371E-06
+ Discard -user request             :    1   17.497  -1   3   0.035  -0.004   0.100  0.335 -0.016  0.942         0 1.000E+00
+ END OF HISTORY       8   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.4290E-06   2.4290E-06   2.4290E-06   2.4290E-06   4.0961E-05
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.022 -0.024  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       8.6475E-06   8.6475E-06   8.6475E-06   8.6475E-06   1.4583E-04
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000  -0.000   0.000 -0.001 -0.048  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.4482E-06   3.4482E-06   3.4482E-06   3.4482E-06   5.8148E-05
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000  -0.000   0.000  0.029 -0.034  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.4686E-06   2.4686E-06   2.4686E-06   2.4686E-06   4.1629E-05
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000  -0.000   0.000  0.011 -0.061  0.998         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.4128E-07   3.4128E-07   3.4128E-07   3.4128E-07   5.7551E-06
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000  -0.000   0.000  0.027 -0.089  0.996         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.2260E-05   1.2260E-05   1.2260E-05   1.2260E-05   2.0675E-04
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000  -0.000   0.000  0.059 -0.082  0.995         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.9530E-05   2.9530E-05   2.9530E-05   2.9530E-05   4.9797E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2   0.000  -0.000   0.000  0.060 -0.079  0.995         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.8913E-05   5.8913E-05   5.8913E-05   5.8913E-05   9.9347E-04
+          STEP ABOUT TO OCCUR      :    1   19.998  -1   2   0.000  -0.000   0.000  0.060 -0.075  0.995         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.1755E-04   1.1755E-04   1.1755E-04   1.1755E-04   1.9823E-03
+          STEP ABOUT TO OCCUR      :    1   19.996  -1   2   0.000  -0.000   0.000  0.058 -0.079  0.995         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.3452E-04   2.3453E-04   2.3452E-04   2.3453E-04   3.9549E-03
+          STEP ABOUT TO OCCUR      :    1   19.992  -1   2   0.000  -0.000   0.000  0.042 -0.080  0.996         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.6797E-04   4.6797E-04   4.6797E-04   4.6797E-04   7.8914E-03
+          STEP ABOUT TO OCCUR      :    1   19.984  -1   2   0.000  -0.000   0.001  0.055 -0.072  0.996         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       9.3400E-04   9.3401E-04   9.3400E-04   9.3401E-04   1.5750E-02
+          STEP ABOUT TO OCCUR      :    1   19.968  -1   2   0.000  -0.000   0.002  0.046 -0.088  0.995         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.8634E-03   1.8635E-03   1.8634E-03   1.8635E-03   3.1422E-02
+          STEP ABOUT TO OCCUR      :    1   19.937  -1   2   0.000  -0.000   0.004  0.039 -0.079  0.996         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.7177E-03   3.7188E-03   3.7177E-03   3.7188E-03   6.2701E-02
+          STEP ABOUT TO OCCUR      :    1   19.874  -1   2   0.001  -0.001   0.007  0.173 -0.144  0.974         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.3681E-03   7.4004E-03   7.3681E-03   7.4004E-03   1.2475E-01
+          STEP ABOUT TO OCCUR      :    1   19.750  -1   2   0.002  -0.002   0.014  0.532 -0.227  0.816         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.4366E-02   1.4375E-02   1.4366E-02   1.4375E-02   2.4224E-01
+
+
+                                       NP   ENERGY  Q REGION    X       Y       Z      U      V      W      LATCH  WEIGHT
+
+          STEP ABOUT TO OCCUR      :    1   19.507  -1   2   0.010  -0.006   0.026  0.503 -0.316  0.804         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.5790E-02   2.5879E-02   2.5790E-02   2.5879E-02   4.3581E-01
+ bremsstrahlung  about to occur    :    1   19.072  -1   2   0.021  -0.016   0.047  0.386 -0.392  0.835         0 1.000E+00
+         Resulting electron        :    1   18.682  -1   2   0.021  -0.016   0.047  0.386 -0.392  0.835         0 1.000E+00
+         Resulting photon          :    2    0.390   0   2   0.021  -0.016   0.047  0.397 -0.399  0.826         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    2    0.390   0   2   0.021  -0.016   0.047  0.397 -0.399  0.826         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       6.4079E-02   2.6679E-01   6.4079E-02   6.4079E-02   0.0000E+00
+ Discard -user request             :    2    0.390   0   3   0.046  -0.042   0.100  0.397 -0.399  0.826         0 1.000E+00
+         Now on top of stack       :    1   18.682  -1   2   0.021  -0.016   0.047  0.386 -0.392  0.835         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   18.682  -1   2   0.021  -0.016   0.047  0.386 -0.392  0.835         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       9.1203E-04   9.1206E-04   9.1203E-04   9.1206E-04   1.5341E-02
+ Moller   about to occur           :    1   18.667  -1   2   0.021  -0.017   0.048  0.412 -0.372  0.832         0 1.000E+00
+          Resulting electrons      :    1   17.381  -1   2   0.021  -0.017   0.048  0.362 -0.353  0.863         0 1.000E+00
+                                   :    2    1.286  -1   2   0.021  -0.017   0.048  0.828 -0.475  0.300         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    2    1.286  -1   2   0.021  -0.017   0.048  0.828 -0.475  0.300         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.8994E-03   4.0159E-03   3.8994E-03   4.0159E-03   6.2500E-02
+          STEP ABOUT TO OCCUR      :    2    1.223  -1   2   0.023  -0.020   0.049  0.340 -0.940 -0.039         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.1906E-03   3.7114E-03   3.1906E-03   3.7114E-03   5.7924E-02
+          STEP ABOUT TO OCCUR      :    2    1.165  -1   2   0.024  -0.022   0.047  0.435 -0.856 -0.279         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.2404E-03   3.4659E-03   3.2404E-03   3.4659E-03   5.4262E-02
+          STEP ABOUT TO OCCUR      :    2    1.111  -1   2   0.024  -0.025   0.046  0.051 -0.963 -0.266         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.8602E-03   3.2246E-03   2.8602E-03   3.2246E-03   5.0639E-02
+          STEP ABOUT TO OCCUR      :    2    1.060  -1   2   0.022  -0.027   0.045 -0.924 -0.349  0.157         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.9259E-03   2.9935E-03   2.9259E-03   2.9935E-03   4.7186E-02
+          STEP ABOUT TO OCCUR      :    2    1.013  -1   2   0.020  -0.029   0.045 -0.590 -0.730 -0.344         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.7139E-03   2.8100E-03   2.7139E-03   2.8100E-03   4.4477E-02
+ Discard  AE,AP<E<ECUT             :    2    0.969  -1   2   0.018  -0.031   0.044 -0.849 -0.352 -0.395         0 1.000E+00
+         Now on top of stack       :    1   17.381  -1   2   0.021  -0.017   0.048  0.362 -0.353  0.863         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   17.381  -1   2   0.021  -0.017   0.048  0.362 -0.353  0.863         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       9.6337E-03   9.6508E-03   9.6337E-03   9.6508E-03   1.6185E-01
+ bremsstrahlung  about to occur    :    1   17.219  -1   2   0.024  -0.020   0.056  0.213 -0.339  0.916         0 1.000E+00
+         Resulting electron        :    1   16.986  -1   2   0.024  -0.020   0.056  0.213 -0.339  0.916         0 1.000E+00
+         Resulting photon          :    2    0.233   0   2   0.024  -0.020   0.056  0.282 -0.339  0.897         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    2    0.233   0   2   0.024  -0.020   0.056  0.282 -0.339  0.897         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.8500E-02   2.3615E-01   4.8500E-02   4.8500E-02   0.0000E+00
+ Discard -user request             :    2    0.233   0   3   0.038  -0.036   0.100  0.282 -0.339  0.897         0 1.000E+00
+         Now on top of stack       :    1   16.986  -1   2   0.024  -0.020   0.056  0.213 -0.339  0.916         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   16.986  -1   2   0.024  -0.020   0.056  0.213 -0.339  0.916         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.8885E-03   7.8927E-03   7.8885E-03   7.8927E-03   1.3225E-01
+ bremsstrahlung  about to occur    :    1   16.854  -1   2   0.026  -0.022   0.064  0.158 -0.212  0.964         0 1.000E+00
+         Resulting electron        :    1   16.677  -1   2   0.026  -0.022   0.064  0.158 -0.212  0.964         0 1.000E+00
+         Resulting photon          :    2    0.177   0   2   0.026  -0.022   0.064  0.141 -0.215  0.967         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    2    0.177   0   2   0.026  -0.022   0.064  0.141 -0.215  0.967         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.7308E-02   4.1438E-02   3.7308E-02   3.7308E-02   0.0000E+00
+ Discard -user request             :    2    0.177   0   3   0.031  -0.030   0.100  0.141 -0.215  0.967         0 1.000E+00
+         Now on top of stack       :    1   16.677  -1   2   0.026  -0.022   0.064  0.158 -0.212  0.964         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   16.677  -1   2   0.026  -0.022   0.064  0.158 -0.212  0.964         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.5419E-02   3.6059E-02   3.5419E-02   3.6059E-02   6.0342E-01
+          STEP ABOUT TO OCCUR      :    1   16.073  -1   2   0.035  -0.026   0.098 -0.080 -0.151  0.985         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.1562E-03   2.1576E-03   2.1562E-03   2.1576E-03   3.6078E-02
+          STEP ABOUT TO OCCUR      :    1   16.037  -1   2   0.034  -0.027   0.100 -0.130 -0.230  0.964         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       6.2688E-05   6.2690E-05   6.2688E-05   6.2690E-05   1.0482E-03
+          STEP ABOUT TO OCCUR      :    1   16.036  -1   2   0.034  -0.027   0.100 -0.116 -0.218  0.969         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.3477E-07   7.3477E-07   7.3477E-07   7.3477E-07   1.2286E-05
+          STEP ABOUT TO OCCUR      :    1   16.036  -1   2   0.034  -0.027   0.100 -0.098 -0.221  0.970         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.3381E-06   4.3201E-06   1.3381E-06   1.3381E-06   2.2374E-05
+ Discard -user request             :    1   16.036  -1   3   0.034  -0.027   0.100 -0.098 -0.221  0.970         0 1.000E+00
+ END OF HISTORY       9   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.2205E-06   7.2205E-06   7.2205E-06   7.2205E-06   1.2176E-04
+
+
+                                       NP   ENERGY  Q REGION    X       Y       Z      U      V      W      LATCH  WEIGHT
+
+          STEP ABOUT TO OCCUR      :    1   20.000  -1   2   0.000   0.000   0.000  0.008  0.016  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.8484E-05   2.8484E-05   2.8484E-05   2.8484E-05   4.8034E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2   0.000   0.000   0.000  0.008  0.016  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.5700E-05   3.5700E-05   3.5700E-05   3.5700E-05   6.0202E-04
+          STEP ABOUT TO OCCUR      :    1   19.999  -1   2   0.000   0.000   0.000  0.009  0.015  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       7.1393E-05   7.1395E-05   7.1393E-05   7.1395E-05   1.2039E-03
+          STEP ABOUT TO OCCUR      :    1   19.998  -1   2   0.000   0.000   0.000  0.025  0.010  1.000         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.4277E-04   1.4277E-04   1.4277E-04   1.4277E-04   2.4075E-03
+          STEP ABOUT TO OCCUR      :    1   19.995  -1   2   0.000   0.000   0.000  0.037  0.015  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.8544E-04   2.8544E-04   2.8544E-04   2.8544E-04   4.8134E-03
+          STEP ABOUT TO OCCUR      :    1   19.990  -1   2   0.000   0.000   0.001  0.028  0.017  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       5.7068E-04   5.7070E-04   5.7068E-04   5.7070E-04   9.6236E-03
+          STEP ABOUT TO OCCUR      :    1   19.981  -1   2   0.000   0.000   0.001  0.025  0.032  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.1410E-03   1.1411E-03   1.1410E-03   1.1411E-03   1.9241E-02
+          STEP ABOUT TO OCCUR      :    1   19.962  -1   2   0.000   0.000   0.002  0.017  0.048  0.999         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       2.2806E-03   2.2812E-03   2.2806E-03   2.2812E-03   3.8465E-02
+          STEP ABOUT TO OCCUR      :    1   19.923  -1   2   0.000   0.000   0.005  0.048  0.033  0.998         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.5554E-03   4.5567E-03   4.5554E-03   4.5567E-03   7.6824E-02
+          STEP ABOUT TO OCCUR      :    1   19.846  -1   2   0.000   0.000   0.009  0.069 -0.045  0.997         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       9.1037E-03   9.1053E-03   9.1037E-03   9.1053E-03   1.5348E-01
+          STEP ABOUT TO OCCUR      :    1   19.693  -1   2   0.001  -0.000   0.018  0.099 -0.038  0.994         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.8134E-02   1.8184E-02   1.8134E-02   1.8184E-02   3.0637E-01
+          STEP ABOUT TO OCCUR      :    1   19.386  -1   2   0.001   0.002   0.036 -0.004  0.195  0.981         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       3.5584E-02   3.5759E-02   3.5584E-02   3.5759E-02   6.0196E-01
+ Moller   about to occur           :    1   18.784  -1   2  -0.001   0.006   0.072 -0.180  0.018  0.983         0 1.000E+00
+          Resulting electrons      :    1   18.453  -1   2  -0.001   0.006   0.072 -0.151  0.023  0.988         0 1.000E+00
+                                   :    2    0.332  -1   2  -0.001   0.006   0.072 -0.929 -0.126  0.349         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.332  -1   2  -0.001   0.006   0.072 -0.929 -0.126  0.349         0 1.000E+00
+         Now on top of stack       :    1   18.453  -1   2  -0.001   0.006   0.072 -0.151  0.023  0.988         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   18.453  -1   2  -0.001   0.006   0.072 -0.151  0.023  0.988         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.9717E-02   1.9745E-02   1.9717E-02   1.9745E-02   3.3185E-01
+ bremsstrahlung  about to occur    :    1   18.121  -1   2  -0.001   0.006   0.091  0.095  0.087  0.992         0 1.000E+00
+         Resulting electron        :    1   17.714  -1   2  -0.001   0.006   0.091  0.095  0.087  0.992         0 1.000E+00
+         Resulting photon          :    2    0.407   0   2  -0.001   0.006   0.091  0.065  0.090  0.994         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    2    0.407   0   2  -0.001   0.006   0.091  0.065  0.090  0.994         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       8.8349E-03   4.1262E-01   8.8349E-03   8.8349E-03   0.0000E+00
+
+
+                                       NP   ENERGY  Q REGION    X       Y       Z      U      V      W      LATCH  WEIGHT
+
+ Discard -user request             :    2    0.407   0   3  -0.001   0.007   0.100  0.065  0.090  0.994         0 1.000E+00
+         Now on top of stack       :    1   17.714  -1   2  -0.001   0.006   0.091  0.095  0.087  0.992         0 1.000E+00
+          STEP ABOUT TO OCCUR      :    1   17.714  -1   2  -0.001   0.006   0.091  0.095  0.087  0.992         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       8.7534E-03   8.7797E-03   8.7534E-03   8.7797E-03   1.4736E-01
+          STEP ABOUT TO OCCUR      :    1   17.567  -1   2  -0.000   0.008   0.100  0.066  0.231  0.971         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       1.4548E-04   1.4548E-04   1.4548E-04   1.4548E-04   2.4413E-03
+          STEP ABOUT TO OCCUR      :    1   17.565  -1   2  -0.000   0.008   0.100  0.068  0.222  0.973         0 1.000E+00
+    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP :       4.2886E-06   2.6871E-05   4.2886E-06   4.2886E-06   7.1965E-05
+ Discard -user request             :    1   17.565  -1   3  -0.000   0.008   0.100  0.068  0.222  0.973         0 1.000E+00
+ END OF HISTORY      10   ****************************************
+
+
+
+ Fraction of energy reflected from plate=            29.539%
+ Fraction of energy deposited in plate=               9.143%
+ Fraction of energy transmitted through plate=       61.318%
+                                                 -----------
+ Total fraction of energy accounted for=            100.000%
+
+
+
+
+
+================================================================================
+Finished simulation
+
+  Elapsed time:                    0.4 s (  0.000 h)
+  CPU time:                        0.4 s (  0.000 h)
+  Ratio:                          1.017
+
+
+End of run                                             Fri Feb 12 14:00:17 2021
+================================================================================

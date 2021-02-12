@@ -197,6 +197,8 @@ def init():
 
     egsfortran.egs_set_defaults()
     egsfortran.egs_check_arguments()
+    egsfortran.flush_output()
+
     # print("COMMON IO")
     # print("---------")
     # for name in dir(egsfortran.egs_io):
@@ -244,15 +246,15 @@ def init():
     egsfortran.hatch()  #     pick up cross section data for TA
     #                data file must be assigned to unit 12
 
-    # egsfortran.flushoutput()  # gfortran only - else doesn't print all lines
+    egsfortran.flush_output()  # gfortran only - else doesn't print all lines
 
     logger.info(
-        ' knock-on electrons can be created and any electron followed down to\n'
-        "                                        "
+        '\n knock-on electrons can be created and any electron followed down to\n'
+        "                                       "
         f'{ae[0]-prm:8.3} MeV kinetic energy\n'
         ' brem photons can be created and any photon followed down to      \n'
-        "                                        "
-        f'{ap[0]:8.3} MeV '
+        "                                       "
+        f'{ap[0]:8.3f} MeV'
         # Compton events can create electrons and photons below these cutoffs
     )# OUTPUT AE(1)-PRM, AP(1);
 
@@ -268,18 +270,19 @@ def init():
     # print("                 Kinetic Energy(MeV)  charge  angle w.r.t.Z axis-degrees")
     # for i in range(len(iausfl)):
     #     iausfl[i] = 1
-    for i in range(3):
-        escore[i] = 0.0  # zero scoring array before starting
+    escore[:] = 0.0  # zero scoring array before starting
 
     # XXX set 2 for debugging
-    score.iwatch = 1  # This determines the type and amount of output
+    score.iwatch = 2  # This determines the type and amount of output
                     # =1 => print info about each interaction
                     # =2 => print info about same + each electron step
                     # =4 => create a file to be displayed by EGS_Windows
                     #  Note that these files can be huge
                     # IWATCH 1 and 2 outputs to unit 6, 4 to unit 13
 
-    egsfortran.watch(-99,iwatch);   # Initializes calls to AUSGAB for WATCH
+    egsfortran.flush_output()
+    watch(-99, iwatch)   # Initializes calls to AUSGAB for WATCH
+    egsfortran.flush_output()  # if change above to egsfortran.watch(...)
     # ---------------------------------------------------------------------
     # STEP 6   DETERMINATION-OF-INICIDENT-PARTICLE-PARAMETERS
     # ---------------------------------------------------------------------
@@ -318,14 +321,33 @@ def main(iqin=-1):  # iqin here only to make generating validation data faster
             f"{latchi:10}{wtin:10.3E}",
             )
             shower(iqin,ein,xin,yin,zin,uin,vin,win,irin,wtin)
+            egsfortran.flush_output()
             watch(-1, iwatch)  # print a message that this history is over
+            egsfortran.flush_output()
 
     # -----------------------------------------------------------------
     # STEP 8   OUTPUT-OF-RESULTS
     # -----------------------------------------------------------------
-    # note output is at the end of each history in subroutine ausgab
 
-    # -----------------------------------------------------------------
+    anorm = 100. / ((ein + float(iqin) * prm) * float(ncase))
+    # normalize to % of total input energy
+    total = sum(escore)
+
+    msgs = (
+        " Fraction of energy reflected from plate=",
+        ' Fraction of energy deposited in plate=',
+        ' Fraction of energy transmitted through plate=',
+    )
+    logger.info("\n")
+    for i in range(3):
+        logger.info(f"{msgs[i]:<49}{escore[i]*anorm:10.3f}%")
+
+    logger.info(" "*49 + "-"*11)
+
+    msg = ' Total fraction of energy accounted for='
+    logger.info(f'{msg:<49}{total*anorm:10.3f}%\n\n\n')
+
+        # -----------------------------------------------------------------
     # STEP 9   finish run
     # -----------------------------------------------------------------
     egsfortran.egs_finish()
@@ -447,6 +469,7 @@ def ausgab(iarg):
     region 1 or 3, so score its energy.
     """
     if iwatch > 0:
+        egsfortran.flush_output()
         watch(iarg, iwatch)  # handles printouts of data
                              # iwatch is passed in score
 
