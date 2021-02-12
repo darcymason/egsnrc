@@ -153,7 +153,7 @@ def electr(hownear, howfar, ausgab) -> int:
             # End inline replace: $ EVALUATE_EBREM_FRACTION; ----
 
             rnno24 = randomset()
-            logger.info(f'random rnno24={rnno24}')
+            # logger.info(f'random rnno24={rnno24}')
             if rnno24 <= ebr1:
                 # It was bremsstrahlung
                 ebrems(ausgab)
@@ -203,7 +203,7 @@ def electr(hownear, howfar, ausgab) -> int:
         # End inline replace: $ EVALUATE_PBREM_FRACTION; ----
 
         rnno25 = randomset()
-        logger.info(f'random rnno25={rnno25}')
+        # logger.info(f'random rnno25={rnno25}')
         if rnno25 < pbr1:
             # It was bremsstrahlung
             ebrems(ausgab)

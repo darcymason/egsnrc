@@ -2,6 +2,7 @@
 from pathlib import Path
 import os
 from egsnrc import egsfortran
+from egsnrc.watch import watch
 from egsnrc.electr import electr
 import logging
 import numpy  # cannot use `np` as is an EGS var!!
@@ -309,16 +310,15 @@ def main(iqin=-1):  # iqin here only to make generating validation data faster
 
     for i in range(ncase):
         if (iwatch != 0) and (iwatch != 4):
-            print(
+            logger.debug(
             "\n INITIAL SHOWER VALUES             :"
             f"    1{ei:9.3f}{iqin:4}{irin:4}"
             f"{xin:8.3f}{yin:8.3f}{zin:8.3f}"
             f"{uin:7.3f}{vin:7.3f}{win:7.3f}"  # should be 8.3 like x,y,z but get extra spaces
             f"{latchi:10}{wtin:10.3E}",
-            flush=True
             )
             shower(iqin,ein,xin,yin,zin,uin,vin,win,irin,wtin)
-            egsfortran.watch(-1,iwatch)  # print a message that this history is over
+            watch(-1, iwatch)  # print a message that this history is over
 
     # -----------------------------------------------------------------
     # STEP 8   OUTPUT-OF-RESULTS
@@ -369,7 +369,7 @@ def howfar():
 
     if ir[np_m1] == 3:  # terminate this history: it is past the plate
         epcont.idisc = 1
-        logger.info("howfar  irl 3, idisc = 1")
+        # logger.info("howfar  irl 3, idisc = 1")
         return
 
     if ir[np_m1] == 2:  # We are in the Ta plate - check the geometry
@@ -387,18 +387,18 @@ def howfar():
                 epcont.ustep = tval
                 epcont.irnew = 1
         # else w[np_m1] == 0.0, cannot hit boundary
-        logger.info("howfar region 2")
+        # logger.info("howfar region 2")
         return
 
     # Not region 3 or 2, must be 1, region with source
     if w[np_m1] >  0.0:  # this must be a source particle on z=0 boundary
         epcont.ustep = 0.0
         epcont.irnew = 2
-        logger.info("howfar region 1 going to 2")
+        # logger.info("howfar region 1 going to 2")
     else:
         # it must be a reflected particle-discard it
         epcont.idisc = 1
-        logger.info("howfar reflected region 1, idisc=1")
+        # logger.info("howfar reflected region 1, idisc=1")
 
 
 def hownear(x, y, z, irl):
@@ -447,8 +447,8 @@ def ausgab(iarg):
     region 1 or 3, so score its energy.
     """
     if iwatch > 0:
-        egsfortran.watch(iarg, iwatch)  # handles printouts of data
-                                        # iwatch is passed in score
+        watch(iarg, iwatch)  # handles printouts of data
+                             # iwatch is passed in score
 
     if iarg <= 4:
         irl = ir[np-1] # pick up current region number  ** 0-based

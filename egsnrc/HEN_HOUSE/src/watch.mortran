@@ -1,0 +1,315 @@
+REPLACE {$CNTOUT(#);(#);} WITH {
+   ICOUNT=ICOUNT+1;
+   OUTPUT {P1},KE,IQ({P1}),IR({P1}),X({P1}),Y({P1}),Z({P1}),U({P1}),V({P1}),
+   W({P1}),LATCH({P1}),WT({P1});  ({P2},I5,F9.3,2I4,3F8.3,3F7.3,I10,1PE10.3);
+}
+
+
+SUBROUTINE WATCH(IARG,IWATCH);
+
+"============================================================================="
+"                                                                             "
+"     A general purpose auxiliary routine for use with the EGSnrc system
+"
+"     It prints out information about the particle transport                  "
+"                                                                             "
+"       For IWATCH = 1 it prints information about each discrete interaction  "
+"       For IWATCH = 2 or 3 it prints information about each step as well     "
+"       For IWATCH = 4 it prints graphing data for use with EGS_Windows       "
+"                                                                             "
+"                                                                             "
+"    Routine is used via two mandatory and 1 optional call from the user's    "
+"          code                                                               "
+"                                                                             "
+"   1)The routine must be initialized by a call with IARG=-99 before the first"
+"          call to SHOWER. It should be after all inputs are in place.        "
+"   2)The routine must be called near the beginning of the AUSGAB subroutine  "
+"          IF (IWATCH > 0 ) CALL WATCH(IARG,IWATCH);                          "
+"   3)The routine may be called at the end of each history with IARG = - 1 so "
+"          a message will get printed stated history is complete              "
+"                                                                             "
+"    Since WATCH cannot output values related to the initial values in a      "
+"    shower call, it is useful to also put something like the following       "
+"    immediately prior to the CALL SHOWER stmt                                "
+"           IF((IWATCH ~= 0) & (IWATCH ~= 4))[                                "
+"              OUTPUT 1,EIN,IQI,IRI,XI,YI,ZI,UI,VI,WI,LATCHI,WTI;              "
+"               (/' INITIAL SHOWER VALUES',T36,':',                           "
+"               I5,F9.3,2I4,3F8.3,3F7.3,I10,1PE10.3);                         "
+"           ]                                                                 "
+"    Note EIN is the kinetic energy of the incident particle                  "
+"                                                                             "
+"                                                                             "
+"   The routine uses up to 132 columns for output.                            "
+"                                                                             "
+"     JAN 1984  GENERALIZED VERSION WITH INITIALIZATION                       "
+"                              DAVE ROGERS NRCC                               "
+"     JUN 1987  PUT IN IWATCH = 4 OPTION     AFB                              "
+"     JUL 1988  COMPATIBLE WITH X-RAY FLUORESCENCE  DWOR                      "
+"     SEP 1990  ADDED ENERGY OUTPUT TO IWATCH = 4 OPTION     AFB              "
+"     OCT 1990  UNIX compatible carriage control   DWOR                       "
+"     JAN 2000  Rewritten to output relaxation particles and also             "
+"               so some of the output makes more sense BW                     "
+"                                                                             "
+"*****************************************************************************"
+
+"define a local macro"
+REPLACE {$CNTOUT(#);(#);} WITH {
+   ICOUNT=ICOUNT+1;
+   OUTPUT {P1},KE,IQ({P1}),IR({P1}),X({P1}),Y({P1}),Z({P1}),U({P1}),V({P1}),
+   W({P1}),LATCH({P1}),WT({P1});  ({P2},I5,F9.3,2I4,3F8.3,3F7.3,I10,1PE10.3);
+}
+
+$IMPLICIT-NONE;
+$INTEGER iarg,iwatch,IP,ICOUNT,JHSTRY,J,N;
+$REAL KE;
+$INTEGER graph_unit;
+integer  egs_open_file;
+$INTEGER ku,kr,ka;
+
+;COMIN/BOUNDS, STACK,EPCONT,EGS-VARIANCE-REDUCTION,USEFUL,EGS-IO/;
+
+DATA ICOUNT/0/,JHSTRY/1/ graph_unit/-1/;
+save     ICOUNT,JHSTRY,graph_unit;
+
+ku = 13; kr = 0; ka = 1;
+IF(IARG = -99) [ "Initialize flags so we will get calls thru AUSGAB"
+  DO J=1,29[IAUSFL(J)=1;];
+  /IAUSFL(22),IAUSFL(23),IAUSFL(24)/=0;
+]
+
+IF(IARG = -1) ["main is assumed to call AUSGAB with IARG=-1 at end of history"
+  IF(IWATCH = 4) [
+    IF( graph_unit < 0 ) [
+        graph_unit = egs_open_file(ku,kr,ka,'.egsgph');
+    ]
+    WRITE(graph_unit,:GRAPHICS_FORMAT:) 0,0,0,0.0,0.0,0.0,0.0,JHSTRY;
+    JHSTRY=JHSTRY+1;
+  ]
+  ELSE[
+    OUTPUT JHSTRY;(' END OF HISTORY',I8,3X,40('*')/);
+    JHSTRY=JHSTRY+1;ICOUNT=ICOUNT+2;RETURN;
+  ]
+]
+
+IF( (IWATCH ~= 4) & ((ICOUNT >= 50) | (ICOUNT = 0) | (IARG = -99)) )[
+   "PRINT HEADER"
+   ICOUNT=1;
+   OUTPUT;(//T39,' NP',3X,'ENERGY  Q REGION    X',7X,
+   'Y',7X,'Z',6X,'U',6X,'V',6X,'W',6X,'LATCH',2X,'WEIGHT'/);
+]
+
+IF((IWATCH = 4) & (IARG >= 0) & (IARG ~= 5)) [ "GRAPHICS OUTPUT"
+   IF( graph_unit < 0 ) graph_unit = egs_open_file(ku,kr,ka,'.egsgph');
+   WRITE(graph_unit,:GRAPHICS_FORMAT:) NP,IQ(NP),IR(NP),X(NP),Y(NP),Z(NP),E(NP);
+   :GRAPHICS_FORMAT:FORMAT(2I4,1X,I6,4G15.8,I12);
+]
+
+IF(IARG = 5  |  IARG < 0) RETURN;
+IF(IWATCH = 4) RETURN; "NONE OF THE REST NEEDED FOR GRAPHICS OUTPUT"
+
+KE=E(NP);IF(IQ(NP).NE.0)[KE=E(NP)-PRM;]
+
+IF(IARG = 0 & IWATCH = 2)[
+  $CNTOUT(NP);(T11,'STEP ABOUT TO OCCUR', T36,':');
+]
+ELSEIF(IARG = 0)[RETURN;]
+IF(    IARG = 1)[
+   $CNTOUT(NP);(' Discard  AE,AP<E<ECUT',T36,':');]
+ELSEIF(IARG = 2)[
+   $CNTOUT(NP);(' Discard  E<AE,AP',T36,':');]
+ELSEIF(IARG = 3)[
+   $CNTOUT(NP);(' Discard -user request',T36,':');]
+ELSEIF(IARG = 4)[OUTPUT EDEP,IR(NP);
+  (T10,'Local energy deposition',T36,':',F12.5,' MeV in region ',I6);]
+
+ELSEIF(IARG = 6)[
+   $CNTOUT(NP);(' bremsstrahlung  about to occur',T36,':');]
+ELSEIF(IARG = 7)[
+    IF(nbr_split =1) ["no splitting or SBS is on in BEAMnrc"
+       DO IP=NPold,NP[
+         IF(IQ(IP)=-1)[
+           KE = E(IP) - RM;
+           $CNTOUT(IP);(T10,'Resulting electron',T36,':');
+         ]
+         ELSE[
+           KE = E(IP);
+           $CNTOUT(IP);(T10,'Resulting photon',T36,':');
+         ]
+       ]
+    ]
+    ELSE ["splitting case--e- is always at NPold"
+      KE = E(NPold) - RM;
+      $CNTOUT(NPold);(T10,'Resulting electron',T36,':');
+      DO IP=NPold+1,NP[
+        KE= E(IP);
+        IF(IP = NPold+1)["print info for first one only"
+           $CNTOUT(IP);(T10,'Split photons',T36,':');
+        ]
+        ELSE[ $CNTOUT(IP);(T36,':'); ]
+      ]
+    ]" end of splitting block"
+]
+
+ELSEIF(IARG = 8)[$CNTOUT(NP);(' Moller   about to occur',T36,':');]
+ELSEIF(IARG = 9)[
+  "surely this logic not needed?"
+  IF(NP=NPold)[
+     $CNTOUT(NP);(T11,'Interaction rejected',T36,':');
+  ]
+  ELSE[
+     DO IP=NPold,NP[
+        KE = E(IP) - ABS(IQ(NP))*RM;
+        IF(IP=NPold)[$CNTOUT(IP);(T11,'Resulting electrons',T36,':');]
+        ELSE[$CNTOUT(IP);(T36,':');]
+     ]
+  ]
+]
+
+ELSEIF(IARG = 10)[
+   $CNTOUT(NP);(' Bhabba   about to occur',T36,':');
+]
+ELSEIF(IARG = 11)[
+  IF(NP=NPold)[
+     $CNTOUT(NP);(T11,'Interaction rejected',T36,':');
+  ]
+  ELSE[
+     DO IP=NPold,NP[
+        KE = E(IP) - ABS(IQ(IP))*RM;
+        IF(IP=NPold)[ $CNTOUT(IP);(T11,'Resulting e- or e+',T36,':'); ]
+        ELSE[$CNTOUT(IP);(T36,':');]
+     ]
+  ]
+]
+
+ELSEIF(IARG = 12)[
+   $CNTOUT(NP);(' Positron about to decay in flight',T36,':');
+]
+ELSEIF(IARG = 13)[
+  IF(NP=NPold)[
+     $CNTOUT(NP);(T11,'Interaction rejected',T36,':');
+  ]
+  ELSE[
+     DO IP=NPold,NP[
+        KE = E(IP) - ABS(IQ(IP))*RM;
+        IF(IP=NPold)[$CNTOUT(IP);(T11,'Resulting photons',T36,':');]
+        ELSE[$CNTOUT(IP);(T36,':');]
+     ]
+  ]
+]
+
+ELSEIF(IARG = 28)[
+   $CNTOUT(NP);(' Positron will annihilate at rest',T36,':');
+]
+ELSEIF(IARG = 14)[
+  IF(NP=NPold)[
+       $CNTOUT(NP);(T11,'Interaction rejected',T36,':');
+  ]
+  ELSE[
+     DO IP=NPold,NP[
+        KE = E(IP) - ABS(IQ(IP))*RM;
+        IF(IP=NPold)[$CNTOUT(IP);(' Positron annihilates at rest',T36,':');]
+        ELSE[$CNTOUT(IP);(T36,':');]
+     ]
+  ]
+]
+
+ELSEIF(IARG = 15)[
+    $CNTOUT(NP);(' Pair production about to occur',T36,':');
+]
+ELSEIF(IARG = 16)["after pair production"
+  IF(NP=NPold & i_survived_rr = 0)[
+       $CNTOUT(NP);(T11,'Interaction rejected',T36,':');
+  ]
+  ELSEIF(NP=NPold & i_survived_rr > 0)["we have cleared the stack"
+      OUTPUT i_survived_rr,prob_rr;
+       (T10,'Russian Roulette eliminated ',I2,
+                    ' particle(s) with probability ',F8.5)
+      $CNTOUT(NP);(T10,'Now on top of stack',T36,':');
+  ]
+  ELSE[
+     DO IP=NPold,NP[
+        KE = E(IP) - ABS(IQ(IP))*RM;
+        IF(IP=NPold)[$CNTOUT(IP);(T11,'Resulting pair',T36,':');]
+        ELSE[$CNTOUT(IP);(T36,':');]
+     ]
+     IF(i_survived_rr > 0)[
+        OUTPUT i_survived_rr,prob_rr;
+       (T10,'Russian Roulette eliminated ',I2,'
+             particle(s) with probability ',F8.5);
+       $CNTOUT(NP);(T10,'Now on top of stack',T36,':');
+     ]
+  ]
+]
+
+ELSEIF(IARG = 17)[$CNTOUT(NP);(' Compton  about to occur',T36,':');]
+ELSEIF(IARG = 18)["after call to COMPT"
+  IF(NP = NPold & i_survived_rr = 0)[
+      $CNTOUT(NP);(T11,'Interaction rejected',T36,':');
+  ]
+  ELSEIF(NP > NPold)["have not cleared the stack with rus rou"
+     DO IP=NPold,NPold+1[
+        KE = E(IP) - ABS(IQ(IP))*RM;
+        IF(IQ(IP).NE.0)[$CNTOUT(IP);(T11,'compton electron created',T36,':');]
+        ELSE[$CNTOUT(IP);(T11,'compton scattered photon',T36,':');]
+     ]
+  ]
+  IF(i_survived_rr > 0)["whether the stack has been cleared or not"
+       OUTPUT i_survived_rr,prob_rr;
+       (T10,'Russian Roulette eliminated ',I2,
+                    ' particle(s) with probability ',F8.5)
+      $CNTOUT(NP);(T10,'Now on top of stack',T36,':');
+  ]
+]
+
+ELSEIF(IARG = 19)[
+    $CNTOUT(NP);(' Photoelectric about to occur',T36,':');
+]
+ELSEIF(IARG = 20)[
+    IF(NPold=NP & IQ(NP)=0 & i_survived_rr = 0)[
+      $CNTOUT(NP);(T11,'Photon energy below N-shell',/,
+                   T11,'Photon discarded',T36,':');
+    ]
+    ELSEIF(IQ(NPold) = -1 & i_survived_rr = 0)[
+      KE= E(NPold)-RM;
+      $CNTOUT(NPold);(T10,'Resulting photoelectron',T36,':');
+    ]
+    ELSEIF(i_survived_rr > 0)["done some russian roulette"
+       IF(NP=NPold-1 | IQ(NPold) ~= -1)[
+          IF(i_survived_rr > 1)["eliminated more than the photoelectron"
+              OUTPUT i_survived_rr-1,prob_rr;
+              (T10,'Russian Roulette eliminated ',I4,
+                    ' particle(s) with probability ',F8.5,' plus');
+          ]
+          OUTPUT prob_rr;
+                 (T10,'Russian Roulette eliminated resulting photoelectron',
+                      ' with probability ',F8.5);
+       ]
+       ELSE["NPold could hold the photoelectron"
+           KE = E(NPold) - RM;
+           $CNTOUT(NPold);(T10,'Resulting photoelectron?',T36,':');
+           OUTPUT i_survived_rr,prob_rr;
+           (T10,'Russian Roulette eliminated ',I4,
+                    ' particle(s) with probability ',F8.5);
+       ]
+       $CNTOUT(NP);(T10,'Now on top of stack',T36,':');
+    ]
+]
+
+ELSEIF(IARG = 24)[$CNTOUT(NP);(' Rayleigh scattering occured',T36,':');]
+
+ELSEIF(IARG = 25)[$CNTOUT(NP);(T10,'Fluorescent X-ray created',T36,':');]
+
+ELSEIF(IARG = 26)[$CNTOUT(NP);(T10,'Coster-Kronig e- created',T36,':');]
+
+ELSEIF(IARG = 27)[$CNTOUT(NP);(T10,'Auger electron created',T36,':');]
+
+IF(IARG = 0  &  IWATCH = 2)[OUTPUT  USTEP,TUSTEP,VSTEP,TVSTEP,EDEP;
+(T5,'USTEP,TUSTEP,VSTEP,TVSTEP,EDEP',T36,':    ',5(1PE13.4));ICOUNT=ICOUNT+1;]
+
+IF(NP = 1  |  IARG = 0) RETURN;
+IF( IARG <= 3)[
+       N=NP-1;
+       KE = E(N) - ABS(IQ(N))*RM;
+       $CNTOUT(N);(T10,'Now on top of stack',T36,':');
+]
+RETURN;END;
