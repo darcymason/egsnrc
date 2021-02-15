@@ -531,6 +531,7 @@ def tstep_ustep(
 
                         # additional vacuum transport in em field
                         epcont.e_range =  vacdst
+                        logger.info("vacuum step")
                         iarg=TRANAUSB
                         if iausfl[iarg-1+1] != 0:  # ** 0-based
                             ausgab(iarg)

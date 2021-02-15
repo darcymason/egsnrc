@@ -20,6 +20,8 @@ header = "".join(
     )
 )
 
+high_prec = False
+
 # Simple iargs that just print a message and current state
 arg_messages = {
     1: ' Discard  AE,AP<E<ECUT',
@@ -52,12 +54,24 @@ second_message = {
 
 def std_data(msg, ip, ke):
     """ip must be already -1 for 0-based arrays in Python"""
-    return (
-        f"{msg:<35}:{ip+1:5}{ke:9.3f}{iq[ip]:4}{ir[ip]:4}"
-        f"{x[ip]:8.3f}{y[ip]:8.3f}{z[ip]:8.3f}"
-        f"{u[ip]:7.3f}{v[ip]:7.3f}{w[ip]:7.3f}"
-        f"{latch[ip]:10}{wt[ip]:10.3E}"
-    )
+    # orig precsions from WATCH in mortran
+    #   ke 9.3; x,y,z 8.3; u,v,w 7.3; latch 10; wt 10.3E
+    # more detail -> use 9.5, 9.5, 8.5 for ke, xyz, uvw
+    if high_prec:
+        return (
+            f"{msg:<35}:{ip+1:5}{ke:11.5f}{iq[ip]:4}{ir[ip]:4}"
+            f"{x[ip]:10.5f}{y[ip]:10.5f}{z[ip]:10.5f}"
+            f"{u[ip]:9.5f}{v[ip]:9.5f}{w[ip]:9.5f}"
+            f"{latch[ip]:10}{wt[ip]:10.3E}"
+        )
+    else:
+        return (
+            f"{msg:<35}:{ip+1:5}{ke:9.3f}{iq[ip]:4}{ir[ip]:4}"
+            f"{x[ip]:8.3f}{y[ip]:8.3f}{z[ip]:8.3f}"
+            f"{u[ip]:7.3f}{v[ip]:7.3f}{w[ip]:7.3f}"
+            f"{latch[ip]:10}{wt[ip]:10.3E}"
+        )
+
 
 # def log_it(s):
 #     logger.debug(icount)
@@ -138,7 +152,7 @@ def watch(iarg, iwatch):
     if iwatch != 4 and (icount >= 50 or icount == 0 or iarg == -99) :
         # PRINT HEADER
         icount = 1
-        log_it(header)
+        # log_it(header) # comment out to better align diffs with original
 
     if iwatch == 4 and iarg >= 0 and (iarg != 5):
         # GRAPHICS OUTPUT
@@ -221,7 +235,7 @@ def watch(iarg, iwatch):
             else:
                 for ip_m1 in range(npold-1,np):
                     ke = e[ip_m1] - abs(iq[ip_m1]) * rm
-                    msg = 'resulting pair' if ip_m1 == npold-1 else ""
+                    msg = '          Resulting pair' if ip_m1 == npold-1 else ""
                     icount += 1
                     log_it(std_data(msg, ip_m1, ke))
         elif iarg == 18:
@@ -290,3 +304,16 @@ def watch(iarg, iwatch):
         msg = '         Now on top of stack'
         icount += 1
         log_it(std_data(msg, N_m1, ke))
+
+    if iarg >= 40:  # extras added in Python egsnrc
+        return watch_extra(iarg, iwatch)
+
+
+def watch_extra(iarg, iwatch):
+    """Custom added flags for tracing in very fine detail"""
+    # (used for Python conversion from Mortran code)
+
+    if iwatch !=2:
+        return  # these are only for detailed step info
+
+

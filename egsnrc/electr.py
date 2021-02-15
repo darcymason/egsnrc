@@ -111,8 +111,13 @@ def electr(hownear, howfar, ausgab) -> int:
         # (iq = -1 for electrons, 0 for photons and 1 for positrons)
         lelec = iq[np_m1]
 
+        # XX below looks like float precision conversion, but latest egsnrc.macros
+        # has both as real*8
+        # "ENERGY PRECISION" is 'DOUBLE PRECISION' which appears to be real*8
+        # eie is $REAL, also defined as real*8
         peie  = e[np_m1]  # precise energy of incident electron (double precision)
         eie   = peie  # energy incident electron (conversion to single)
+        # eie   = numpy.array(peie, dtype=numpy.float32) # convert to single precision
 
         if eie <= ecut[irl_m1]:
             particle_outcome = ECUT_DISCARD

@@ -59,7 +59,13 @@ with working_dir(HERE):
 
     print(f"Running f2py on {USER_CODE_FORTRAN}")
     proc = subprocess.run(
-        f"python3.9 -m numpy.f2py {F2PY_OPTIONS} -c {USER_CODE_FORTRAN} -m {LIB_NAME}".split(),
+        # Now use interface file, had to edit to get Python ausgab
+        # working from multiple Fortran functions
+        # See https://github.com/bnavigator/f2py-minimal-cb/pull/1
+        # Likely will be fixed in patch numpy release, or at least will
+        # work if create one Fortran function called from many
+        # (see also https://github.com/numpy/numpy/issues/18341)
+        f"python3.9 -m numpy.f2py {F2PY_OPTIONS} -c {LIB_NAME}.pyf {USER_CODE_FORTRAN}".split(),
         # capture_output=True, encoding="utf8"
     )
     if proc.returncode != 0:

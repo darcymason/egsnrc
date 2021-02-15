@@ -2,7 +2,7 @@
 from pathlib import Path
 import os
 from egsnrc import egsfortran
-from egsnrc.watch import watch
+from egsnrc import watch
 from egsnrc.electr import electr
 import logging
 import numpy  # cannot use `np` as is an EGS var!!
@@ -15,6 +15,7 @@ from egsnrc.calcfuncs import (
     calc_tstep_from_demfp,
     compute_eloss, compute_eloss_g
 )
+
 
 
 
@@ -37,6 +38,35 @@ logger = logging.getLogger('egsnrc')  # XXX later `egsnrc`
 HEN_HOUSE = Path(os.environ["HEN_HOUSE"])
 EGS_HOME = Path(os.environ['EGS_HOME'])
 
+
+def ausgab(iarg):
+    """
+    In this AUSGAB routine for tutor4, we score the energy deposited
+    in the various regions. This amounts to the total energy
+    reflected, deposited and transmitted by the slab.
+
+    For IARG=0, an electron or photon step is about to occur and we
+    score the energy deposited, if any. Note that only electrons
+    deposit energy during a step, and due to our geometry, electrons
+    only take steps in region 2 - however there is no need to check.
+    For IARG=1,2 and 4, particles have been discarded for falling
+    below various energy cutoffs and all their energy is deposited
+    locally (in fact EDEP = particles kinetic energy).
+    For IARG=3, we are discarding the particle since it is in
+    region 1 or 3, so score its energy.
+    """
+    # logger.info("In Python ausgab")
+    if iwatch > 0:
+        # egsfortran.flush_output()
+        watch.watch(iarg, iwatch)  # handles printouts of data
+                             # iwatch is passed in score
+
+    if iarg <= 4:
+        irl = ir[np-1] # pick up current region number  ** 0-based
+        escore[irl-1] += edep
+
+
+egsfortran.ausgab = ausgab
 
 # ******************************************************************
 #                                National Research Council of Canada
@@ -133,11 +163,11 @@ def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
             # even if not in the mortran call arguments,
             # unless intent(callback,hide) is used in f2py comments,
             # in which case, need to set `egsfortran.hownear = hownear`
-            # egsfortran.electr(ircode, howfar) #, hownear,
+            egsfortran.electr(ircode, howfar) #, hownear,
             #     calc_tstep_from_demfp,
             #     compute_eloss, compute_eloss_g
             # )
-            ircode = electr(hownear, howfar, ausgab)
+            # ircode = electr(hownear, howfar, ausgab)
         # egsfortran.flushoutput()
     # ---------------- end of subroutine shower
 
@@ -187,7 +217,7 @@ def print_info():
 
 # --------------------------------------------------------------------
 # egsfortran.egs_init()
-def init():
+def init(iwatch=1, high_prec=False):
     global init_done
 
     if init_done:
@@ -272,8 +302,8 @@ def init():
     #     iausfl[i] = 1
     escore[:] = 0.0  # zero scoring array before starting
 
-    # XXX set 2 for debugging
-    score.iwatch = 2  # This determines the type and amount of output
+    watch.high_prec = high_prec  # if True, show more decimal places
+    score.iwatch = iwatch  # This determines the type and amount of output
                     # =1 => print info about each interaction
                     # =2 => print info about same + each electron step
                     # =4 => create a file to be displayed by EGS_Windows
@@ -281,7 +311,7 @@ def init():
                     # IWATCH 1 and 2 outputs to unit 6, 4 to unit 13
 
     egsfortran.flush_output()
-    watch(-99, iwatch)   # Initializes calls to AUSGAB for WATCH
+    watch.watch(-99, iwatch)   # Initializes calls to AUSGAB for WATCH
     egsfortran.flush_output()  # if change above to egsfortran.watch(...)
     # ---------------------------------------------------------------------
     # STEP 6   DETERMINATION-OF-INICIDENT-PARTICLE-PARAMETERS
@@ -292,9 +322,10 @@ def init():
     init_done = True
 
 
-def main(iqin=-1):  # iqin here only to make generating validation data faster
+def main(iqin=-1, iwatch=1, high_prec=False, ncase=10):
+    # iqin here only to make generating validation data faster
     # The "in"s are local variables
-    init()
+    init(iwatch, high_prec)
     # et_control.exact_bca = False
     # et_control.spin_effects = True
     # iqin=-1  #                incident charge - electrons
@@ -309,7 +340,8 @@ def main(iqin=-1):  # iqin here only to make generating validation data faster
     # ---------------------------------------------------------------------
     # initiate the shower 10 times
 
-    ncase=10 # XXX  # INITIATE THE SHOWER NCASE TIMES
+    # INITIATE THE SHOWER NCASE TIMES
+    #  ncase=10 # now from function call parameter
 
     for i in range(ncase):
         if (iwatch != 0) and (iwatch != 4):
@@ -322,7 +354,7 @@ def main(iqin=-1):  # iqin here only to make generating validation data faster
             )
             shower(iqin,ein,xin,yin,zin,uin,vin,win,irin,wtin)
             egsfortran.flush_output()
-            watch(-1, iwatch)  # print a message that this history is over
+            watch.watch(-1, iwatch)  # print a message that this history is over
             egsfortran.flush_output()
 
     # -----------------------------------------------------------------
@@ -450,32 +482,6 @@ def hownear(x, y, z, irl):
 
     # else in region 1 or 3, can't return anything sensible
     raise ValueError(f'Called hownear in region {irl}')
-
-
-def ausgab(iarg):
-    """
-    In this AUSGAB routine for tutor4, we score the energy deposited
-    in the various regions. This amounts to the total energy
-    reflected, deposited and transmitted by the slab.
-
-    For IARG=0, an electron or photon step is about to occur and we
-    score the energy deposited, if any. Note that only electrons
-    deposit energy during a step, and due to our geometry, electrons
-    only take steps in region 2 - however there is no need to check.
-    For IARG=1,2 and 4, particles have been discarded for falling
-    below various energy cutoffs and all their energy is deposited
-    locally (in fact EDEP = particles kinetic energy).
-    For IARG=3, we are discarding the particle since it is in
-    region 1 or 3, so score its energy.
-    """
-    if iwatch > 0:
-        egsfortran.flush_output()
-        watch(iarg, iwatch)  # handles printouts of data
-                             # iwatch is passed in score
-
-    if iarg <= 4:
-        irl = ir[np-1] # pick up current region number  ** 0-based
-        escore[irl-1] += edep
 
 
 

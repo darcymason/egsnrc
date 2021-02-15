@@ -46,6 +46,10 @@
 "  egs_init at the beginning and call egs_finish at the end.                  "
 "                                                                             "
 "#############################################################################"
+
+"PARAMETER $MXAUS=45;       CHANGE IF MORE AUSGAB CALLS ARE ADDED"
+"PARAMETER $MXAUSM5=40;     SET THIS TO $MXAUS VALUE LESS 5"
+
 REPLACE {$MXMED} WITH {1}   "only 1 medium in the problem(default 10)"
 REPLACE {$MXREG} WITH {3}   "only 3 geometric regions (default 2000)"
 REPLACE {$MXSTACK} WITH {15}"less than 15 particles on stack at once"
@@ -329,7 +333,7 @@ END;"end of subroutine hownear"
 
 "********************************************************************"
 "                                                                    "
-SUBROUTINE AUSGAB(IARG);
+SUBROUTINE XXXAUSGAB(IARG);
 "                                                                    "
 " In this AUSGAB routine for tutor4, we score the energy deposited   "
 "  in the various regions. This amounts to the total energy          "

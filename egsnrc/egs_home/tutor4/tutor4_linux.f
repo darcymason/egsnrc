@@ -58,7 +58,7 @@
         RETURN
       END IF
       END
-      SUBROUTINE AUSGAB(IARG)
+      SUBROUTINE XXXAUSGAB(IARG)
       implicit none
       integer*4 IARG,IRL
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
@@ -8103,6 +8103,8 @@ C*****************************************************************************
       end
       SUBROUTINE ELECTR(IRCODE, howfar)
       implicit none
+Cf2py intent(callback,hide) ausgab
+      EXTERNAL ausgab
 Cxxf2py intent(callback) howfar
       EXTERNAL howfar
 Cxf2py intent(callback) hownear
@@ -8296,8 +8298,6 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               RNNE1=1.E-30
             END IF
             DEMFP=MAX(-LOG(RNNE1),1.E-8)
-            write(i_log,'(a,e16.8)') 'random rnne1=',rnne1
-            call flush(i_log)
             elke = log(eke)
             Lelke=eke1(MEDIUM)*elke+eke0(MEDIUM)
             IF (( sig_ismonotone(qel,medium) )) THEN
@@ -8445,8 +8445,6 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 END IF
                 rnnotu = rng_array(rng_seed)
                 rng_seed = rng_seed + 1
-                write(i_log,'(a,e16.8)') 'random rnnotu=',rnnotu
-                call flush(i_log)
                 tmxs = rnnotu*min(tmxs,smaxir(irl))
               ELSE
                 tmxs = min(tmxs,smaxir(irl))
@@ -8552,8 +8550,6 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                   END IF
                   rnnoss = rng_array(rng_seed)
                   rng_seed = rng_seed + 1
-                  write(i_log,'(a,e16.8)') 'random rnnoss=',rnnoss
-                  call flush(i_log)
                   IF (( rnnoss .LT. 1.e-30 )) THEN
                     rnnoss = 1.e-30
                   END IF
@@ -8688,7 +8684,6 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               IF ((ustep .NE. 0 .AND. idisc .LT. 0)) THEN
                 go to 4570
               END IF
-              write(i_log,'(a)') 'next tstep'
               GO TO 4581
             END IF
             vstep = ustep
@@ -8958,8 +8953,6 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               go to 4570
             END IF
             IF ((medium .NE. medold)) THEN
-              write(i_log,'(a)') 'medium ~= medold, next tstep'
-              call flush(i_log)
               GO TO 4581
             END IF
             demfp = demfp - save_de*sig
@@ -8987,8 +8980,6 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           END IF
           rfict = rng_array(rng_seed)
           rng_seed = rng_seed + 1
-          write(i_log,'(a,e16.8)') 'random rfict=',rfict
-          call flush(i_log)
           IF(((rfict .LE. sigratio)))GO TO4582
         GO TO 4581
 4582    CONTINUE
@@ -9000,8 +8991,6 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           END IF
           rnno24 = rng_array(rng_seed)
           rng_seed = rng_seed + 1
-          write(i_log,'(a,e16.8)') 'random rnno24=',rnno24
-          call flush(i_log)
           IF ((rnno24 .LE. ebr1)) THEN
             go to 4650
           ELSE
@@ -9031,8 +9020,6 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         END IF
         rnno25 = rng_array(rng_seed)
         rng_seed = rng_seed + 1
-        write(i_log,'(a,e16.8)') 'random rnno25=',rnno25
-        call flush(i_log)
         IF ((rnno25 .LT. pbr1)) THEN
           go to 4650
         END IF
@@ -12106,6 +12093,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       integer*4 medium, qel
       logical spin_effects
       real*8 us,  vs,  ws,  xf,  yf,  zf,  ustep
+Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       real*8 blccc,  xcccc,  z,r,z2,r2,  r2max, chia2,  chilog,  cphi0,
      *  cphi,  sphi,  e,  elke,  beta2,  etap,  xi_corr,  ms_corr, epsil
      *on,  temp,  factor,  lambda,  p2,  p2i,  q1,  rhophi2,  sint,  sin

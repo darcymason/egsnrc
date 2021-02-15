@@ -23,3 +23,6 @@ ANNIHRAUSA: numpy.int32 = 14
 USERDAUS: numpy.int32 = 3
 
 EM_MACROS_ACTIVE = False
+
+# extra AUSFL flags for debugging
+RANDOMNUM = 40

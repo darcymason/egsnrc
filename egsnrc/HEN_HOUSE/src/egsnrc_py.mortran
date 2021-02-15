@@ -833,7 +833,6 @@ SUBROUTINE old_COMPT;
 "******************************************************************"
 
 $IMPLICIT-NONE;
-
 $COMIN-COMPT;    "DEFAULT REPLACEMENT PRODUCES THE FOLLOWING:
                  "COMIN/COMPTON-DATA,EGS-VARIANCE-REDUCTION,DEBUG, "
                                "STACK,THRESH,UPHIOT,USEFUL,RANDOM/;"
@@ -995,6 +994,11 @@ SUBROUTINE ELECTR(IRCODE, howfar);
 "******************************************************************"
 $IMPLICIT-NONE;
 !COMMENTS;
+"f2py intent(callback,hide) ausgab"
+EXTERNAL ausgab;
+!NOCOMMENTS;
+
+!COMMENTS;
 "xxf2py intent(callback) howfar"
 EXTERNAL howfar;
 "xf2py intent(callback) hownear"
@@ -1112,11 +1116,8 @@ $start_new_particle;
                 "($RANDOMSET is a macro'ed random number generator)
                 "(demfp = differential electron mean free path)
 
-            $pyegs_debug('(a,e16.8)','random rnne1=',rnne1);
-            call flush(i_log);
-            "$egs_info('(a,e16.8,a)','** Random: ', rnne1, ' **');"
-
-            "$egs_info('(a,e16.8)', 'non-vac, demfp=', demfp);"
+            "$pyegs_debug('(a,2e16.8)','VAC, random rnne1, demfp=',rnne1,demfp);"
+            "call flush(i_log);"
 
             elke = log(eke);
             "(eke = kinetic energy, rm = rest mass, all in units of MeV)
@@ -1220,8 +1221,8 @@ $start_new_particle;
                 IF(random_tustep)
                 [
                     $RANDOMSET rnnotu;
-                    $pyegs_debug('(a,e16.8)','random rnnotu=',rnnotu);
-                    call flush(i_log);
+                    "$pyegs_debug('(a,e16.8)','random rnnotu=',rnnotu);"
+                    "call flush(i_log);"
                     tmxs = rnnotu*min(tmxs,smaxir(irl));
                 ]
                 ELSE
@@ -1359,8 +1360,8 @@ $start_new_particle;
                         "Sample the distance to a single scattering event
                         $RANDOMSET rnnoss;
 
-                        $pyegs_debug('(a,e16.8)','random rnnoss=',rnnoss);
-                        call flush(i_log);
+                        "$pyegs_debug('(a,e16.8)','random rnnoss=',rnnoss);"
+                        "call flush(i_log);"
 
                         IF( rnnoss < 1.e-30 ) [
                             rnnoss = 1.e-30;
@@ -1476,7 +1477,7 @@ $start_new_particle;
                 IF(ustep ~= 0) [$AUSCALL($TRANAUSA);]
                 IF(eie <= ecut(irl)) [go to :ECUT-DISCARD:;]
                 IF(ustep ~= 0 & idisc < 0) [go to :USER-ELECTRON-DISCARD:;]
-                $pyegs_debug('(a)', 'next tstep');
+                "$pyegs_debug('(a)', 'next tstep');"
                 NEXT :TSTEP: ; "(Start again at :TSTEP:)
 
             ] "Go try another big step in (possibly) new medium
@@ -1712,8 +1713,8 @@ $start_new_particle;
             ]
 
             IF(medium ~= medold) [
-                $pyegs_debug('(a)', 'medium ~= medold, next tstep');
-                call flush(i_log);
+                "$pyegs_debug('(a)', 'medium ~= medold, next tstep');"
+                "call flush(i_log);"
                 NEXT :TSTEP:;
             ]
             $USER_CONTROLS_TSTEP_RECURSION;
@@ -1733,8 +1734,8 @@ $start_new_particle;
 
         $RANDOMSET rfict;
 
-        $pyegs_debug('(a,e16.8)','random rfict=',rfict);
-        call flush(i_log);
+        "$pyegs_debug('(a,e16.8)','random rfict=',rfict);"
+        "call flush(i_log);"
 
     ] UNTIL (rfict <= sigratio) ; "end tstep loop
 
@@ -1747,8 +1748,8 @@ $start_new_particle;
           "Default is $EVALUATE ebr1 USING ebr1(elke);"
         $RANDOMSET rnno24;
 
-        $pyegs_debug('(a,e16.8)','random rnno24=',rnno24);
-        call flush(i_log);
+        "$pyegs_debug('(a,e16.8)','random rnno24=',rnno24);"
+        "call flush(i_log);"
 
         IF(rnno24 <= ebr1)
         [
@@ -1790,8 +1791,8 @@ $start_new_particle;
        "Default is $EVALUATE pbr1 USING pbr1(elke);"
     $RANDOMSET rnno25;
 
-    $pyegs_debug('(a,e16.8)','random rnno25=',rnno25);
-    call flush(i_log);
+    "$pyegs_debug('(a,e16.8)','random rnno25=',rnno25);"
+    "call flush(i_log);"
 
     IF(rnno25 < pbr1) [go to :EBREMS:;] "It was bremsstrahlung
     "Decide between bhabha and annihilation
@@ -4457,6 +4458,10 @@ $REAL
     ustep  "straight line distance between the initial and final position
 ;
 
+!COMMENTS;
+"f2py intent(inout) us, vs, ws, xf, yf, zf, ustep"
+!NOCOMMENTS;
+
 " Local variables
 " ===============
 $REAL
@@ -6547,6 +6552,7 @@ SUBROUTINE PHOTON(IRCODE, howfar);
 "                                                                  "
 "******************************************************************"
 $IMPLICIT-NONE;
+
 EXTERNAL howfar;
 
 $INTEGER IRCODE; "1 => normal return"
@@ -7799,6 +7805,7 @@ return; end;
 
 subroutine eii_sample(ish,iZ,Uj);
 implicit none;
+
 $INTEGER ish,iZ;
 $REAL    Uj;
 
