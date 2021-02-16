@@ -40,6 +40,60 @@
       SUBROUTINE flush_output
       call flush()
       END
+      SUBROUTINE xxxHOWFAR
+      implicit none
+      real*8 TVAL
+      COMMON/STACK/ E(15),X(15),Y(15),Z(15),U(15),V(15),W(15),DNEAR(15),
+     *WT(15),IQ(15),IR(15),LATCH(15), LATCHI,NP,NPold
+      DOUBLE PRECISION E
+      real*8 X,Y,Z,  U,V,W,  DNEAR,  WT
+      integer*4 IQ,  IR,  LATCH,  LATCHI, NP,  NPold
+      COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
+     *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
+      DOUBLE PRECISION EDEP,  EDEP_LOCAL
+      real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
+     *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
+     *v_final,w_final
+      integer*4 IDISC,  IROLD,  IRNEW,  IAUSFL
+      COMMON/GEOM/ZBOUND
+      real*8 ZBOUND
+      IF ((IR(NP) .EQ. 3)) THEN
+        IDISC=1
+        RETURN
+      ELSE IF((IR(NP).EQ.2)) THEN
+        IF ((W(NP) .GT. 0.0)) THEN
+          TVAL= (ZBOUND - Z(NP))/W(NP)
+          IF ((TVAL .GT. USTEP)) THEN
+            RETURN
+          ELSE
+            USTEP = TVAL
+            IRNEW=3
+            RETURN
+          END IF
+        ELSE IF((W(NP) .LT. 0.0)) THEN
+          TVAL = -Z(NP)/W(NP)
+          IF ((TVAL .GT. USTEP)) THEN
+            RETURN
+          ELSE
+            USTEP = TVAL
+            IRNEW = 1
+            RETURN
+          END IF
+        ELSE IF((W(NP) .EQ. 0.0)) THEN
+          RETURN
+        END IF
+      ELSE IF((IR(NP) .EQ. 1)) THEN
+        IF ((W(NP) .GT. 0.0)) THEN
+          USTEP=0.0
+          IRNEW=2
+          RETURN
+        ELSE
+          IDISC=1
+          RETURN
+        END IF
+      END IF
+      END
       SUBROUTINE HOWNEAR(tperp, x, y, z, irl)
       implicit none
       real*8 tperp, x,y,z
@@ -63,7 +117,7 @@
       integer*4 IARG,IRL
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -2333,7 +2387,7 @@
       integer*4 IQ,  IR,  LATCH,  LATCHI, NP,  NPold
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -4872,7 +4926,7 @@ C*****************************************************************************
       logical sig_ismonotone
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -5064,7 +5118,7 @@ C*****************************************************************************
         iausfl(i) = 1
 3521  CONTINUE
 3522  CONTINUE
-      DO 3531 i=6,35
+      DO 3531 i=6,55
         iausfl(i) = 0
 3531  CONTINUE
 3532  CONTINUE
@@ -7109,7 +7163,7 @@ C*****************************************************************************
       integer*4 NNE,  IBRDST,  IPRDST,  ibr_nist,  itriplet,  pair_nrc
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -7413,7 +7467,7 @@ C*****************************************************************************
       LOGICAL QDEBUG
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -7817,7 +7871,7 @@ C*****************************************************************************
       LOGICAL QDEBUG
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -8162,7 +8216,7 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       logical sig_ismonotone
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -10096,7 +10150,7 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       logical sig_ismonotone
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -12277,7 +12331,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       integer*4 rng_seed,  seeds
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -12690,7 +12744,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       implicit none
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -13158,7 +13212,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       integer*4 edge_number
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -13480,7 +13534,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       integer*4 edge_number
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -14062,7 +14116,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       real*8 xphi,yphi,xphi2,yphi2,rhophi2, cphi,sphi
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -14628,7 +14682,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       real*8 RMT2,  RMSQ,  AP,  AE,  UP,  UE,  TE,  THMOLL
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -15157,7 +15211,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       integer*2 MED,  IRAYLR,  IPHOTONUCR
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -15446,7 +15500,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       LOGICAL QDEBUG
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -16755,7 +16809,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       real*8 Uj
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,
@@ -18345,7 +18399,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       integer*4 IQ,  IR,  LATCH,  LATCHI, NP,  NPold
       COMMON/EPCONT/EDEP,EDEP_LOCAL,TSTEP,TUSTEP,USTEP,TVSTEP,VSTEP, RHO
      *F,EOLD,ENEW,EKE,ELKE,GLE,E_RANGE, x_final,y_final,z_final, u_final
-     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(35)
+     *,v_final,w_final, IDISC,IROLD,IRNEW,IAUSFL(55)
       DOUBLE PRECISION EDEP,  EDEP_LOCAL
       real*8 TSTEP,  TUSTEP,  USTEP,  VSTEP,  TVSTEP,  RHOF,  EOLD,  ENE
      *W,  EKE,  ELKE,  GLE,  E_RANGE, x_final,y_final,z_final,  u_final,

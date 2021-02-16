@@ -24,5 +24,10 @@ USERDAUS: numpy.int32 = 3
 
 EM_MACROS_ACTIVE = False
 
-# extra AUSFL flags for debugging
+# XXX extra AUSFL flags for debugging
 RANDOMNUM = 40
+PRESTAIIA = 41
+PRESTAIA = 42
+TUSTEPB = 43
+HOWFARB = 44
+HOWFARA = 45

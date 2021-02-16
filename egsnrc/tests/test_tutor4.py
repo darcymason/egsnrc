@@ -82,14 +82,13 @@ class TestTutor4:
     def test_output(self, caplog):
         """Test that Python tutor4 produces known output"""
 
+        logger.propagate = True  # needed for pytest to capture
         caplog.set_level(logging.DEBUG)
         # Ensure proper random initial state
         # (other tests use ranlux)
 
         egsfortran.init_ranlux(1,0)
-        # with caplog.at_level(logging.DEBUG, logger="root.egsnrc"):
         tutor4.main(iwatch=2, high_prec=True)
-        # captured = capfd.readouterr()
 
         std_filename = TEST_DATA / "orig-tutor4-watch2-extra-prec.txt"
         expected = open(std_filename, "r").readlines()

@@ -39,7 +39,7 @@ HEN_HOUSE = Path(os.environ["HEN_HOUSE"])
 EGS_HOME = Path(os.environ['EGS_HOME'])
 
 
-def ausgab(iarg):
+def ausgab(iarg, **kwargs):
     """
     In this AUSGAB routine for tutor4, we score the energy deposited
     in the various regions. This amounts to the total energy
@@ -58,7 +58,7 @@ def ausgab(iarg):
     # logger.info("In Python ausgab")
     if iwatch > 0:
         # egsfortran.flush_output()
-        watch.watch(iarg, iwatch)  # handles printouts of data
+        watch.watch(iarg, iwatch, **kwargs)  # handles printouts of data
                              # iwatch is passed in score
 
     if iarg <= 4:
@@ -163,11 +163,11 @@ def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
             # even if not in the mortran call arguments,
             # unless intent(callback,hide) is used in f2py comments,
             # in which case, need to set `egsfortran.hownear = hownear`
-            egsfortran.electr(ircode, howfar) #, hownear,
+            # egsfortran.electr(ircode, howfar) #, hownear,
             #     calc_tstep_from_demfp,
             #     compute_eloss, compute_eloss_g
             # )
-            # ircode = electr(hownear, howfar, ausgab)
+            ircode = electr(hownear, howfar, ausgab)
         # egsfortran.flushoutput()
     # ---------------- end of subroutine shower
 
@@ -490,8 +490,10 @@ if __name__ == "__main__":
     HERE  = Path(__file__).resolve().parent
     TEST_DATA = HERE.parent.parent / "tests" / "data"
 
+    iwatch = 2
+    high_prec = True
     if len(sys.argv) == 1:
-        main()
+        main(iwatch=iwatch, high_prec=high_prec)
     else:
         # Else, generating validation data for tests
         # generate for both e- and e+
@@ -501,7 +503,7 @@ if __name__ == "__main__":
             print("Only accept 'gen' as optional argument")
         else:
             print("# e-   ----------------------------")
-            main(-1)
+            main(-1, iwatch=iwatch, high_prec=high_prec)
             print("\n\n# e+   ----------------------------")
-            main(+1)
+            main(+1, iwatch=iwatch, high_prec=high_prec)
 

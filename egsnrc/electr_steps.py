@@ -361,6 +361,10 @@ def tstep_ustep(
                 # This statement changed to be consistent with PRESTA-I
                 ch_steps.count_all_steps += 1
                 ch_steps.is_ch_step = False
+
+                if iausfl[TUSTEPB]:  # extra
+                    ausgab(TUSTEPB, tustep=tustep, tperp=tperp, skindepth=skindepth)
+
                 if tustep <= tperp and (not exact_bca or tustep > skindepth):
                     # We are further way from a boundary than a skindepth, so
                     # perform a normal condensed-history step
@@ -389,6 +393,8 @@ def tstep_ustep(
                             # Outputs
                             uscat,vscat,wscat,xtrans,ytrans,ztrans,ustep
                     )
+                        if iausfl[PRESTAIIA]:  # extra for debugging
+                            ausgab(PRESTAIIA)
                     else:
                         egsfortran.msdist_pi(  # msdist_pI but for case issues
                             # Inputs
@@ -397,6 +403,9 @@ def tstep_ustep(
                             # Outputs
                             uscat,vscat,wscat,xtrans,ytrans,ztrans,ustep
                         )
+                        if iausfl[PRESTAIA]:  # extra for debugging
+                            ausgab(PRESTAIA)
+
                     # logger.debug(
                     #     f'presta out: uvwcat,xyztrans,ustep {uscat},{vscat},{wscat}'
                     #     f',{xtrans},{ytrans},{ztrans},{ustep}')
@@ -479,7 +488,12 @@ def tstep_ustep(
                 call_howfar_in_electr()
             else:
                 if callhowfar or wt[np_m1] <= 0:
-                    howfar()
+                    if iausfl[HOWFARB]:
+                        ausgab(HOWFARB, idisc=idisc, ustep=ustep, irnew=irnew)
+                    egsfortran.xxxhowfar()
+                    if iausfl[HOWFARA]:
+                        ausgab(HOWFARA, idisc=idisc, ustep=ustep, irnew=irnew)
+
             # End inline replace: $ CALL_HOWFAR_IN_ELECTR; ----
 
             # Now see if user requested discard
@@ -531,7 +545,7 @@ def tstep_ustep(
 
                         # additional vacuum transport in em field
                         epcont.e_range =  vacdst
-                        logger.info("vacuum step")
+                        # logger.info("vacuum step")
                         iarg=TRANAUSB
                         if iausfl[iarg-1+1] != 0:  # ** 0-based
                             ausgab(iarg)

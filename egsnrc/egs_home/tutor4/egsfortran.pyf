@@ -121,6 +121,51 @@ python module egsfortran ! in
         end subroutine dummyxxx
         subroutine flush_output ! in :egsfortran:tutor4_linux.f
         end subroutine flush_output
+        subroutine xxxhowfar ! in :egsfortran:tutor4_linux.f
+            double precision dimension(15) :: e
+            real*8 dimension(15) :: x
+            real*8 dimension(15) :: y
+            real*8 dimension(15) :: z
+            real*8 dimension(15) :: u
+            real*8 dimension(15) :: v
+            real*8 dimension(15) :: w
+            real*8 dimension(15) :: dnear
+            real*8 dimension(15) :: wt
+            integer*4 dimension(15) :: iq
+            integer*4 dimension(15) :: ir
+            integer*4 dimension(15) :: latch
+            integer*4 :: latchi
+            integer*4 :: np
+            integer*4 :: npold
+            double precision :: edep
+            double precision :: edep_local
+            real*8 :: tstep
+            real*8 :: tustep
+            real*8 :: ustep
+            real*8 :: tvstep
+            real*8 :: vstep
+            real*8 :: rhof
+            real*8 :: eold
+            real*8 :: enew
+            real*8 :: eke
+            real*8 :: elke
+            real*8 :: gle
+            real*8 :: e_range
+            real*8 :: x_final
+            real*8 :: y_final
+            real*8 :: z_final
+            real*8 :: u_final
+            real*8 :: v_final
+            real*8 :: w_final
+            integer*4 :: idisc
+            integer*4 :: irold
+            integer*4 :: irnew
+            integer*4 dimension(55) :: iausfl
+            real*8 :: zbound
+            common /stack/ e,x,y,z,u,v,w,dnear,wt,iq,ir,latch,latchi,np,npold
+            common /epcont/ edep,edep_local,tstep,tustep,ustep,tvstep,vstep,rhof,eold,enew,eke,elke,gle,e_range,x_final,y_final,z_final,u_final,v_final,w_final,idisc,irold,irnew,iausfl
+            common /geom/ zbound
+        end subroutine xxxhowfar
         subroutine hownear(tperp,x,y,z,irl) ! in :egsfortran:tutor4_linux.f
             real*8 :: tperp
             real*8 :: x
@@ -155,7 +200,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             real*8 dimension(3) :: escore
             integer*4 :: iwatch
             double precision dimension(15) :: e
@@ -567,7 +612,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             real*8 dimension(3) :: e_max_rr
             real*8 :: prob_rr
             integer*4 :: nbr_split
@@ -956,7 +1001,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             real*8 :: count_pii_steps
             real*8 :: count_all_steps
             logical :: is_ch_step
@@ -2257,7 +2302,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             real*8 dimension(51,100,1) :: nb_fdata
             real*8 dimension(51,100,1) :: nb_xdata
             real*8 dimension(50,100,1) :: nb_wdata
@@ -2391,7 +2436,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             double precision dimension(15) :: e
             real*8 dimension(15) :: x
             real*8 dimension(15) :: y
@@ -2520,7 +2565,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             double precision dimension(15) :: e
             real*8 dimension(15) :: x
             real*8 dimension(15) :: y
@@ -2690,7 +2735,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             real*8 dimension(1) :: rlc
             real*8 dimension(1) :: rldu
             real*8 dimension(1) :: rho
@@ -3431,7 +3476,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             real*8 dimension(30,100) :: binding_energies
             real*8 dimension(6,100) :: interaction_prob
             real*8 dimension(39,100) :: relaxation_prob
@@ -4456,7 +4501,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             real*8 dimension(250,1) :: a_triplet
             real*8 dimension(250,1) :: b_triplet
             real*8 :: dl_triplet
@@ -4533,7 +4578,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             double precision dimension(15) :: e
             real*8 dimension(15) :: x
             real*8 dimension(15) :: y
@@ -4682,7 +4727,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             real*8 dimension(1) :: rlc
             real*8 dimension(1) :: rldu
             real*8 dimension(1) :: rho
@@ -4874,7 +4919,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             real*8 dimension(1) :: rlc
             real*8 dimension(1) :: rldu
             real*8 dimension(1) :: rho
@@ -5176,7 +5221,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             double precision dimension(15) :: e
             real*8 dimension(15) :: x
             real*8 dimension(15) :: y
@@ -5473,7 +5518,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             double precision, optional :: pzero=0.d0
             double precision, optional :: prm=0.5109989461
             double precision, optional :: prmt2=1.0219978922
@@ -5761,7 +5806,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             real*8 dimension(1) :: ebinda
             real*8 dimension(1) :: ge0
             real*8 dimension(1) :: ge1
@@ -5896,7 +5941,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             double precision dimension(15) :: e
             real*8 dimension(15) :: x
             real*8 dimension(15) :: y
@@ -6522,7 +6567,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             real*8 dimension(10000) :: eii_xsection_a
             real*8 dimension(10000) :: eii_xsection_b
             real*8 dimension(1) :: eii_cons
@@ -7383,7 +7428,7 @@ python module egsfortran ! in
             integer*4 :: idisc
             integer*4 :: irold
             integer*4 :: irnew
-            integer*4 dimension(35) :: iausfl
+            integer*4 dimension(55) :: iausfl
             double precision, optional :: pzero=0.d0
             double precision, optional :: prm=0.5109989461
             double precision, optional :: prmt2=1.0219978922

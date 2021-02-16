@@ -47,8 +47,6 @@
 "                                                                             "
 "#############################################################################"
 
-"PARAMETER $MXAUS=45;       CHANGE IF MORE AUSGAB CALLS ARE ADDED"
-"PARAMETER $MXAUSM5=40;     SET THIS TO $MXAUS VALUE LESS 5"
 
 REPLACE {$MXMED} WITH {1}   "only 1 medium in the problem(default 10)"
 REPLACE {$MXREG} WITH {3}   "only 3 geometric regions (default 2000)"
@@ -302,6 +300,52 @@ SUBROUTINE flush_output;
   call flush();
 END;
 
+
+"*********************************************************************"
+"                                                                     "
+SUBROUTINE xxxHOWFAR;
+"                                                                     "
+"    HOWFAR for use with tutor4 (same as with TUTOR1)                 "
+"*********************************************************************"
+$IMPLICIT-NONE;
+$REAL TVAL;
+COMIN/STACK,EPCONT,GEOM/;
+"       COMMON STACK contains X,Y,Z,U,V,W,IR and NP(stack pointer)"
+"       COMMON EPCONT contains IRNEW, USTEP and IDISC"
+"       COMMON GEOM contains ZBOUND"
+
+IF(IR(NP) = 3) [
+   IDISC=1;RETURN;"terminate this history: it is past the plate"
+]
+ELSEIF(IR(NP).EQ.2)["We are in the Ta plate - check the geometry"
+
+   IF(W(NP) > 0.0)[
+      "going forward - consider first since  most frequent"
+      TVAL= (ZBOUND - Z(NP))/W(NP);"TVAL is dist to boundary"
+      "                          in this direction"
+      IF(TVAL > USTEP)[RETURN;"can take currently requested step"]
+      ELSE[USTEP = TVAL; IRNEW=3; RETURN;]
+   ]"END OF W(NP)>0 CASE"
+
+   ELSEIF(W(NP) < 0.0)["going back towards origin"
+      TVAL = -Z(NP)/W(NP); "distance to plane at origin"
+      IF(TVAL > USTEP)[RETURN;"can take currently requested step"]
+      ELSE[USTEP = TVAL; IRNEW = 1; RETURN;]
+   ]"END W(NP)<0 CASE"
+
+   ELSEIF(W(NP) = 0.0)["cannot hit boundary"RETURN;]
+]"end of region 2 case"
+
+ELSEIF(IR(NP) = 1)["in region with source"
+   IF(W(NP) >  0.0)["this must be a source particle on z=0 boundary"
+      USTEP=0.0;IRNEW=2;RETURN;
+   ]
+   ELSE[ "it must be a reflected particle-discard it"
+      IDISC=1;RETURN;
+   ]
+]"end region 1 case"
+
+END;"end of subroutine howfar"
 
 SUBROUTINE HOWNEAR(tperp, x, y, z, irl);
 "                                                                     "

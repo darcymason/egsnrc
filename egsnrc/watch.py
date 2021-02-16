@@ -2,7 +2,7 @@ import logging
 logger = logging.getLogger("egsnrc")
 
 from egsnrc.commons import *
-
+from egsnrc.params import *
 
 log_it = logger.debug  # can set this if wish to change to different log level
 
@@ -78,7 +78,7 @@ def std_data(msg, ip, ke):
 #     logger.debug(s)
 
 
-def watch(iarg, iwatch):
+def watch(iarg, iwatch, **kwargs):
     """====================================================================
 
       A general purpose auxiliary routine for use with the EGSnrc system
@@ -306,14 +306,30 @@ def watch(iarg, iwatch):
         log_it(std_data(msg, N_m1, ke))
 
     if iarg >= 40:  # extras added in Python egsnrc
-        return watch_extra(iarg, iwatch)
+        watch_extra(iarg, iwatch, **kwargs)
 
 
-def watch_extra(iarg, iwatch):
+extra_messages = {
+    PRESTAIA: '      After msdist_pi call',
+    PRESTAIIA:'      After msdist_pii call',
+    TUSTEPB: 'tustep vs tperp, skin_depth',
+    HOWFARB: '      Before HOWFAR',
+    HOWFARA: '      After HOWFAR',
+}
+
+def watch_extra(iarg, iwatch, **kwargs):
     """Custom added flags for tracing in very fine detail"""
     # (used for Python conversion from Mortran code)
 
     if iwatch !=2:
         return  # these are only for detailed step info
-
+    np_m1 = np - 1
+    ke = e[np_m1]
+    if iq[np_m1] != 0:
+        ke -= prm
+    if kwargs:
+        data = ", ".join(f"{kw}={val}" for kw,val in kwargs.items())
+        log_it(f"{extra_messages[iarg]:<35}: {data}")
+    else:
+        log_it(std_data(extra_messages[iarg], np-1, ke))
 
