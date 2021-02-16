@@ -59,7 +59,7 @@ REPLACE {;COMIN/GEOM/;} WITH {;COMMON/GEOM/ZBOUND;$REAL ZBOUND;}
 REPLACE {$CALL-HOWNEAR(#);} WITH {
    ;CALL HOWNEAR({P1},X(NP),Y(NP),Z(NP),IRL);}
 
-REPLACE {$pyegs_debug(#,#);} WITH { write(i_log,{P1}) {P2}; };
+REPLACE {$pyegs_debug(#,#);} WITH { write(i_log,{P1}) {P2}; call flush;};
 
 REPLACE {$XXXCALL-HOWNEAR(#);} WITH {
    ";$egs_info('(a,3e16.8)','HOWNEAR inputs=',x(np),y(np),z(np));"

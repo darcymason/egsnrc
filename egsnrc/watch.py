@@ -327,9 +327,16 @@ def watch_extra(iarg, iwatch, **kwargs):
     ke = e[np_m1]
     if iq[np_m1] != 0:
         ke -= prm
+
+    msg = kwargs['msg'] if 'msg' in kwargs else extra_messages[iarg]
+
     if kwargs:
-        data = ", ".join(f"{kw}={val}" for kw,val in kwargs.items())
-        log_it(f"{extra_messages[iarg]:<35}: {data}")
+        data = ", ".join(
+            f"{kw}={val}"
+            for kw,val in kwargs.items()
+            if kw != "msg"
+        )
+        log_it(f"{msg:<35}: {data}")
     else:
-        log_it(std_data(extra_messages[iarg], np-1, ke))
+        log_it(std_data(msg, np-1, ke))
 

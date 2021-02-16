@@ -2487,6 +2487,7 @@ LOOP
 [
     $RANDOMSET xphi;
     "$pyegs_debug('(a,e16.8)','azim random xphi=',xphi);"
+    "call flush;"
     xphi  = 2*xphi - 1;
     xphi2 = xphi*xphi;
     $RANDOMSET yphi;
@@ -3573,7 +3574,7 @@ REPLACE {$egs_warning(#,#);} WITH {
   $warning({P1},{P2});
 };
 REPLACE {$warning(#,#);} WITH { write(i_log,{P1}) {P2}; };
-REPLACE {$egs_info(#,#);} WITH { write(i_log,{P1}) {P2}; };
+REPLACE {$egs_info(#,#);} WITH { write(i_log,{P1}) {P2}; call flush;};
 REPLACE {$declare_write_buffer;} WITH {;};
 
 

@@ -1640,16 +1640,24 @@ $start_new_particle;
                 IF ( domultiple | dosingle )
                 [
                     u_tmp = u(np); v_tmp = v(np); w_tmp = w(np);
+                    "$egs_info('(a,3e16.8)',"
+                    "    'domultiple dosingle before uvw_tmp=',"
+                    "        u_tmp, v_tmp, w_tmp);"
+
                     call uphi(2,1); "Apply the deflection, save call to uphi if
                                     "no deflection in a single scattering mode
                     u_final = u(np); v_final = v(np); w_final = w(np);
 
                     "$egs_info('(a,3e16.8)', 'Called UPHI: final uvw=',"
-                    "    u_final, v_final, w_final);"
+                        "u_final, v_final, w_final);"
 
                     u(np) = u_tmp; v(np) = v_tmp; w(np) = w_tmp;
                 ]
-                ELSE [ u_final = u(np); v_final = v(np); w_final = w(np); ]
+                ELSE [
+                    u_final = u(np); v_final = v(np); w_final = w(np);
+                    "$egs_info('(a,3e16.8)', 'NOT domultiple/dosingle uvw f',"
+                        "u_final, v_final, w_final);"
+                ]
             ]
 
             $AUSCALL($TRANAUSB);
@@ -6828,7 +6836,7 @@ $EVALUATE COSTHE USING SIN(CTHET);
 " $EVALUATE COSPHI USING SIN(CPHI);
 $SELECT-AZIMUTHAL-ANGLE(cosphi,sinphi);
 
-"$egs_info('(a,2e16.8)','UPHI: cosphi, sinphi=',cosphi,sinphi);"
+"$pyegs_debug('(a,2e16.8)','UPHI: cosphi, sinphi=',cosphi,sinphi);"
 
 "   USE THE FOLLOWING ENTRY FOR THE SECOND OF TWO PARTICLES WHEN WE"
 "   KNOW TWO PARTICLES HAVE A RELATIONSHIP IN THEIR CORRECTIONS.   "
@@ -6851,6 +6859,7 @@ GO TO (:OLD-PARTICLE:,:NEW-PARTICLE:,:BREMS-GAMMA:),LVL;
 
 :OLD-PARTICLE:
 A=U(NP);B=V(NP);C=W(NP);
+"$pyegs_debug('(a,3e16.8)', 'a b c=', A, B, C);"
 GO TO :ADJUST:;
 
 :BREMS-GAMMA:
@@ -6867,11 +6876,15 @@ $TRANSFER PROPERTIES TO (NP) FROM (NP-1);
 SINPS2=A*A+B*B;
 "   If SINPS2 is small, no rotation is needed    "
 IF (SINPS2.LT.1.0E-20)["small polar angle case"
+   "$pyegs_debug('(a, 2e16.8)',"
+       "'uphi small angle sinthe,costhe=',sinthe, costhe);"
    U(NP)=SINTHE*COSPHI;
    V(NP)=SINTHE*SINPHI;
    W(NP)=C*COSTHE;    "fixed March 2001 from =COSTHE"
 ] "end small polar angle case"
 ELSE["large polar angle case"
+   "$pyegs_debug('(a, 2e16.8)',"
+       "'uphi large angle sinthe,costhe=',sinthe, costhe);"
    SINPSI=SQRT(SINPS2);
    US=SINTHE*COSPHI;
    VS=SINTHE*SINPHI;

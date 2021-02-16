@@ -4,6 +4,10 @@ from egsnrc.commons import *
 from egsnrc.params import *
 from egsnrc.randoms import randomset
 
+import logging
+logger = logging.getLogger("egsnrc")
+
+
 def uphi(ientry, lvl):
     """uniform phi distribution
     Set coordinates for new particle or reset direction cosines of
@@ -64,6 +68,7 @@ def uphi(ientry, lvl):
     rhophi2 = 99  # dummy to start the loop
     while rhophi2 > 1:  # LOOP
         xphi = randomset()
+        # logger.debug(f"xphi random: {xphi}")
         xphi  = 2*xphi - 1
         xphi2 = xphi*xphi
         yphi = randomset()

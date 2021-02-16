@@ -198,6 +198,7 @@ def tstep_ustep(
                     #        threshold for creation of a brem.)
                     epcont.tstep = vacdst
                     sig0 = 1.E-15
+                    # logger.debug("sig <= 0")
                 else:
                     # --- Inline replace: $ CALCULATE_TSTEP_FROM_DEMFP; -----
                     if compute_tstep:
@@ -362,8 +363,8 @@ def tstep_ustep(
                 ch_steps.count_all_steps += 1
                 ch_steps.is_ch_step = False
 
-                if iausfl[TUSTEPB]:  # extra
-                    ausgab(TUSTEPB, tustep=tustep, tperp=tperp, skindepth=skindepth)
+                # if iausfl[TUSTEPB]:  # extra
+                #     ausgab(TUSTEPB, tustep=tustep, tperp=tperp, skindepth=skindepth)
 
                 if tustep <= tperp and (not exact_bca or tustep > skindepth):
                     # We are further way from a boundary than a skindepth, so
@@ -393,8 +394,8 @@ def tstep_ustep(
                             # Outputs
                             uscat,vscat,wscat,xtrans,ytrans,ztrans,ustep
                     )
-                        if iausfl[PRESTAIIA]:  # extra for debugging
-                            ausgab(PRESTAIIA)
+                        # if iausfl[PRESTAIIA]:  # extra for debugging
+                        #     ausgab(PRESTAIIA)
                     else:
                         egsfortran.msdist_pi(  # msdist_pI but for case issues
                             # Inputs
@@ -403,8 +404,8 @@ def tstep_ustep(
                             # Outputs
                             uscat,vscat,wscat,xtrans,ytrans,ztrans,ustep
                         )
-                        if iausfl[PRESTAIA]:  # extra for debugging
-                            ausgab(PRESTAIA)
+                        # if iausfl[PRESTAIA]:  # extra for debugging
+                        #     ausgab(PRESTAIA)
 
                     # logger.debug(
                     #     f'presta out: uvwcat,xyztrans,ustep {uscat},{vscat},{wscat}'
@@ -488,11 +489,11 @@ def tstep_ustep(
                 call_howfar_in_electr()
             else:
                 if callhowfar or wt[np_m1] <= 0:
-                    if iausfl[HOWFARB]:
-                        ausgab(HOWFARB, idisc=idisc, ustep=ustep, irnew=irnew)
+                    # if iausfl[HOWFARB]:
+                    #     ausgab(HOWFARB, idisc=idisc, ustep=ustep, irnew=irnew)
                     egsfortran.xxxhowfar()
-                    if iausfl[HOWFARA]:
-                        ausgab(HOWFARA, idisc=idisc, ustep=ustep, irnew=irnew)
+                    # if iausfl[HOWFARA]:
+                    #     ausgab(HOWFARA, idisc=idisc, ustep=ustep, irnew=irnew)
 
             # End inline replace: $ CALL_HOWFAR_IN_ELECTR; ----
 
@@ -511,7 +512,7 @@ def tstep_ustep(
                 # irnew to the region we are really most likely to be
                 # in.  A message is written out whenever ustep is less than -1.e-4
                 if ustep < -1e-4:
-                    ierust = ierust + 1
+                    ierust += 1
                     # logger.debug(
                     #     f"{ierust:4d} Negative ustep = {ustep:12.5e}"
                     #     f" dedx={dedx:8.4f} ke={e[np_m1]-prm:8.4f}"
@@ -550,10 +551,10 @@ def tstep_ustep(
                         if iausfl[iarg-1+1] != 0:  # ** 0-based
                             ausgab(iarg)
                         # Transport the particle
-                        x[np_m1] = x[np_m1] + u[np_m1]*vstep
-                        y[np_m1] = y[np_m1] + v[np_m1]*vstep
-                        z[np_m1] = z[np_m1] + w[np_m1]*vstep
-                        dnear[np_m1] = dnear[np_m1] - vstep
+                        x[np_m1] += u[np_m1]*vstep
+                        y[np_m1] += v[np_m1]*vstep
+                        z[np_m1] += w[np_m1]*vstep
+                        dnear[np_m1] -= vstep
                             # (dnear is distance to the nearest boundary
                             #  that goes along with particle stack and
                             #  which the user's howfar can supply (option)
@@ -726,9 +727,9 @@ def tstep_ustep(
                                 spin_effects,costhe,sinthe)
                     # logger.debug('Single scattering called')
                 else:
-                    theta  = 0 # No deflection in single scattering model
-                    sinthe = 0
-                    costhe = 1
+                    uphiot.theta  = 0 # No deflection in single scattering model
+                    uphiot.sinthe = 0
+                    uphiot.costhe = 1
 
             # We now know distance and amount of energy loss for this step,
             # and the angle by which the electron will be scattered. Hence,
@@ -749,6 +750,11 @@ def tstep_ustep(
 
             if callmsdist:
                 # Deflection and scattering have been calculated/sampled in msdist
+                # if iausfl[UVWAUSB]:
+                #     ausgab(
+                #         UVWAUSB, msg='callmsdist=True',
+                #         us=uscat, vscat=vscat, wscat=wscat
+                #     )
                 epcont.u_final = uscat
                 epcont.v_final = vscat
                 epcont.w_final = wscat
@@ -760,15 +766,38 @@ def tstep_ustep(
                     epcont.x_final = x[np_m1] + u[np_m1]*vstep
                     epcont.y_final = y[np_m1] + v[np_m1]*vstep
                     epcont.z_final = z[np_m1] + w[np_m1]*vstep
+                    # if iausfl[XYZAUSA]:
+                    #     ausgab(
+                    #         XYZAUSA, msg="callmsdist=False",
+                    #         xf=x_final, yf=y_final, zf=z_final
+                    #     )
+
                 if domultiple or dosingle:
                     uvw_tmp = (u[np_m1], v[np_m1], w[np_m1])
+                    # logger.debug(
+                    #         f"domultiple/dosingle before uvw_tmp={uvw_tmp}"
+                    #     )
+
                     egsfortran.uphi(2,1) # Apply the deflection, save call to uphi if
                                     # no deflection in a single scattering mode
-                    epcont.u_final = u[np_m1]; epcont.v_final = v[np_m1]; epcont.w_final = w[np_m1]
-                    # logger.debug(f'Called UPHI: final uvw={u_final},{v_final},{w_final}')
+                    np_m1 = np - 1
+                    epcont.u_final = u[np_m1]
+                    epcont.v_final = v[np_m1]
+                    epcont.w_final = w[np_m1]
+                    # if iausfl[UVWAUSA]:
+                    #     ausgab(
+                    #         UVWAUSA, msg="domultiple/dosingle after", uf=u_final, vf=v_final, wf=w_final
+                    #     )
+
+                    logger.debug(f'Called UPHI: final uvw={u_final},{v_final},{w_final}')
+                    logger.debug(f'Called UPHI: uvw={u[np_m1]},{v[np_m1]},{w[np_m1]}')
                     u[np_m1], v[np_m1], w[np_m1] = uvw_tmp
                 else:
                     epcont.u_final = u[np_m1]; epcont.v_final = v[np_m1]; epcont.w_final = w[np_m1]
+                    # if iausfl[UVWAUSA]:
+                    #     ausgab(
+                    #         UVWAUSA, msg="NOT domultiple/dosingle", uf=u_final, vf=v_final, wf=w_final
+                    #     )
 
             iarg=TRANAUSB
             if iausfl[iarg-1+1] != 0:  # ** 0-based
@@ -777,6 +806,10 @@ def tstep_ustep(
             # Transport the particle
             x[np_m1] = x_final; y[np_m1] = y_final; z[np_m1] = z_final
             u[np_m1] = u_final; v[np_m1] = v_final; w[np_m1] = w_final
+
+            # iarg=TRANAUSB
+            # if iausfl[iarg-1+1] != 0:  # ** 0-based
+            #     ausgab(iarg)
 
             # logger.debug(
             #     f"Transport: new xyz/uvw={x[np_m1]} {y[np_m1]} {z[np_m1]}"
@@ -824,7 +857,7 @@ def tstep_ustep(
                     ir[np_m1] = irnew
                     irl = irnew
                     irl_m1 = irl - 1  # ** 0-based
-                    useful.medium =med[irl_m1]
+                    useful.medium = med[irl_m1]
                     medium_m1 = medium - 1
                 # End inline replace: $ electron_region_change; ---- ]
 

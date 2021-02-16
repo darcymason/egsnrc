@@ -1544,6 +1544,7 @@
           eii_xfile = 'ik'
           write(i_log,*) '==> Using default EII data compilation ', eii_
      *    xfile(:lnblnk1(eii_xfile))
+          call flush
         ELSE IF((toUpper(eii_xfile(:lnblnk1(eii_xfile))).eq.'OFF')) THEN
           eii_xfile='Off'
           eii_flag=0
@@ -2151,8 +2152,10 @@
         write(i_log,*) 'You are trying to use radiative Compton correcti
      *ons'
         write(i_log,*) 'without having included rad_compton1.mortran'
+        call flush
         write(i_log,'(a//)') 'Turning radiative Compton corrections OFF
      *...'
+        call flush
         radc_flag = 0
       END IF
       output_strings(12) = allowed_inputs(num_radc,radc_flag)
@@ -4156,10 +4159,13 @@ C*****************************************************************************
       END IF
       call egs_open_units(.true.)
       write(i_log,'(a)') line
+      call flush
       write(i_log,'(a,a,t55,a,$)') 'EGSnrc version 4 for ','x86_64-unkno
      *wn-linux-gnu',' '
+      call flush
       call egs_get_fdate(dattim)
       write(i_log,'(a,/,a)') dattim,line
+      call flush
       pos1 = lnblnk1('output file(s)')
       pos2 = 80 - lnblnk1('linux')
       pos2 = min(pos2,80-lnblnk1(user_code))
@@ -4188,42 +4194,67 @@ C*****************************************************************************
       pos2 = min(pos2,80-lnblnk1(output_file))
       IF((pos2 .LT. pos1+2))pos2 = pos1 + 2
       write(i_log,'(a,$)') 'configuration'
+      call flush
       l = pos2 - lnblnk1('configuration')
       write(i_log,'(a,$)') line1(:l)
+      call flush
       write(i_log,'(a)') 'linux'
+      call flush
       write(i_log,'(a,$)') 'user code'
+      call flush
       l = pos2 - lnblnk1('user code')
       write(i_log,'(a,$)') line1(:l)
+      call flush
       write(i_log,'(a)') user_code(:lnblnk1(user_code))
+      call flush
       write(i_log,'(a,$)') 'pegs file'
+      call flush
       l = pos2 - lnblnk1('pegs file')
       write(i_log,'(a,$)') line1(:l)
+      call flush
       write(i_log,'(a)') tmp_string(:lnblnk1(tmp_string))
+      call flush
       write(i_log,'(a,$)') 'using host'
+      call flush
       l = pos2 - lnblnk1('using host')
       write(i_log,'(a,$)') line1(:l)
+      call flush
       write(i_log,'(a)') host_name(:lnblnk1(host_name))
+      call flush
       IF (( have_input )) THEN
         write(i_log,'(a,$)') 'input file'
+        call flush
         l = pos2 - lnblnk1('input file')
         write(i_log,'(a,$)') line1(:l)
+        call flush
         write(i_log,'(a)') input_file(:lnblnk1(input_file))
+        call flush
       END IF
       write(i_log,'(a,$)') 'output file(s)'
+      call flush
       l = pos2 - lnblnk1('output file(s)')
       write(i_log,'(a,$)') line1(:l)
+      call flush
       write(i_log,'(a)') output_file(:lnblnk1(output_file))
+      call flush
       IF (( n_parallel .GT. 0 )) THEN
         write(i_log,'(a,$)') 'number of parallel jobs'
+        call flush
         l = pos2 - lnblnk1('number of parallel jobs')
         write(i_log,'(a,$)') line1(:l)
+        call flush
         write(i_log,'(i2)') n_parallel
+        call flush
         write(i_log,'(a,$)') 'job number'
+        call flush
         l = pos2 - lnblnk1('job number')
         write(i_log,'(a,$)') line1(:l)
+        call flush
         write(i_log,'(i2)') i_parallel
+        call flush
       END IF
       write(i_log,'(a)') line
+      call flush
       return
 2920  write(i_log,'(/a)') '***************** Error: '
       write(i_log,*) 'failed to open input file ',tmp_string(:lnblnk1(tm
@@ -4326,6 +4357,7 @@ C*****************************************************************************
         call egs_strip_path(arg)
         write(i_log,'(//,a,a,a,//)') 'Usage: ',arg(:lnblnk1(arg)),' [arg
      *s] '
+        call flush
         tmp_string = hen_house(:lnblnk1(hen_house)) // 'pieces/help_mess
      *age'
         i_help=98
@@ -4341,6 +4373,7 @@ C*****************************************************************************
 3031    CONTINUE
           read(i_help,'(a)',err=3040,end=3040) line1
           write(i_log,'(a)') line1
+          call flush
         GO TO 3031
 3032    CONTINUE
 3040    CONTINUE
@@ -4753,16 +4786,21 @@ C*****************************************************************************
         t1 = t_elapsed
         t2 = t1/3600
         write(i_log,'(//a,/,a,/)') line,'Finished simulation'
+        call flush
         write(i_log,'(2x,a,t30,f9.1,a,f7.3,a)') 'Elapsed time: ',t1,' s
      *(',t2,' h)'
+        call flush
         t1 = tt_cpu
         t2 = t1/3600
         write(i_log,'(2x,a,t30,f9.1,a,f7.3,a)') 'CPU time:',t1,' s (',t2
      *  ,' h)'
+        call flush
         write(i_log,'(2x,a,t30,f10.3)') 'Ratio:',t_elapsed/tt_cpu
+        call flush
       END IF
       call egs_get_fdate(dattim)
       write(i_log,'(//a,t56,a,/,a)') 'End of run ',dattim,line
+      call flush
       n_open=0
       DO 3351 i=1,len(base)
         base(i:i) = ' '
@@ -5680,6 +5718,7 @@ C*****************************************************************************
         fname=dirname(:lnblnk1(dirname))//fname(indsep:)
         write(i_log,'(//a,a/)') ' Retrieving file: ',fname(:lnblnk1(fnam
      *  e))
+        call flush
       ELSE IF((ind2.EQ.1)) THEN
         call getenv('HOME',dirname)
         IF ((dirname.EQ.' ')) THEN
@@ -5692,6 +5731,7 @@ C*****************************************************************************
         fname=dirname(:lnblnk1(dirname))//fname(indsep:)
         write(i_log,'(//a,a/)') ' Retrieving file: ',fname(:lnblnk1(fnam
      *  e))
+        call flush
       END IF
       return
       end
@@ -6102,11 +6142,13 @@ C*****************************************************************************
      *, ' N1',' N2',' N3',' N4',' N5',' N6',' N7'/
       write(i_log,'(a,a,a)') 'Binding energies from ',photon_xsections(:
      *lnblnk1(photon_xsections)), ' photon cross section library'
+      call flush
       DO 3971 j=1,100
         DO 3981 i=1,16
           IF (( binding_energies(i,j) .GT. 0 )) THEN
             write(i_log,'(a,i3,a,a,a,1pe12.4,a)') ' Eb(',j,',',labels(i)
      *      ,') = ',binding_energies(i,j),' MeV'
+            call flush
           END IF
 3981    CONTINUE
 3982    CONTINUE
@@ -6587,6 +6629,7 @@ C*****************************************************************************
         write(i_log,'(/a)') '***************** Warning: '
         write(i_log,*) ' *** egs_read_byte: ERROR READING A byte *** '
         write(i_log,*) ' From unit ',iunit,' position ',jrec,' bytes'
+        call flush
         egs_read_byte = -1
         return
       END IF
@@ -6622,6 +6665,7 @@ C*****************************************************************************
           write(i_log,*) ' *** egs_read_short: ERROR READING short integ
      *er *** '
           write(i_log,*) ' From unit ',iunit,' position ',jrec,' bytes'
+          call flush
           egs_read_short = -1
           return
         END IF
@@ -6658,6 +6702,7 @@ C*****************************************************************************
           write(i_log,'(/a)') '***************** Warning: '
           write(i_log,*) ' *** egs_read_int: ERROR READING integer *** '
           write(i_log,*) ' From unit ',iunit,' position ',jrec,' bytes'
+          call flush
           egs_read_int = -1
           return
         END IF
@@ -6694,6 +6739,7 @@ C*****************************************************************************
           write(i_log,'(/a)') '***************** Warning: '
           write(i_log,*) ' *** egs_read_real: ERROR READING float *** '
           write(i_log,*) ' From unit ',iunit,' position ',jrec,' bytes'
+          call flush
           egs_read_real = -1
           return
         END IF
@@ -6853,6 +6899,9 @@ C*****************************************************************************
           END IF
           xphi = rng_array(rng_seed)
           rng_seed = rng_seed + 1
+          write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
+          call flush
+          call flush
           xphi = 2*xphi - 1
           xphi2 = xphi*xphi
           IF (( rng_seed .GT. 24 )) THEN
@@ -6980,6 +7029,9 @@ C*****************************************************************************
           END IF
           xphi = rng_array(rng_seed)
           rng_seed = rng_seed + 1
+          write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
+          call flush
+          call flush
           xphi = 2*xphi - 1
           xphi2 = xphi*xphi
           IF (( rng_seed .GT. 24 )) THEN
@@ -7420,6 +7472,9 @@ C*****************************************************************************
             END IF
             xphi = rng_array(rng_seed)
             rng_seed = rng_seed + 1
+            write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
+            call flush
+            call flush
             xphi = 2*xphi - 1
             xphi2 = xphi*xphi
             IF (( rng_seed .GT. 24 )) THEN
@@ -8469,6 +8524,8 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 dedx0=pdedx1(Lelke,MEDIUM)*elke+pdedx0(Lelke,MEDIUM)
               END IF
               dedx = rhof*dedx0
+              write(i_log,'(a,e16.8)') 'dedx=', dedx
+              call flush
               tmxs=tmxs1(Lelke,MEDIUM)*elke+tmxs0(Lelke,MEDIUM)
               tmxs = tmxs/rhof
               ekei = E_array(lelke,medium)
@@ -8491,6 +8548,8 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               aux = aux*(1+2*aux)*(fedep/(2-fedep))**2/6
               range = fedep*eke*dedxmid*(1+aux)
               range = (range + range_ep(qel,lelke,medium))/rhof
+              write(i_log,'(a,e16.8)') 'range=', range
+              call flush
               random_tustep = .false.
               IF ((random_tustep)) THEN
                 IF (( rng_seed .GT. 24 )) THEN
@@ -8786,13 +8845,21 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                     ELSE
                       write(i_log,*) ' Stoped in SET-TVSTEP because xi >
      * 1! '
+                      call flush
                       write(i_log,*) ' Medium: ',medium
+                      call flush
                       write(i_log,*) ' Initial energy: ',eke
+                      call flush
                       write(i_log,*) ' Average step energy: ',ekems
+                      call flush
                       write(i_log,*) ' tustep: ',tustep
+                      call flush
                       write(i_log,*) ' ustep0: ',ustep0
+                      call flush
                       write(i_log,*) ' vstep:  ',vstep
+                      call flush
                       write(i_log,*) ' ==> xi = ',xi
+                      call flush
                       write(i_log,'(/a)') '***************** Error: '
                       write(i_log,*) 'This is a fatal error condition'
                       write(i_log,'(/a)') '***************** Quiting now
@@ -8908,6 +8975,8 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 spin_index = .true.
                 call mscat(lambda,chia2,xi,elkems,beta2,qel,medium, spin
      *          _effects,findindex,spin_index, costhe,sinthe)
+                write(i_log,'(a)') 'Multiple scattering called'
+                call flush
               ELSE
                 IF ((dosingle)) THEN
                   ekems = Max(ekef,ecut(irl)-rm)
@@ -8928,6 +8997,8 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                   END IF
                   call sscat(chia2,elkems,beta2,qel,medium, spin_effects
      *            ,costhe,sinthe)
+                  write(i_log,'(a)') 'Single scattering called'
+                  call flush
                 ELSE
                   theta = 0
                   sinthe = 0
@@ -8953,10 +9024,16 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 u_tmp = u(np)
                 v_tmp = v(np)
                 w_tmp = w(np)
+                write(i_log,'(a,3e16.8)') 'domultiple dosingle before uv
+     *w_tmp=', u_tmp, v_tmp, w_tmp
+                call flush
                 call uphi(2,1)
                 u_final = u(np)
                 v_final = v(np)
                 w_final = w(np)
+                write(i_log,'(a,3e16.8)') 'Called UPHI: final uvw=', u_f
+     *          inal, v_final, w_final
+                call flush
                 u(np) = u_tmp
                 v(np) = v_tmp
                 w(np) = w_tmp
@@ -8964,6 +9041,9 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 u_final = u(np)
                 v_final = v(np)
                 w_final = w(np)
+                write(i_log,'(a,3e16.8)') 'NOT domultiple/dosingle uvw f
+     *', u_final, v_final, w_final
+                call flush
               END IF
             END IF
             IARG=0
@@ -9376,6 +9456,7 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               IF ((ISUB.LT.11)) THEN
                 write(i_log,'(1PE20.7,4E20.7)') THETA,SINTHE,SINT,COSTHE
      *          ,COST
+                call flush
               END IF
 4751        CONTINUE
 4752        CONTINUE
@@ -9383,8 +9464,10 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
 4742      CONTINUE
           write(i_log,'(a,2i5)') ' SINE TESTS,MXSINC,NSINSS=',MXSINC,NSI
      *    NSS
+          call flush
           write(i_log,'(a,1PE16.8,3e16.8)') ' ADEV,RDEV,S2C2(MN,MX) =',
      *    ADEV,RDEV,S2C2MN,S2C2MX
+          call flush
           ADEV=0.
           RDEV=0.
           S2C2MN=10.
@@ -9414,8 +9497,10 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
 4762      CONTINUE
           write(i_log,'(a,i7,a)') ' TEST AT ',NRNA,' RANDOM ANGLES IN (0
      *,5*PI/2)'
+          call flush
           write(i_log,'(1PE16.8,3E16.8)') ' ADEV,RDEV,S2C2(MN,MX) =', AD
      *    EV,RDEV,S2C2MN,S2C2MX
+          call flush
         END IF
         P=1.
         DO 4771 I=1,50
@@ -9449,6 +9534,7 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
 4801  CONTINUE
 4802  CONTINUE
       write(i_log,'(a,i3)') ' ===> Photonuclear flag: ', iphotonuc
+      call flush
       IF((.NOT.is_pegsless))REWIND KMPI
       NM=0
       DO 4821 IM=1,NMED
@@ -9456,6 +9542,7 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         IF ((IRAYLM(IM).EQ.1)) THEN
           write(i_log,'(a,i3/)') ' RAYLEIGH OPTION REQUESTED FOR MEDIUM
      *NUMBER',IM
+          call flush
         END IF
 4821  CONTINUE
 4822  CONTINUE
@@ -9463,6 +9550,7 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         IF ((IPHOTONUCM(IM).EQ.1)) THEN
           write(i_log,'(a,i3/)') ' PHOTONUCLEAR REQUESTED FOR MEDIUM NUM
      *BER',IM
+          call flush
         END IF
 4831  CONTINUE
 4832  CONTINUE
@@ -9504,6 +9592,7 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           GO TO 4930
 4920      CONTINUE
           write(i_log,*) 'Found medium with gas pressure'
+          call flush
           read(tmp_string,2) (MBUF(I),I=1,5),RHO(IM),NNE(IM),IUNRST(IM),
      *    EPSTFL(IM), IAPRIM(IM)
 2         FORMAT(5A1,5X,F11.0,4X,I2,26X,I1,9X,I1,9X,I1)
@@ -9547,6 +9636,7 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
             READ(KMPI,4680)(COHE0(I,IM),COHE1(I,IM),I=1,NGE)
             write(i_log,'(a,i3,a)') ' Rayleigh data available for medium
      *', IM, ' in PEGS4 data set.'
+            call flush
           END IF
           IF ((IRAYLM(IM).EQ.1)) THEN
             IF ((IRAYL.NE.1)) THEN
@@ -9584,6 +9674,7 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         IF ((DUNIT.NE.1.0)) THEN
           write(i_log,'(a,1PE14.5,E14.5,a)') ' DUNIT REQUESTED&USED ARE:
      * ', DUNITR,DUNIT,'(CM.)'
+          call flush
         END IF
         DO 4951 IM=1,NMED
           DFACT=RLC(IM)/DUNIT
@@ -9623,6 +9714,7 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       ELSE
         write(i_log,*) ' PEGSLESS INPUT.  CALCULATING ELECTRON CROSS-SEC
      *TIONS.'
+        call flush
         write(i_log,'(/a)') '***************** Error: '
         write(i_log,'(a/a)') ' Code cannot be run in pegsless mode.', '
      *Compile with required files and try again.'
@@ -9704,17 +9796,21 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
       call init_triplet
       IF ((NMED.EQ.1)) THEN
         write(i_log,*) 'EGSnrc SUCCESSFULLY ''HATCHED'' FOR ONE MEDIUM.'
+        call flush
       ELSE
         write(i_log,'(a,i5,a)') 'EGSnrc SUCCESSFULLY ''HATCHED'' FOR ',N
      *  MED,' MEDIA.'
+        call flush
       END IF
       RETURN
 4860  write(i_log,'(a,i2//,a/,a/)') ' END OF FILE ON UNIT ',KMPI, ' PROG
      *RAM STOPPED IN HATCH BECAUSE THE', ' FOLLOWING NAMES WERE NOT RECO
      *GNIZED:'
+      call flush
       DO 5031 IM=1,NMED
         IF ((LOK(IM).NE.1)) THEN
           write(i_log,'(40x,a,24a1,a)') '''',(MEDIA(I,IM),I=1,LMDN),''''
+          call flush
         END IF
 5031  CONTINUE
 5032  CONTINUE
@@ -9928,8 +10024,10 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         write(i_log,*) 'You are trying to use radiative Compton correcti
      *ons'
         write(i_log,*) 'without having included rad_compton1.mortran'
+        call flush
         write(i_log,'(a//)') 'Turning radiative Compton corrections OFF
      *...'
+        call flush
         radc_flag = 0
       END IF
       getd = .false.
@@ -9953,10 +10051,12 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
           call exit(1)
         END IF
         write(i_log,'(a/)') ' Bound Compton scattering not requested! '
+        call flush
         return
       END IF
       write(i_log,'(/a$)') 'Bound Compton scattering requested, reading
      *data ......'
+      call flush
       rewind(i_incoh)
       DO 5071 j=1,18
         read(i_incoh,*)
@@ -9986,8 +10086,10 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
 5081  CONTINUE
 5082  CONTINUE
       write(i_log,*) ' Done'
+      call flush
       write(i_log,'(/a)') ' Initializing Bound Compton scattering ......
      *'
+      call flush
       DO 5091 medium=1,nmed
         pztot = 0
         nsh = 0
@@ -10022,11 +10124,13 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         n_shell(medium) = nsh
         write(i_log,'(a,i3,a,i3,a)') ' Medium ',medium,' has ',nsh,' she
      *lls: '
+        call flush
         DO 5121 i=1,nsh
           j = shell_array(i,medium)
           eno_array(i,medium) = eno_array(i,medium)/pztot
           write(i_log,'(i4,i5,i4,f9.5,e10.3,f10.3)') i,j,shn_array(j),en
      *    o_array(i,medium), Jo_array(j),be_array(j)*PRM*1000.
+          call flush
           eno_array(i,medium) = -eno_array(i,medium)
           eno_atbin_array(i,medium) = i
 5121    CONTINUE
@@ -10061,6 +10165,7 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
 5091  CONTINUE
 5092  CONTINUE
       write(i_log,'(a/)') ' ...... Done.'
+      call flush
       getd = .false.
       DO 5171 j=1,3
         IF (( iedgfl(j) .GT. 0 .AND. iedgfl(j) .LE. 100 )) THEN
@@ -10379,6 +10484,7 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         IF (( .NOT.exact_bca )) THEN
           write(i_log,*) ' old PRESTA calculates default min. step-size
      *for BCA: '
+          call flush
           ecutmn = 1e30
           DO 5211 i=1,3
             IF (( med(i) .GT. 0 .AND. med(i) .LE. nmed )) THEN
@@ -10387,20 +10493,24 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
 5211      CONTINUE
 5212      CONTINUE
           write(i_log,*) '     minimum ECUT found: ',ecutmn
+          call flush
           tstbmn = 1e30
           DO 5221 medium=1,nmed
             tstbm = (ecutmn-prm)*(ecutmn+prm)/ecutmn**2
             tstbm = blcc(medium)*tstbm*(ecutmn/xcc(medium))**2
             aux = Log(tstbm)
             IF((aux .GT. 300))write(i_log,*) 'aux > 300 ? ',aux
+            call flush
             tstbm = Log(tstbm/aux)
             tstbmn = Min(tstbmn,tstbm)
 5221      CONTINUE
 5222      CONTINUE
           write(i_log,*) '     default BLCMIN is: ',tstbmn
+          call flush
           skindepth_for_bca = Exp(tstbmn)
           write(i_log,*) '     this corresponds to ',skindepth_for_bca,
      *    ' elastic MFPs '
+          call flush
         ELSE
           skindepth_for_bca = 3
         END IF
@@ -10415,6 +10525,7 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         call init_spin
       END IF
       write(i_log,*) ' '
+      call flush
       esige_max = 0
       psige_max = 0
       DO 5241 medium=1,nmed
@@ -10445,6 +10556,7 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
 5252    CONTINUE
         write(i_log,*) ' Medium ',medium,' sige = ',sigee,sigep,' monoto
      *ne = ', ise_monoton,isp_monoton
+        call flush
         sig_ismonotone(0,medium) = ise_monoton
         sig_ismonotone(1,medium) = isp_monoton
         esig_e(medium) = sigee
@@ -10454,9 +10566,12 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
 5241  CONTINUE
 5242  CONTINUE
       write(i_log,*) ' '
+      call flush
       write(i_log,*) ' Initializing tmxs for estepe = ',estepe,' and xim
      *ax = ',ximax
+      call flush
       write(i_log,*) ' '
+      call flush
       DO 5261 medium=1,nmed
         ei = exp((1 - eke0(medium))/eke1(medium))
         eil = log(ei)
@@ -10756,13 +10871,21 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
         return
       END IF
       write(i_log,*) ' '
+      call flush
       write(i_log,*) ' *************************************'
+      call flush
       write(i_log,*) ' Maximum step size in mscat exceeded! '
+      call flush
       write(i_log,*) ' Maximum step size initialized: 100000'
+      call flush
       write(i_log,*) ' Present lambda: ',lambda
+      call flush
       write(i_log,*) ' chia2: ',chia2
+      call flush
       write(i_log,*) ' q1 elke beta2: ',q1,elke,beta2
+      call flush
       write(i_log,*) ' medium: ',medium
+      call flush
       write(i_log,'(/a)') '***************** Error: '
       write(i_log,*) ' Stopping execution'
       write(i_log,'(/a)') '***************** Quiting now.'
@@ -10911,6 +11034,7 @@ Cf2py intent(inout) cost, sint
       integer*4 i,j,k
       write(i_log,'(/a,$)') 'Reading screened Rutherford MS data .......
      *........ '
+      call flush
       rewind(i_mscat)
       DO 5341 i=0,63
         DO 5351 j=0,7
@@ -10929,6 +11053,7 @@ Cf2py intent(inout) cost, sint
 5341  CONTINUE
 5342  CONTINUE
       write(i_log,'(a)') ' done '
+      call flush
       llammin = Log(1.)
       llammax = Log(1e5)
       dllamb = (llammax-llammin)/63
@@ -11062,13 +11187,19 @@ Cf2py intent(inout) cost, sint
       END IF
       write(i_log,'(//a,a)') 'Reading spin data base from ',spin_file(:l
      *nblnk1(spin_file))
+      call flush
       write(i_log,'(a)') data_version
+      call flush
       write(i_log,'(a,a,a)') 'Data generated on a machine with ',endiane
      *ss, ' endianess'
+      call flush
       write(i_log,'(a,a)') 'The endianess of this CPU is ','1234'
+      call flush
       IF((swap))write(i_log,'(a)') '=> will need to do byte swaping'
+      call flush
       write(i_log,'(a,2f9.2,2f9.5,//)') 'Ranges: ',espin_min,espin_max,
      *b2spin_min,b2spin_max
+      call flush
       n_ener = 15
       n_q = 15
       n_point = 31
@@ -11113,6 +11244,7 @@ Cf2py intent(inout) cost, sint
       DO 5421 medium=1,NMED
         write(i_log,'(a,i4,a,$)') '  medium ',medium,' .................
      *.... '
+        call flush
         DO 5431 iq=0,1
           DO 5441 i=0, 31
             eta_array(iq,i)=0
@@ -11475,6 +11607,7 @@ Cf2py intent(inout) cost, sint
         blcce1(neke,medium) = blcce1(neke-1,medium)
         blcce0(neke,medium) = blcce0(neke-1,medium)
         write(i_log,'(a)') ' done'
+        call flush
 5421  CONTINUE
 5422  CONTINUE
       close(spin_unit)
@@ -11579,6 +11712,7 @@ Cf2py intent(inout) cost, sint
       DO 5741 medium=1,NMED
         write(i_log,'(a,i4,a,$)') '  Initializing spin data for medium '
      *  ,medium, ' ..................... '
+        call flush
         DO 5751 iq=0,1
           DO 5761 i=0, 31
             eta_array(iq,i)=0
@@ -11896,12 +12030,15 @@ Cf2py intent(inout) cost, sint
         blcce1(neke,medium) = blcce1(neke-1,medium)
         blcce0(neke,medium) = blcce0(neke-1,medium)
         write(i_log,'(a)') ' done'
+        call flush
 5741  CONTINUE
 5742  CONTINUE
       return
 5800  write(i_log,*) ' ******************** Error in init_spin *********
      *********** '
+      call flush
       write(i_log,'(a,a)') '  could not open file ',spin_file
+      call flush
       write(i_log,'(/a)') '***************** Error: '
       write(i_log,*) ' terminating execution '
       write(i_log,'(/a)') '***************** Quiting now.'
@@ -12033,6 +12170,9 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         END IF
         xphi = rng_array(rng_seed)
         rng_seed = rng_seed + 1
+        write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
+        call flush
+        call flush
         xphi = 2*xphi - 1
         xphi2 = xphi*xphi
         IF (( rng_seed .GT. 24 )) THEN
@@ -12058,6 +12198,9 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         END IF
         xphi = rng_array(rng_seed)
         rng_seed = rng_seed + 1
+        write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
+        call flush
+        call flush
         xphi = 2*xphi - 1
         xphi2 = xphi*xphi
         IF (( rng_seed .GT. 24 )) THEN
@@ -12234,6 +12377,9 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         END IF
         xphi = rng_array(rng_seed)
         rng_seed = rng_seed + 1
+        write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
+        call flush
+        call flush
         xphi = 2*xphi - 1
         xphi2 = xphi*xphi
         IF (( rng_seed .GT. 24 )) THEN
@@ -13304,8 +13450,11 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
           n_warning = n_warning + 1
           write(i_log,*) ' Subroutine PHOTO called with E = ',peig, ' wh
      *ich is below the current min. energy of 1 keV! '
+          call flush
           write(i_log,*) ' Converting now this photon to an electron, '
+          call flush
           write(i_log,*) ' but you should check your code! '
+          call flush
         END IF
         iq(np) = -1
         e(np) = peig + prm
@@ -13330,6 +13479,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
             iZ = int( zelem(medium,k) + 0.5 )
             IF (( iZ .LT. 1 .OR. iZ .GT. 100 )) THEN
               write(i_log,*) ' Error in PHOTO: '
+              call flush
               write(i_log,'(/a)') '***************** Error: '
               write(i_log,*) '   Atomic number of element ',k, ' in medi
      *um ',medium,' is not between 1 and ',100
@@ -13631,8 +13781,11 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
           write(i_log,*) ' Subroutine egs_shellwise_photo called with E
      *= ', peig,' which is below the current min. energy of ', 0.001,' k
      *eV! '
+          call flush
           write(i_log,*) ' Converting now this photon to an electron, '
+          call flush
           write(i_log,*) ' but you should check your code! '
+          call flush
         END IF
         iq(np) = -1
         e(np) = peig + prm
@@ -13661,6 +13814,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
             zpos = pe_zpos(iZ)
             IF (( iZ .LT. 1 .OR. iZ .GT. 100 )) THEN
               write(i_log,*) ' Error in egs_shellwise_photo: '
+              call flush
               write(i_log,'(/a)') '***************** Error: '
               write(i_log,*) '   Atomic number of element ',k, ' in medi
      *um ',medium,' is not between 1 and ',100
@@ -13909,6 +14063,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
      *, ' N1',' N2',' N3',' N4',' N5',' N6',' N7'/
       write(i_log,'(/a$)') ' Reading renormalized photoelectric cross se
      *ctions ......'
+      call flush
       data_dir = hen_house(:lnblnk1(hen_house)) // 'data' // '/'
       pe_sw_file = data_dir(:lnblnk1(data_dir)) // 'photo_shellwise.data
      *'
@@ -14099,6 +14254,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
 6451  CONTINUE
 6452  CONTINUE
       write(i_log,'(a/)') ' done'
+      call flush
       IF((is_open))close(pe_sw_unit)
       return
       end
@@ -14255,6 +14411,9 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
                 END IF
                 xphi = rng_array(rng_seed)
                 rng_seed = rng_seed + 1
+                write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
+                call flush
+                call flush
                 xphi = 2*xphi - 1
                 xphi2 = xphi*xphi
                 IF (( rng_seed .GT. 24 )) THEN
@@ -14388,6 +14547,9 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
               END IF
               xphi = rng_array(rng_seed)
               rng_seed = rng_seed + 1
+              write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
+              call flush
+              call flush
               xphi = 2*xphi - 1
               xphi2 = xphi*xphi
               IF (( rng_seed .GT. 24 )) THEN
@@ -14526,6 +14688,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
 6592  CONTINUE
       min_be = 0.001
       write(i_log,'(/a)') ' Reading EADL relaxation data ......'
+      call flush
       data_dir = hen_house(:lnblnk1(hen_house)) // 'data' // '/'
       relax_file = data_dir(:lnblnk1(data_dir)) // 'relax.data'
       relax_unit = egs_get_unit(0)
@@ -14578,6 +14741,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
           END IF
           write(i_log,'(a,i3,a,i2,a)') '  Z = ',iZ,' has ',nshell,' shel
      *ls'
+          call flush
           DO 6671 ish=shell_ntot+1,shell_ntot+nshell
             curr_rec = curr_rec+1
             read(relax_unit,rec=curr_rec) shell_type(ish)
@@ -14654,6 +14818,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
 6631  CONTINUE
 6632  CONTINUE
       write(i_log,'(a/)') ' ...... Done.'
+      call flush
       IF((is_open))close(relax_unit)
       return
       stop
@@ -14849,6 +15014,9 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
               END IF
               xphi = rng_array(rng_seed)
               rng_seed = rng_seed + 1
+              write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
+              call flush
+              call flush
               xphi = 2*xphi - 1
               xphi2 = xphi*xphi
               IF (( rng_seed .GT. 24 )) THEN
@@ -14985,6 +15153,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       END IF
       open(triplet_unit,file=triplet_data_file,err=6760)
       write(i_log,'(a,$)') ' init_triplet: reading triplet data ... '
+      call flush
       read(triplet_unit,*) ntrip
       IF (( ntrip .GT. 55 )) THEN
         write(i_log,'(/a)') '***************** Error: '
@@ -15000,6 +15169,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
 6781  CONTINUE
 6782  CONTINUE
       write(i_log,*) 'OK'
+      call flush
       ifirst = 0
       DO 6791 i=1,ntrip
         IF((ifirst .EQ. 0 .AND. energies(i) .GT. 4.01*rm))ifirst = i
@@ -15014,6 +15184,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       DO 6801 imed=1,nmed
         write(i_log,'(a,i3,a,$)') '   Preparing triplet fraction data fo
      *r medium ',imed,' ... '
+        call flush
         iz1 = zelem(imed,1) + 0.1
         DO 6811 i=1,ntrip
           sigp(i) = pz(imed,1)*sig_pair(iz1,i)
@@ -15045,6 +15216,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
 6841    CONTINUE
 6842    CONTINUE
         write(i_log,*) 'OK'
+        call flush
 6801  CONTINUE
 6802  CONTINUE
       close(triplet_unit)
@@ -15096,6 +15268,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       IF((got_data))return
       write(i_log,'(a/,a)') 'Output from subroutine EDGSET:', '=========
      *====================='
+      call flush
       do_relax = .false.
       DO 6851 j=1,3
         IF (( iedgfl(j) .GT. 0 .AND. iedgfl(j) .LE. 100 )) THEN
@@ -15113,11 +15286,14 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
           call exit(1)
         END IF
         write(i_log,'(a/)') ' Atomic relaxations not requested! '
+        call flush
         return
       END IF
       write(i_log,'(a/)') ' Atomic relaxations requested! '
+      call flush
       write(i_log,'(a$)') ' Reading simplified photo-absorption data ...
      *..'
+      call flush
       got_data = .true.
       rewind(i_photo_relax)
       DO 6861 i=1,100
@@ -15139,7 +15315,9 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
 6881  CONTINUE
 6882  CONTINUE
       write(i_log,'(a)') ' Done'
+      call flush
       write(i_log,'(/a$)') ' Reading simplified relaxation data .....'
+      call flush
       read(i_photo_relax,*)
       DO 6891 i=1,100
         read(i_photo_relax,*) j,(relaxation_prob(k,i),k=1,19)
@@ -15166,8 +15344,10 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
 6931  CONTINUE
 6932  CONTINUE
       write(i_log,'(a)') ' Done'
+      call flush
       write(i_log,'(/a$)') ' Reading parametrized XCOM photo cross secti
      *on data .....'
+      call flush
       rewind(i_photo_cs)
       DO 6941 i=1,100
         read(i_photo_cs,*) j,edge_number(i)
@@ -15179,6 +15359,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
 6941  CONTINUE
 6942  CONTINUE
       write(i_log,'(a)') ' Done'
+      call flush
       IF ((eadl_relax)) THEN
         call egs_init_relax
       END IF
@@ -15555,6 +15736,9 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         END IF
         xphi = rng_array(rng_seed)
         rng_seed = rng_seed + 1
+        write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
+        call flush
+        call flush
         xphi = 2*xphi - 1
         xphi2 = xphi*xphi
         IF (( rng_seed .GT. 24 )) THEN
@@ -15571,11 +15755,15 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       rhophi2 = 1/rhophi2
       cosphi = (xphi2 - yphi2)*rhophi2
       sinphi = 2*xphi*yphi*rhophi2
+      write(i_log,'(a,2e16.8)') 'UPHI: cosphi, sinphi=',cosphi,sinphi
+      call flush
 7040  GO TO (7070,7080,7090),LVL
       GO TO 7050
 7070  A=U(NP)
       B=V(NP)
       C=W(NP)
+      write(i_log,'(a,3e16.8)') 'a b c=', A, B, C
+      call flush
       GO TO 7100
 7090  A=U(NP-1)
       B=V(NP-1)
@@ -15589,10 +15777,14 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       LATCH(NP)=LATCH(NP-1)
 7100  SINPS2=A*A+B*B
       IF ((SINPS2.LT.1.0E-20)) THEN
+        write(i_log,'(a)') 'uphi small angle'
+        call flush
         U(NP)=SINTHE*COSPHI
         V(NP)=SINTHE*SINPHI
         W(NP)=C*COSTHE
       ELSE
+        write(i_log,'(a)') 'uphi large angle'
+        call flush
         SINPSI=SQRT(SINPS2)
         US=SINTHE*COSPHI
         VS=SINTHE*SINPHI
@@ -15809,22 +16001,28 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         xi_array(k)=Log(1-x_array(k)+1e-6)
         IF (( fool_intel_optimizer )) THEN
           write(i_log,*) 'xi_array(k): ',xi_array(k)
+          call flush
         END IF
 7161  CONTINUE
 7162  CONTINUE
       ngauss = 64
       call gauss_legendre(0d0,1d0,x_gauss,w_gauss,ngauss)
       write(i_log,*) ' '
+      call flush
       IF ((ibr_nist .EQ. 1)) THEN
         write(i_log,*) 'Using NIST brems cross sections! '
+        call flush
       ELSE IF((ibr_nist .EQ. 2)) THEN
         write(i_log,*) 'Using NRC brems cross sections! '
+        call flush
       END IF
       write(i_log,*) ' '
+      call flush
       DO 7171 medium=1,nmed
         log_ap(medium) = log(ap(medium))
         write(i_log,*) ' Initializing brems data for medium ',medium,'..
      *.'
+        call flush
         emin = max(ae(medium) - rm, ap(medium))
         DO 7181 i=1,nmix
           IF((energy_array(i) .GE. emin))GO TO7182
@@ -15838,11 +16036,16 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         ilast = i+1
         IF (( ifirst .LT. 1 .OR. ilast .GT. nmix )) THEN
           write(i_log,*) ' init_nist_brems: data available only for '
+          call flush
           write(i_log,*) energy_array(1),' <= E <= ',energy_array(nmix)
+          call flush
           write(i_log,*) ' will use spline interpolations to get cross '
+          call flush
           write(i_log,*) ' sections beyond the available data but this m
      *ay'
+          call flush
           write(i_log,*) ' produce nonsense!'
+          call flush
           IF((ifirst .LT. 1))ifirst=1
           IF((ilast .GT. nmix))ilast = nmix
         END IF
@@ -15962,6 +16165,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         pbr20(neke,medium) = pbr20(neke-1,medium)
         write(i_log,*) ' Max. new cross sections per energy loss: ',sige
      *  e,sigep
+        call flush
         esig_e(medium) = sigee
         psig_e(medium) = sigep
         IF((sigee .GT. esige_max))esige_max = sigee
@@ -16012,6 +16216,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
             IF (( fool_intel_optimizer )) THEN
               write(i_log,*) 'nb_xdata(ndat,i,medium): ', nb_xdata(ndat,
      *        i,medium)
+              call flush
             END IF
 7301      CONTINUE
 7302      CONTINUE
@@ -16057,7 +16262,9 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
 7171  CONTINUE
 7172  CONTINUE
       write(i_log,*) ' '
+      call flush
       write(i_log,*) ' '
+      call flush
       return
 2870  write(i_log,'(/a)') '***************** Error: '
       write(i_log,*) 'failed to open EGSnrc data file ',tmp1_string(:lnb
@@ -16187,13 +16394,18 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       END IF
       write(i_log,'(//a,a)') 'Reading NRC pair data base from ',nrcp_fil
      *e(:lnblnk1(nrcp_file))
+      call flush
       write(i_log,'(a,a,a)') 'Data generated on a machine with ',endiane
      *ss,' endianess'
+      call flush
       write(i_log,'(a,a)') 'The endianess of this CPU is ','1234'
+      call flush
       IF (( swap )) THEN
         write(i_log,'(a)') '=> will need to do byte swaping'
+        call flush
       END IF
       write(i_log,'(a,2f9.3)') 'Energy range of the data: ',emin,emax
+      call flush
       IF (( nb .NE. 65 )) THEN
         write(i_log,'(/a)') '***************** Error: '
         write(i_log,*) 'Inconsistent x-grid size'
@@ -16224,6 +16436,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       DO 7401 medium=1,NMED
         write(i_log,'(a,i4,a,$)') '  medium ',medium,' .................
      *.... '
+        call flush
         DO 7411 ie=1,84
           DO 7421 ix=1,65
             nrcp_fdata(ix,ie,medium) = 0
@@ -16258,9 +16471,11 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
 7461    CONTINUE
 7462    CONTINUE
         write(i_log,'(a)') ' done'
+        call flush
 7401  CONTINUE
 7402  CONTINUE
       write(i_log,*) ' '
+      call flush
       close(nrcp_unit)
       return
 7360  CONTINUE
@@ -16485,8 +16700,10 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
 7511  CONTINUE
 7512  CONTINUE
       write(i_log,*) ' '
+      call flush
       write(i_log,*) 'eii_init: minimum threshold energy found: ',e_eii_
      *min
+      call flush
       DO 7521 imed=1,nmed
         DO 7531 iele=1,nne(imed)
           iZ = int(zelem(imed,iele)+0.5)
@@ -16510,16 +16727,22 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       IF (( nsh .EQ. 0 )) THEN
         write(i_log,*) '*** EII requested but no shells with binding ene
      *rgies '
+        call flush
         write(i_log,*) '    above the specified threshold found'
+        call flush
         write(i_log,*) '    => turning off EII'
+        call flush
         eii_flag = 0
       END IF
       IF (( nsh .GT. 40 )) THEN
         write(i_log,*) '*** Number of shells with binding energies great
      *er than '
+        call flush
         write(i_log,*) '    the specified thresholds is ',nsh
+        call flush
         write(i_log,*) '    This is more than the allocated arrays can h
      *old'
+        call flush
         write(i_log,'(/a)') '***************** Error: '
         write(i_log,*) '    Increase the macro $MAX_EII_SHELLS and retry
      *'
@@ -16527,6 +16750,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         call exit(1)
       END IF
       write(i_log,*) 'eii_init: number of shells to simulate EII: ',nsh
+      call flush
       nsh_tot = nsh
       tmp_array(1) = 0
       DO 7561 j=2,100
@@ -16567,7 +16791,9 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
      *600)
       write(i_log,'(//a,a)') 'Opened EII data file ',eii_file(:lnblnk1(e
      *ii_file))
+      call flush
       write(i_log,'(a,$)') ' eii_init: reading EII data ... '
+      call flush
       read(eii_unit,*,err=7610,end=7610) nskip
       DO 7621 j=1,nskip
         read(eii_unit,*,err=7610,end=7610)
@@ -16594,10 +16820,14 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         IF (( nsh .LT. eii_nshells(iZ) )) THEN
           write(i_log,*) 'EII data file has data for ',nsh,' shells for
      *element '
+          call flush
           write(i_log,*) iZ,' but according'
+          call flush
           write(i_log,*) 'to binding energies and thresholds ',eii_nshel
      *    ls(iZ)
+          call flush
           write(i_log,*) 'shells are required'
+          call flush
           write(i_log,'(/a)') '***************** Error: '
           write(i_log,*) 'This is a fatal error.'
           write(i_log,'(/a)') '***************** Quiting now.'
@@ -16664,7 +16894,9 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         close(eii_out)
       END IF
       write(i_log,*) ' OK '
+      call flush
       write(i_log,*) ' '
+      call flush
       DO 7661 imed=1,nmed
         Ec = ae(imed) - rm
         Ecc = min(Ec,ap(imed))
@@ -16785,6 +17017,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
           ebr10(meke(imed),imed) = ebr10(meke(imed)-1,imed)
           write(i_log,*) 'eii_init: for medium ',imed,' adjusted sige =
      *', sigma_max,' monotone = ',is_monotone
+          call flush
           sig_ismonotone(0,imed) = is_monotone
           esig_e(imed) = sigma_max
         END IF
@@ -17032,9 +17265,11 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         IF((.NOT.has_r))return
       END IF
       write(i_log,*) ' '
+      call flush
       DO 7731 medium=ifirst,ilast
         write(i_log,'(a,a,a,i3,a,f9.5)') 'Scaling ',strings(which+1),' x
      *-section data for medium', medium,' with ',fac
+        call flush
         DO 7741 j=1,mge(medium)
           gle = (j - ge0(medium))/ge1(medium)
           gmfp = gmfp0(j,medium) + gmfp1(j,medium)*gle
@@ -17181,13 +17416,17 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
      *144, triplet_file*142,tmp_string*144,compton_file*144,  photonuc_f
      *ile*144
       write(i_log,'(/a$)') '(Re)-initializing photon cross sections'
+      call flush
       write(i_log,'(a,a/)') ' with files from the series: ', prefix(:lnb
      *lnk1(prefix))
+      call flush
       write(i_log,'(a,a)') ' Compton cross sections: ',comp_prefix(:lnbl
      *nk1(comp_prefix))
+      call flush
       IF ((iphotonuc .EQ. 1)) THEN
         write(i_log,'(a,a)') ' Photonuclear cross sections: ', photonuc_
      *  prefix(:lnblnk1(photonuc_prefix))
+        call flush
         input_photonuc_data = .false.
         IF ((lnblnk1(photonuc_prefix) .GT. 0 .AND. photonuc_prefix(1:7)
      *  .NE. 'default')) THEN
@@ -17216,6 +17455,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       END IF
       write(i_log,'(a,a)') ' Using Compton cross sections from ', compto
      *n_file(:lnblnk1(compton_file))
+      call flush
       IF ((iphotonuc .EQ. 1)) THEN
         IF (( input_photonuc_data )) THEN
           photonuc_file = data_dir(:lnblnk1(data_dir)) // photonuc_prefi
@@ -17226,6 +17466,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         END IF
         write(i_log,'(a,a)') ' Using photonuclear cross sections from ',
      *   photonuc_file(:lnblnk1(photonuc_file))
+        call flush
       END IF
       photo_unit = 83
       photo_unit = egs_get_unit(photo_unit)
@@ -17350,6 +17591,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         ge1(medium) = ge1(medium)/log(up(medium)/ap(medium))
         ge0(medium) = 1 - ge1(medium)*log(ap(medium))
         write(i_log,'(a,i3,a,$)') ' Working on medium ',medium,' ... '
+        call flush
         IF (( out .EQ. 1 )) THEN
           write(ounit,'(/,2x,a,i3,a,24a1/)') 'Medium ',medium,': ', (med
      *    ia(k,medium),k=1,24)
@@ -17494,6 +17736,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         photonuc1(nge,medium) = photonuc1(nge-1,medium)
         photonuc0(nge,medium) = photonuc - photonuc1(nge,medium)*gle
         write(i_log,'(a)') 'OK'
+        call flush
 7781  CONTINUE
 7782  CONTINUE
       close(photo_unit)
@@ -17623,6 +17866,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         call exit(1)
 7900    write(i_log,'(/2a)') 'Opened custom ff file ',ff_file(:lnblnk1(f
      *  f_file))
+        call flush
         j = 0
 7911    CONTINUE
           j = j + 1
@@ -17688,6 +17932,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         IF((xgrid(1,medium) .LT. 1e-6))xgrid(1,medium) = 1e-4
         write(i_log,'(/a,i4,a)') '  -> ', nff, ' atomic ff values comput
      *ed!'
+        call flush
       END IF
       close(ff_unit)
       emin = exp((1 - ge0(medium))/ge1(medium))
@@ -17818,6 +18063,7 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       IF((xgrid(1,medium) .LT. 1e-6))xgrid(1,medium) = 1e-4
       write(i_log,'(/a,i4,a)') '  -> ', nff, ' atomic ff values computed
      *!'
+      call flush
       close(ff_unit)
       emin = exp((1 - ge0(medium))/ge1(medium))
       emax = exp((mge(medium) - ge0(medium))/ge1(medium))
