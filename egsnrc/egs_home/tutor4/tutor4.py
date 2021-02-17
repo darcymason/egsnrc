@@ -490,10 +490,10 @@ if __name__ == "__main__":
     HERE  = Path(__file__).resolve().parent
     TEST_DATA = HERE.parent.parent / "tests" / "data"
 
-    iwatch = 2
-    high_prec = True
+    iwatch = 1
+    high_prec = False
     if len(sys.argv) == 1:
-        main(iwatch=iwatch, high_prec=high_prec)
+        main(iwatch=iwatch, high_prec=high_prec, ncase=1000)
     else:
         # Else, generating validation data for tests
         # generate for both e- and e+

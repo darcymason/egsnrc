@@ -314,7 +314,7 @@ def electr(hownear, howfar, ausgab) -> int:
         if edep < peie:
             if iausfl[ANNIHRAUSB-1+1] != 0:  # ** 0-based
                 ausgab(ANNIHRAUSB)
-            annih_at_rest()
+            egsfortran.annih_at_rest()
             if particle_selection_annihrest:
                 particle_selection_annihrest()
 

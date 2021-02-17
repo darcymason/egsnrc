@@ -6899,9 +6899,6 @@ C*****************************************************************************
           END IF
           xphi = rng_array(rng_seed)
           rng_seed = rng_seed + 1
-          write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
-          call flush
-          call flush
           xphi = 2*xphi - 1
           xphi2 = xphi*xphi
           IF (( rng_seed .GT. 24 )) THEN
@@ -7029,9 +7026,6 @@ C*****************************************************************************
           END IF
           xphi = rng_array(rng_seed)
           rng_seed = rng_seed + 1
-          write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
-          call flush
-          call flush
           xphi = 2*xphi - 1
           xphi2 = xphi*xphi
           IF (( rng_seed .GT. 24 )) THEN
@@ -7472,9 +7466,6 @@ C*****************************************************************************
             END IF
             xphi = rng_array(rng_seed)
             rng_seed = rng_seed + 1
-            write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
-            call flush
-            call flush
             xphi = 2*xphi - 1
             xphi2 = xphi*xphi
             IF (( rng_seed .GT. 24 )) THEN
@@ -8524,8 +8515,6 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 dedx0=pdedx1(Lelke,MEDIUM)*elke+pdedx0(Lelke,MEDIUM)
               END IF
               dedx = rhof*dedx0
-              write(i_log,'(a,e16.8)') 'dedx=', dedx
-              call flush
               tmxs=tmxs1(Lelke,MEDIUM)*elke+tmxs0(Lelke,MEDIUM)
               tmxs = tmxs/rhof
               ekei = E_array(lelke,medium)
@@ -8548,8 +8537,6 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
               aux = aux*(1+2*aux)*(fedep/(2-fedep))**2/6
               range = fedep*eke*dedxmid*(1+aux)
               range = (range + range_ep(qel,lelke,medium))/rhof
-              write(i_log,'(a,e16.8)') 'range=', range
-              call flush
               random_tustep = .false.
               IF ((random_tustep)) THEN
                 IF (( rng_seed .GT. 24 )) THEN
@@ -8975,8 +8962,6 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 spin_index = .true.
                 call mscat(lambda,chia2,xi,elkems,beta2,qel,medium, spin
      *          _effects,findindex,spin_index, costhe,sinthe)
-                write(i_log,'(a)') 'Multiple scattering called'
-                call flush
               ELSE
                 IF ((dosingle)) THEN
                   ekems = Max(ekef,ecut(irl)-rm)
@@ -8997,8 +8982,6 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                   END IF
                   call sscat(chia2,elkems,beta2,qel,medium, spin_effects
      *            ,costhe,sinthe)
-                  write(i_log,'(a)') 'Single scattering called'
-                  call flush
                 ELSE
                   theta = 0
                   sinthe = 0
@@ -9024,16 +9007,10 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 u_tmp = u(np)
                 v_tmp = v(np)
                 w_tmp = w(np)
-                write(i_log,'(a,3e16.8)') 'domultiple dosingle before uv
-     *w_tmp=', u_tmp, v_tmp, w_tmp
-                call flush
                 call uphi(2,1)
                 u_final = u(np)
                 v_final = v(np)
                 w_final = w(np)
-                write(i_log,'(a,3e16.8)') 'Called UPHI: final uvw=', u_f
-     *          inal, v_final, w_final
-                call flush
                 u(np) = u_tmp
                 v(np) = v_tmp
                 w(np) = w_tmp
@@ -9041,9 +9018,6 @@ Cxf2py de=compute_eloss_g(lelec, medium, step, eke, elke, lelke, range)
                 u_final = u(np)
                 v_final = v(np)
                 w_final = w(np)
-                write(i_log,'(a,3e16.8)') 'NOT domultiple/dosingle uvw f
-     *', u_final, v_final, w_final
-                call flush
               END IF
             END IF
             IARG=0
@@ -12170,9 +12144,6 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         END IF
         xphi = rng_array(rng_seed)
         rng_seed = rng_seed + 1
-        write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
-        call flush
-        call flush
         xphi = 2*xphi - 1
         xphi2 = xphi*xphi
         IF (( rng_seed .GT. 24 )) THEN
@@ -12198,9 +12169,6 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         END IF
         xphi = rng_array(rng_seed)
         rng_seed = rng_seed + 1
-        write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
-        call flush
-        call flush
         xphi = 2*xphi - 1
         xphi2 = xphi*xphi
         IF (( rng_seed .GT. 24 )) THEN
@@ -12377,9 +12345,6 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         END IF
         xphi = rng_array(rng_seed)
         rng_seed = rng_seed + 1
-        write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
-        call flush
-        call flush
         xphi = 2*xphi - 1
         xphi2 = xphi*xphi
         IF (( rng_seed .GT. 24 )) THEN
@@ -14411,9 +14376,6 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
                 END IF
                 xphi = rng_array(rng_seed)
                 rng_seed = rng_seed + 1
-                write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
-                call flush
-                call flush
                 xphi = 2*xphi - 1
                 xphi2 = xphi*xphi
                 IF (( rng_seed .GT. 24 )) THEN
@@ -14547,9 +14509,6 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
               END IF
               xphi = rng_array(rng_seed)
               rng_seed = rng_seed + 1
-              write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
-              call flush
-              call flush
               xphi = 2*xphi - 1
               xphi2 = xphi*xphi
               IF (( rng_seed .GT. 24 )) THEN
@@ -15014,9 +14973,6 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
               END IF
               xphi = rng_array(rng_seed)
               rng_seed = rng_seed + 1
-              write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
-              call flush
-              call flush
               xphi = 2*xphi - 1
               xphi2 = xphi*xphi
               IF (( rng_seed .GT. 24 )) THEN
@@ -15736,9 +15692,6 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
         END IF
         xphi = rng_array(rng_seed)
         rng_seed = rng_seed + 1
-        write(i_log,'(a,e16.8)') 'azim random xphi=',xphi
-        call flush
-        call flush
         xphi = 2*xphi - 1
         xphi2 = xphi*xphi
         IF (( rng_seed .GT. 24 )) THEN
@@ -15755,15 +15708,11 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       rhophi2 = 1/rhophi2
       cosphi = (xphi2 - yphi2)*rhophi2
       sinphi = 2*xphi*yphi*rhophi2
-      write(i_log,'(a,2e16.8)') 'UPHI: cosphi, sinphi=',cosphi,sinphi
-      call flush
 7040  GO TO (7070,7080,7090),LVL
       GO TO 7050
 7070  A=U(NP)
       B=V(NP)
       C=W(NP)
-      write(i_log,'(a,3e16.8)') 'a b c=', A, B, C
-      call flush
       GO TO 7100
 7090  A=U(NP-1)
       B=V(NP-1)
@@ -15777,14 +15726,10 @@ Cf2py intent(inout) us, vs, ws, xf, yf, zf, ustep
       LATCH(NP)=LATCH(NP-1)
 7100  SINPS2=A*A+B*B
       IF ((SINPS2.LT.1.0E-20)) THEN
-        write(i_log,'(a)') 'uphi small angle'
-        call flush
         U(NP)=SINTHE*COSPHI
         V(NP)=SINTHE*SINPHI
         W(NP)=C*COSTHE
       ELSE
-        write(i_log,'(a)') 'uphi large angle'
-        call flush
         SINPSI=SQRT(SINPS2)
         US=SINTHE*COSPHI
         VS=SINTHE*SINPHI

@@ -789,8 +789,8 @@ def tstep_ustep(
                     #         UVWAUSA, msg="domultiple/dosingle after", uf=u_final, vf=v_final, wf=w_final
                     #     )
 
-                    logger.debug(f'Called UPHI: final uvw={u_final},{v_final},{w_final}')
-                    logger.debug(f'Called UPHI: uvw={u[np_m1]},{v[np_m1]},{w[np_m1]}')
+                    # logger.debug(f'Called UPHI: final uvw={u_final},{v_final},{w_final}')
+                    # logger.debug(f'Called UPHI: uvw={u[np_m1]},{v[np_m1]},{w[np_m1]}')
                     u[np_m1], v[np_m1], w[np_m1] = uvw_tmp
                 else:
                     epcont.u_final = u[np_m1]; epcont.v_final = v[np_m1]; epcont.w_final = w[np_m1]
