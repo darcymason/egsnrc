@@ -46,6 +46,8 @@
 "  egs_init at the beginning and call egs_finish at the end.                  "
 "                                                                             "
 "#############################################################################"
+
+
 REPLACE {$MXMED} WITH {1}   "only 1 medium in the problem(default 10)"
 REPLACE {$MXREG} WITH {3}   "only 3 geometric regions (default 2000)"
 REPLACE {$MXSTACK} WITH {15}"less than 15 particles on stack at once"
@@ -53,13 +55,22 @@ REPLACE {$MXSTACK} WITH {15}"less than 15 particles on stack at once"
 "Define a common to pass information to the geometry routine HOWFAR"
 REPLACE {;COMIN/GEOM/;} WITH {;COMMON/GEOM/ZBOUND;$REAL ZBOUND;}
 
+
 REPLACE {$CALL-HOWNEAR(#);} WITH {
+   ;CALL HOWNEAR({P1},X(NP),Y(NP),Z(NP),IRL);}
+
+REPLACE {$pyegs_debug(#,#);} WITH { write(i_log,{P1}) {P2}; call flush;};
+
+REPLACE {$XXXCALL-HOWNEAR(#);} WITH {
    ";$egs_info('(a,3e16.8)','HOWNEAR inputs=',x(np),y(np),z(np));"
    ;{P1} = hownear(x(np),y(np),z(np),irl);
    "$egs_info('(a,e16.8)', 'Return value=', {P1});"
    }
 
-REPLACE {$XXXCOMPUTE-DRANGE(#,#,#,#,#,#);} WITH
+
+
+
+REPLACE {$XXYCOMPUTE-DRANGE(#,#,#,#,#,#);} WITH
 "        ============================="
 {
   $egs_info('(a,I4, I4, 2F14.9,I4,2F14.9)','in ',
@@ -87,7 +98,7 @@ REPLACE {$XXXCOMPUTE-DRANGE(#,#,#,#,#,#);} WITH
 }
 ;
 
-REPLACE {$XXXCALCULATE-TSTEP-FROM-DEMFP;} WITH  "Remove XXX for generating test data"
+REPLACE {$XXYCALCULATE-TSTEP-FROM-DEMFP;} WITH  "Remove XXX for gen test data"
 "        ============================"
 {;
   IF( compute_tstep ) [
@@ -126,7 +137,7 @@ REPLACE {$XXXCALCULATE-TSTEP-FROM-DEMFP;} WITH  "Remove XXX for generating test 
 }
 ;
 
-REPLACE {$CALCULATE-TSTEP-FROM-DEMFP;} WITH
+REPLACE {$XXXCALCULATE-TSTEP-FROM-DEMFP;} WITH
 "        ============================"
 {;
   total_de = demfp/sig;
@@ -141,14 +152,14 @@ REPLACE {$CALCULATE-TSTEP-FROM-DEMFP;} WITH
 ;
 
 
-REPLACE {$COMPUTE-ELOSS(#,#,#,#,#);} WITH
+REPLACE {$XXXCOMPUTE-ELOSS(#,#,#,#,#);} WITH
 "        =========================="
 {;
   {P5} = compute_eloss(lelec, medium, {P1},{P2},{P3},{P4});
 }
 ;
 
-REPLACE {$XXXCOMPUTE-ELOSS(#,#,#,#,#);} WITH
+REPLACE {$XXYCOMPUTE-ELOSS(#,#,#,#,#);} WITH
 "        =========================="
 {;
   $egs_info('(a, 2I4, 3E25.16e2,I4)','in ',
@@ -175,7 +186,7 @@ REPLACE {$XXXCOMPUTE-ELOSS(#,#,#,#,#);} WITH
 ;
 
 
-REPLACE {$XXXCOMPUTE-ELOSS-G(#,#,#,#,#);} WITH
+REPLACE {$XXYCOMPUTE-ELOSS-G(#,#,#,#,#);} WITH
 "        ============================"
 {
   "lelec, medium, step, eke, elke, lelke, range_"
@@ -221,7 +232,7 @@ REPLACE {$XXXCOMPUTE-ELOSS-G(#,#,#,#,#);} WITH
 ;
 
 
-REPLACE {$COMPUTE-ELOSS-G(#,#,#,#,#);} WITH
+REPLACE {$XXXCOMPUTE-ELOSS-G(#,#,#,#,#);} WITH
 "        ============================"
 {
   {P5} = compute_eloss_g(lelec,medium, {P1},{P2},{P3},{P4},range);
@@ -229,7 +240,7 @@ REPLACE {$COMPUTE-ELOSS-G(#,#,#,#,#);} WITH
 ;
 
 
-REPLACE {$CALCULATE-XI(#);} WITH
+REPLACE {$XXYCALCULATE-XI(#);} WITH
 {
   $egs_info('(a, 2I4, 6E25.16e2)','in ',
   lelec, medium, ekems, rmt2, rmsq, xccl, blccl, {P1});
@@ -261,6 +272,8 @@ REPLACE {$CALCULATE-XI(#);} WITH
 }
 
 
+
+
 "Define a COMMON for scoring in AUSGAB"
 REPLACE {;COMIN/SCORE/;} WITH {
    ;COMMON/SCORE/ESCORE(3),IWATCH; $INTEGER IWATCH; REAL*8 ESCORE;
@@ -282,9 +295,89 @@ SUBROUTINE dummyxxx;
 
 end;
 
+
+SUBROUTINE flush_output;
+  call flush();
+END;
+
+
+"*********************************************************************"
+"                                                                     "
+SUBROUTINE xxxHOWFAR;
+"                                                                     "
+"    HOWFAR for use with tutor4 (same as with TUTOR1)                 "
+"*********************************************************************"
+$IMPLICIT-NONE;
+$REAL TVAL;
+COMIN/STACK,EPCONT,GEOM/;
+"       COMMON STACK contains X,Y,Z,U,V,W,IR and NP(stack pointer)"
+"       COMMON EPCONT contains IRNEW, USTEP and IDISC"
+"       COMMON GEOM contains ZBOUND"
+
+IF(IR(NP) = 3) [
+   IDISC=1;RETURN;"terminate this history: it is past the plate"
+]
+ELSEIF(IR(NP).EQ.2)["We are in the Ta plate - check the geometry"
+
+   IF(W(NP) > 0.0)[
+      "going forward - consider first since  most frequent"
+      TVAL= (ZBOUND - Z(NP))/W(NP);"TVAL is dist to boundary"
+      "                          in this direction"
+      IF(TVAL > USTEP)[RETURN;"can take currently requested step"]
+      ELSE[USTEP = TVAL; IRNEW=3; RETURN;]
+   ]"END OF W(NP)>0 CASE"
+
+   ELSEIF(W(NP) < 0.0)["going back towards origin"
+      TVAL = -Z(NP)/W(NP); "distance to plane at origin"
+      IF(TVAL > USTEP)[RETURN;"can take currently requested step"]
+      ELSE[USTEP = TVAL; IRNEW = 1; RETURN;]
+   ]"END W(NP)<0 CASE"
+
+   ELSEIF(W(NP) = 0.0)["cannot hit boundary"RETURN;]
+]"end of region 2 case"
+
+ELSEIF(IR(NP) = 1)["in region with source"
+   IF(W(NP) >  0.0)["this must be a source particle on z=0 boundary"
+      USTEP=0.0;IRNEW=2;RETURN;
+   ]
+   ELSE[ "it must be a reflected particle-discard it"
+      IDISC=1;RETURN;
+   ]
+]"end region 1 case"
+
+END;"end of subroutine howfar"
+
+SUBROUTINE HOWNEAR(tperp, x, y, z, irl);
+"                                                                     "
+" The following is a general specification of HOWNEAR                 "
+"   Given a particle at (x,y,z) in region irl, HOWNEAR answers the    "
+"   question, What is the distance to the closest boundary?           "
+"                                                                     "
+"  In general this can be a complex subroutine.                       "
+"  Note that this subroutine must be linked to $CALL-HOWNEAR(#)       "
+"                                                                     "
+"*********************************************************************"
+$IMPLICIT-NONE;
+$REAL tperp, x,y,z;
+$INTEGER irl;
+
+;COMIN/GEOM/; "       COMMON GEOM contains ZBOUND"
+
+IF(irl = 3) [OUTPUT;('Called HOWNEAR in region 3'); RETURN;]
+
+ELSEIF(irl = 2)["We are in the Ta plate - check the geometry"
+    tperp = min(z, (ZBOUND - z) );
+]
+
+ELSEIF(irl = 1)[OUTPUT;('Called HOWNEAR in region 1'); RETURN;]
+
+END;"end of subroutine hownear"
+
+
+
 "********************************************************************"
 "                                                                    "
-SUBROUTINE AUSGAB(IARG);
+SUBROUTINE XXXAUSGAB(IARG);
 "                                                                    "
 " In this AUSGAB routine for tutor4, we score the energy deposited   "
 "  in the various regions. This amounts to the total energy          "

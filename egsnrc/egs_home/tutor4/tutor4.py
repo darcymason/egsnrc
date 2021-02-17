@@ -2,12 +2,21 @@
 from pathlib import Path
 import os
 from egsnrc import egsfortran
+from egsnrc import watch
+from egsnrc.electr import electr
 import logging
 import numpy  # cannot use `np` as is an EGS var!!
 from math import log  # for calculate_tstep_...
 
 # Get all common blocks
 from egsnrc.commons import *
+
+from egsnrc.calcfuncs import (
+    calc_tstep_from_demfp,
+    compute_eloss, compute_eloss_g
+)
+
+
 
 
 init_done = False  # run init() only once, else crashes (unknown reason)
@@ -30,6 +39,35 @@ HEN_HOUSE = Path(os.environ["HEN_HOUSE"])
 EGS_HOME = Path(os.environ['EGS_HOME'])
 
 
+def ausgab(iarg, **kwargs):
+    """
+    In this AUSGAB routine for tutor4, we score the energy deposited
+    in the various regions. This amounts to the total energy
+    reflected, deposited and transmitted by the slab.
+
+    For IARG=0, an electron or photon step is about to occur and we
+    score the energy deposited, if any. Note that only electrons
+    deposit energy during a step, and due to our geometry, electrons
+    only take steps in region 2 - however there is no need to check.
+    For IARG=1,2 and 4, particles have been discarded for falling
+    below various energy cutoffs and all their energy is deposited
+    locally (in fact EDEP = particles kinetic energy).
+    For IARG=3, we are discarding the particle since it is in
+    region 1 or 3, so score its energy.
+    """
+    # logger.info("In Python ausgab")
+    if iwatch > 0:
+        # egsfortran.flush_output()
+        watch.watch(iarg, iwatch, **kwargs)  # handles printouts of data
+                             # iwatch is passed in score
+
+    if iarg <= 4:
+        irl = ir[np-1] # pick up current region number  ** 0-based
+        escore[irl-1] += edep
+
+
+egsfortran.ausgab = ausgab
+
 # ******************************************************************
 #                                National Research Council of Canada
 def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
@@ -37,9 +75,9 @@ def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
     # ******************************************************************
 
     # stack
-    global e, x, y, z, u, v, w, dnear, wt, iq, ir, latch, latchi, np, npold
+    # global e, x, y, z, u, v, w, dnear, wt, iq, ir, latch, latchi, np, npold
     # uphiot
-    global theta, sinthe, costhe, sinphi, cosphi, pi, twopi, pi5d2
+    # global theta, sinthe, costhe, sinphi, cosphi, pi, twopi, pi5d2
 
     # msg = ", ".join(f"{x}={locals()[x]}" for x in "iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti".split(","))
     # logger.info(f"Called shower with {msg}")
@@ -84,7 +122,7 @@ def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
     u[0]=ui; v[0]=vi; w[0]=wi
 
 
-    # TRANSFER PROPERTIES TO [0] FROM I
+    # TRANSFER PROPERTIES TO [0] FROM I  # ** 0-based, is [1] in Mortran
     x[0]=xi; y[0]=yi; z[0]=zi
     ir[0]=iri
     wt[0]=wti
@@ -125,10 +163,11 @@ def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
             # even if not in the mortran call arguments,
             # unless intent(callback,hide) is used in f2py comments,
             # in which case, need to set `egsfortran.hownear = hownear`
-            egsfortran.electr(ircode, howfar, hownear,
-                calc_tstep_from_demfp,
-                compute_eloss, compute_eloss_g
-            )
+            # egsfortran.electr(ircode, howfar) #, hownear,
+            #     calc_tstep_from_demfp,
+            #     compute_eloss, compute_eloss_g
+            # )
+            ircode = electr(hownear, howfar, ausgab)
         # egsfortran.flushoutput()
     # ---------------- end of subroutine shower
 
@@ -178,7 +217,7 @@ def print_info():
 
 # --------------------------------------------------------------------
 # egsfortran.egs_init()
-def init():
+def init(iwatch=1, high_prec=False):
     global init_done
 
     if init_done:
@@ -188,6 +227,8 @@ def init():
 
     egsfortran.egs_set_defaults()
     egsfortran.egs_check_arguments()
+    egsfortran.flush_output()
+
     # print("COMMON IO")
     # print("---------")
     # for name in dir(egsfortran.egs_io):
@@ -235,15 +276,15 @@ def init():
     egsfortran.hatch()  #     pick up cross section data for TA
     #                data file must be assigned to unit 12
 
-    # egsfortran.flushoutput()  # gfortran only - else doesn't print all lines
+    egsfortran.flush_output()  # gfortran only - else doesn't print all lines
 
     logger.info(
-        ' knock-on electrons can be created and any electron followed down to\n'
-        "                                        "
+        '\n knock-on electrons can be created and any electron followed down to\n'
+        "                                       "
         f'{ae[0]-prm:8.3} MeV kinetic energy\n'
         ' brem photons can be created and any photon followed down to      \n'
-        "                                        "
-        f'{ap[0]:8.3} MeV '
+        "                                       "
+        f'{ap[0]:8.3f} MeV'
         # Compton events can create electrons and photons below these cutoffs
     )# OUTPUT AE(1)-PRM, AP(1);
 
@@ -257,17 +298,21 @@ def init():
     # ---------------------------------------------------------------------
     # Print header for output - which is all AUSGAB does in this case
     # print("                 Kinetic Energy(MeV)  charge  angle w.r.t.Z axis-degrees")
-    for i in range(3):
-        escore[i] = 0.0  # zero scoring array before starting
+    # for i in range(len(iausfl)):
+    #     iausfl[i] = 1
+    escore[:] = 0.0  # zero scoring array before starting
 
-    score.iwatch=1  # This determines the type and amount of output
+    watch.high_prec = high_prec  # if True, show more decimal places
+    score.iwatch = iwatch  # This determines the type and amount of output
                     # =1 => print info about each interaction
                     # =2 => print info about same + each electron step
                     # =4 => create a file to be displayed by EGS_Windows
                     #  Note that these files can be huge
                     # IWATCH 1 and 2 outputs to unit 6, 4 to unit 13
 
-    egsfortran.watch(-99,iwatch);   # Initializes calls to AUSGAB for WATCH
+    egsfortran.flush_output()
+    watch.watch(-99, iwatch)   # Initializes calls to AUSGAB for WATCH
+    egsfortran.flush_output()  # if change above to egsfortran.watch(...)
     # ---------------------------------------------------------------------
     # STEP 6   DETERMINATION-OF-INICIDENT-PARTICLE-PARAMETERS
     # ---------------------------------------------------------------------
@@ -277,9 +322,10 @@ def init():
     init_done = True
 
 
-def main(iqin=-1):  # iqin here only to make generating validation data faster
+def main(iqin=-1, iwatch=1, high_prec=False, ncase=10):
+    # iqin here only to make generating validation data faster
     # The "in"s are local variables
-    init()
+    init(iwatch, high_prec)
     # et_control.exact_bca = False
     # et_control.spin_effects = True
     # iqin=-1  #                incident charge - electrons
@@ -294,26 +340,46 @@ def main(iqin=-1):  # iqin here only to make generating validation data faster
     # ---------------------------------------------------------------------
     # initiate the shower 10 times
 
-    ncase=10  # INITIATE THE SHOWER NCASE TIMES
+    # INITIATE THE SHOWER NCASE TIMES
+    #  ncase=10 # now from function call parameter
 
     for i in range(ncase):
         if (iwatch != 0) and (iwatch != 4):
-            print(
+            logger.debug(
             "\n INITIAL SHOWER VALUES             :"
             f"    1{ei:9.3f}{iqin:4}{irin:4}"
             f"{xin:8.3f}{yin:8.3f}{zin:8.3f}"
             f"{uin:7.3f}{vin:7.3f}{win:7.3f}"  # should be 8.3 like x,y,z but get extra spaces
-            f"{latchi:10}{wtin:10.3E}"
+            f"{latchi:10}{wtin:10.3E}",
             )
             shower(iqin,ein,xin,yin,zin,uin,vin,win,irin,wtin)
-            egsfortran.watch(-1,iwatch)  # print a message that this history is over
+            egsfortran.flush_output()
+            watch.watch(-1, iwatch)  # print a message that this history is over
+            egsfortran.flush_output()
 
     # -----------------------------------------------------------------
     # STEP 8   OUTPUT-OF-RESULTS
     # -----------------------------------------------------------------
-    # note output is at the end of each history in subroutine ausgab
 
-    # -----------------------------------------------------------------
+    anorm = 100. / ((ein + float(iqin) * prm) * float(ncase))
+    # normalize to % of total input energy
+    total = sum(escore)
+
+    msgs = (
+        " Fraction of energy reflected from plate=",
+        ' Fraction of energy deposited in plate=',
+        ' Fraction of energy transmitted through plate=',
+    )
+    logger.info("\n")
+    for i in range(3):
+        logger.info(f"{msgs[i]:<49}{escore[i]*anorm:10.3f}%")
+
+    logger.info(" "*49 + "-"*11)
+
+    msg = ' Total fraction of energy accounted for='
+    logger.info(f'{msg:<49}{total*anorm:10.3f}%\n\n\n')
+
+        # -----------------------------------------------------------------
     # STEP 9   finish run
     # -----------------------------------------------------------------
     egsfortran.egs_finish()
@@ -354,8 +420,10 @@ def howfar():
     """
 
     np_m1 = np - 1  # ** 0-based arrays
+
     if ir[np_m1] == 3:  # terminate this history: it is past the plate
         epcont.idisc = 1
+        # logger.info("howfar  irl 3, idisc = 1")
         return
 
     if ir[np_m1] == 2:  # We are in the Ta plate - check the geometry
@@ -373,15 +441,18 @@ def howfar():
                 epcont.ustep = tval
                 epcont.irnew = 1
         # else w[np_m1] == 0.0, cannot hit boundary
+        # logger.info("howfar region 2")
         return
 
     # Not region 3 or 2, must be 1, region with source
     if w[np_m1] >  0.0:  # this must be a source particle on z=0 boundary
         epcont.ustep = 0.0
         epcont.irnew = 2
+        # logger.info("howfar region 1 going to 2")
     else:
         # it must be a reflected particle-discard it
         epcont.idisc = 1
+        # logger.info("howfar reflected region 1, idisc=1")
 
 
 def hownear(x, y, z, irl):
@@ -413,240 +484,16 @@ def hownear(x, y, z, irl):
     raise ValueError(f'Called hownear in region {irl}')
 
 
-def compute_drange(lelec, medium, eke1, eke2, lelke1, elke1, elke2):
-    """Computes path-length traveled going from energy `eke1` to `eke2`
-
-    both energies being in the same interpolation bin,
-    given by `lelke1`. `elke1` and `elke2` are the logarithms of
-    'eke1' and `eke2`. The expression is based on logarithmic interpolation as
-    used in EGSnrc (i.e. dedx = a + b*Log(E) ) and a power series expansion
-    of the ExpIntegralEi function that is the result of the integration.
-
-    Parameters
-    ----------
-    lelec: INTEGER
-        Charge of the particle, either -1 or +1
-
-    medium: INTEGER
-        Current medium
-
-    Returns
-        -------
-    REAL
-        path-length traveled going from energy `eke1` to `eke2`
-
-    """
-    fedep = 1 - eke2/eke1
-
-    # evaluate the logarithm of the midpoint energy
-    elktmp = 0.5*(elke1+elke2+0.25*fedep*fedep*(1+fedep*(1+0.875*fedep)))
-
-    # *** -1 for 0-based in Python
-    lelktmp = lelke1 - 1 # was = lelke1
-    medium -= 1
-
-    if lelec < 0:
-        # $EVALUATE dedxmid USING ededx(elktmp)
-        dedxmid = ededx1[lelktmp,medium]*elktmp+ ededx0[lelktmp,medium]
-        dedxmid = 1/dedxmid
-        aux = ededx1[lelktmp,medium]*dedxmid
-        #  aux = ededx1(lelktmp,medium)/dedxmid"
-    else:
-        # $EVALUATE dedxmid USING pdedx(elktmp)
-        dedxmid = pdedx1[lelktmp,medium]*elktmp+ pdedx0[lelktmp,medium]
-        dedxmid = 1/dedxmid
-        aux = pdedx1[lelktmp,medium]*dedxmid
-        #  aux = pdedx1(lelktmp,medium)/dedxmid
-
-    aux = aux*(1+2*aux)*(fedep/(2-fedep))**2/6
-
-    return fedep*eke1*dedxmid*(1+aux)
-
-
-def calc_tstep_from_demfp(qel,lelec, medium, lelke, demfp, sig, eke, elke, total_de):
-    """Calculate path length to the next discrete interaction
-
-    Once the sub-threshold processes energy loss to the next discrete
-    interaction is determined, the corresponding path-length has to be
-    calculated. This is done by this function. This function
-    assumes the energy at the begining to be `eke`, the logarithm of it
-    `elke`, `lelke` - the corresponding interpolation index and makes
-    use of `compute_drange`.
-    """
-    # in: medium, qel, leklef (for compute-drange)
-    # in/out:  compute_tstep, total_tstep,
-    # global e_array, epcont.eke, epcont.elke, bounds.vacdst, eke0[], eke1[]
-
-    # print("fn:", ",".join(str(x) for x in (qel,lelec, medium, demfp, sig, eke, elke, total_de)) )
-    fedep = total_de
-    ekef  = eke - fedep
-
-    # *** 0-based array
-    medium_m1 = medium - 1
-    if  ekef <= e_array[1-1,medium_m1]:
-        tstep = vacdst
-    else:
-        elkef = log(ekef)
-        # Unhandled macro '$ SET INTERVAL elkef,eke;'->
-        # Below line from tutor4_linux.f
-        lelkef=int(eke1[medium_m1]*elkef+eke0[medium_m1])  # XXX note fortran had implicit real->int conversion
-        if  lelkef == lelke:
-            #  initial and final energy are in the same interpolation bin
-            # --- Inline replace: $ COMPUTE_DRANGE(eke,ekef,lelke,elke,elkef,tstep); -----
-            tstep = compute_drange(lelec, medium, eke,ekef,lelke,elke,elkef)
-        else:
-            #  initial and final energy are in different interpolation bins,
-            #  calc range from ekef to E(lelkef+1) and from E(lelke) to eke
-            #  and add the pre-calculated range from E(lelkef+1) to E(lelke)
-            ekei = e_array[lelke-1,medium_m1]
-            elkei = (lelke - eke0[medium_m1])/eke1[medium_m1]
-            # --- Inline replace: $ COMPUTE_DRANGE(eke,ekei,lelke,elke,elkei,tuss); -----
-            tuss = compute_drange(lelec, medium, eke,ekei,lelke,elke,elkei)
-            ekei = e_array[lelkef+1-1,medium_m1]  # 0-based -1
-            elkei = (lelkef + 1 - eke0[medium_m1])/eke1[medium_m1]
-            # --- Inline replace: $ COMPUTE_DRANGE(ekei,ekef,lelkef,elkei,elkef,tstep); -----
-            tstep = compute_drange(lelec, medium, ekei,ekef,lelkef,elkei,elkef)
-            # Note: range_ep IS 0-based already in first dimn
-            tstep=tstep+tuss+range_ep[qel,lelke-1,medium_m1]-range_ep[qel,lelkef+1-1,medium_m1]
-
-    return tstep
-
-
-def compute_eloss(lelec, medium, step, eke, elke, lelke):
-    """"Compute the energy loss due to sub-threshold processes for a path-length `step`.
-
-    The energy at the beginning of the step is `eke`, `elke`=log(`eke`),
-    `lelke` is the interpolation index.
-    The formulae are based on the logarithmic interpolation for dedx
-    used in EGSnrc.
-
-    Returns
-    -------
-    REAL
-        energy loss
-
-    Note
-    ----
-    Assumes that initial and final energy are in the same interpolation bin.
-
-    """
-    # print("fn: ",lelec, medium, step, eke, elke, lelke)
-
-    # ** 0-based
-    medium_m1 = medium - 1
-    lelke_m1 = lelke - 1
-
-    if lelec < 0:
-        dedxmid = ededx1[lelke_m1, medium_m1]*elke+ ededx0[lelke_m1, medium_m1]  # EVALUATE dedxmid USING ededx(elke)
-        aux = ededx1[lelke_m1, medium_m1]/dedxmid
-    else:
-        dedxmid = pdedx1[lelke_m1, medium_m1]*elke+ pdedx0[lelke_m1, medium_m1]  # EVALUATE dedxmid USING pdedx(elke)
-        aux = pdedx1[lelke_m1, medium_m1]/dedxmid
-
-    # de = dedxmid*tuss #  Energy loss using stopping power at the beginning
-    de = dedxmid*step*rhof # IK: rhof scaling bug, June 9 2006
-                            # rhof scaling must be done here and NOT in
-                            # $ COMPUTE-ELOSS-G
-    fedep = de / eke
-    de = de*(1-0.5*fedep*aux*(1-0.333333*fedep*(aux-1-0.25*fedep*(2-aux*(4-aux)))))
-
-    return de
-
-
-def compute_eloss_g(lelec, medium, step, eke, elke, lelke, range_):
-    """A generalized version of `compute_eloss`"""
-    # ** 0-based arrays in Python
-    medium_m1 = medium - 1
-    lelke_m1 = lelke - 1
-
-    # Note: range_ep IS 0-based already in first dimn
-
-    qel = 0 if lelec==-1 else 1  # recalc here to not bother passing in both
-    tuss = range_ - range_ep[qel,lelke_m1,medium_m1] / rhof
-        #  here tuss is the range between the initial energy and the next lower
-        #  energy on the interpolation grid
-    if tuss >= step:
-        #  Final energy is in the same interpolation bin
-        # --- Inline replace: $ COMPUTE_ELOSS(tustep,eke,elke,lelke,de); -----
-        de = compute_eloss(lelec, medium, step, eke, elke, lelke)
-
-    else:  # Must find first the table index where the step ends using
-           #  pre-calculated ranges
-        lelktmp = lelke
-        tuss = (range_ - step) * rhof
-        #  now tuss is the range of the final energy electron
-        #  scaled to the default mass density from PEGS4
-
-        if tuss <= 0:
-            de = eke - te[medium_m1]*0.99
-            #  i.e., if the step we intend to take is longer than the particle
-            #  range, the particle energy goes down to the threshold
-            # (eke is the initial particle energy)
-            # originally the entire energy was lost, but msdist_xxx is not prepared
-            # to deal with such large eloss fractions => changed July 2005.
-        else:
-            while tuss < range_ep[qel, lelktmp-1, medium_m1]:
-                lelktmp -= 1
-            lelktmp_m1 = lelktmp - 1  # *** 0-based arrays in Python
-            elktmp = (lelktmp + 1 - eke0[medium_m1]) / eke1[medium_m1]
-            eketmp = e_array[lelktmp_m1+1, medium_m1]
-            # tuss = range_ep(qel,lelktmp+1,medium_m1) - tuss
-            # IK: rhof scaling bug, June 9 2006: because of the change in
-            #     compute_eloss above, we must scale tuss by rhof
-            tuss = (range_ep[qel, lelktmp_m1+1, medium_m1] - tuss) / rhof
-            # --- Inline replace: $ COMPUTE_ELOSS(tuss,eketmp,elktmp,lelktmp,de); -----
-            de = compute_eloss(lelec, medium, tuss, eketmp, elktmp, lelktmp)
-            de = de + eke - eketmp
-
-    return de
-
-
-def calculate_xi(lelec, medium, ekems, rmt2, rmsq, xccl, blccl, step):
-    # ** 0-based arrays
-    medium_m1 = medium - 1
-
-    p2 = ekems*(ekems+rmt2)
-    beta2 = p2/(p2 + rmsq)
-    chia2 = xccl/(4*blccl*p2)
-    # Note that our chia2 is Moliere chia2/4
-    # Note also that xcc is now old egs xcc**2
-    xi = 0.5*xccl/p2/beta2*step
-    if spin_effects:
-        elkems = log(ekems)
-        lelkems=int(eke1[medium_m1]*elkems+eke0[medium_m1])  # $ SET INTERVAL elkems,eke
-        lelkems_m1 = lelkems - 1  # ** 0-based
-        if lelec < 0:
-            # EVALUATE etap USING etae_ms(elkems)
-            etap = etae_ms1[lelkems_m1, medium_m1]*elkems+ etae_ms0[lelkems_m1, medium_m1]
-            # EVALUATE xi_corr USING q1ce_ms(elkems)
-            xi_corr = q1ce_ms1[lelkems_m1, medium_m1]*elkems+ q1ce_ms0[lelkems_m1, medium_m1]
-        else:
-            # EVALUATE etap USING etap_ms(elkems)
-            etap = etap_ms1[lelkems_m1, medium_m1]*elkems+ etap_ms0[lelkems_m1, medium_m1]
-            # EVALUATE xi_corr USING q1cp_ms(elkems)
-            xi_corr = q1cp_ms1[lelkems_m1, medium_m1]*elkems+ q1cp_ms0[lelkems_m1, medium_m1]
-
-        chia2 = chia2*etap
-        xi = xi*xi_corr
-        # EVALUATE ms_corr USING blcce(elkems)
-        ms_corr = blcce1[lelkems_m1, medium_m1]*elkems+ blcce0[lelkems_m1, medium_m1]
-        blccl = blccl*ms_corr  # not used after in this fn.  Needs to be returned?
-    else:
-        xi_corr = 1
-        etap = 1
-
-    xi = xi*(log(1+1./chia2)-1/(1+chia2))
-
-    return xi, blccl
-
 
 if __name__ == "__main__":
     import sys
     HERE  = Path(__file__).resolve().parent
     TEST_DATA = HERE.parent.parent / "tests" / "data"
 
+    iwatch = 2
+    high_prec = True
     if len(sys.argv) == 1:
-        main()
+        main(iwatch=iwatch, high_prec=high_prec)
     else:
         # Else, generating validation data for tests
         # generate for both e- and e+
@@ -656,7 +503,7 @@ if __name__ == "__main__":
             print("Only accept 'gen' as optional argument")
         else:
             print("# e-   ----------------------------")
-            main(-1)
+            main(-1, iwatch=iwatch, high_prec=high_prec)
             print("\n\n# e+   ----------------------------")
-            main(+1)
+            main(+1, iwatch=iwatch, high_prec=high_prec)
 

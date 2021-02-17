@@ -205,8 +205,8 @@ PARAMETER $MXSINC=1002;   "ANGLE INTERVALS IN (0,5*PI/2) FOR SINE"
 ;  "---------- BUFFER FLUSH SEMICOLON ----------"
 
 "THE FOLLOWING ARE PARAMETERS FOR AUSGAB CALLS:"
-PARAMETER $MXAUS=35;       "CHANGE IF MORE AUSGAB CALLS ARE ADDED"
-PARAMETER $MXAUSM5=30;     "SET THIS TO $MXAUS VALUE LESS 5"
+PARAMETER $MXAUS=55;       "CHANGE IF MORE AUSGAB CALLS ARE ADDED"
+PARAMETER $MXAUSM5=50;     "SET THIS TO $MXAUS VALUE LESS 5"
 
 "FIRST FIVE AUSGAB CALLS BELOW TURNED ON IN BLOCK DATA (DEFAULT)"
 PARAMETER $TRANAUSB=0;    "BEFORE TRANSPORT"
@@ -2486,9 +2486,13 @@ REPLACE {$SELECT-AZIMUTHAL-ANGLE(#,#);} WITH
 LOOP
 [
     $RANDOMSET xphi;
+    "$pyegs_debug('(a,e16.8)','azim random xphi=',xphi);"
+    "call flush;"
     xphi  = 2*xphi - 1;
     xphi2 = xphi*xphi;
     $RANDOMSET yphi;
+    "$pyegs_debug('(a,e16.8)','azim random yphi=',yphi);"
+    "call flush(i_log);"
     yphi2  = yphi*yphi;
     rhophi2 = xphi2 + yphi2;
 ]WHILE(rhophi2 > 1);
@@ -3570,7 +3574,7 @@ REPLACE {$egs_warning(#,#);} WITH {
   $warning({P1},{P2});
 };
 REPLACE {$warning(#,#);} WITH { write(i_log,{P1}) {P2}; };
-REPLACE {$egs_info(#,#);} WITH { write(i_log,{P1}) {P2}; };
+REPLACE {$egs_info(#,#);} WITH { write(i_log,{P1}) {P2}; call flush;};
 REPLACE {$declare_write_buffer;} WITH {;};
 
 

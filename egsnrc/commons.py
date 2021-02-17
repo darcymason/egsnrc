@@ -25,7 +25,7 @@ np = stack.np
 npold = stack.npold
 
 #  COMMON block media --------
-media_ = egsfortran.media
+media_ = egsfortran.media  # underscore because `media`* is also an attribute
 rlc = media_.rlc
 rldu = media_.rldu
 rho = media_.rho
@@ -38,7 +38,7 @@ mcmfp = media_.mcmfp
 mrange = media_.mrange
 iraylm = media_.iraylm
 iphotonucm = media_.iphotonucm
-media = media_.media
+media = media_.media  # * see note for `media_`
 iphotonuc = media_.iphotonuc
 nmed = media_.nmed
 eii_xfile = media_.eii_xfile
@@ -181,3 +181,21 @@ bca_algorithm = et_control.bca_algorithm
 exact_bca = et_control.exact_bca
 spin_effects = et_control.spin_effects
 smaxir = et_control.smaxir
+
+
+#  COMMON block egs_vr --------
+egs_vr = egsfortran.egs_vr
+prob_rr = egs_vr.prob_rr
+nbr_split = egs_vr.nbr_split
+i_play_rr = egs_vr.i_play_rr
+i_survived_rr = egs_vr.i_survived_rr
+n_rr_warning = egs_vr.n_rr_warning
+e_max_rr = egs_vr.e_max_rr
+i_do_rr = egs_vr.i_do_rr
+
+
+#  COMMON block ch_steps --------
+ch_steps = egsfortran.ch_steps
+count_pii_steps = ch_steps.count_pii_steps
+count_all_steps = ch_steps.count_all_steps
+is_ch_step = ch_steps.is_ch_step

@@ -4,6 +4,12 @@ from pathlib import Path
 pytest.importorskip("egsnrc.egsfortran")  # from numpy.f2py, used while in transition
 from egsnrc import egsfortran
 from egsnrc.egs_home.tutor4 import tutor4
+from egsnrc import calcfuncs
+
+import logging
+logger = logging.getLogger("egsnrc")
+
+
 
 HERE  = Path(__file__).resolve().parent
 TEST_DATA = HERE / "data"
@@ -40,41 +46,62 @@ def known_in_out(filepath, in_types, out_types):
         else:
             yield inputs, outputs
 
-tutor4.init()
+
+def gen_data_lines(lines):
+    """Yield 'data' lines from an egsnrc run"""
+    for line in lines:
+        if line.find(":") == 35:
+            yield line
+
+
+def line_data(line):
+    """Given a `watch` line, return a list of the numbers"""
+    data = line.split(":", maxsplit=1)[1]
+    data = [float(d.strip()) for d in data.split()]
+    return data
+
+
+def lines_approx_equal(line1, line2, epsilon=0.000002):
+    line1 = line1.strip()
+    line2 = line2.strip()
+    if line1 == line2:
+        return True
+    else:
+        # Allow for small differences in float numbers:
+        line1_data = line_data(line1)
+        line2_data = line_data(line2)
+        if len(line1_data) != len(line2_data):
+            return False  # however, should never be the case
+        return all(
+            abs(d1 - d2) < epsilon
+            for d1, d2 in zip(line1_data, line2_data)
+        )
+
 
 class TestTutor4:
-    def test_output(self, capfd):
-        """Test that (partially) Python tutor4 produces known output"""
+    def test_output(self, caplog):
+        """Test that Python tutor4 produces known output"""
 
+        logger.propagate = True  # needed for pytest to capture
+        caplog.set_level(logging.DEBUG)
         # Ensure proper random initial state
         # (other tests use ranlux)
+
         egsfortran.init_ranlux(1,0)
-        tutor4.main()
-        captured = capfd.readouterr()
+        tutor4.main(iwatch=2, high_prec=True)
 
-        # Test last line of history 10
-        lines = captured.out.splitlines()
-        rev_lines_iter = reversed(lines)
-        while not next(rev_lines_iter).startswith(" END OF HISTORY      10"):
-            pass
-        last_line_hist10 = next(rev_lines_iter)
+        std_filename = TEST_DATA / "orig-tutor4-watch2-extra-prec.txt"
+        expected = open(std_filename, "r").readlines()
+        got = [rec.message.strip('\n') for rec in caplog.records]
 
-        # Could test more, but testing last couple of lines of last history
-        # should pretty much guarantee had exact 'trajectory' through
-        # random numbers and all physics as original EGSnrc mortran/fortran
-        # (within the significant figures shown)
-        assert (
-            "Discard -user request             :    1   "
-            "16.496  -1   3  -0.004  -0.001   0.100 -0.280"
-            "  0.259  0.924         0 1.000E+00"
-        ) in last_line_hist10
-        # Ignore test outputs we might be generating
-        while (secondlast := next(rev_lines_iter)).startswith(("in", "out", "fn:")):
-            pass
-        expected_2nd_last_hist10 = (
-            "17.150  -1   2   0.006  -0.005   0.063 -0.240 -0.009  0.971"
-        )
-        assert expected_2nd_last_hist10 in secondlast
+        # Test each line of "data" - ignore headings, etc
+        iter_got = gen_data_lines(got)
+        icount = 0
+        for line_expect in gen_data_lines(expected):
+            line_got = next(iter_got)
+            assert lines_approx_equal(line_expect, line_got)
+            icount += 1
+        assert icount > 200  # check that test is actually testing lots of lines
 
     def test_compute_drange(self):
         "Calculate correct values for $COMPUTE-DRANGE in Python"
@@ -85,7 +112,7 @@ class TestTutor4:
             (int, int, float, float, int, float, float), float
         ):
             # compute_drange(lelec, medium, eke1, eke2, lelke1, elke1, elke2)
-            got = tutor4.compute_drange(*inputs)
+            got = calcfuncs.compute_drange(*inputs)
             assert got == pytest.approx(expected,abs=0.0000001)
 
     def test_calc_tstep(self):
@@ -99,7 +126,7 @@ class TestTutor4:
             #
             # print("in ", ",".join(str(x) for x in inputs))
 
-            got = tutor4.calc_tstep_from_demfp(*inputs)
+            got = calcfuncs.calc_tstep_from_demfp(*inputs)
             # print(got, expected)
             assert got == pytest.approx(expected,abs=0.0000001)
 
@@ -113,7 +140,7 @@ class TestTutor4:
         ):
             #
             # print("in ", ",".join(str(x) for x in inputs))
-            got = tutor4.compute_eloss(*inputs)
+            got = calcfuncs.compute_eloss(*inputs)
 
             assert got == pytest.approx(expected,abs=0.0000001)
 
@@ -128,7 +155,7 @@ class TestTutor4:
         ):
             #
             # print("in ", ",".join(str(x) for x in inputs))
-            got = tutor4.compute_eloss_g(*inputs)
+            got = calcfuncs.compute_eloss_g(*inputs)
 
             assert got == pytest.approx(expected,abs=0.0000001)
 
@@ -150,7 +177,7 @@ class TestTutor4:
             #
             # print("in ", ",".join(str(x) for x in inputs))
 
-            got = tutor4.calculate_xi(*inputs)
+            got = calcfuncs.calculate_xi(*inputs)
             for a_got, a_expected in zip(got, expected):
                 assert a_got == pytest.approx(a_expected,abs=0.0000001)
 
