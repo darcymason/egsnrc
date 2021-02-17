@@ -491,7 +491,7 @@ def tstep_ustep(
                 if callhowfar or wt[np_m1] <= 0:
                     # if iausfl[HOWFARB]:
                     #     ausgab(HOWFARB, idisc=idisc, ustep=ustep, irnew=irnew)
-                    egsfortran.xxxhowfar()
+                    howfar()
                     # if iausfl[HOWFARA]:
                     #     ausgab(HOWFARA, idisc=idisc, ustep=ustep, irnew=irnew)
 
@@ -778,7 +778,7 @@ def tstep_ustep(
                     #         f"domultiple/dosingle before uvw_tmp={uvw_tmp}"
                     #     )
 
-                    egsfortran.uphi(2,1) # Apply the deflection, save call to uphi if
+                    uphi(2,1) # Apply the deflection, save call to uphi if
                                     # no deflection in a single scattering mode
                     np_m1 = np - 1
                     epcont.u_final = u[np_m1]
