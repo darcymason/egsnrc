@@ -4,6 +4,8 @@ from egsnrc.commons import rng_seed, rng_array
 import logging
 logger = logging.getLogger("egsnrc")
 
+# from random import random  # Python random
+# randomset = random
 
 def randomset():
     global rng_seed

@@ -17,8 +17,6 @@ from egsnrc.calcfuncs import (
 )
 
 
-
-
 init_done = False  # run init() only once, else crashes (unknown reason)
 
 
@@ -352,10 +350,11 @@ def main(iqin=-1, iwatch=1, high_prec=False, ncase=10):
             f"{uin:7.3f}{vin:7.3f}{win:7.3f}"  # should be 8.3 like x,y,z but get extra spaces
             f"{latchi:10}{wtin:10.3E}",
             )
-            shower(iqin,ein,xin,yin,zin,uin,vin,win,irin,wtin)
-            egsfortran.flush_output()
-            watch.watch(-1, iwatch)  # print a message that this history is over
-            egsfortran.flush_output()
+        shower(iqin,ein,xin,yin,zin,uin,vin,win,irin,wtin)
+
+        # egsfortran.flush_output()
+        # watch.watch(-1, iwatch)  # print a message that this history is over
+        # egsfortran.flush_output()
 
     # -----------------------------------------------------------------
     # STEP 8   OUTPUT-OF-RESULTS
@@ -487,13 +486,29 @@ def hownear(x, y, z, irl):
 
 if __name__ == "__main__":
     import sys
+    import cProfile as profile
+    import pstats
     HERE  = Path(__file__).resolve().parent
     TEST_DATA = HERE.parent.parent / "tests" / "data"
 
-    iwatch = 1
+    iwatch = 0
     high_prec = False
+    filename = HERE / "profile.stats"
     if len(sys.argv) == 1:
-        main(iwatch=iwatch, high_prec=high_prec, ncase=1000)
+        # profile.run(
+        #     "main(iwatch=iwatch, high_prec=high_prec, ncase=2000)",
+        #     str(filename)
+        # )
+        # stats = pstats.Stats('profile.stats')
+        main(iwatch=iwatch, high_prec=high_prec, ncase=2000)
+
+        # Clean up filenames for the report
+        # stats.strip_dirs()
+
+        # Sort the statistics by the cumulative time spent
+        # in the function
+        # stats.sort_stats('cumulative')
+        # stats.print_stats(20)
     else:
         # Else, generating validation data for tests
         # generate for both e- and e+
