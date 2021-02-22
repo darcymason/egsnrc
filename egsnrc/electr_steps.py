@@ -2,6 +2,7 @@ from egsnrc.randoms import randomset
 from egsnrc.params import *
 from egsnrc.commons import *
 from egsnrc.constants import *
+from egsnrc.util import fort_hex  # for detailed debug tracing
 
 from egsnrc.calcfuncs import (
     calc_tstep_from_demfp, calculate_xi, compute_drange,
@@ -279,7 +280,7 @@ def tstep_ustep(
                         # particle cannot escape local region
                         # set idisc 1 for electrons, 99 for positrons
                         epcont.idisc = 50 + 49*iq[np_m1]
-                        return USER_ELECTRON_DISCARD, lelke
+                        return USER_ELECTRON_DISCARD, lelke, eie, peie
                 # End inline replace: $ RANGE_DISCARD; ----
 
                 if user_range_discard:
@@ -452,7 +453,7 @@ def tstep_ustep(
                             )
                             dosingle = False
                             stack.np -= 1
-                            return LAMBDA_WARNING, ircode
+                            return LAMBDA_WARNING, ircode, eie, peie
                         epcont.ustep = tustep
                     else:
                         # Boundary crossing a la EGS4/PRESTA-I but using
@@ -506,7 +507,7 @@ def tstep_ustep(
             # Now see if user requested discard
             if idisc > 0: # idisc is returned by howfar:
                 # User requested immediate discard
-                return USER_ELECTRON_DISCARD, None
+                return USER_ELECTRON_DISCARD, None, eie, peie
 
             # --- Inline replace: $ CHECK_NEGATIVE_USTEP; -----
             if check_negative_ustep:
@@ -585,9 +586,9 @@ def tstep_ustep(
                     if call_tranausa:
                         ausgab(TRANAUSA)
                 if eie <= ecut[irl_m1]:
-                    return ECUT_DISCARD, None
+                    return ECUT_DISCARD, None, eie, peie
                 if ustep != 0 and idisc < 0:
-                    return USER_ELECTRON_DISCARD, None
+                    return USER_ELECTRON_DISCARD, None, eie, peie
 
                 next_tstep = True
                 break  # out of ustep (next :TSTEP:)
@@ -842,7 +843,7 @@ def tstep_ustep(
             #     but the old region => confusion in the geometry routine
             #     is very likely.      Jan 27 2004
             if irnew == irl and eie <= ecut[irl_m1]:
-                return ECUT_DISCARD, None
+                return ECUT_DISCARD, None, eie, peie
 
             useful.medold = medium
             if medium != 0:
@@ -869,12 +870,12 @@ def tstep_ustep(
                 ausgab(TRANAUSA)
 
             if eie <= ecut[irl_m1]:
-                return ECUT_DISCARD, None
+                return ECUT_DISCARD, None, eie, peie
 
             # Now check for deferred discard request.  May have been set
             # by either howfar, or one of the transport ausgab calls
             if idisc < 0:
-                return USER_ELECTRON_DISCARD, None
+                return USER_ELECTRON_DISCARD, None, eie, peie
 
             if medium != medold:
                 # logger.info('medium != medold, next tstep')
@@ -935,5 +936,5 @@ def tstep_ustep(
         # logger.info(f'random rfict={rfict:0.8e}')
 
         if rfict <= sigratio:
-            return None, lelke   # end tstep loop, else continue looping
+            return None, lelke, eie, peie   # end tstep loop, else continue looping
 

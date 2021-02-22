@@ -4,6 +4,7 @@ import os
 from egsnrc import egsfortran
 from egsnrc import watch
 from egsnrc.electr import electr
+from egsnrc.util import for_E18, fort_hex  # for debugging vs mortran
 import logging
 import numpy  # cannot use `np` as is an EGS var!!
 from math import log  # for calculate_tstep_...
@@ -61,6 +62,8 @@ def ausgab(iarg, **kwargs):
 
     if iarg <= 4:
         irl = ir[np-1] # pick up current region number  ** 0-based
+        msg = " AUSGAB irl,edep"
+        logger.debug(f"{msg:<35}:{irl:3}{fort_hex(edep)}")
         escore[irl-1] += edep
 
 
@@ -289,7 +292,13 @@ def init(iwatch=1, high_prec=False):
     # ---------------------------------------------------------------------
     # STEP 4  INITIALIZATION-FOR-HOWFAR and HOWNEAR
     # ---------------------------------------------------------------------
-    geom.zbound=0.1  #      plate is 1 mm thick
+    # Standard tutor4.mortran has zbound=0.1 (without D0, so single precision)
+    # Here mimic that exact single precision number to get identical results
+    # Even before end of history one, a min(tustep, tperp (from hownear)) is
+    # different between Python and Fortran without this.
+    point1_single_prec = float.fromhex('0x1.99999a0000000p-4')
+    # OR, change tutor4.mortran to 0.1D0 and then compare with 0.1 below
+    geom.zbound=0.1  # point1_single_prec  #      plate is 1 mm thick
 
     # ---------------------------------------------------------------------
     # STEP 5  INITIALIZATION-FOR-AUSGAB
@@ -327,7 +336,7 @@ def main(iqin=-1, iwatch=1, high_prec=False, ncase=10):
     # et_control.exact_bca = False
     # et_control.spin_effects = True
     # iqin=-1  #                incident charge - electrons
-    ein=20 + prm
+    ein=20.0 + prm
     ei=20.0  #    20 MeV kinetic energy"
     xin = yin = zin = 0.0  #      incident at origin
     uin = vin = 0.0; win=1.0  #  moving along Z axis
@@ -353,15 +362,15 @@ def main(iqin=-1, iwatch=1, high_prec=False, ncase=10):
         shower(iqin,ein,xin,yin,zin,uin,vin,win,irin,wtin)
 
         # egsfortran.flush_output()
-        # watch.watch(-1, iwatch)  # print a message that this history is over
+        watch.watch(-1, iwatch)  # print a message that this history is over
         # egsfortran.flush_output()
 
     # -----------------------------------------------------------------
     # STEP 8   OUTPUT-OF-RESULTS
     # -----------------------------------------------------------------
 
-    anorm = 100. / ((ein + float(iqin) * prm) * float(ncase))
     # normalize to % of total input energy
+    anorm = 100. / ((ein + iqin*prm) * ncase)
     total = sum(escore)
 
     msgs = (
@@ -371,12 +380,12 @@ def main(iqin=-1, iwatch=1, high_prec=False, ncase=10):
     )
     logger.info("\n")
     for i in range(3):
-        logger.info(f"{msgs[i]:<49}{escore[i]*anorm:10.3f}%")
+        logger.info(f"{msgs[i]:<49}{escore[i]*anorm:15.8f}%")
 
     logger.info(" "*49 + "-"*11)
 
     msg = ' Total fraction of energy accounted for='
-    logger.info(f'{msg:<49}{total*anorm:10.3f}%\n\n\n')
+    logger.info(f'{msg:<49}{total*anorm:15.8f}%\n\n\n')
 
         # -----------------------------------------------------------------
     # STEP 9   finish run
@@ -491,7 +500,6 @@ if __name__ == "__main__":
     HERE  = Path(__file__).resolve().parent
     TEST_DATA = HERE.parent.parent / "tests" / "data"
 
-    iwatch = 0
     high_prec = False
     filename = HERE / "profile.stats"
     if len(sys.argv) == 1:
@@ -509,16 +517,16 @@ if __name__ == "__main__":
         # in the function
         # stats.sort_stats('cumulative')
         # stats.print_stats(20)
-    else:
+    elif sys.argv[1] == "gen":
         # Else, generating validation data for tests
         # generate for both e- and e+
         # filename = sys.argv[1]
         # for now, user still has to redirect to ../../tests/data/(filename)
-        if sys.argv[1] != "gen":
-            print("Only accept 'gen' as optional argument")
-        else:
-            print("# e-   ----------------------------")
-            main(-1, iwatch=iwatch, high_prec=high_prec)
-            print("\n\n# e+   ----------------------------")
-            main(+1, iwatch=iwatch, high_prec=high_prec)
-
+        print("# e-   ----------------------------")
+        main(-1, iwatch=iwatch, high_prec=high_prec)
+        print("\n\n# e+   ----------------------------")
+        main(+1, iwatch=iwatch, high_prec=high_prec)
+    elif sys.argv[1] == "e+":
+        main(iqin=+1, iwatch=1, high_prec=True, ncase=10)
+    else:
+        print(f"Unknown argument {sys.argv[1]}")

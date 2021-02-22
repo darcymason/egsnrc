@@ -1,5 +1,7 @@
 import numpy
 
+MXSTACK = 40  # must be same as when f2py egsfortan created
+
 EPSEMFP: numpy.float64 = 1.E-8
 RANDOMIZE_TUSTEP: bool = False
 PRESTA_II: numpy.int32 = 0

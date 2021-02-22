@@ -1,0 +1,1910 @@
+ 3FF3C083126E978D 40363851EB851EB8 8010000000000002
+
+---After setting pegs_file and user_code --
+egsfortran values
+-----------------
+egs_home:  b'/home/darcy/git/egsnrc/egsnrc/egs_home/                                                                                         '
+user_code:  b'tutor4                                                          '
+pegs_file:  b'tutor_data                                                                                                                                                                                                                                                      '
+
+Environment
+-----------
+HEN_HOUSE=/home/darcy/git/EGSnrc/HEN_HOUSE
+EGS_HOME=/home/darcy/git/egsnrc/egsnrc/egs_home
+EGS_CONFIG=/home/darcy/git/EGSnrc/HEN_HOUSE/specs/linux.conf
+================================================================================
+EGSnrc version 4 for x86_64-unknown-linux-gnu          Mon Feb 22 11:36:24 2021
+================================================================================
+configuration............................................linux
+user code................................................tutor4
+pegs file................................................tutor_data on HEN_HOUSE
+using host...............................................DESKTOP-DNF8ELT
+output file(s)...........................................
+================================================================================
+  Start tutor1
+
+ CALL HATCH to get cross-section data
+
+ ===> Photonuclear flag:   0
+ RAYLEIGH OPTION REQUESTED FOR MEDIUM NUMBER  1
+
+ Rayleigh data available for medium  1 in PEGS4 data set.
+
+(Re)-initializing photon cross sections with files from the series: xcom
+
+ Compton cross sections: default
+ Using Compton cross sections from /home/darcy/git/EGSnrc/HEN_HOUSE/data/compton_sigma.data
+ Working on medium   1 ... 
+  ->  100 atomic ff values computed!
+      preparing data for Rayleigh sampling ... done
+
+OK
+
+Reading screened Rutherford MS data ...............  done 
+
+
+Reading spin data base from /home/darcy/git/EGSnrc/HEN_HOUSE/data/spinms.data
+EGSnrc spin data, version 2.0   
+Data generated on a machine with 1234 endianess
+The endianess of this CPU is 1234
+Ranges:      1.00   100.00  0.30054  1.00000
+
+
+  medium    1 .....................  done
+  
+  Medium            1  sige =    1.7946410123827996        1.7870816572288755       monotone =  T T
+  
+  Initializing tmxs for estepe =   0.25000000000000000       and ximax =   0.50000000000000000     
+  
+
+Bound Compton scattering requested, reading data ......  Done
+
+ Initializing Bound Compton scattering ......
+ Medium   1 has  21 shells: 
+   1  861   1  0.02740 0.141E+01    67.416
+   2  862   2  0.02740 0.503E+01    11.681
+   3  863   3  0.02740 0.247E+01    11.136
+   4  864   4  0.05479 0.271E+01     9.881
+   5  865   5  0.02740 0.111E+02     2.708
+   6  866   6  0.02740 0.652E+01     2.469
+   7  867   7  0.05479 0.696E+01     2.194
+   8  868   8  0.05479 0.452E+01     1.793
+   9  869   9  0.08219 0.462E+01     1.735
+  10  870  10  0.02740 0.234E+02     0.563
+  11  871  11  0.02740 0.148E+02     0.462
+  12  872  12  0.05479 0.158E+02     0.402
+  13  873  13  0.05479 0.121E+02     0.239
+  14  874  14  0.08219 0.124E+02     0.227
+  15  875  15  0.02740 0.607E+02     0.068
+  16  876  16  0.02740 0.414E+02     0.042
+  17  877  17  0.05479 0.444E+02     0.034
+  18  878  18  0.08219 0.117E+02     0.025
+  19  879  19  0.10959 0.118E+02     0.023
+  20  880  20  0.05479 0.944E+02     0.008
+  21  881  21  0.01370 0.221E+03     0.008
+ ...... Done.
+
+Output from subroutine EDGSET:
+==============================
+ Atomic relaxations requested! 
+
+ Reading simplified photo-absorption data ..... Done
+
+ Reading simplified relaxation data ..... Done
+
+ Reading parametrized XCOM photo cross section data ..... Done
+
+ Reading EADL relaxation data ......
+  Z =  73 has 22 shells
+ ...... Done.
+
+ EGSnrc SUCCESSFULLY 'HATCHED' FOR ONE MEDIUM.
+
+ knock-on electrons can be created and any electron followed down to
+                                          0.189 MeV kinetic energy
+ brem photons can be created and any photon followed down to      
+                                          0.010 MeV
+
+ INITIAL SHOWER VALUES             :    1   20.000   1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+in compute-eloss-g: 3EEC1777E8A6321D 4034000000000000 4007F7427B73E391  33
+in compute-eloss: 3EEC1777E8A6321D 4034000000000000 4007F7427B73E391  33
+out compute-eloss: 3F2D9304ED5F6A58
+out compute-eloss-g: 3F2D9304ED5F6A58
+ AUSGAB irl,edep                   :  2 3F2D9304ED5F6A58
+in compute-eloss-g: 3EE2EA9F99CD8CE9 4033FFF1367D8950 4007F73C913D8452  33
+in compute-eloss: 3EE2EA9F99CD8CE9 4033FFF1367D8950 4007F73C913D8452  33
+out compute-eloss: 3F23EA348ABF75AE
+out compute-eloss-g: 3F23EA348ABF75AE
+ AUSGAB irl,edep                   :  2 3F23EA348ABF75AE
+in compute-eloss-g: 3EC5AF40674661D9 4033FFE7416343F0 4007F738959578DA  33
+in compute-eloss: 3EC5AF40674661D9 4033FFE7416343F0 4007F738959578DA  33
+out compute-eloss: 3F06D43B5F99DC4D
+out compute-eloss-g: 3F06D43B5F99DC4D
+ AUSGAB irl,edep                   :  2 3F06D43B5F99DC4D
+in compute-eloss-g: 3EA99F63DAE674DD 4033FFE466DBD7FD 4007F737715DCF49  33
+in compute-eloss: 3EA99F63DAE674DD 4033FFE466DBD7FD 4007F737715DCF49  33
+out compute-eloss: 3EEAF993B0796FD9
+out compute-eloss-g: 3EEAF993B0796FD9
+ AUSGAB irl,edep                   :  2 3EEAF993B0796FD9
+in compute-eloss-g: 3EC3F5A11210C9C5 4033FFE38F0F3A79 4007F7371B0B7DBE  33
+in compute-eloss: 3EC3F5A11210C9C5 4033FFE38F0F3A79 4007F7371B0B7DBE  33
+out compute-eloss: 3F05034D223D2123
+out compute-eloss-g: 3F05034D223D2123
+ AUSGAB irl,edep                   :  2 3F05034D223D2123
+in compute-eloss-g: 3EFD82A26EA500B9 4033FFE0EEA59631 4007F7360E12DF13  33
+in compute-eloss: 3EFD82A26EA500B9 4033FFE0EEA59631 4007F7360E12DF13  33
+out compute-eloss: 3F3F1157E1F4E6C8
+out compute-eloss-g: 3F3F1157E1F4E6C8
+ AUSGAB irl,edep                   :  2 3F3F1157E1F4E6C8
+in compute-eloss-g: 3F0D829FF63528A9 4033FFC1DD4DB43C 4007F729A09F8FA3  33
+in compute-eloss: 3F0D829FF63528A9 4033FFC1DD4DB43C 4007F729A09F8FA3  33
+out compute-eloss: 3F4F115279F265E3
+out compute-eloss-g: 3F4F115279F265E3
+ AUSGAB irl,edep                   :  2 3F4F115279F265E3
+in compute-eloss-g: 3F1D829DB805B3F6 4033FF83BAA8C057 4007F710C58358E4  33
+in compute-eloss: 3F1D829DB805B3F6 4033FF83BAA8C057 4007F710C58358E4  33
+out compute-eloss: 3F5F114A80FEEEAF
+out compute-eloss-g: 3F5F114A80FEEEAF
+ AUSGAB irl,edep                   :  2 3F5F114A80FEEEAF
+in compute-eloss-g: 3F2D82999C9D4A82 4033FF07757EBC5B 4007F6DF0E6FFA8B  33
+in compute-eloss: 3F2D82999C9D4A82 4033FF07757EBC5B 4007F6DF0E6FFA8B  33
+out compute-eloss: 3F6F113AF4E1F722
+out compute-eloss-g: 3F6F113AF4E1F722
+ AUSGAB irl,edep                   :  2 3F6F113AF4E1F722
+in compute-eloss-g: 3F3D827D9A0E5EC8 4033FE0EEBA7154B 4007F67B9CDC0468  33
+in compute-eloss: 3F3D827D9A0E5EC8 4033FE0EEBA7154B 4007F67B9CDC0468  33
+out compute-eloss: 3F7F110704705CE5
+out compute-eloss-g: 3F7F110704705CE5
+ AUSGAB irl,edep                   :  2 3F7F110704705CE5
+in compute-eloss-g: 3F4D81E2935CD0FB 4033FC1DDB36CE45 4007F5B4AC8331B1  33
+in compute-eloss: 3F4D81E2935CD0FB 4033FC1DDB36CE45 4007F5B4AC8331B1  33
+out compute-eloss: 3F8F1036E5BC2049
+out compute-eloss-g: 3F8F1036E5BC2049
+ AUSGAB irl,edep                   :  2 3F8F1036E5BC2049
+in compute-eloss-g: 3F5D7FBD08A393C1 4033F83BD45A16C1 4007F4269C3AE321  33
+in compute-eloss: 3F5D7FBD08A393C1 4033F83BD45A16C1 4007F4269C3AE321  33
+out compute-eloss: 3F9F0D9A83CEEE4E
+out compute-eloss-g: 3F9F0D9A83CEEE4E
+ AUSGAB irl,edep                   :  2 3F9F0D9A83CEEE4E
+in compute-eloss-g: 3F6D7BE93E842DCC 4033F0786DB92305 4007F109D64D2483  33
+in compute-eloss: 3F6D7BE93E842DCC 4033F0786DB92305 4007F109D64D2483  33
+out compute-eloss: 3FAF08DF3E18AEDC
+out compute-eloss-g: 3FAF08DF3E18AEDC
+ AUSGAB irl,edep                   :  2 3FAF08DF3E18AEDC
+in compute-eloss-g: 3F7D728998F5D3EB 4033E0F3FE1A16AE 4007EACD99DCB693  33
+in compute-eloss: 3F7D728998F5D3EB 4033E0F3FE1A16AE 4007EACD99DCB693  33
+out compute-eloss: 3FBEFD993EB16230
+out compute-eloss-g: 3FBEFD993EB16230
+ AUSGAB irl,edep                   :  2 3FBEFD993EB16230
+in compute-eloss-g: 3F8023F7ACAE42F2 4033C1F664DB654C 4007DE4B0A1F8303  33
+in compute-eloss: 3F8023F7ACAE42F2 4033C1F664DB654C 4007DE4B0A1F8303  33
+out compute-eloss: 3FC0FB6C3D7AA87C
+out compute-eloss-g: 3FC0FB6C3D7AA87C
+ AUSGAB irl,edep                   :  2 3FC0FB6C3D7AA87C
+ Bhabba   about to occur           :    1   19.62499   1   2  -0.00181   0.00175   0.02207 -0.15432  0.05743  0.98635         0 1.000E+00
+          Resulting e- or e+       :    1   18.95571   1   2  -0.00181   0.00175   0.02207 -0.12615  0.08824  0.98808         0 1.000E+00
+                                   :    2    0.66929  -1   2  -0.00181   0.00175   0.02207 -0.61232 -0.52732  0.58907         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.66929  -1   2  -0.00181   0.00175   0.02207 -0.61232 -0.52732  0.58907         0 1.000E+00
+         Now on top of stack       :    1   18.95571   1   2  -0.00181   0.00175   0.02207 -0.12615  0.08824  0.98808         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3FE56ACC3FA727EC
+in compute-eloss-g: 3F969A9A4B9A400C 4032F4A92A6336BC 4007896E59BCD92A  33
+in compute-eloss: 3F969A9A4B9A400C 4032F4A92A6336BC 4007896E59BCD92A  33
+out compute-eloss: 3FD7BD06008AAA26
+out compute-eloss-g: 3FD7BD06008AAA26
+ AUSGAB irl,edep                   :  2 3FD7BD06008AAA26
+in compute-eloss-g: 3FA633479D10BA16 403295B512610C13 400760F5BFCF22D6  33
+in compute-eloss: 3FA633479D10BA16 403295B512610C13 400760F5BFCF22D6  33
+out compute-eloss: 3FE7499D89910B5F
+out compute-eloss-g: 3FE7499D89910B5F
+ AUSGAB irl,edep                   :  2 3FE7499D89910B5F
+in compute-eloss-g: 3F8E041FB3AFA670 4031DB68261483B8 40070F271E7DEFD6  33
+in compute-eloss: 3F7F772BC9234900 4031BD77E4EE0437 400701B239563EAD  32
+out compute-eloss: 3FC07BD23B427360
+out compute-eloss-g: 3FCF73F2CE823400
+ AUSGAB irl,edep                   :  2 3FCF73F2CE823400
+in compute-eloss-g: 3F442B8B87E48700 40319C8040777F50 4006F2C6709FCB39  32
+in compute-eloss: 3F442B8B87E48700 40319C8040777F50 4006F2C6709FCB39  32
+out compute-eloss: 3F852120F9D00F2C
+out compute-eloss-g: 3F852120F9D00F2C
+ AUSGAB irl,edep                   :  2 3F852120F9D00F2C
+in compute-eloss-g: 3F127CB46A8F1800 403199DC1C58454E 4006F19335F8EDF1  32
+in compute-eloss: 3F127CB46A8F1800 403199DC1C58454E 4006F19335F8EDF1  32
+out compute-eloss: 3F535DBB2A63810C
+out compute-eloss-g: 3F535DBB2A63810C
+ AUSGAB irl,edep                   :  2 3F535DBB2A63810C
+in compute-eloss-g: 3EE3A08B59FE55E5 4031998EA56B9BC0 4006F170002204D6  32
+in compute-eloss: 3EE3A08B59FE55E5 4031998EA56B9BC0 4006F170002204D6  32
+out compute-eloss: 3F248F704B53140D
+out compute-eloss-g: 3F248F704B53140D
+ AUSGAB irl,edep                   :  2 3F248F704B53140D
+ Discard -user request             :    1   17.59968   1   3  -0.01847   0.01376   0.10000 -0.44862  0.14104  0.88252         0 1.000E+00
+ AUSGAB irl,edep                   :  3 40329F2605B37616
+ END OF HISTORY       1   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000   1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+in compute-eloss-g: 3ED119F9BACBB024 4034000000000000 4007F7427B73E391  33
+in compute-eloss: 3ED119F9BACBB024 4034000000000000 4007F7427B73E391  33
+out compute-eloss: 3F120109662B7396
+out compute-eloss-g: 3F120109662B7396
+ AUSGAB irl,edep                   :  2 3F120109662B7396
+in compute-eloss-g: 3EB829350D1280FF 4033FFFB7FBDA675 4007F740AE8C58B0  33
+in compute-eloss: 3EB829350D1280FF 4033FFFB7FBDA675 4007F740AE8C58B0  33
+out compute-eloss: 3EF96FA66D0B3CE8
+out compute-eloss-g: 3EF96FA66D0B3CE8
+ AUSGAB irl,edep                   :  2 3EF96FA66D0B3CE8
+in compute-eloss-g: 3ECA1E4BFB56433C 4033FFF9E8C33FA4 4007F7400BC19E0E  33
+in compute-eloss: 3ECA1E4BFB56433C 4033FFF9E8C33FA4 4007F7400BC19E0E  33
+out compute-eloss: 3F0B7F2F873AAADC
+out compute-eloss-g: 3F0B7F2F873AAADC
+ AUSGAB irl,edep                   :  2 3F0B7F2F873AAADC
+in compute-eloss-g: 3EE8A0A3CE28D1BF 4033FFF678DD4EBD 4007F73EABCB8110  33
+in compute-eloss: 3EE8A0A3CE28D1BF 4033FFF678DD4EBD 4007F73EABCB8110  33
+out compute-eloss: 3F29ED6250FCF8E9
+out compute-eloss-g: 3F29ED6250FCF8E9
+ AUSGAB irl,edep                   :  2 3F29ED6250FCF8E9
+in compute-eloss-g: 3ED15A6D9E083E58 4033FFE9822C263F 4007F7397C4D4A3B  33
+in compute-eloss: 3ED15A6D9E083E58 4033FFE9822C263F 4007F7397C4D4A3B  33
+out compute-eloss: 3F1244E352711B71
+out compute-eloss-g: 3F1244E352711B71
+ AUSGAB irl,edep                   :  2 3F1244E352711B71
+in compute-eloss-g: 3EC6BE8470011010 4033FFE4F0F351A3 4007F737A89AB1D2  33
+in compute-eloss: 3EC6BE8470011010 4033FFE4F0F351A3 4007F737A89AB1D2  33
+out compute-eloss: 3F07F1D05E7C14D3
+out compute-eloss-g: 3F07F1D05E7C14D3
+ AUSGAB irl,edep                   :  2 3F07F1D05E7C14D3
+in compute-eloss-g: 3EF71A3472ABAEC1 4033FFE1F2B945D3 4007F736761B5DE4  33
+in compute-eloss: 3EF71A3472ABAEC1 4033FFE1F2B945D3 4007F736761B5DE4  33
+out compute-eloss: 3F385256864F3460
+out compute-eloss-g: 3F385256864F3460
+ AUSGAB irl,edep                   :  2 3F385256864F3460
+in compute-eloss-g: 3F09D2DDFCCDF344 4033FFC9A062BF84 4007F72CBB7DD296  33
+in compute-eloss: 3F09D2DDFCCDF344 4033FFC9A062BF84 4007F72CBB7DD296  33
+out compute-eloss: 3F4B2FC281E94E3C
+out compute-eloss-g: 3F4B2FC281E94E3C
+ AUSGAB irl,edep                   :  2 3F4B2FC281E94E3C
+in compute-eloss-g: 3F19D28329ABE958 4033FF9340DDBBB1 4007F716FB565141  33
+in compute-eloss: 3F19D28329ABE958 4033FF9340DDBBB1 4007F716FB565141  33
+out compute-eloss: 3F5B2F5E97D07F8E
+out compute-eloss-g: 3F5B2F5E97D07F8E
+ AUSGAB irl,edep                   :  2 3F5B2F5E97D07F8E
+in compute-eloss-g: 3F29D1CAD241FAA5 4033FF2683635C6F 4007F6EB7AF5C6AF  33
+in compute-eloss: 3F29D1CAD241FAA5 4033FF2683635C6F 4007F6EB7AF5C6AF  33
+out compute-eloss: 3F6B2E93EE74D70D
+out compute-eloss-g: 3F6B2E93EE74D70D
+ AUSGAB irl,edep                   :  2 3F6B2E93EE74D70D
+in compute-eloss-g: 3F39D1556FCDCF5F 4033FE4D0EC3E8C8 4007F69479F7AF91  33
+in compute-eloss: 3F39D1556FCDCF5F 4033FE4D0EC3E8C8 4007F69479F7AF91  33
+out compute-eloss: 3F7B2E072B2267DE
+out compute-eloss-g: 3F7B2E072B2267DE
+ AUSGAB irl,edep                   :  2 3F7B2E072B2267DE
+in compute-eloss-g: 3F49CFFC553A76F6 4033FC9A2E5136A2 4007F5E6706992BD  33
+in compute-eloss: 3F49CFFC553A76F6 4033FC9A2E5136A2 4007F5E6706992BD  33
+out compute-eloss: 3F8B2C797D2BCBA7
+out compute-eloss-g: 3F8B2C797D2BCBA7
+ AUSGAB irl,edep                   :  2 3F8B2C797D2BCBA7
+in compute-eloss-g: 3F59CE5B34ED9D51 4033F9349F219129 4007F48A44D1C052  33
+in compute-eloss: 3F59CE5B34ED9D51 4033F9349F219129 4007F48A44D1C052  33
+out compute-eloss: 3F9B2A7D9BD3995B
+out compute-eloss-g: 3F9B2A7D9BD3995B
+ AUSGAB irl,edep                   :  2 3F9B2A7D9BD3995B
+in compute-eloss-g: 3F69C866E1FF1571 4033F269FFBA9C43 4007F1D16EC99AFC  33
+in compute-eloss: 3F69C866E1FF1571 4033F269FFBA9C43 4007F1D16EC99AFC  33
+out compute-eloss: 3FAB23AF75763BF8
+out compute-eloss-g: 3FAB23AF75763BF8
+ AUSGAB irl,edep                   :  2 3FAB23AF75763BF8
+in compute-eloss-g: 3F7980E759B5CB16 4033E4D827FFE125 4007EC5E582211A3  33
+in compute-eloss: 3F7980E759B5CB16 4033E4D827FFE125 4007EC5E582211A3  33
+out compute-eloss: 3FBAD75E19CBAEF0
+out compute-eloss-g: 3FBAD75E19CBAEF0
+ AUSGAB irl,edep                   :  2 3FBAD75E19CBAEF0
+in compute-eloss-g: 3F3C3C6A1E6C7180 4033CA00C9E61576 4007E18BD59B35C8  33
+in compute-eloss: 3F3C3C6A1E6C7180 4033CA00C9E61576 4007E18BD59B35C8  33
+out compute-eloss: 3F7DB6BC7D5B5C6F
+out compute-eloss-g: 3F7DB6BC7D5B5C6F
+ AUSGAB irl,edep                   :  2 3F7DB6BC7D5B5C6F
+ bremsstrahlung  about to occur    :    1   19.78182   1   2   0.00176  -0.00031   0.01277  0.17041  0.07817  0.98227         0 1.000E+00
+         Resulting photon          :    1   11.02449   1   2   0.00176  -0.00031   0.01277  0.17041  0.07817  0.98227         0 1.000E+00
+         Resulting photon          :    2    9.26832   0   2   0.00176  -0.00031   0.01277  0.17265  0.08260  0.98151         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    2    9.26832   0   3   0.01711   0.00703   0.10000  0.17265  0.08260  0.98151         0 1.000E+00
+         Now on top of stack       :    1   10.51350   1   2   0.00176  -0.00031   0.01277  0.17041  0.07817  0.98227         0 1.000E+00
+ AUSGAB irl,edep                   :  3 40228961E3DB1C24
+in compute-eloss-g: 3F8A259B0EF8035B 402506E8D861635C 4002D23F3E74C84C  29
+in compute-eloss: 3F8A259B0EF8035B 402506E8D861635C 4002D23F3E74C84C  29
+out compute-eloss: 3FCAC4EB411E7B59
+out compute-eloss-g: 3FCAC4EB411E7B59
+ AUSGAB irl,edep                   :  2 3FCAC4EB411E7B59
+in compute-eloss-g: 3F8BE9A0C1004181 40249BD52B5CE96F 4002A918FAF2A049  29
+in compute-eloss: 3F8BE9A0C1004181 40249BD52B5CE96F 4002A918FAF2A049  29
+out compute-eloss: 3FCC8C83EA9A0FF0
+out compute-eloss-g: 3FCC8C83EA9A0FF0
+ AUSGAB irl,edep                   :  2 3FCC8C83EA9A0FF0
+ bremsstrahlung  about to occur    :    1   10.08132   1   2   0.00204   0.00331   0.03868  0.02755 -0.08371  0.99611         0 1.000E+00
+         Resulting photon          :    1    9.87114   1   2   0.00204   0.00331   0.03868  0.02755 -0.08371  0.99611         0 1.000E+00
+         Resulting photon          :    2    0.72118   0   2   0.00204   0.00331   0.03868  0.22392 -0.19466  0.95497         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    2    0.72118   0   3   0.01641  -0.00919   0.10000  0.22392 -0.19466  0.95497         0 1.000E+00
+         Now on top of stack       :    1    9.36014   1   2   0.00204   0.00331   0.03868  0.02755 -0.08371  0.99611         0 1.000E+00
+ AUSGAB irl,edep                   :  3 3FE713E612A6EC6B
+in compute-eloss-g: 3FA3CE79A64AFD4E 4022B864BA881268 4001E445775E04F3  28
+in compute-eloss: 3FA3CE79A64AFD4E 4022B864BA881268 4001E445775E04F3  28
+out compute-eloss: 3FE42482E63A9474
+out compute-eloss-g: 3FE42482E63A9474
+ AUSGAB irl,edep                   :  2 3FE42482E63A9474
+in compute-eloss-g: 3F809A8CAD014858 4021761C8C246921 400155B24FDCB98C  28
+in compute-eloss: 3F809A8CAD014858 4021761C8C246921 400155B24FDCB98C  28
+out compute-eloss: 3FC0D9BFB7F8C4E5
+out compute-eloss-g: 3FC0D9BFB7F8C4E5
+ AUSGAB irl,edep                   :  2 3FC0D9BFB7F8C4E5
+ bremsstrahlung  about to occur    :    1    8.59904   1   2   0.03154   0.00395   0.07050  0.86909 -0.04013  0.49302         0 1.000E+00
+         Resulting photon          :    1    8.17476   1   2   0.03154   0.00395   0.07050  0.86909 -0.04013  0.49302         0 1.000E+00
+         Resulting photon          :    2    0.93528   0   2   0.03154   0.00395   0.07050  0.86208  0.00175  0.50677         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    2    0.93528   0   3   0.08172   0.00405   0.10000  0.86208  0.00175  0.50677         0 1.000E+00
+         Now on top of stack       :    1    7.66376   1   2   0.03154   0.00395   0.07050  0.86909 -0.04013  0.49302         0 1.000E+00
+ AUSGAB irl,edep                   :  3 3FEDEDCA4B076999
+in compute-eloss-g: 3F98835E5927A220 401EA7B1D1281EE6 40004AC23B56239D  27
+in compute-eloss: 3F54EA85F1F74B00 401D3199CC9DA65D 3FFFCD74FAB55471  26
+out compute-eloss: 3F950BED306C71EE
+out compute-eloss-g: 3FD8B23F1BAE4FB0
+ AUSGAB irl,edep                   :  2 3FD8B23F1BAE4FB0
+ Bhabba   about to occur           :    1    7.27788   1   2   0.04987   0.00744   0.08528  0.70513  0.32905  0.62811         0 1.000E+00
+          Resulting e- or e+       :    1    6.87689   1   2   0.04987   0.00744   0.08528  0.69568  0.40536  0.59305         0 1.000E+00
+                                   :    2    0.40099  -1   2   0.04987   0.00744   0.08528  0.46735 -0.56948  0.67622         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.40099  -1   2   0.04987   0.00744   0.08528  0.46735 -0.56948  0.67622         0 1.000E+00
+         Now on top of stack       :    1    6.87689   1   2   0.04987   0.00744   0.08528  0.69568  0.40536  0.59305         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3FD9A9DAAC16F42A
+in compute-eloss-g: 3F8E2399E2F64970 401B81F034ABCAA8 3FFED9C591DFA179  26
+in compute-eloss: 3F8E2399E2F64970 401B81F034ABCAA8 3FFED9C591DFA179  26
+out compute-eloss: 3FCE365D26CB107B
+out compute-eloss-g: 3FCE365D26CB107B
+ AUSGAB irl,edep                   :  2 3FCE365D26CB107B
+in compute-eloss-g: 3F78BB2A7F5ED160 401A903D4B757224 3FFE4AB76282AFA0  26
+in compute-eloss: 3F78BB2A7F5ED160 401A903D4B757224 3FFE4AB76282AFA0  26
+out compute-eloss: 3FB8C29D9EBCC011
+out compute-eloss-g: 3FB8C29D9EBCC011
+ AUSGAB irl,edep                   :  2 3FB8C29D9EBCC011
+in compute-eloss-g: 3F53F8C47B5AC370 401A2D32D4FA7F24 3FFE0E9F48AAFBCC  26
+in compute-eloss: 3F53F8C47B5AC370 401A2D32D4FA7F24 3FFE0E9F48AAFBCC  26
+out compute-eloss: 3F93FC807CA10121
+out compute-eloss-g: 3F93FC807CA10121
+ AUSGAB irl,edep                   :  2 3F93FC807CA10121
+ bremsstrahlung  about to occur    :    1    6.52462   1   2   0.06721   0.01217   0.09707  0.84966  0.14135  0.50803         0 1.000E+00
+         Resulting photon          :    1    6.88993   1   2   0.06721   0.01217   0.09707  0.84966  0.14135  0.50803         0 1.000E+00
+         Resulting photon          :    2    0.14569   0   2   0.06721   0.01217   0.09707  0.93675  0.14954  0.31643         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    2    0.14569   0   3   0.07588   0.01355   0.10000  0.93675  0.14954  0.31643         0 1.000E+00
+         Now on top of stack       :    1    6.37893   1   2   0.06721   0.01217   0.09707  0.84966  0.14135  0.50803         0 1.000E+00
+ AUSGAB irl,edep                   :  3 3FC2A5E85C1326AE
+in compute-eloss-g: 3F67FAFDE6FCF240 40198407119D44EE 3FFDA5E43F0CFAF4  26
+in compute-eloss: 3F67FAFDE6FCF240 40198407119D44EE 3FFDA5E43F0CFAF4  26
+out compute-eloss: 3FA7F6E13950A316
+out compute-eloss-g: 3FA7F6E13950A316
+ AUSGAB irl,edep                   :  2 3FA7F6E13950A316
+in compute-eloss-g: 3F5DE9E16C611600 401954194F2AA3A8 3FFD87B9F4645545  26
+in compute-eloss: 3F5DE9E16C611600 401954194F2AA3A8 3FFD87B9F4645545  26
+out compute-eloss: 3F9DE26F64E219C7
+out compute-eloss-g: 3F9DE26F64E219C7
+ AUSGAB irl,edep                   :  2 3F9DE26F64E219C7
+in compute-eloss-g: 3F52A5EC57C92740 40193636DFC5C18E 3FFD74CE0280A801  26
+in compute-eloss: 3F436B2A304E4A00 40192D491ADAD4EA 3FFD6F2266B6CDA0  25
+out compute-eloss: 3F8365378C79121E
+out compute-eloss-g: 3F92A060B1292D00
+ AUSGAB irl,edep                   :  2 3F92A060B1292D00
+in compute-eloss-g: 3F45E4163C7F6B00 401923967F149861 3FFD68F781DF93F4  25
+in compute-eloss: 3F45E4163C7F6B00 401923967F149861 3FFD68F781DF93F4  25
+out compute-eloss: 3F85DCEE1CD03CB7
+out compute-eloss-g: 3F85DCEE1CD03CB7
+ AUSGAB irl,edep                   :  2 3F85DCEE1CD03CB7
+in compute-eloss-g: 3F3AF2BD7E974500 401918A808063043 3FFD6200E11BCCD7  25
+in compute-eloss: 3F3AF2BD7E974500 401918A808063043 3FFD6200E11BCCD7  25
+out compute-eloss: 3F7AE974190B2A5C
+out compute-eloss-g: 3F7AE974190B2A5C
+ AUSGAB irl,edep                   :  2 3F7AE974190B2A5C
+in compute-eloss-g: 3F305B9F2C844000 401911EDAAFFED78 3FFD5DB638C9DBCD  25
+in compute-eloss: 3F305B9F2C844000 401911EDAAFFED78 3FFD5DB638C9DBCD  25
+out compute-eloss: 3F7055CEAADA02D7
+out compute-eloss-g: 3F7055CEAADA02D7
+ AUSGAB irl,edep                   :  2 3F7055CEAADA02D7
+in compute-eloss-g: 3F248F0DAF0D9000 40190DD8375536F7 3FFD5B1ACA1515D1  25
+in compute-eloss: 3F248F0DAF0D9000 40190DD8375536F7 3FFD5B1ACA1515D1  25
+out compute-eloss: 3F64879BCB180FB5
+out compute-eloss-g: 3F64879BCB180FB5
+ AUSGAB irl,edep                   :  2 3F64879BCB180FB5
+in compute-eloss-g: 3F1A9C6704A67400 40190B4743DBD3F5 3FFD59772A0FE2E4  25
+in compute-eloss: 3F1A9C6704A67400 40190B4743DBD3F5 3FFD59772A0FE2E4  25
+out compute-eloss: 3F5A92A729628148
+out compute-eloss-g: 3F5A92A729628148
+ AUSGAB irl,edep                   :  2 3F5A92A729628148
+in compute-eloss-g: 3F1141619D91A000 4019099E19693DCD 3FFD5867806D9E7C  25
+in compute-eloss: 3F1141619D91A000 4019099E19693DCD 3FFD5867806D9E7C  25
+out compute-eloss: 3F513B031427B71A
+out compute-eloss-g: 3F513B031427B71A
+ AUSGAB irl,edep                   :  2 3F513B031427B71A
+in compute-eloss-g: 3F065756BF50C000 4019088A6937FB52 3FFD57B74FA6B229  25
+in compute-eloss: 3F065756BF50C000 4019088A6937FB52 3FFD57B74FA6B229  25
+out compute-eloss: 3F464F0D71BE0CFD
+out compute-eloss-g: 3F464F0D71BE0CFD
+ AUSGAB irl,edep                   :  2 3F464F0D71BE0CFD
+in compute-eloss-g: 3EFD73AEFBA83000 401907D7F0CC6D62 3FFD57453C715986  25
+in compute-eloss: 3EFD73AEFBA83000 401907D7F0CC6D62 3FFD57453C715986  25
+out compute-eloss: 3F3D68B9C144992C
+out compute-eloss-g: 3F3D68B9C144992C
+ AUSGAB irl,edep                   :  2 3F3D68B9C144992C
+in compute-eloss-g: 3ED88008517DF244 401907624DE56850 3FFD56FA09CE8603  25
+in compute-eloss: 3ED88008517DF244 401907624DE56850 3FFD56FA09CE8603  25
+out compute-eloss: 3F1876E73CDE1ED7
+out compute-eloss-g: 3F1876E73CDE1ED7
+ AUSGAB irl,edep                   :  2 3F1876E73CDE1ED7
+in compute-eloss-g: 3ED4C937AB75283A 40190749D6FE2B72 3FFD56EA662352AB  25
+in compute-eloss: 3ED4C937AB75283A 40190749D6FE2B72 3FFD56EA662352AB  25
+out compute-eloss: 3F14C177EFE55DA3
+out compute-eloss-g: 3F14C177EFE55DA3
+ AUSGAB irl,edep                   :  2 3F14C177EFE55DA3
+in compute-eloss-g: 3EF93D68B7825CAC 4019073515863B8D 3FFD56DD215D6BFA  25
+in compute-eloss: 3EF93D68B7825CAC 4019073515863B8D 3FFD56DD215D6BFA  25
+out compute-eloss: 3F3933FCD79B7FEF
+out compute-eloss-g: 3F3933FCD79B7FEF
+ AUSGAB irl,edep                   :  2 3F3933FCD79B7FEF
+in compute-eloss-g: 3EF077D6D726B7BE 401906D04592DD1F 3FFD569CAE596992  25
+in compute-eloss: 3EF077D6D726B7BE 401906D04592DD1F 3FFD569CAE596992  25
+out compute-eloss: 3F3071AE6C1A7C92
+out compute-eloss-g: 3F3071AE6C1A7C92
+ AUSGAB irl,edep                   :  2 3F3071AE6C1A7C92
+in compute-eloss-g: 3EC92199BA5B4F02 4019068E7ED92CB5 3FFD5672A0CF655A  25
+in compute-eloss: 3EC92199BA5B4F02 4019068E7ED92CB5 3FFD5672A0CF655A  25
+out compute-eloss: 3F0918320CEDBEB2
+out compute-eloss-g: 3F0918320CEDBEB2
+ AUSGAB irl,edep                   :  2 3F0918320CEDBEB2
+ Discard -user request             :    1    6.25636   1   3   0.07403   0.01398   0.10000  0.88075  0.31378  0.35471         0 1.000E+00
+ AUSGAB irl,edep                   :  3 401D1D0892C0263E
+ END OF HISTORY       2   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000   1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+in compute-eloss-g: 3EE7AD81B48CF70A 4034000000000000 4007F7427B73E391  33
+in compute-eloss: 3EE7AD81B48CF70A 4034000000000000 4007F7427B73E391  33
+out compute-eloss: 3F28ED6BB21D98C4
+out compute-eloss-g: 3F28ED6BB21D98C4
+ AUSGAB irl,edep                   :  2 3F28ED6BB21D98C4
+in compute-eloss-g: 3EF8C4A638A0F845 4033FFF3894A26F1 4007F73D7F2998A9  33
+in compute-eloss: 3EF8C4A638A0F845 4033FFF3894A26F1 4007F73D7F2998A9  33
+out compute-eloss: 3F3A134AC777DC38
+out compute-eloss-g: 3F3A134AC777DC38
+ AUSGAB irl,edep                   :  2 3F3A134AC777DC38
+in compute-eloss-g: 3F024DB37E633EEC 4033FFD975FF5F79 4007F73310FE629E  33
+in compute-eloss: 3F024DB37E633EEC 4033FFD975FF5F79 4007F73310FE629E  33
+out compute-eloss: 3F4344FED43CA3A7
+out compute-eloss-g: 3F4344FED43CA3A7
+ AUSGAB irl,edep                   :  2 3F4344FED43CA3A7
+in compute-eloss-g: 3F124D9880470C66 4033FFB2EC01B700 4007F723A66C5CBA  33
+in compute-eloss: 3F124D9880470C66 4033FFB2EC01B700 4007F723A66C5CBA  33
+out compute-eloss: 3F5344E040DE92A1
+out compute-eloss-g: 3F5344E040DE92A1
+ AUSGAB irl,edep                   :  2 3F5344E040DE92A1
+in compute-eloss-g: 3F224D637C331E68 4033FF65D880B386 4007F704D1201D89  33
+in compute-eloss: 3F224D637C331E68 4033FF65D880B386 4007F704D1201D89  33
+out compute-eloss: 3F6344A41F6A0D20
+out compute-eloss-g: 3F6344A41F6A0D20
+ AUSGAB irl,edep                   :  2 3F6344A41F6A0D20
+in compute-eloss-g: 3F324D34E0F62D14 4033FECBB35FB836 4007F6C725E38B01  33
+in compute-eloss: 3F324D34E0F62D14 4033FECBB35FB836 4007F6C725E38B01  33
+out compute-eloss: 3F73446A6C342BA9
+out compute-eloss-g: 3F73446A6C342BA9
+ AUSGAB irl,edep                   :  2 3F73446A6C342BA9
+in compute-eloss-g: 3F424CEA3E48E06F 4033FD976CB8F4F3 4007F64BCB496D91  33
+in compute-eloss: 3F424CEA3E48E06F 4033FD976CB8F4F3 4007F64BCB496D91  33
+out compute-eloss: 3F83440A94096F8A
+out compute-eloss-g: 3F83440A94096F8A
+ AUSGAB irl,edep                   :  2 3F83440A94096F8A
+in compute-eloss-g: 3F524BD3B927FFA5 4033FB2EEB6673C5 4007F5550494DA40  33
+in compute-eloss: 3F524BD3B927FFA5 4033FB2EEB6673C5 4007F5550494DA40  33
+out compute-eloss: 3F9342C2D20EC199
+out compute-eloss-g: 3F9342C2D20EC199
+ AUSGAB irl,edep                   :  2 3F9342C2D20EC199
+in compute-eloss-g: 3F6245E04323183B 4033F65E3AB1F015 4007F3673EBB4032  33
+in compute-eloss: 3F6245E04323183B 4033F65E3AB1F015 4007F3673EBB4032  33
+out compute-eloss: 3FA33C3A0756712E
+out compute-eloss-g: 3FA33C3A0756712E
+ AUSGAB irl,edep                   :  2 3FA33C3A0756712E
+in compute-eloss-g: 3F72356F5FE64717 4033ECC01DAE44DC 4007EF8B9D2531BE  33
+in compute-eloss: 3F72356F5FE64717 4033ECC01DAE44DC 4007EF8B9D2531BE  33
+out compute-eloss: 3FB32A6209C23A72
+out compute-eloss-g: 3FB32A6209C23A72
+ AUSGAB irl,edep                   :  2 3FB32A6209C23A72
+in compute-eloss-g: 3F8222F21674F2B0 4033D995BBA482A2 4007E7D5F1A97C59  33
+in compute-eloss: 3F8222F21674F2B0 4033D995BBA482A2 4007E7D5F1A97C59  33
+out compute-eloss: 3FC315DA1B91CDE8
+out compute-eloss-g: 3FC315DA1B91CDE8
+ AUSGAB irl,edep                   :  2 3FC315DA1B91CDE8
+in compute-eloss-g: 3F62FD9CC18EBF60 4033B36A076D5F06 4007D864D9319896  33
+in compute-eloss: 3F62FD9CC18EBF60 4033B36A076D5F06 4007D864D9319896  33
+out compute-eloss: 3FA3FB03737E40E5
+out compute-eloss-g: 3FA3FB03737E40E5
+ AUSGAB irl,edep                   :  2 3FA3FB03737E40E5
+ bremsstrahlung  about to occur    :    1   19.66181   1   2  -0.00047   0.00011   0.02001  0.04832 -0.01278  0.99875         0 1.000E+00
+         Resulting photon          :    1   19.98884   1   2  -0.00047   0.00011   0.02001  0.04832 -0.01278  0.99875         0 1.000E+00
+         Resulting photon          :    2    0.18397   0   2  -0.00047   0.00011   0.02001  0.02319  0.04264  0.99882         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    2    0.18397   0   3   0.00139   0.00353   0.10000  0.02319  0.04264  0.99882         0 1.000E+00
+         Now on top of stack       :    1   19.47784   1   2  -0.00047   0.00011   0.02001  0.04832 -0.01278  0.99875         0 1.000E+00
+ AUSGAB irl,edep                   :  3 3FC78C6FDC99125D
+in compute-eloss-g: 3F947CD53341DB2C 40337A53A5FA6DC1 4007C1147BE22CDB  33
+in compute-eloss: 3F947CD53341DB2C 40337A53A5FA6DC1 4007C1147BE22CDB  33
+out compute-eloss: 3FD58A2008E23712
+out compute-eloss-g: 3FD58A2008E23712
+ AUSGAB irl,edep                   :  2 3FD58A2008E23712
+in compute-eloss-g: 3FA447236826AB26 4033242B25D6E4E5 40079D62304A01C0  33
+in compute-eloss: 3FA447236826AB26 4033242B25D6E4E5 40079D62304A01C0  33
+out compute-eloss: 3FE54C18C156D1E9
+out compute-eloss-g: 3FE54C18C156D1E9
+ AUSGAB irl,edep                   :  2 3FE54C18C156D1E9
+in compute-eloss-g: 3F835221C5B9EA78 403279CA5FCC2E56 400754E85326692E  33
+in compute-eloss: 3F835221C5B9EA78 403279CA5FCC2E56 400754E85326692E  33
+out compute-eloss: 3FC44650C5FB2496
+out compute-eloss-g: 3FC44650C5FB2496
+ AUSGAB irl,edep                   :  2 3FC44650C5FB2496
+ bremsstrahlung  about to occur    :    1   18.31735   1   2  -0.00511  -0.01518   0.08597 -0.19779 -0.39115  0.89882         0 1.000E+00
+         Resulting photon          :    1   18.80436   1   2  -0.00511  -0.01518   0.08597 -0.19779 -0.39115  0.89882         0 1.000E+00
+         Resulting photon          :    2    0.02398   0   2  -0.00511  -0.01518   0.08597 -0.19683 -0.38852  0.90017         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.02398   0   2  -0.00511  -0.01518   0.08597 -0.19683 -0.38852  0.90017         0 1.000E+00
+         Now on top of stack       :    1   18.29336   1   2  -0.00511  -0.01518   0.08597 -0.19779 -0.39115  0.89882         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3F988F7A09AA0839
+in compute-eloss-g: 3F8CBB280F7A64F8 40324B19DFBDCD8B 400740972D42456A  33
+in compute-eloss: 3F8CBB280F7A64F8 40324B19DFBDCD8B 400740972D42456A  33
+out compute-eloss: 3FCE22A4DE1550F6
+out compute-eloss-g: 3FCE22A4DE1550F6
+ AUSGAB irl,edep                   :  2 3FCE22A4DE1550F6
+in compute-eloss-g: 3F5A326C51CE6C00 40320ED49601A2E9 4007260FE3E636FC  33
+in compute-eloss: 3F5A326C51CE6C00 40320ED49601A2E9 4007260FE3E636FC  33
+out compute-eloss: 3F9B7839701A05E7
+out compute-eloss-g: 3F9B7839701A05E7
+ AUSGAB irl,edep                   :  2 3F9B7839701A05E7
+in compute-eloss-g: 3F286F771FEDFE00 403207F687A59C68 4007230475A4E47D  33
+in compute-eloss: 3F286F771FEDFE00 403207F687A59C68 4007230475A4E47D  33
+out compute-eloss: 3F699F259E4A0B5C
+out compute-eloss-g: 3F699F259E4A0B5C
+ AUSGAB irl,edep                   :  2 3F699F259E4A0B5C
+in compute-eloss-g: 3EDEAE3AB58CBE31 403207298E78AA18 400722A98271F6AF  33
+in compute-eloss: 3EDEAE3AB58CBE31 403207298E78AA18 400722A98271F6AF  33
+out compute-eloss: 3F2015BF9199A135
+out compute-eloss-g: 3F2015BF9199A135
+ AUSGAB irl,edep                   :  2 3F2015BF9199A135
+in compute-eloss-g: 3EC1938E4EB003D7 403207218398E14B 400722A5F0CE954A  33
+in compute-eloss: 3EC1938E4EB003D7 403207218398E14B 400722A5F0CE954A  33
+out compute-eloss: 3F026DFA097AF3A9
+out compute-eloss-g: 3F026DFA097AF3A9
+ AUSGAB irl,edep                   :  2 3F026DFA097AF3A9
+in compute-eloss-g: 3E97728D7472F765 4032071F35D9A01C 400722A4EB1A1509  33
+in compute-eloss: 3E97728D7472F765 4032071F35D9A01C 400722A4EB1A1509  33
+out compute-eloss: 3ED895EEC4D55611
+out compute-eloss-g: 3ED895EEC4D55611
+ AUSGAB irl,edep                   :  2 3ED895EEC4D55611
+in compute-eloss-g: 3EADC65F09C55010 4032071ED381E509 400722A4BF76222F  33
+in compute-eloss: 3EADC65F09C55010 4032071ED381E509 400722A4BF76222F  33
+out compute-eloss: 3EEF3861AEF46E00
+out compute-eloss-g: 3EEF3861AEF46E00
+ AUSGAB irl,edep                   :  2 3EEF3861AEF46E00
+in compute-eloss-g: 3ED7BC610623180A 4032071DD9BED791 400722A450A09BD2  33
+in compute-eloss: 3ED7BC610623180A 4032071DD9BED791 400722A450A09BD2  33
+out compute-eloss: 3F18E3578B595B9E
+out compute-eloss-g: 3F18E3578B595B9E
+ AUSGAB irl,edep                   :  2 3F18E3578B595B9E
+in compute-eloss-g: 3ECCB03B246A652D 40320717A0E8F4BB 400722A18DCA4F0A  33
+in compute-eloss: 3ECCB03B246A652D 40320717A0E8F4BB 400722A18DCA4F0A  33
+out compute-eloss: 3F0E14BCCD450943
+out compute-eloss-g: 3F0E14BCCD450943
+ AUSGAB irl,edep                   :  2 3F0E14BCCD450943
+in compute-eloss-g: 3ECE44FFE654E11D 40320713DE515B12 4007229FE2A0D7E1  33
+in compute-eloss: 3ECE44FFE654E11D 40320713DE515B12 4007229FE2A0D7E1  33
+out compute-eloss: 3F0FBD274B1254AC
+out compute-eloss-g: 3F0FBD274B1254AC
+ AUSGAB irl,edep                   :  2 3F0FBD274B1254AC
+ Discard -user request             :    1   18.02759   1   3  -0.00746  -0.02212   0.10000 -0.06034 -0.46004  0.88585         0 1.000E+00
+ AUSGAB irl,edep                   :  3 40330CB18EAC71B0
+ END OF HISTORY       3   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000   1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+in compute-eloss-g: 3EDA204B2B0A3C47 4034000000000000 4007F7427B73E391  33
+in compute-eloss: 3EDA204B2B0A3C47 4034000000000000 4007F7427B73E391  33
+out compute-eloss: 3F1B8149ED48CF2A
+out compute-eloss-g: 3F1B8149ED48CF2A
+ AUSGAB irl,edep                   :  2 3F1B8149ED48CF2A
+in compute-eloss-g: 3EEAFB24596EF1A0 4033FFF91FAD84AE 4007F73FBB526C65  33
+in compute-eloss: 3EEAFB24596EF1A0 4033FFF91FAD84AE 4007F73FBB526C65  33
+out compute-eloss: 3F2C67AF6DA7077C
+out compute-eloss-g: 3F2C67AF6DA7077C
+ AUSGAB irl,edep                   :  2 3F2C67AF6DA7077C
+in compute-eloss-g: 3E88BCC0A3BCA63C 4033FFEAEBD5CDDA 4007F73A0CF82ADA  33
+in compute-eloss: 3E88BCC0A3BCA63C 4033FFEAEBD5CDDA 4007F73A0CF82ADA  33
+out compute-eloss: 3ECA0AFAB8CAAB4E
+out compute-eloss-g: 3ECA0AFAB8CAAB4E
+ AUSGAB irl,edep                   :  2 3ECA0AFAB8CAAB4E
+in compute-eloss-g: 3EF9B6B1486B021A 4033FFEAB7BFD868 4007F739F8227F69  33
+in compute-eloss: 3EF9B6B1486B021A 4033FFEAB7BFD868 4007F739F8227F69  33
+out compute-eloss: 3F3B121B99869D42
+out compute-eloss-g: 3F3B121B99869D42
+ AUSGAB irl,edep                   :  2 3F3B121B99869D42
+in compute-eloss-g: 3F06F6E6B300A6F2 4033FFCFA5A43EE1 4007F72F24049B45  33
+in compute-eloss: 3F06F6E6B300A6F2 4033FFCFA5A43EE1 4007F72F24049B45  33
+out compute-eloss: 3F482D2A5F2CC24C
+out compute-eloss-g: 3F482D2A5F2CC24C
+ AUSGAB irl,edep                   :  2 3F482D2A5F2CC24C
+in compute-eloss-g: 3F16F6E5AD856CEC 4033FF9F4B4F8087 4007F71BCC695D71  33
+in compute-eloss: 3F16F6E5AD856CEC 4033FF9F4B4F8087 4007F71BCC695D71  33
+out compute-eloss: 3F582D25E607BDA3
+out compute-eloss-g: 3F582D25E607BDA3
+ AUSGAB irl,edep                   :  2 3F582D25E607BDA3
+in compute-eloss-g: 3F26F6E2D2FFC7AF 4033FF3E96B7E868 4007F6F51CADBC73  33
+in compute-eloss: 3F26F6E2D2FFC7AF 4033FF3E96B7E868 4007F6F51CADBC73  33
+out compute-eloss: 3F682D1C191753C8
+out compute-eloss-g: 3F682D1C191753C8
+ AUSGAB irl,edep                   :  2 3F682D1C191753C8
+in compute-eloss-g: 3F36F6CAE3D30D18 4033FE7D2DD71FAD 4007F6A7BB248A23  33
+in compute-eloss: 3F36F6CAE3D30D18 4033FE7D2DD71FAD 4007F6A7BB248A23  33
+out compute-eloss: 3F782CF54E612DB1
+out compute-eloss-g: 3F782CF54E612DB1
+ AUSGAB irl,edep                   :  2 3F782CF54E612DB1
+in compute-eloss-g: 3F46F60F841065EB 4033FCFA5E82399A 4007F60CF0449389  33
+in compute-eloss: 3F46F60F841065EB 4033FCFA5E82399A 4007F60CF0449389  33
+out compute-eloss: 3F882C14DA96F35E
+out compute-eloss-g: 3F882C14DA96F35E
+ AUSGAB irl,edep                   :  2 3F882C14DA96F35E
+in compute-eloss-g: 3F56F16B645C3E78 4033F9F4DBE6E6BC 4007F4D742A35803  33
+in compute-eloss: 3F56F16B645C3E78 4033F9F4DBE6E6BC 4007F4D742A35803  33
+out compute-eloss: 3F9826FBB8133FBF
+out compute-eloss-g: 3F9826FBB8133FBF
+ AUSGAB irl,edep                   :  2 3F9826FBB8133FBF
+in compute-eloss-g: 3F66EDF705B71C2A 4033F3EB1CF8E1EC 4007F26BDD95339F  33
+in compute-eloss: 3F66EDF705B71C2A 4033F3EB1CF8E1EC 4007F26BDD95339F  33
+out compute-eloss: 3FA822EC090079D1
+out compute-eloss-g: 3FA822EC090079D1
+ AUSGAB irl,edep                   :  2 3FA822EC090079D1
+in compute-eloss-g: 3F76EB8FC7CD4B18 4033E7D9A6F461AF 4007ED93B14C73AF  33
+in compute-eloss: 3F76EB8FC7CD4B18 4033E7D9A6F461AF 4007ED93B14C73AF  33
+out compute-eloss: 3FB81F8A9E755372
+out compute-eloss-g: 3FB81F8A9E755372
+ AUSGAB irl,edep                   :  2 3FB81F8A9E755372
+in compute-eloss-g: 3F86EA2842599E0E 4033CFBA1C55EC5C 4007E3DBE04C7479  33
+in compute-eloss: 3F86EA2842599E0E 4033CFBA1C55EC5C 4007E3DBE04C7479  33
+out compute-eloss: 3FC81C5A8C54E5EF
+out compute-eloss-g: 3FC81C5A8C54E5EF
+ AUSGAB irl,edep                   :  2 3FC81C5A8C54E5EF
+in compute-eloss-g: 3F854E4C84E4ACB8 40339F81673D4290 4007D04B251B0215  33
+in compute-eloss: 3F854E4C84E4ACB8 40339F81673D4290 4007D04B251B0215  33
+out compute-eloss: 3FC668EFF19CB5A3
+out compute-eloss-g: 3FC668EFF19CB5A3
+ AUSGAB irl,edep                   :  2 3FC668EFF19CB5A3
+ bremsstrahlung  about to occur    :    1   19.44799   1   2  -0.00395   0.00315   0.03209 -0.15258  0.24650  0.95706         0 1.000E+00
+         Resulting photon          :    1   19.87661   1   2  -0.00395   0.00315   0.03209 -0.15258  0.24650  0.95706         0 1.000E+00
+         Resulting photon          :    2    0.08238   0   2  -0.00395   0.00315   0.03209 -0.13940  0.24511  0.95942         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.08238   0   2  -0.00395   0.00315   0.03209 -0.13940  0.24511  0.95942         0 1.000E+00
+         Now on top of stack       :    1   19.36561   1   2  -0.00395   0.00315   0.03209 -0.15258  0.24650  0.95706         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3FB516A20C7F055F
+in compute-eloss-g: 3F95FECE5C4EBCA6 40335D98E54D8A20 4007B53EFB098FF9  33
+in compute-eloss: 3F95FECE5C4EBCA6 40335D98E54D8A20 4007B53EFB098FF9  33
+out compute-eloss: 3FD71E6DC043C68D
+out compute-eloss-g: 3FD71E6DC043C68D
+ AUSGAB irl,edep                   :  2 3FD71E6DC043C68D
+ bremsstrahlung  about to occur    :    1   19.00438   1   2  -0.00555   0.00912   0.05261  0.03195  0.30638  0.95137         0 1.000E+00
+         Resulting photon          :    1   19.49069   1   2  -0.00555   0.00912   0.05261  0.03195  0.30638  0.95137         0 1.000E+00
+         Resulting photon          :    2    0.02469   0   2  -0.00555   0.00912   0.05261 -0.16637  0.36681  0.91530         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.02469   0   2  -0.00555   0.00912   0.05261 -0.16637  0.36681  0.91530         0 1.000E+00
+         Now on top of stack       :    1   18.97970   1   2  -0.00555   0.00912   0.05261  0.03195  0.30638  0.95137         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3F9947553F8C0BC5
+in compute-eloss-g: 3FA842EA1C85D91C 4032FACD58FC9803 40078C05730133B1  33
+in compute-eloss: 3FA842EA1C85D91C 4032FACD58FC9803 40078C05730133B1  33
+out compute-eloss: 3FE9780E8751280D
+out compute-eloss-g: 3FE9780E8751280D
+ AUSGAB irl,edep                   :  2 3FE9780E8751280D
+in compute-eloss-g: 3F4C56CD64B11300 40322F0CE4C20EC3 400734495E687205  33
+in compute-eloss: 3F4C56CD64B11300 40322F0CE4C20EC3 400734495E687205  33
+out compute-eloss: 3F8DB966D126D1E3
+out compute-eloss-g: 3F8DB966D126D1E3
+ AUSGAB irl,edep                   :  2 3F8DB966D126D1E3
+in compute-eloss-g: 3ED15EA4AE86D8D1 40322B55B7E7E9E9 400732A6BAE0B398  33
+in compute-eloss: 3ED15EA4AE86D8D1 40322B55B7E7E9E9 400732A6BAE0B398  33
+out compute-eloss: 3F1237E9B893EDC7
+out compute-eloss-g: 3F1237E9B893EDC7
+ AUSGAB irl,edep                   :  2 3F1237E9B893EDC7
+ Discard -user request             :    1   18.16921   1   3   0.00020   0.01468   0.10000  0.07750  0.05192  0.99564         0 1.000E+00
+ AUSGAB irl,edep                   :  3 403330F2D1ED7BC4
+ END OF HISTORY       4   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000   1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+in compute-eloss-g: 3EBC2F45DDED4C71 4034000000000000 4007F7427B73E391  33
+in compute-eloss: 3EBC2F45DDED4C71 4034000000000000 4007F7427B73E391  33
+out compute-eloss: 3EFDAC14E2370B72
+out compute-eloss-g: 3EFDAC14E2370B72
+ AUSGAB irl,edep                   :  2 3EFDAC14E2370B72
+in compute-eloss-g: 3EF00FDB971A57B8 4033FFFE253EB1DD 4007F741BD8CEEB5  33
+in compute-eloss: 3EF00FDB971A57B8 4033FFFE253EB1DD 4007F741BD8CEEB5  33
+out compute-eloss: 3F30E8DF6D80EB80
+out compute-eloss-g: 3F30E8DF6D80EB80
+ AUSGAB irl,edep                   :  2 3F30E8DF6D80EB80
+in compute-eloss-g: 3EF6182F2FE384C7 4033FFED3C5F445C 4007F73AF9FCDFF1  33
+in compute-eloss: 3EF6182F2FE384C7 4033FFED3C5F445C 4007F73AF9FCDFF1  33
+out compute-eloss: 3F3742B3B69B3918
+out compute-eloss-g: 3F3742B3B69B3918
+ AUSGAB irl,edep                   :  2 3F3742B3B69B3918
+in compute-eloss-g: 3F03F57F85B096E2 4033FFD5F9AB8DC1 4007F731AC0D3FD0  33
+in compute-eloss: 3F03F57F85B096E2 4033FFD5F9AB8DC1 4007F731AC0D3FD0  33
+out compute-eloss: 3F45032875AEB756
+out compute-eloss-g: 3F45032875AEB756
+ AUSGAB irl,edep                   :  2 3F45032875AEB756
+in compute-eloss-g: 3F13F57E36A04CD0 4033FFABF35AA264 4007F720DC84B257  33
+in compute-eloss: 3F13F57E36A04CD0 4033FFABF35AA264 4007F720DC84B257  33
+out compute-eloss: 3F55032483DE1828
+out compute-eloss-g: 3F55032483DE1828
+ AUSGAB irl,edep                   :  2 3F55032483DE1828
+in compute-eloss-g: 3F23F412DA9205F6 4033FF57E6C892EC 4007F6FF3D0FEC5C  33
+in compute-eloss: 3F23F412DA9205F6 4033FF57E6C892EC 4007F6FF3D0FEC5C  33
+out compute-eloss: 3F6501A0D920A119
+out compute-eloss-g: 3F6501A0D920A119
+ AUSGAB irl,edep                   :  2 3F6501A0D920A119
+in compute-eloss-g: 3F33F07E68FD7BFC 4033FEAFD9C1C9E7 4007F6BC01573F40  33
+in compute-eloss: 3F33F07E68FD7BFC 4033FEAFD9C1C9E7 4007F6BC01573F40  33
+out compute-eloss: 3F74FDD1CAD0E36C
+out compute-eloss-g: 3F74FDD1CAD0E36C
+ AUSGAB irl,edep                   :  2 3F74FDD1CAD0E36C
+in compute-eloss-g: 3F43EE267DF24262 4033FD5FFCA51CD9 4007F6359BA9F943  33
+in compute-eloss: 3F43EE267DF24262 4033FD5FFCA51CD9 4007F6359BA9F943  33
+out compute-eloss: 3F84FB45BBAD4A32
+out compute-eloss-g: 3F84FB45BBAD4A32
+ AUSGAB irl,edep                   :  2 3F84FB45BBAD4A32
+in compute-eloss-g: 3F53EC27868FB59C 4033FAC093EDA730 4007F528D679FA4D  33
+in compute-eloss: 3F53EC27868FB59C 4033FAC093EDA730 4007F528D679FA4D  33
+out compute-eloss: 3F94F902D9447178
+out compute-eloss-g: 3F94F902D9447178
+ AUSGAB irl,edep                   :  2 3F94F902D9447178
+in compute-eloss-g: 3F635531744CDAA4 4033F58253375614 4007F30F1C33A52D  33
+in compute-eloss: 3F635531744CDAA4 4033F58253375614 4007F30F1C33A52D  33
+out compute-eloss: 3FA459C9847528F3
+out compute-eloss-g: 3FA459C9847528F3
+ AUSGAB irl,edep                   :  2 3FA459C9847528F3
+ bremsstrahlung  about to occur    :    1   19.91927   1   2   0.00001   0.00010   0.00479 -0.05862 -0.02504  0.99797         0 1.000E+00
+         Resulting photon          :    1   18.77105   1   2   0.00001   0.00010   0.00479 -0.05862 -0.02504  0.99797         0 1.000E+00
+         Resulting photon          :    2    1.65922   0   2   0.00001   0.00010   0.00479 -0.07549 -0.04034  0.99633         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    2    1.65922   0   3  -0.00721  -0.00376   0.10000 -0.07549 -0.04034  0.99633         0 1.000E+00
+         Now on top of stack       :    1   18.26006   1   2   0.00001   0.00010   0.00479 -0.05862 -0.02504  0.99797         0 1.000E+00
+ AUSGAB irl,edep                   :  3 3FFA8C2673295C9F
+in compute-eloss-g: 3F334CD3014FCC4A 40324293074285B6 40073CDBB608081A  33
+in compute-eloss: 3F334CD3014FCC4A 40324293074285B6 40073CDBB608081A  33
+out compute-eloss: 3F743F37D326C261
+out compute-eloss-g: 3F743F37D326C261
+ AUSGAB irl,edep                   :  2 3F743F37D326C261
+ Bhabba   about to occur           :    1   18.25511   1   2  -0.00001   0.00009   0.00508 -0.07045 -0.02188  0.99728         0 1.000E+00
+          Resulting e- or e+       :    1   17.60762   1   2  -0.00001   0.00009   0.00508 -0.04875 -0.06029  0.99699         0 1.000E+00
+                                   :    2    0.64750  -1   2  -0.00001   0.00009   0.00508 -0.42186  0.65559  0.62629         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.64750  -1   2  -0.00001   0.00009   0.00508 -0.42186  0.65559  0.62629         0 1.000E+00
+         Now on top of stack       :    1   17.60762   1   2  -0.00001   0.00009   0.00508 -0.04875 -0.06029  0.99699         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3FE4B84D14D998FC
+in compute-eloss-g: 3F74D1E3C7A31FD2 40319B8CAB1E8682 4006F257C79FB74D  32
+in compute-eloss: 3F74D1E3C7A31FD2 40319B8CAB1E8682 4006F257C79FB74D  32
+out compute-eloss: 3FB5CED9D15DC9A1
+out compute-eloss-g: 3FB5CED9D15DC9A1
+ AUSGAB irl,edep                   :  2 3FB5CED9D15DC9A1
+in compute-eloss-g: 3F84BBFC6401C938 403185BDD14D28B8 4006E8690FD76A39  32
+in compute-eloss: 3F84BBFC6401C938 403185BDD14D28B8 4006E8690FD76A39  32
+out compute-eloss: 3FC5B64099FC8E98
+out compute-eloss-g: 3FC5B64099FC8E98
+ AUSGAB irl,edep                   :  2 3FC5B64099FC8E98
+in compute-eloss-g: 3F8BBB56543E7324 40315A5150192F9B 4006D47D02A068A5  32
+in compute-eloss: 3F8BBB56543E7324 40315A5150192F9B 4006D47D02A068A5  32
+out compute-eloss: 3FCD0696B833D184
+out compute-eloss-g: 3FCD0696B833D184
+ AUSGAB irl,edep                   :  2 3FCD0696B833D184
+ bremsstrahlung  about to occur    :    1   17.12604   1   2  -0.00039   0.00158   0.03356  0.02840  0.20023  0.97934         0 1.000E+00
+         Resulting photon          :    1   17.58852   1   2  -0.00039   0.00158   0.03356  0.02840  0.20023  0.97934         0 1.000E+00
+         Resulting photon          :    2    0.04852   0   2  -0.00039   0.00158   0.03356 -0.00739  0.20684  0.97835         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.04852   0   2  -0.00039   0.00158   0.03356 -0.00739  0.20684  0.97835         0 1.000E+00
+         Now on top of stack       :    1   17.07752   1   2  -0.00039   0.00158   0.03356  0.02840  0.20023  0.97934         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3FA8D80460184B2E
+in compute-eloss-g: 3FA12E45361A91D0 403113D82078BBD2 4006B3BCF8C341AE  32
+in compute-eloss: 3FA12E45361A91D0 403113D82078BBD2 4006B3BCF8C341AE  32
+out compute-eloss: 3FE1F6960C4A5176
+out compute-eloss-g: 3FE1F6960C4A5176
+ AUSGAB irl,edep                   :  2 3FE1F6960C4A5176
+in compute-eloss-g: 3FA119A818C5B0F2 4030842370166946 40066F499F6C9C45  32
+in compute-eloss: 3FA119A818C5B0F2 4030842370166946 40066F499F6C9C45  32
+out compute-eloss: 3FE1DAAE9C3EFF6B
+out compute-eloss-g: 3FE1DAAE9C3EFF6B
+ AUSGAB irl,edep                   :  2 3FE1DAAE9C3EFF6B
+in compute-eloss-g: 3F75F77C63FC0830 402FEA9BF668E296 400628E8323778F1  32
+in compute-eloss: 3F75F77C63FC0830 402FEA9BF668E296 400628E8323778F1  32
+out compute-eloss: 3FB6EA9BA2E6A835
+out compute-eloss-g: 3FB6EA9BA2E6A835
+ AUSGAB irl,edep                   :  2 3FB6EA9BA2E6A835
+in compute-eloss-g: 3F5EAA50DB16F980 402FBCC6BF231546 40061D62EEDE2E25  32
+in compute-eloss: 3F5EAA50DB16F980 402FBCC6BF231546 40061D62EEDE2E25  32
+out compute-eloss: 3F9FFC6F1BBDCB4C
+out compute-eloss-g: 3F9FFC6F1BBDCB4C
+ AUSGAB irl,edep                   :  2 3F9FFC6F1BBDCB4C
+in compute-eloss-g: 3F4393CB268F7280 402FACC887953660 40061959E49970ED  32
+in compute-eloss: 3F4393CB268F7280 402FACC887953660 40061959E49970ED  32
+out compute-eloss: 3F846B602FFD4B09
+out compute-eloss-g: 3F846B602FFD4B09
+ AUSGAB irl,edep                   :  2 3F846B602FFD4B09
+in compute-eloss-g: 3F256DEB6B200A00 402FA7ADAF89370E 4006180FB9A42443  32
+in compute-eloss: 3F256DEB6B200A00 402FA7ADAF89370E 4006180FB9A42443  32
+out compute-eloss: 3F6659CD55FF17B2
+out compute-eloss-g: 3F6659CD55FF17B2
+ AUSGAB irl,edep                   :  2 3F6659CD55FF17B2
+in compute-eloss-g: 3F0639F070C89800 402FA64812B3D71C 400617B556FDF3B5  32
+in compute-eloss: 3F0639F070C89800 402FA64812B3D71C 400617B556FDF3B5  32
+out compute-eloss: 3F472E915254B0A7
+out compute-eloss-g: 3F472E915254B0A7
+ AUSGAB irl,edep                   :  2 3F472E915254B0A7
+in compute-eloss-g: 3EE20118ABC7864E 402FA5EB586E8DCA 4006179DE6934A24  32
+in compute-eloss: 3EE20118ABC7864E 402FA5EB586E8DCA 4006179DE6934A24  32
+out compute-eloss: 3F22C7402B80B508
+out compute-eloss-g: 3F22C7402B80B508
+ AUSGAB irl,edep                   :  2 3F22C7402B80B508
+in compute-eloss-g: 3EA45C8B902DE4A8 402FA5D8912E624A 4006179927651874  32
+in compute-eloss: 3EA45C8B902DE4A8 402FA5D8912E624A 4006179927651874  32
+out compute-eloss: 3EE53CA4507F13FD
+out compute-eloss-g: 3EE53CA4507F13FD
+ AUSGAB irl,edep                   :  2 3EE53CA4507F13FD
+in compute-eloss-g: 3ED833463DA046EA 402FA5D73D641D42 40061798D18088BE  32
+in compute-eloss: 3ED833463DA046EA 402FA5D73D641D42 40061798D18088BE  32
+out compute-eloss: 3F193D9E9547F0D3
+out compute-eloss-g: 3F193D9E9547F0D3
+ AUSGAB irl,edep                   :  2 3F193D9E9547F0D3
+ Discard -user request             :    1   15.82381   1   3   0.01106   0.02465   0.10000  0.56682  0.36042  0.74082         0 1.000E+00
+ AUSGAB irl,edep                   :  3 4030D886F74A694F
+ END OF HISTORY       5   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000   1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+in compute-eloss-g: 3ED9B0AFD013551D 4034000000000000 4007F7427B73E391  33
+in compute-eloss: 3ED9B0AFD013551D 4034000000000000 4007F7427B73E391  33
+out compute-eloss: 3F1B0BCAA247E02C
+out compute-eloss-g: 3F1B0BCAA247E02C
+ AUSGAB irl,edep                   :  2 3F1B0BCAA247E02C
+in compute-eloss-g: 3EB6ADD788425098 4033FFF93D0D576E 4007F73FC7125E4D  33
+in compute-eloss: 3EB6ADD788425098 4033FFF93D0D576E 4007F73FC7125E4D  33
+out compute-eloss: 3EF7E04322E90134
+out compute-eloss-g: 3EF7E04322E90134
+ AUSGAB irl,edep                   :  2 3EF7E04322E90134
+in compute-eloss-g: 3EEB64F7F7E76DA7 4033FFF7BF09253F 4007F73F2E43AA77  33
+in compute-eloss: 3EEB64F7F7E76DA7 4033FFF7BF09253F 4007F73F2E43AA77  33
+out compute-eloss: 3F2CD718CC67F1DA
+out compute-eloss-g: 3F2CD718CC67F1DA
+ AUSGAB irl,edep                   :  2 3F2CD718CC67F1DA
+in compute-eloss-g: 3EA3CCDA95DB2B43 4033FFE9537CBF0B 4007F73969A0A576  33
+in compute-eloss: 3EA3CCDA95DB2B43 4033FFE9537CBF0B 4007F73969A0A576  33
+out compute-eloss: 3EE4D86001C8019E
+out compute-eloss-g: 3EE4D86001C8019E
+ AUSGAB irl,edep                   :  2 3EE4D86001C8019E
+in compute-eloss-g: 3EC649DB0465C3CD 4033FFE8ACB9BEFD 4007F73926EBF254  33
+in compute-eloss: 3EC649DB0465C3CD 4033FFE8ACB9BEFD 4007F73926EBF254  33
+out compute-eloss: 3F0776FEE780A8C5
+out compute-eloss-g: 3F0776FEE780A8C5
+ AUSGAB irl,edep                   :  2 3F0776FEE780A8C5
+in compute-eloss-g: 3ED16D261F121488 4033FFE5BDD9E20D 4007F737FA90F270  33
+in compute-eloss: 3ED16D261F121488 4033FFE5BDD9E20D 4007F737FA90F270  33
+out compute-eloss: 3F125898A0B260AE
+out compute-eloss-g: 3F125898A0B260AE
+ AUSGAB irl,edep                   :  2 3F125898A0B260AE
+in compute-eloss-g: 3EED9FE1A8D8E448 4033FFE127B3B9E0 4007F73624E57713  33
+in compute-eloss: 3EED9FE1A8D8E448 4033FFE127B3B9E0 4007F73624E57713  33
+out compute-eloss: 3F2F3022BE06A7EF
+out compute-eloss-g: 3F2F3022BE06A7EF
+ AUSGAB irl,edep                   :  2 3F2F3022BE06A7EF
+in compute-eloss-g: 3F060E2CAF12E169 4033FFD18FA25ADD 4007F72FE805AA27  33
+in compute-eloss: 3F060E2CAF12E169 4033FFD18FA25ADD 4007F72FE805AA27  33
+out compute-eloss: 3F47382833A6EA26
+out compute-eloss-g: 3F47382833A6EA26
+ AUSGAB irl,edep                   :  2 3F47382833A6EA26
+in compute-eloss-g: 3F160E28643483CA 4033FFA31F51F38F 4007F71D54719A53  33
+in compute-eloss: 3F160E28643483CA 4033FFA31F51F38F 4007F71D54719A53  33
+out compute-eloss: 3F5738208C70570B
+out compute-eloss-g: 3F5738208C70570B
+ AUSGAB irl,edep                   :  2 3F5738208C70570B
+in compute-eloss-g: 3F260E1C9D670D15 4033FF463ECFC1CE 4007F6F82CD44FB0  33
+in compute-eloss: 3F260E1C9D670D15 4033FF463ECFC1CE 4007F6F82CD44FB0  33
+out compute-eloss: 3F67380DE1BA60E5
+out compute-eloss-g: 3F67380DE1BA60E5
+ AUSGAB irl,edep                   :  2 3F67380DE1BA60E5
+in compute-eloss-g: 3F360DC33D3D3424 4033FE8C7E60B3FB 4007F6ADDBCFBD5E  33
+in compute-eloss: 3F360DC33D3D3424 4033FE8C7E60B3FB 4007F6ADDBCFBD5E  33
+out compute-eloss: 3F7737A34068803C
+out compute-eloss-g: 3F7737A34068803C
+ AUSGAB irl,edep                   :  2 3F7737A34068803C
+in compute-eloss-g: 3F460D517BF6F094 4033FD19042CAD73 4007F6193459D345  33
+in compute-eloss: 3F460D517BF6F094 4033FD19042CAD73 4007F6193459D345  33
+out compute-eloss: 3F8737126A0A77AD
+out compute-eloss-g: 3F8737126A0A77AD
+ AUSGAB irl,edep                   :  2 3F8737126A0A77AD
+in compute-eloss-g: 3F560BF67368423B 4033FA3221DF6C24 4007F4EFCC4B5498  33
+in compute-eloss: 3F560BF67368423B 4033FA3221DF6C24 4007F4EFCC4B5498  33
+out compute-eloss: 3F973572E7C518B2
+out compute-eloss-g: 3F973572E7C518B2
+ AUSGAB irl,edep                   :  2 3F973572E7C518B2
+in compute-eloss-g: 3F65E664802461A8 4033F464C5257ADE 4007F29CA4232AB2  33
+in compute-eloss: 3F65E664802461A8 4033F464C5257ADE 4007F29CA4232AB2  33
+out compute-eloss: 3FA70D82A767CEE0
+out compute-eloss-g: 3FA70D82A767CEE0
+ AUSGAB irl,edep                   :  2 3FA70D82A767CEE0
+in compute-eloss-g: 3F574E3DDAF5EB8C 4033E8DE03D1C6F7 4007EDFC521F33A3  33
+in compute-eloss: 3F574E3DDAF5EB8C 4033E8DE03D1C6F7 4007EDFC521F33A3  33
+out compute-eloss: 3F9887E152E6CA5A
+out compute-eloss-g: 3F9887E152E6CA5A
+ AUSGAB irl,edep                   :  2 3F9887E152E6CA5A
+ bremsstrahlung  about to occur    :    1   19.88568   1   2   0.00039  -0.00105   0.00667  0.08339 -0.18574  0.97905         0 1.000E+00
+         Resulting photon          :    1   11.48433   1   2   0.00039  -0.00105   0.00667  0.08339 -0.18574  0.97905         0 1.000E+00
+         Resulting photon          :    2    8.91235   0   2   0.00039  -0.00105   0.00667  0.07415 -0.19946  0.97710         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Pair production about to occur    :    2    8.91235   0   2   0.00098  -0.00261   0.01432  0.07415 -0.19946  0.97710         0 1.000E+00
+          Resulting pair           :    2    6.44346   1   2   0.00098  -0.00261   0.01432  0.12403 -0.23945  0.96295         0 1.000E+00
+                                   :    3    1.44690  -1   2   0.00098  -0.00261   0.01432  0.03795 -0.17007  0.98470         0 1.000E+00
+in compute-eloss-g: 3F739B757F5B3587 3FF72681D7CB69EA 3FD7A4A52CE8BB66  16
+in compute-eloss: 3F6F89E712A3B4E0 3FF6EB1E4801F969 3FD6FFA27B1625BF  15
+out compute-eloss: 3FAE88668EFDF5C0
+out compute-eloss-g: 3FB2FA6C441602F0
+ AUSGAB irl,edep                   :  2 3FB2FA6C441602F0
+in compute-eloss-g: 3F722A0B155E0BC0 3FF5F6DB138A09BB 3FD446EC439A7804  15
+in compute-eloss: 3F722A0B155E0BC0 3FF5F6DB138A09BB 3FD446EC439A7804  15
+out compute-eloss: 3FB19EA13B57A76C
+out compute-eloss-g: 3FB19EA13B57A76C
+ AUSGAB irl,edep                   :  2 3FB19EA13B57A76C
+in compute-eloss-g: 3F70D23097CDD9B7 3FF4DCF0FFD48F44 3FD0FC2AB610E628  15
+in compute-eloss: 3F70D23097CDD9B7 3FF4DCF0FFD48F44 3FD0FC2AB610E628  15
+out compute-eloss: 3FB05A026F8C723B
+out compute-eloss-g: 3FB05A026F8C723B
+ AUSGAB irl,edep                   :  2 3FB05A026F8C723B
+in compute-eloss-g: 3F6F04E1C5979829 3FF3D750D8DBC820 3FCB8A8C8EA9CD18  15
+in compute-eloss: 3F6C849EF9503CC0 3FF3C3D805663B2B 3FCB0CB0563814F1  14
+out compute-eloss: 3FABCBE54806C75C
+out compute-eloss-g: 3FAE3AFFB6B86600
+ AUSGAB irl,edep                   :  2 3FAE3AFFB6B86600
+in compute-eloss-g: 3F6CF4A98C9F0CD3 3FF2E578DB2604F0 3FC54BFC5BED9452  14
+in compute-eloss: 3F6CF4A98C9F0CD3 3FF2E578DB2604F0 3FC54BFC5BED9452  14
+out compute-eloss: 3FAC4EF968B120AE
+out compute-eloss-g: 3FAC4EF968B120AE
+ AUSGAB irl,edep                   :  2 3FAC4EF968B120AE
+in compute-eloss-g: 3F6AF7EDBDE4921C 3FF203010FE07BEB 3FBE51BDA32EE3B0  14
+in compute-eloss: 3F6AF7EDBDE4921C 3FF203010FE07BEB 3FBE51BDA32EE3B0  14
+out compute-eloss: 3FAA72714656D9A4
+out compute-eloss-g: 3FAA72714656D9A4
+ AUSGAB irl,edep                   :  2 3FAA72714656D9A4
+in compute-eloss-g: 3F69058B95CE70D2 3FF12F6D85ADC51E 3FB24B70524572FF  14
+in compute-eloss: 3F647801A67FD820 3FF10BA50AFE3922 3FB034376C87BCC8  13
+out compute-eloss: 3FA4262579B1C01B
+out compute-eloss-g: 3FA89F34CFA33FA0
+ AUSGAB irl,edep                   :  2 3FA89F34CFA33FA0
+in compute-eloss-g: 3F6770CC0A770B0D 3FF06A73DF30AB21 3F9A45F0AA2F2434  13
+in compute-eloss: 3F6770CC0A770B0D 3FF06A73DF30AB21 3F9A45F0AA2F2434  13
+out compute-eloss: 3FA72972FF72E165
+out compute-eloss-g: 3FA72972FF72E165
+ AUSGAB irl,edep                   :  2 3FA72972FF72E165
+ Discard  AE,AP<E<ECUT             :    3    0.98075  -1   2  -0.01186  -0.00957   0.01593  0.47685 -0.85614 -0.19909         0 1.000E+00
+         Now on top of stack       :    2    6.44346   1   2   0.00098  -0.00261   0.01432  0.12403 -0.23945  0.96295         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3FEF62508E6A282C
+in compute-eloss-g: 3F8D5354F56E2DAE 4019C61922578662 3FFDCF1D2B1265DD  26
+in compute-eloss: 3F746D1F98CFAEC0 40192D491ADAD4EA 3FFD6F2266B6CDA0  25
+out compute-eloss: 3FB46564C0D2B217
+out compute-eloss-g: 3FCD4CB34FFF8800
+ AUSGAB irl,edep                   :  2 3FCD4CB34FFF8800
+in compute-eloss-g: 3F565A650C903A90 4018DBB387D78A22 3FFD3AF4D4CD9ECD  25
+in compute-eloss: 3F565A650C903A90 4018DBB387D78A22 3FFD3AF4D4CD9ECD  25
+out compute-eloss: 3F964F9826D488DD
+out compute-eloss-g: 3F964F9826D488DD
+ AUSGAB irl,edep                   :  2 3F964F9826D488DD
+ bremsstrahlung  about to occur    :    2    6.19276   1   2   0.00700   0.00209   0.02593  0.41012  0.63211  0.65745         0 1.000E+00
+         Resulting photon          :    2    6.68807   1   2   0.00700   0.00209   0.02593  0.41012  0.63211  0.65745         0 1.000E+00
+         Resulting photon          :    3    0.01569   0   2   0.00700   0.00209   0.02593  0.36593  0.65546  0.66066         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    3    0.01569   0   2   0.00700   0.00209   0.02593  0.36593  0.65546  0.66066         0 1.000E+00
+         Now on top of stack       :    2    6.17708   1   2   0.00700   0.00209   0.02593  0.41012  0.63211  0.65745         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3F9010A66828075D
+in compute-eloss-g: 3F99CA74672D5EA2 4018B55349488D92 3FFD222E4EAC42E3  25
+in compute-eloss: 3F99CA74672D5EA2 4018B55349488D92 3FFD222E4EAC42E3  25
+out compute-eloss: 3FD9B1883D6DB170
+out compute-eloss-g: 3FD9B1883D6DB170
+ AUSGAB irl,edep                   :  2 3FD9B1883D6DB170
+ bremsstrahlung  about to occur    :    2    5.77561   1   2   0.01778   0.02126   0.03628  0.81686  0.50874  0.27190         0 1.000E+00
+         Resulting photon          :    2    6.27245   1   2   0.01778   0.02126   0.03628  0.81686  0.50874  0.27190         0 1.000E+00
+         Resulting photon          :    3    0.01416   0   2   0.01778   0.02126   0.03628  0.78710  0.59531  0.16150         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    3    0.01416   0   2   0.01778   0.02126   0.03628  0.78710  0.59531  0.16150         0 1.000E+00
+         Now on top of stack       :    2    5.76146   1   2   0.01778   0.02126   0.03628  0.81686  0.50874  0.27190         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3F8CFF6C43C48AD6
+in compute-eloss-g: 3F9C9F5D4751B3B0 40170BBB0F4FD036 3FFC04DFFE66A1CA  25
+in compute-eloss: 3F7C9023B5E216C0 4015B675971B431B 3FFB10CFD2B846CE  24
+out compute-eloss: 3FBC4D89303EBD08
+out compute-eloss-g: 3FDC67B9CF5880F0
+ AUSGAB irl,edep                   :  2 3FDC67B9CF5880F0
+ bremsstrahlung  about to occur    :    2    5.31762   1   2   0.02994   0.04064   0.05110  0.04089  0.83238  0.55270         0 1.000E+00
+         Resulting photon          :    2    4.67735   1   2   0.02994   0.04064   0.05110  0.04089  0.83238  0.55270         0 1.000E+00
+         Resulting photon          :    3    1.15127   0   2   0.02994   0.04064   0.05110  0.03042  0.84420  0.53517         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    3    1.15127   0   3   0.03272   0.11778   0.10000  0.03042  0.84420  0.53517         0 1.000E+00
+         Now on top of stack       :    2    4.16635   1   2   0.02994   0.04064   0.05110  0.04089  0.83238  0.55270         0 1.000E+00
+ AUSGAB irl,edep                   :  3 3FF26B9C641C008D
+in compute-eloss-g: 3F96837ED03B9638 4010AA5859534804 3FF6D528EE857189  23
+in compute-eloss: 3F8C1EAE49591BC0 40102614B595565A 3FF6542AAABB392B  22
+out compute-eloss: 3FCB713FC5BF4FBE
+out compute-eloss-g: 3FD5FCDA1EBEC280
+ AUSGAB irl,edep                   :  2 3FD5FCDA1EBEC280
+ bremsstrahlung  about to occur    :    2    3.82279   1   2   0.03400   0.06060   0.04708  0.30758  0.80119 -0.51330         0 1.000E+00
+         Resulting photon          :    2    3.09586   1   2   0.03400   0.06060   0.04708  0.30758  0.80119 -0.51330         0 1.000E+00
+         Resulting photon          :    3    1.23793   0   2   0.03400   0.06060   0.04708  0.21648  0.82172 -0.52717         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    3    1.23793   0   1   0.05333   0.13400   0.00000  0.21648  0.82172 -0.52717         0 1.000E+00
+         Now on top of stack       :    2    2.58486   1   2   0.03400   0.06060   0.04708  0.30758  0.80119 -0.51330         0 1.000E+00
+ AUSGAB irl,edep                   :  1 3FF3CE905ADE03A3
+in compute-eloss-g: 3ECBE011057428C3 4004ADCD415FB5E6 3FEE63B8888B4BA3  19
+in compute-eloss: 3ECBE011057428C3 4004ADCD415FB5E6 3FEE63B8888B4BA3  19
+out compute-eloss: 3F0ABFBF03392C59
+out compute-eloss-g: 3F0ABFBF03392C59
+ AUSGAB irl,edep                   :  2 3F0ABFBF03392C59
+ bremsstrahlung  about to occur    :    2    2.58481   1   2   0.03400   0.06061   0.04708  0.30758  0.80119 -0.51330         0 1.000E+00
+         Resulting photon          :    2    3.08534   1   2   0.03400   0.06061   0.04708  0.30758  0.80119 -0.51330         0 1.000E+00
+         Resulting photon          :    3    0.01048   0   2   0.03400   0.06061   0.04708  0.38967  0.70536 -0.59214         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    3    0.01048   0   2   0.03400   0.06061   0.04708  0.38967  0.70536 -0.59214         0 1.000E+00
+         Now on top of stack       :    2    2.57434   1   2   0.03400   0.06061   0.04708  0.30758  0.80119 -0.51330         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3F8574E0F50E984A
+in compute-eloss-g: 3F87FDC6EBCC9DEC 4004983DA0ABA415 3FEE4249A204193F  19
+in compute-eloss: 3F87FDC6EBCC9DEC 4004983DA0ABA415 3FEE4249A204193F  19
+out compute-eloss: 3FC6FF544D204304
+out compute-eloss-g: 3FC6FF544D204304
+ AUSGAB irl,edep                   :  2 3FC6FF544D204304
+in compute-eloss-g: 3F8585739B3A6D6D 400328485BD99FE5 3FEBF19FC3962AFB  19
+in compute-eloss: 3F8585739B3A6D6D 400328485BD99FE5 3FEBF19FC3962AFB  19
+out compute-eloss: 3FC497209D94CF7D
+out compute-eloss-g: 3FC497209D94CF7D
+ AUSGAB irl,edep                   :  2 3FC497209D94CF7D
+in compute-eloss-g: 3F8325AD330CB53A 4001DED6520052ED 3FE9B7F896D5F7EA  19
+in compute-eloss: 3F8310F150D56178 4001DD993AC2F6C5 3FE9B5C0B5823BC9  18
+out compute-eloss: 3FC236E242E04846
+out compute-eloss-g: 3FC24AB3B6B60AC0
+ AUSGAB irl,edep                   :  2 3FC24AB3B6B60AC0
+in compute-eloss-g: 3F81612BC9FAA124 4000BA2B1694F241 3FE79A627C236C15  18
+in compute-eloss: 3F81612BC9FAA124 4000BA2B1694F241 3FE79A627C236C15  18
+out compute-eloss: 3FC095EA8D1BCF59
+out compute-eloss-g: 3FC095EA8D1BCF59
+ AUSGAB irl,edep                   :  2 3FC095EA8D1BCF59
+in compute-eloss-g: 3ED440E67C3EBF7F 3FFF6198DB866A96 3FE58E4EABB9E2CE  18
+in compute-eloss: 3ED440E67C3EBF7F 3FFF6198DB866A96 3FE58E4EABB9E2CE  18
+out compute-eloss: 3F13516E425FB375
+out compute-eloss-g: 3F13516E425FB375
+ AUSGAB irl,edep                   :  2 3F13516E425FB375
+in compute-eloss-g: 3ECE2627017A7D38 3FFF614B95CD6118 3FE58DFFDF93BE74  18
+in compute-eloss: 3ECE2627017A7D38 3FFF614B95CD6118 3FE58DFFDF93BE74  18
+out compute-eloss: 3F0CC1AD98C4CB00
+out compute-eloss-g: 3F0CC1AD98C4CB00
+ AUSGAB irl,edep                   :  2 3F0CC1AD98C4CB00
+in compute-eloss-g: 3EC909008BC54FF5 3FFF611212722F8E 3FE58DC53923629C  18
+in compute-eloss: 3EC909008BC54FF5 3FFF611212722F8E 3FE58DC53923629C  18
+out compute-eloss: 3F07E0FD88A8F5A1
+out compute-eloss-g: 3F07E0FD88A8F5A1
+ AUSGAB irl,edep                   :  2 3F07E0FD88A8F5A1
+in compute-eloss-g: 3ECD81CBEB185014 3FFF60E250771E3C 3FE58D9485210F37  18
+in compute-eloss: 3ECD81CBEB185014 3FFF60E250771E3C 3FE58D9485210F37  18
+out compute-eloss: 3F0C24E847F633A4
+out compute-eloss-g: 3F0C24E847F633A4
+ AUSGAB irl,edep                   :  2 3F0C24E847F633A4
+in compute-eloss-g: 3E875408247248CA 3FFF60AA06A68E50 3FE58D5B1DAEC1F0  18
+in compute-eloss: 3E875408247248CA 3FFF60AA06A68E50 3FE58D5B1DAEC1F0  18
+out compute-eloss: 3EC64032DB0C5A05
+out compute-eloss-g: 3EC64032DB0C5A05
+ AUSGAB irl,edep                   :  2 3EC64032DB0C5A05
+in compute-eloss-g: 3ECA80705840DF33 3FFF60A73EA032EE 3FE58D5847889A7B  18
+in compute-eloss: 3ECA80705840DF33 3FFF60A73EA032EE 3FE58D5847889A7B  18
+out compute-eloss: 3F094714CF4DD0F4
+out compute-eloss-g: 3F094714CF4DD0F4
+ AUSGAB irl,edep                   :  2 3F094714CF4DD0F4
+ bremsstrahlung  about to occur    :    2    1.96105   1   2   0.03264   0.06137   0.01917 -0.32776  0.28751 -0.89995         0 1.000E+00
+         Resulting photon          :    2    1.80312   1   2   0.03264   0.06137   0.01917 -0.32776  0.28751 -0.89995         0 1.000E+00
+         Resulting photon          :    3    0.66893   0   2   0.03264   0.06137   0.01917  0.06332  0.26579 -0.96195         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    3    0.66893   0   1   0.03391   0.06666   0.00000  0.06332  0.26579 -0.96195         0 1.000E+00
+         Now on top of stack       :    2    1.29212   1   2   0.03264   0.06137   0.01917 -0.32776  0.28751 -0.89995         0 1.000E+00
+ AUSGAB irl,edep                   :  1 3FE567DDE1D0A62F
+in compute-eloss-g: 3F70954FA8080E22 3FF4AC85BF8E413A 3FD066F5565C094F  15
+in compute-eloss: 3F36B5D232D50900 3FF3C3D805663B2B 3FCB0CB0563814F1  14
+out compute-eloss: 3F75CC6BE6381E80
+out compute-eloss-g: 3FAFCF44C1C7C5A0
+ AUSGAB irl,edep                   :  2 3FAFCF44C1C7C5A0
+in compute-eloss-g: 3F6EA3B83DDFF170 3FF3AE0B9980030D 3FCA7F36F5652920  14
+in compute-eloss: 3F6EA3B83DDFF170 3FF3AE0B9980030D 3FCA7F36F5652920  14
+out compute-eloss: 3FAD73D2BA60F566
+out compute-eloss-g: 3FAD73D2BA60F566
+ AUSGAB irl,edep                   :  2 3FAD73D2BA60F566
+in compute-eloss-g: 3F6CA78343A3C9CF 3FF2C26D03ACFB62 3FC45DB9CFE4D0F6  14
+in compute-eloss: 3F6CA78343A3C9CF 3FF2C26D03ACFB62 3FC45DB9CFE4D0F6  14
+out compute-eloss: 3FAB9E291A3B4CCF
+out compute-eloss-g: 3FAB9E291A3B4CCF
+ AUSGAB irl,edep                   :  2 3FAB9E291A3B4CCF
+in compute-eloss-g: 3F6AB3C79B2DE163 3FF1E57BBADB20FC 3FBCACD04AF66F18  14
+in compute-eloss: 3F6AB3C79B2DE163 3FF1E57BBADB20FC 3FBCACD04AF66F18  14
+out compute-eloss: 3FA9CDBE5C496396
+out compute-eloss-g: 3FA9CDBE5C496396
+ AUSGAB irl,edep                   :  2 3FA9CDBE5C496396
+in compute-eloss-g: 3F68CA98EA76B944 3FF1170DC7F8D5DF 3FB0DF57B02FA596  14
+in compute-eloss: 3F67514F480DD130 3FF10BA50AFE3922 3FB034376C87BCC8  13
+out compute-eloss: 3FA69ADEBADEB0A6
+out compute-eloss-g: 3FA807F65A324840
+ AUSGAB irl,edep                   :  2 3FA807F65A324840
+in compute-eloss-g: 3F6749316D6B01AD 3FF056CE1527439D 3F957978A8C5DA02  13
+in compute-eloss: 3F6749316D6B01AD 3FF056CE1527439D 3F957978A8C5DA02  13
+out compute-eloss: 3FA6A7C7F6B2508F
+out compute-eloss-g: 3FA6A7C7F6B2508F
+ AUSGAB irl,edep                   :  2 3FA6A7C7F6B2508F
+ Discard  AE,AP<E<ECUT             :    2    0.97694   1   2   0.02368   0.06520   0.00582 -0.37747  0.90886 -0.17743         0 1.000E+00
+         Now on top of stack       :    1   10.97333   1   2   0.00039  -0.00105   0.00667  0.08339 -0.18574  0.97905         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3FEF431FAAE36232
+ Positron will annihilate at rest  :    2    0.97694   1   2   0.02368   0.06520   0.00582 -0.37747  0.90886 -0.17743         0 1.000E+00
+ Positron annihilates at rest      :    2    0.51100   0   2   0.02368   0.06520   0.00582  0.77936 -0.47955  0.40329         0 1.000E+00
+                                   :    3    0.51100   0   2   0.02368   0.06520   0.00582 -0.77936  0.47955 -0.40329         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    3    0.51100   0   1   0.01243   0.07212   0.00000 -0.77936  0.47955 -0.40329         0 1.000E+00
+         Now on top of stack       :    2    0.51100   0   2   0.02368   0.06520   0.00582  0.77936 -0.47955  0.40329         0 1.000E+00
+ AUSGAB irl,edep                   :  1 3FE05A1A80000000
+ AUSGAB irl,edep                   :  2                0
+ Rayleigh scattering occured       :    2    0.51100   0   2   0.06052   0.04253   0.02488  0.75588 -0.39879  0.51924         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    2    0.51100   0   3   0.16987  -0.01516   0.10000  0.75588 -0.39879  0.51924         0 1.000E+00
+         Now on top of stack       :    1   10.97333   1   2   0.00039  -0.00105   0.00667  0.08339 -0.18574  0.97905         0 1.000E+00
+ AUSGAB irl,edep                   :  3 3FE05A1A80000000
+in compute-eloss-g: 3F7B50E1E74C916C 4025F257FAD4EA1A 400329EAE4977EBA  29
+in compute-eloss: 3F7B50E1E74C916C 4025F257FAD4EA1A 400329EAE4977EBA  29
+out compute-eloss: 3FBC0757782B1A98
+out compute-eloss-g: 3FBC0757782B1A98
+ AUSGAB irl,edep                   :  2 3FBC0757782B1A98
+in compute-eloss-g: 3F8B13515657E72F 4025BA494BE493E5 4003156181AF1104  29
+in compute-eloss: 3F8B13515657E72F 4025BA494BE493E5 4003156181AF1104  29
+out compute-eloss: 3FCBC32A0BFE7C78
+out compute-eloss-g: 3FCBC32A0BFE7C78
+ AUSGAB irl,edep                   :  2 3FCBC32A0BFE7C78
+in compute-eloss-g: 3F9AC4EC08FFC2EE 40254B3CA3B499F3 4002EC145920F3B4  29
+in compute-eloss: 3F9AC4EC08FFC2EE 40254B3CA3B499F3 4002EC145920F3B4  29
+out compute-eloss: 3FDB68C2BA40CD41
+out compute-eloss-g: 3FDB68C2BA40CD41
+ AUSGAB irl,edep                   :  2 3FDB68C2BA40CD41
+in compute-eloss-g: 3F9104F0FE50C6D2 40246FF68DE29389 400297FF3215308D  29
+in compute-eloss: 3F9104F0FE50C6D2 40246FF68DE29389 400297FF3215308D  29
+out compute-eloss: 3FD165FD6D91A8C1
+out compute-eloss-g: 3FD165FD6D91A8C1
+ AUSGAB irl,edep                   :  2 3FD165FD6D91A8C1
+ bremsstrahlung  about to occur    :    1    9.94683   1   2  -0.01561  -0.00823   0.06249 -0.83441 -0.00358  0.55114         0 1.000E+00
+         Resulting photon          :    1   10.31797   1   2  -0.01561  -0.00823   0.06249 -0.83441 -0.00358  0.55114         0 1.000E+00
+         Resulting photon          :    2    0.13986   0   2  -0.01561  -0.00823   0.06249 -0.83455  0.01743  0.55065         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Compton  about to occur           :    2    0.13986   0   2  -0.04180  -0.00769   0.07977 -0.83455  0.01743  0.55065         0 1.000E+00
+         Local energy deposition   :     0.00219 MeV in region      2
+ AUSGAB irl,edep                   :  2 3F61F92581634063
+          compton scattered photon :    2    0.13123   0   2  -0.04180  -0.00769   0.07977 -0.83567 -0.43251  0.33852         0 1.000E+00
+          compton electron created :    3    0.00644  -1   2  -0.04180  -0.00769   0.07977 -0.10391  0.87125  0.47971         0 1.000E+00
+ Discard  E<AE,AP                  :    3    0.00644  -1   2  -0.04180  -0.00769   0.07977 -0.10391  0.87125  0.47971         0 1.000E+00
+         Now on top of stack       :    2    0.13123   0   2  -0.04180  -0.00769   0.07977 -0.83567 -0.43251  0.33852         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3F7A620D41B7B900
+ AUSGAB irl,edep                   :  2                0
+ Photoelectric about to occur      :    2    0.13123   0   2  -0.09112  -0.03321   0.09975 -0.83567 -0.43251  0.33852         0 1.000E+00
+         Local energy deposition   :     0.06742 MeV in region      2
+ AUSGAB irl,edep                   :  2 3FB142301311FA12
+         Resulting photoelectron   :    2    0.06381  -1   2  -0.09112  -0.03321   0.09975 -0.83567 -0.43251  0.33852         0 1.000E+00
+ Discard  E<AE,AP                  :    2    0.06381  -1   2  -0.09112  -0.03321   0.09975 -0.83567 -0.43251  0.33852         0 1.000E+00
+         Now on top of stack       :    1    9.80697   1   2  -0.01561  -0.00823   0.06249 -0.83441 -0.00358  0.55114         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3FB055D54507B378
+in compute-eloss-g: 3FA1FF5545E075D6 40239D2AC3C585BD 400243C648BAAED4  28
+in compute-eloss: 3FA1FF5545E075D6 40239D2AC3C585BD 400243C648BAAED4  28
+out compute-eloss: 3FE25918451CBF82
+out compute-eloss-g: 3FE25918451CBF82
+ AUSGAB irl,edep                   :  2 3FE25918451CBF82
+ bremsstrahlung  about to occur    :    1    9.23359   1   2  -0.02910  -0.02110   0.08941 -0.38663 -0.57678  0.71961         0 1.000E+00
+         Resulting photon          :    1    9.72361   1   2  -0.02910  -0.02110   0.08941 -0.38663 -0.57678  0.71961         0 1.000E+00
+         Resulting photon          :    2    0.02098   0   2  -0.02910  -0.02110   0.08941 -0.33943 -0.57877  0.74149         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.02098   0   2  -0.02910  -0.02110   0.08941 -0.33943 -0.57877  0.74149         0 1.000E+00
+         Now on top of stack       :    1    9.21261   1   2  -0.02910  -0.02110   0.08941 -0.38663 -0.57678  0.71961         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3F957AED0E205F5A
+in compute-eloss-g: 3F3D3FB73FBF958A 40226CDBC8ECA995 4001C3BC2079B053  28
+in compute-eloss: 3F3D3FB73FBF958A 40226CDBC8ECA995 4001C3BC2079B053  28
+out compute-eloss: 3F7DC56F8ADCD0E1
+out compute-eloss-g: 3F7DC56F8ADCD0E1
+ AUSGAB irl,edep                   :  2 3F7DC56F8ADCD0E1
+ bremsstrahlung  about to occur    :    1    9.20535   1   2  -0.02927  -0.02136   0.08973 -0.36651 -0.59941  0.71160         0 1.000E+00
+         Resulting photon          :    1    9.70020   1   2  -0.02927  -0.02136   0.08973 -0.36651 -0.59941  0.71160         0 1.000E+00
+         Resulting photon          :    2    0.01614   0   2  -0.02927  -0.02136   0.08973 -0.14433 -0.44754  0.88254         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.01614   0   2  -0.02927  -0.02136   0.08973 -0.14433 -0.44754  0.88254         0 1.000E+00
+         Now on top of stack       :    1    9.18921   1   2  -0.02927  -0.02136   0.08973 -0.36651 -0.59941  0.71160         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3F90873545E836D6
+in compute-eloss-g: 3F850AE4366EBE08 402260DF805859E0 4001BE8638C36CD3  28
+in compute-eloss: 3F850AE4366EBE08 402260DF805859E0 4001BE8638C36CD3  28
+out compute-eloss: 3FC5681A99CF791F
+out compute-eloss-g: 3FC5681A99CF791F
+ AUSGAB irl,edep                   :  2 3FC5681A99CF791F
+in compute-eloss-g: 3F59723E2A6C8840 40220B3F15F11BFC 400198E8838D9A7A  28
+in compute-eloss: 3F59723E2A6C8840 40220B3F15F11BFC 400198E8838D9A7A  28
+out compute-eloss: 3F99DF91B44085E4
+out compute-eloss-g: 3F99DF91B44085E4
+ AUSGAB irl,edep                   :  2 3F99DF91B44085E4
+in compute-eloss-g: 3F30CD856FC63000 4021FE4F4D16FBB9 4001932A2220FA7B  28
+in compute-eloss: 3F30CD856FC63000 4021FE4F4D16FBB9 4001932A2220FA7B  28
+out compute-eloss: 3F71155DF61CBA09
+out compute-eloss-g: 3F71155DF61CBA09
+ AUSGAB irl,edep                   :  2 3F71155DF61CBA09
+in compute-eloss-g: 3F08C668F64FD800 4021FC2CA1583822 4001923705E1737E  28
+in compute-eloss: 3F08C668F64FD800 4021FC2CA1583822 4001923705E1737E  28
+out compute-eloss: 3F493042122A255C
+out compute-eloss-g: 3F493042122A255C
+ AUSGAB irl,edep                   :  2 3F493042122A255C
+in compute-eloss-g: 3EDCE3D812233720 4021FBC7E04FEF79 4001920A344B8CFD  28
+in compute-eloss: 3EDCE3D812233720 4021FBC7E04FEF79 4001920A344B8CFD  28
+out compute-eloss: 3F1D5F41492B3A77
+out compute-eloss-g: 3F1D5F41492B3A77
+ AUSGAB irl,edep                   :  2 3F1D5F41492B3A77
+in compute-eloss-g: 3ED543189629EC24 4021FBB930AF4AE3 40019203ABCEC9B3  28
+in compute-eloss: 3ED543189629EC24 4021FBB930AF4AE3 40019203ABCEC9B3  28
+out compute-eloss: 3F159DEB67DCD1E8
+out compute-eloss-g: 3F159DEB67DCD1E8
+ AUSGAB irl,edep                   :  2 3F159DEB67DCD1E8
+ Discard -user request             :    1    8.99156   1   3  -0.03466  -0.02273   0.10000 -0.59578 -0.00138  0.80315         0 1.000E+00
+ AUSGAB irl,edep                   :  3 402406F1B1B996F5
+ END OF HISTORY       6   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000   1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+in compute-eloss-g: 3EE761FAD30AB72B 4034000000000000 4007F7427B73E391  33
+in compute-eloss: 3EE761FAD30AB72B 4034000000000000 4007F7427B73E391  33
+out compute-eloss: 3F289DE85CDF56F3
+out compute-eloss-g: 3F289DE85CDF56F3
+ AUSGAB irl,edep                   :  2 3F289DE85CDF56F3
+in compute-eloss-g: 3EF5A76968A1E771 4033FFF3B10BD190 4007F73D8F10B38F  33
+in compute-eloss: 3EF5A76968A1E771 4033FFF3B10BD190 4007F73D8F10B38F  33
+out compute-eloss: 3F36CBFA9051B5EA
+out compute-eloss-g: 3F36CBFA9051B5EA
+ AUSGAB irl,edep                   :  2 3F36CBFA9051B5EA
+in compute-eloss-g: 3F00AC2FF0BD558C 4033FFDCE511413E 4007F73470A1AABA  33
+in compute-eloss: 3F00AC2FF0BD558C 4033FFDCE511413E 4007F73470A1AABA  33
+out compute-eloss: 3F418D7286807457
+out compute-eloss-g: 3F418D7286807457
+ AUSGAB irl,edep                   :  2 3F418D7286807457
+in compute-eloss-g: 3F10AC22E4A547FF 4033FFB9CA2C343D 4007F72665BAAC8A  33
+in compute-eloss: 3F10AC22E4A547FF 4033FFB9CA2C343D 4007F72665BAAC8A  33
+out compute-eloss: 3F518D62FFA440D6
+out compute-eloss-g: 3F518D62FFA440D6
+ AUSGAB irl,edep                   :  2 3F518D62FFA440D6
+in compute-eloss-g: 3F20AB350D6D331D 4033FF7394A035AC 4007F70A4FBB9522  33
+in compute-eloss: 3F20AB350D6D331D 4033FF7394A035AC 4007F70A4FBB9522  33
+out compute-eloss: 3F618C650669903D
+out compute-eloss-g: 3F618C650669903D
+ AUSGAB irl,edep                   :  2 3F618C650669903D
+in compute-eloss-g: 3F30AA4E56AFC6F1 4033FEE73178025F 4007F6D225C274A4  33
+in compute-eloss: 3F30AA4E56AFC6F1 4033FEE73178025F 4007F6D225C274A4  33
+out compute-eloss: 3F718B6AFA01AF27
+out compute-eloss-g: 3F718B6AFA01AF27
+ AUSGAB irl,edep                   :  2 3F718B6AFA01AF27
+in compute-eloss-g: 3F40A98685CCED28 4033FDCE7AC86244 4007F661D372171D  33
+in compute-eloss: 3F40A98685CCED28 4033FDCE7AC86244 4007F661D372171D  33
+out compute-eloss: 3F818A8A4CDEEC47
+out compute-eloss-g: 3F818A8A4CDEEC47
+ AUSGAB irl,edep                   :  2 3F818A8A4CDEEC47
+in compute-eloss-g: 3F50A7AEB497DCB5 4033FB9D297EC666 4007F5812792F1BE  33
+in compute-eloss: 3F50A7AEB497DCB5 4033FB9D297EC666 4007F5812792F1BE  33
+out compute-eloss: 3F91887CF7E21F57
+out compute-eloss-g: 3F91887CF7E21F57
+ AUSGAB irl,edep                   :  2 3F91887CF7E21F57
+in compute-eloss-g: 3F60A0712D43EA68 4033F73B0A40CDDE 4007F3BFBA75BCD4  33
+in compute-eloss: 3F60A0712D43EA68 4033F73B0A40CDDE 4007F3BFBA75BCD4  33
+out compute-eloss: 3FA180A493494318
+out compute-eloss-g: 3FA180A493494318
+ AUSGAB irl,edep                   :  2 3FA180A493494318
+in compute-eloss-g: 3F7097EF52C06C5E 4033EE7AB7F7293C 4007F03D4AFDEDB5  33
+in compute-eloss: 3F7097EF52C06C5E 4033EE7AB7F7293C 4007F03D4AFDEDB5  33
+out compute-eloss: 3FB1773DF62BEE72
+out compute-eloss-g: 3FB1773DF62BEE72
+ AUSGAB irl,edep                   :  2 3FB1773DF62BEE72
+in compute-eloss-g: 3F808B1FE8B6E55A 4033DD037A00FD4E 4007E9379389ECE5  33
+in compute-eloss: 3F808B1FE8B6E55A 4033DD037A00FD4E 4007E9379389ECE5  33
+out compute-eloss: 3FC168DE7C3F9609
+out compute-eloss-g: 3FC168DE7C3F9609
+ AUSGAB irl,edep                   :  2 3FC168DE7C3F9609
+in compute-eloss-g: 3F907AA0AD923202 4033BA31BD087E22 4007DB2533A59F02  33
+in compute-eloss: 3F907AA0AD923202 4033BA31BD087E22 4007DB2533A59F02  33
+out compute-eloss: 3FD155BAB3ACC7CA
+out compute-eloss-g: 3FD155BAB3ACC7CA
+ AUSGAB irl,edep                   :  2 3FD155BAB3ACC7CA
+in compute-eloss-g: 3F7719C4FA85E4F4 403374DAD239CB03 4007BED4D0D87950  33
+in compute-eloss: 3F7719C4FA85E4F4 403374DAD239CB03 4007BED4D0D87950  33
+out compute-eloss: 3FB84AA681092A6F
+out compute-eloss-g: 3FB84AA681092A6F
+ AUSGAB irl,edep                   :  2 3FB84AA681092A6F
+ bremsstrahlung  about to occur    :    1   19.36157   1   2   0.00027   0.00390   0.03754  0.25250  0.21250  0.94397         0 1.000E+00
+         Resulting photon          :    1   19.40368   1   2   0.00027   0.00390   0.03754  0.25250  0.21250  0.94397         0 1.000E+00
+         Resulting photon          :    2    0.46890   0   2   0.00027   0.00390   0.03754  0.23122  0.23198  0.94484         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    2    0.46890   0   3   0.01555   0.01924   0.10000  0.23122  0.23198  0.94484         0 1.000E+00
+         Now on top of stack       :    1   18.89268   1   2   0.00027   0.00390   0.03754  0.25250  0.21250  0.94397         0 1.000E+00
+ AUSGAB irl,edep                   :  3 3FDE0262EF0EDBEA
+in compute-eloss-g: 3FA33854DFFED57E 4032E4869FFC8669 4007829C350260C7  33
+in compute-eloss: 3FA33854DFFED57E 4032E4869FFC8669 4007829C350260C7  33
+out compute-eloss: 3FE42D321A933A9A
+out compute-eloss-g: 3FE42D321A933A9A
+ AUSGAB irl,edep                   :  2 3FE42D321A933A9A
+in compute-eloss-g: 3F8D2B962D4BDBE0 4032431D0F27EC94 40073D182E50F0C8  33
+in compute-eloss: 3F8D2B962D4BDBE0 4032431D0F27EC94 40073D182E50F0C8  33
+out compute-eloss: 3FCE9804015B2D28
+out compute-eloss-g: 3FCE9804015B2D28
+ AUSGAB irl,edep                   :  2 3FCE9804015B2D28
+ bremsstrahlung  about to occur    :    1   18.02315   1   2   0.00257   0.02899   0.08068 -0.01092  0.65309  0.75721         0 1.000E+00
+         Resulting photon          :    1   17.39586   1   2   0.00257   0.02899   0.08068 -0.01092  0.65309  0.75721         0 1.000E+00
+         Resulting photon          :    2    1.13828   0   2   0.00257   0.02899   0.08068 -0.04356  0.66102  0.74911         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    2    1.13828   0   3   0.00145   0.04604   0.10000 -0.04356  0.66102  0.74911         0 1.000E+00
+         Now on top of stack       :    1   16.88487   1   2   0.00257   0.02899   0.08068 -0.01092  0.65309  0.75721         0 1.000E+00
+ AUSGAB irl,edep                   :  3 3FF236680124B3CF
+in compute-eloss-g: 3F93C7F9E4403650 4030E2868712EAFD 40069C80DE53C69E  32
+in compute-eloss: 3F93C7F9E4403650 4030E2868712EAFD 40069C80DE53C69E  32
+out compute-eloss: 3FD4ADAAC78BEC11
+out compute-eloss-g: 3FD4ADAAC78BEC11
+ AUSGAB irl,edep                   :  2 3FD4ADAAC78BEC11
+in compute-eloss-g: 3F6D39AF45506F40 40308FCFDBF4BB4D 400674EF243E11DC  32
+in compute-eloss: 3F6D39AF45506F40 40308FCFDBF4BB4D 400674EF243E11DC  32
+out compute-eloss: 3FAE895B3465A4F9
+out compute-eloss-g: 3FAE895B3465A4F9
+ AUSGAB irl,edep                   :  2 3FAE895B3465A4F9
+in compute-eloss-g: 3F3CAB8AC5FE7700 4030808B2E5A887B 40066D8BAF4D42D2  32
+in compute-eloss: 3F3CAB8AC5FE7700 4030808B2E5A887B 40066D8BAF4D42D2  32
+out compute-eloss: 3F7DF433186115EF
+out compute-eloss-g: 3F7DF433186115EF
+ AUSGAB irl,edep                   :  2 3F7DF433186115EF
+in compute-eloss-g: 3F0FC8287A90A000 40307EABEB29026A 40066CA34B22976F  32
+in compute-eloss: 3F0FC8287A90A000 40307EABEB29026A 40066CA34B22976F  32
+out compute-eloss: 3F509A331FD698E8
+out compute-eloss-g: 3F509A331FD698E8
+ AUSGAB irl,edep                   :  2 3F509A331FD698E8
+in compute-eloss-g: 3ECE9006636C82F7 40307E69825C8310 40066C83157A24D3  32
+in compute-eloss: 3ECE9006636C82F7 40307E69825C8310 40066C83157A24D3  32
+out compute-eloss: 3F0FEE481CDDF871
+out compute-eloss-g: 3F0FEE481CDDF871
+ AUSGAB irl,edep                   :  2 3F0FEE481CDDF871
+in compute-eloss-g: 3ED9384955DD8152 40307E6584937F74 40066C8125E0FF5E  32
+in compute-eloss: 3ED9384955DD8152 40307E6584937F74 40066C8125E0FF5E  32
+out compute-eloss: 3F1A595002DDFD0A
+out compute-eloss-g: 3F1A595002DDFD0A
+ AUSGAB irl,edep                   :  2 3F1A595002DDFD0A
+ Discard -user request             :    1   16.49364   1   3   0.00473   0.04182   0.10000  0.05400  0.50309  0.86255         0 1.000E+00
+ AUSGAB irl,edep                   :  3 40318400963F7EBD
+ END OF HISTORY       7   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000   1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+in compute-eloss-g: 3ED331EBA0415E86 4034000000000000 4007F7427B73E391  33
+in compute-eloss: 3ED331EBA0415E86 4034000000000000 4007F7427B73E391  33
+out compute-eloss: 3F1435448A16844A
+out compute-eloss-g: 3F1435448A16844A
+ AUSGAB irl,edep                   :  2 3F1435448A16844A
+in compute-eloss-g: 3EAD8D5E1828BA74 4033FFFAF2AEDD7A 4007F740761FFAD2  33
+in compute-eloss: 3EAD8D5E1828BA74 4033FFFAF2AEDD7A 4007F740761FFAD2  33
+out compute-eloss: 3EEF1CA7086A9FFA
+out compute-eloss-g: 3EEF1CA7086A9FFA
+ AUSGAB irl,edep                   :  2 3EEF1CA7086A9FFA
+in compute-eloss-g: 3EE1FD0AB114F590 4033FFF9F9C9A537 4007F7401290FBF2  33
+in compute-eloss: 3EE1FD0AB114F590 4033FFF9F9C9A537 4007F7401290FBF2  33
+out compute-eloss: 3F22F015FC1F530E
+out compute-eloss-g: 3F22F015FC1F530E
+ AUSGAB irl,edep                   :  2 3F22F015FC1F530E
+in compute-eloss-g: 3EF942401D02BCB1 4033FFF081BEA727 4007F73C48F0F320  33
+in compute-eloss: 3EF942401D02BCB1 4033FFF081BEA727 4007F73C48F0F320  33
+out compute-eloss: 3F3A97857FF2D6CB
+out compute-eloss-g: 3F3A97857FF2D6CB
+ AUSGAB irl,edep                   :  2 3F3A97857FF2D6CB
+in compute-eloss-g: 3F03FCD4F42DA2D0 4033FFD5EA392734 4007F731A5DF7033  33
+in compute-eloss: 3F03FCD4F42DA2D0 4033FFD5EA392734 4007F731A5DF7033  33
+out compute-eloss: 3F450AE0F8A80C50
+out compute-eloss-g: 3F450AE0F8A80C50
+ AUSGAB irl,edep                   :  2 3F450AE0F8A80C50
+in compute-eloss-g: 3F13FCD46A22B494 4033FFABD47735E4 4007F720D029862D  33
+in compute-eloss: 3F13FCD46A22B494 4033FFABD47735E4 4007F720D029862D  33
+out compute-eloss: 3F550ADDD45F484D
+out compute-eloss-g: 3F550ADDD45F484D
+ AUSGAB irl,edep                   :  2 3F550ADDD45F484D
+in compute-eloss-g: 3F23FCAC0EDF41FC 4033FF57A8FFE467 4007F6FF24587042  33
+in compute-eloss: 3F23FCAC0EDF41FC 4033FF57A8FFE467 4007F6FF24587042  33
+out compute-eloss: 3F650AAE31F1DD5A
+out compute-eloss-g: 3F650AAE31F1DD5A
+ AUSGAB irl,edep                   :  2 3F650AAE31F1DD5A
+in compute-eloss-g: 3F33FB7B34F2AEB6 4033FEAF538E54D8 4007F6BBCBA58943  33
+in compute-eloss: 3F33FB7B34F2AEB6 4033FEAF538E54D8 4007F6BBCBA58943  33
+out compute-eloss: 3F750962F683F94A
+out compute-eloss-g: 3F750962F683F94A
+ AUSGAB irl,edep                   :  2 3F750962F683F94A
+in compute-eloss-g: 3F43FA88C380CD08 4033FD5EBD5EEC98 4007F6351BE3830C  33
+in compute-eloss: 3F43FA88C380CD08 4033FD5EBD5EEC98 4007F6351BE3830C  33
+out compute-eloss: 3F85084F2471E47C
+out compute-eloss-g: 3F85084F2471E47C
+ AUSGAB irl,edep                   :  2 3F85084F2471E47C
+in compute-eloss-g: 3F53F92D7AA11132 4033FABDB37A5E5B 4007F527AF9801F6  33
+in compute-eloss: 3F53F92D7AA11132 4033FABDB37A5E5B 4007F527AF9801F6  33
+out compute-eloss: 3F9506B85D903B2A
+out compute-eloss-g: 3F9506B85D903B2A
+ AUSGAB irl,edep                   :  2 3F9506B85D903B2A
+in compute-eloss-g: 3F63F6BFF0FB4CDA 4033F57C0562FA4C 4007F30C9557CBE6  33
+in compute-eloss: 3F63F6BFF0FB4CDA 4033F57C0562FA4C 4007F30C9557CBE6  33
+out compute-eloss: 3FA503D7B14C4DA5
+out compute-eloss-g: 3FA503D7B14C4DA5
+ AUSGAB irl,edep                   :  2 3FA503D7B14C4DA5
+in compute-eloss-g: 3F73EA42FF93469F 4033EAFA198A5425 4007EED54A5297B6  33
+in compute-eloss: 3F73EA42FF93469F 4033EAFA198A5425 4007EED54A5297B6  33
+out compute-eloss: 3FB4F60DFFBB1847
+out compute-eloss-g: 3FB4F60DFFBB1847
+ AUSGAB irl,edep                   :  2 3FB4F60DFFBB1847
+in compute-eloss-g: 3F83D98572324A4F 4033D6040B8A990D 4007E665939B0AB6  33
+in compute-eloss: 3F83D98572324A4F 4033D6040B8A990D 4007E665939B0AB6  33
+out compute-eloss: 3FC4E3270B57106E
+out compute-eloss-g: 3FC4E3270B57106E
+ AUSGAB irl,edep                   :  2 3FC4E3270B57106E
+in compute-eloss-g: 3F93D486ECD9CD66 4033AC3DBD73EAEC 4007D57AA5F12207  33
+in compute-eloss: 3F93D486ECD9CD66 4033AC3DBD73EAEC 4007D57AA5F12207  33
+out compute-eloss: 3FD4DB50C52CDA6D
+out compute-eloss-g: 3FD4DB50C52CDA6D
+ AUSGAB irl,edep                   :  2 3FD4DB50C52CDA6D
+in compute-eloss-g: 3F90C971487ABB68 403358D07A5F3782 4007B344ECE84AD0  33
+in compute-eloss: 3F90C971487ABB68 403358D07A5F3782 4007B344ECE84AD0  33
+out compute-eloss: 3FD1A52D819E1AF4
+out compute-eloss-g: 3FD1A52D819E1AF4
+ AUSGAB irl,edep                   :  2 3FD1A52D819E1AF4
+ Bhabba   about to occur           :    1   19.07122   1   2  -0.00738  -0.00421   0.05381 -0.21207 -0.28066  0.93609         0 1.000E+00
+          Resulting e- or e+       :    1   15.20441   1   2  -0.00738  -0.00421   0.05381 -0.32114 -0.27307  0.90681         0 1.000E+00
+                                   :    2    3.86681  -1   2  -0.00738  -0.00421   0.05381  0.20535 -0.27714  0.93863         0 1.000E+00
+in compute-eloss-g: 3F83812994D54016 400EEF39DBA638D0 3FF5A38D655EF55F  22
+in compute-eloss: 3F83812994D54016 400EEF39DBA638D0 3FF5A38D655EF55F  22
+out compute-eloss: 3FC31CF14BC25E43
+out compute-eloss-g: 3FC31CF14BC25E43
+ AUSGAB irl,edep                   :  2 3FC31CF14BC25E43
+ Moller   about to occur           :    2    3.71749  -1   2  -0.00436  -0.00262   0.06177  0.40255  0.57814  0.70972         0 1.000E+00
+          Resulting electrons      :    2    3.09634  -1   2  -0.00436  -0.00262   0.06177  0.20848  0.63191  0.74647         0 1.000E+00
+                                   :    3    0.62115  -1   2  -0.00436  -0.00262   0.06177  0.93561  0.16848  0.31025         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    3    0.62115  -1   2  -0.00436  -0.00262   0.06177  0.93561  0.16848  0.31025         0 1.000E+00
+         Now on top of stack       :    2    3.09634  -1   2  -0.00436  -0.00262   0.06177  0.20848  0.63191  0.74647         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3FE3E06F3F235B44
+in compute-eloss-g: 3F9033D431C964DA 4008C54EF7213C1B 3FF215630EA474E2  21
+in compute-eloss: 3F8410DF0D9BA290 4008056928265B60 3FF1978582BE2B88  20
+out compute-eloss: 3FC37AAB9B062D74
+out compute-eloss-g: 3FCF79088AB43920
+ AUSGAB irl,edep                   :  2 3FCF79088AB43920
+in compute-eloss-g: 3F8C65749E7EFDC4 4006CDBE6E75F889 3FF0C27B1D2EB7A3  20
+in compute-eloss: 3F8C65749E7EFDC4 4006CDBE6E75F889 3FF0C27B1D2EB7A3  20
+out compute-eloss: 3FCB83CD6A821F3C
+out compute-eloss-g: 3FCB83CD6A821F3C
+ AUSGAB irl,edep                   :  2 3FCB83CD6A821F3C
+in compute-eloss-g: 3F88F6809CC64176 4005158197CDD695 3FEF02A611FC79FF  20
+in compute-eloss: 3F82E0AAE9C61350 4004B74B7AD7A4C5 3FEE7265DD7F496C  19
+out compute-eloss: 3FC240623DE32783
+out compute-eloss-g: 3FC823C40D464480
+ AUSGAB irl,edep                   :  2 3FC823C40D464480
+in compute-eloss-g: 3F76149B18A1AA80 4003934556F9724D 3FECA269CCDACF0B  19
+in compute-eloss: 3F76149B18A1AA80 4003934556F9724D 3FECA269CCDACF0B  19
+out compute-eloss: 3FB5542F158B3A98
+out compute-eloss-g: 3FB5542F158B3A98
+ AUSGAB irl,edep                   :  2 3FB5542F158B3A98
+in compute-eloss-g: 3F698E18EC19C920 4002E8A3DE4D1878 3FEB869F0ACD4855  19
+in compute-eloss: 3F698E18EC19C920 4002E8A3DE4D1878 3FEB869F0ACD4855  19
+out compute-eloss: 3FA8ABF02DF31887
+out compute-eloss-g: 3FA8ABF02DF31887
+ AUSGAB irl,edep                   :  2 3FA8ABF02DF31887
+in compute-eloss-g: 3F55D01A202E8B80 400285F41D954C16 3FEADDE264023F54  19
+in compute-eloss: 3F55D01A202E8B80 400285F41D954C16 3FEADDE264023F54  19
+out compute-eloss: 3F950D7BF33298F3
+out compute-eloss-g: 3F950D7BF33298F3
+ AUSGAB irl,edep                   :  2 3F950D7BF33298F3
+in compute-eloss-g: 3F2504310A496600 40025BD925AEE6E4 3FEA94D1EEAE53D3  19
+in compute-eloss: 3F2504310A496600 40025BD925AEE6E4 3FEA94D1EEAE53D3  19
+out compute-eloss: 3F64482A8DB1021D
+out compute-eloss-g: 3F64482A8DB1021D
+ AUSGAB irl,edep                   :  2 3F64482A8DB1021D
+in compute-eloss-g: 3EDBBAC9A77D8217 400256C71B0B7AA3 3FEA8BFA2DDAABA6  19
+in compute-eloss: 3EDBBAC9A77D8217 400256C71B0B7AA3 3FEA8BFA2DDAABA6  19
+out compute-eloss: 3F1AC2A00D63B9C6
+out compute-eloss-g: 3F1AC2A00D63B9C6
+ AUSGAB irl,edep                   :  2 3F1AC2A00D63B9C6
+ Discard -user request             :    2    2.29227  -1   3  -0.00008   0.00608   0.10000  0.19325 -0.08811  0.97718         0 1.000E+00
+         Now on top of stack       :    1   15.20441   1   2  -0.00738  -0.00421   0.05381 -0.32114 -0.27307  0.90681         0 1.000E+00
+ AUSGAB irl,edep                   :  3 4002569195CB5FDC
+in compute-eloss-g: 3FA7A5F1D14B77DD 402E68A911C7EFF8 4005C5CECBEE28E0  31
+in compute-eloss: 3FA7A5F1D14B77DD 402E68A911C7EFF8 4005C5CECBEE28E0  31
+out compute-eloss: 3FE898D7A219597B
+out compute-eloss-g: 3FE898D7A219597B
+ AUSGAB irl,edep                   :  2 3FE898D7A219597B
+in compute-eloss-g: 3F817242EF7FDED0 402CDF1B97A65A60 40055B9003D8A99B  31
+in compute-eloss: 3F817242EF7FDED0 402CDF1B97A65A60 40055B9003D8A99B  31
+out compute-eloss: 3FC21F435FE61D94
+out compute-eloss-g: 3FC21F435FE61D94
+ AUSGAB irl,edep                   :  2 3FC21F435FE61D94
+in compute-eloss-g: 3F656B8A85FA9D40 402C969E8A26C1EA 40054760AA551C7A  31
+in compute-eloss: 3F656B8A85FA9D40 402C969E8A26C1EA 40054760AA551C7A  31
+out compute-eloss: 3FA63E5DF43ECAF6
+out compute-eloss-g: 3FA63E5DF43ECAF6
+ AUSGAB irl,edep                   :  2 3FA63E5DF43ECAF6
+in compute-eloss-g: 3F51A2C82710BE00 402C80602C32831F 40054124C29F493D  31
+in compute-eloss: 3F51A2C82710BE00 402C80602C32831F 40054124C29F493D  31
+out compute-eloss: 3F924FEDB0CA8F85
+out compute-eloss-g: 3F924FEDB0CA8F85
+ AUSGAB irl,edep                   :  2 3F924FEDB0CA8F85
+in compute-eloss-g: 3F3EEC6337866E00 402C7738355A1DD7 40053E926D1461EC  31
+in compute-eloss: 3F3EEC6337866E00 402C7738355A1DD7 40053E926D1461EC  31
+out compute-eloss: 3F800DD5C74B9AC2
+out compute-eloss-g: 3F800DD5C74B9AC2
+ AUSGAB irl,edep                   :  2 3F800DD5C74B9AC2
+in compute-eloss-g: 3F2B98D151A8F400 402C7334BFE84AF0 40053D7196ED5A32  31
+in compute-eloss: 3F2B98D151A8F400 402C7334BFE84AF0 40053D7196ED5A32  31
+out compute-eloss: 3F6CA759AEEA1178
+out compute-eloss-g: 3F6CA759AEEA1178
+ AUSGAB irl,edep                   :  2 3F6CA759AEEA1178
+in compute-eloss-g: 3F18BD732C53C400 402C716A4A4D5C4F 40053CF0A8440BAE  31
+in compute-eloss: 3F18BD732C53C400 402C716A4A4D5C4F 40053CF0A8440BAE  31
+out compute-eloss: 3F59AFED0E404B81
+out compute-eloss-g: 3F59AFED0E404B81
+ AUSGAB irl,edep                   :  2 3F59AFED0E404B81
+in compute-eloss-g: 3F06D4B917909800 402C709CCAE4EA4D 40053CB6DAE13F3E  31
+in compute-eloss: 3F06D4B917909800 402C709CCAE4EA4D 40053CB6DAE13F3E  31
+out compute-eloss: 3F47B4779A2375C2
+out compute-eloss-g: 3F47B4779A2375C2
+ AUSGAB irl,edep                   :  2 3F47B4779A2375C2
+in compute-eloss-g: 3EE1376AA24ED10D 402C703DF90681BF 40053C9C2E967F28  31
+in compute-eloss: 3EE1376AA24ED10D 402C703DF90681BF 40053C9C2E967F28  31
+out compute-eloss: 3F21E021F67A19BA
+out compute-eloss-g: 3F21E021F67A19BA
+ AUSGAB irl,edep                   :  2 3F21E021F67A19BA
+in compute-eloss-g: 3EFD600FA8443F34 402C702C18E48B45 40053C972745DD02  31
+in compute-eloss: 3EFD600FA8443F34 402C702C18E48B45 40053C972745DD02  31
+out compute-eloss: 3F3E7FEC211BE06D
+out compute-eloss-g: 3F3E7FEC211BE06D
+ AUSGAB irl,edep                   :  2 3F3E7FEC211BE06D
+in compute-eloss-g: 3EAEB27FCF8CCE94 402C6FEF190C490D 40053C85FE46AE6E  31
+in compute-eloss: 3EAEB27FCF8CCE94 402C6FEF190C490D 40053C85FE46AE6E  31
+out compute-eloss: 3EEFDF4F45DC288D
+out compute-eloss-g: 3EEFDF4F45DC288D
+ AUSGAB irl,edep                   :  2 3EEFDF4F45DC288D
+ Discard -user request             :    1   14.21861   1   3  -0.02965  -0.03181   0.10000 -0.35585 -0.76158  0.54163         0 1.000E+00
+ AUSGAB irl,edep                   :  3 402E7B306B1754AF
+ END OF HISTORY       8   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000   1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+in compute-eloss-g: 3ECBA4D5F0E04B7D 4034000000000000 4007F7427B73E391  33
+in compute-eloss: 3ECBA4D5F0E04B7D 4034000000000000 4007F7427B73E391  33
+out compute-eloss: 3F0D1A5674427072
+out compute-eloss-g: 3F0D1A5674427072
+ AUSGAB irl,edep                   :  2 3F0D1A5674427072
+in compute-eloss-g: 3EE8839C726CE786 4033FFFC5CB53178 4007F74106EF6F13  33
+in compute-eloss: 3EE8839C726CE786 4033FFFC5CB53178 4007F74106EF6F13  33
+out compute-eloss: 3F29CED30B572408
+out compute-eloss-g: 3F29CED30B572408
+ AUSGAB irl,edep                   :  2 3F29CED30B572408
+in compute-eloss-g: 3EE2B4A461EEDE1B 4033FFEF754BABCC 4007F73BDD8F6BC9  33
+in compute-eloss: 3EE2B4A461EEDE1B 4033FFEF754BABCC 4007F73BDD8F6BC9  33
+out compute-eloss: 3F23B15FEA178B65
+out compute-eloss-g: 3F23B15FEA178B65
+ AUSGAB irl,edep                   :  2 3F23B15FEA178B65
+in compute-eloss-g: 3ED68F8A7ECDF2C6 4033FFE59C9BB6C0 4007F737ED44CF9D  33
+in compute-eloss: 3ED68F8A7ECDF2C6 4033FFE59C9BB6C0 4007F737ED44CF9D  33
+out compute-eloss: 3F17C05BB18A317A
+out compute-eloss-g: 3F17C05BB18A317A
+ AUSGAB irl,edep                   :  2 3F17C05BB18A317A
+in compute-eloss-g: 3EFEB49D36B5A078 4033FFDFAC84CA5D 4007F7358D3827BB  33
+in compute-eloss: 3EFEB49D36B5A078 4033FFDFAC84CA5D 4007F7358D3827BB  33
+out compute-eloss: 3F4029BC4B2A9ED1
+out compute-eloss-g: 3F4029BC4B2A9ED1
+ AUSGAB irl,edep                   :  2 3F4029BC4B2A9ED1
+in compute-eloss-g: 3F0EB499FE83E935 4033FFBF590C3408 4007F7289EE891E1  33
+in compute-eloss: 3F0EB499FE83E935 4033FFBF590C3408 4007F7289EE891E1  33
+out compute-eloss: 3F5029B9148B6AB9
+out compute-eloss-g: 3F5029B9148B6AB9
+ AUSGAB irl,edep                   :  2 3F5029B9148B6AB9
+in compute-eloss-g: 3F1EB48F3A6D3C32 4033FF7EB227E1DA 4007F70EC20FD5DC  33
+in compute-eloss: 3F1EB48F3A6D3C32 4033FF7EB227E1DA 4007F70EC20FD5DC  33
+out compute-eloss: 3F6029B0602FD17A
+out compute-eloss-g: 3F6029B0602FD17A
+ AUSGAB irl,edep                   :  2 3F6029B0602FD17A
+in compute-eloss-g: 3F2EB47971DF9D2C 4033FEFD64A4E05B 4007F6DB077F605E  33
+in compute-eloss: 3F2EB47971DF9D2C 4033FEFD64A4E05B 4007F6DB077F605E  33
+out compute-eloss: 3F70299ED5739AC3
+out compute-eloss-g: 3F70299ED5739AC3
+ AUSGAB irl,edep                   :  2 3F70299ED5739AC3
+in compute-eloss-g: 3F3EB3EDC0521AD4 4033FDFACAB78921 4007F6738EE3281E  33
+in compute-eloss: 3F3EB3EDC0521AD4 4033FDFACAB78921 4007F6738EE3281E  33
+out compute-eloss: 3F802949263A815D
+out compute-eloss-g: 3F802949263A815D
+ AUSGAB irl,edep                   :  2 3F802949263A815D
+in compute-eloss-g: 3F4EB35D94217FF2 4033FBF5A192C1D1 4007F5A492442B96  33
+in compute-eloss: 3F4EB35D94217FF2 4033FBF5A192C1D1 4007F5A492442B96  33
+out compute-eloss: 3F9028E4F2D775FB
+out compute-eloss-g: 3F9028E4F2D775FB
+ AUSGAB irl,edep                   :  2 3F9028E4F2D775FB
+in compute-eloss-g: 3F5EB0C992A3A1F1 4033F7EB68560BF4 4007F40664427C55  33
+in compute-eloss: 3F5EB0C992A3A1F1 4033F7EB68560BF4 4007F40664427C55  33
+out compute-eloss: 3FA02758E7FBC88C
+out compute-eloss-g: 3FA02758E7FBC88C
+ AUSGAB irl,edep                   :  2 3FA02758E7FBC88C
+in compute-eloss-g: 3F6EAF52E6ECA0A4 4033EFD7BBE20E10 4007F0C95C168CFD  33
+in compute-eloss: 3F6EAF52E6ECA0A4 4033EFD7BBE20E10 4007F0C95C168CFD  33
+out compute-eloss: 3FB026324AF72F66
+out compute-eloss-g: 3FB026324AF72F66
+ AUSGAB irl,edep                   :  2 3FB026324AF72F66
+in compute-eloss-g: 3F6A2861AFAFF0DC 4033DFB1899716E1 4007EA4BD0E63672  33
+in compute-eloss: 3F6A2861AFAFF0DC 4033DFB1899716E1 4007EA4BD0E63672  33
+out compute-eloss: 3FAB87B48243FCF3
+out compute-eloss-g: 3FAB87B48243FCF3
+ AUSGAB irl,edep                   :  2 3FAB87B48243FCF3
+ bremsstrahlung  about to occur    :    1   19.82003   1   2   0.00005  -0.00014   0.01068 -0.03240 -0.05843  0.99777         0 1.000E+00
+         Resulting photon          :    1   15.70191   1   2   0.00005  -0.00014   0.01068 -0.03240 -0.05843  0.99777         0 1.000E+00
+         Resulting photon          :    2    4.62913   0   2   0.00005  -0.00014   0.01068 -0.04655 -0.05112  0.99761         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    2    4.62913   0   3  -0.00411  -0.00472   0.10000 -0.04655 -0.05112  0.99761         0 1.000E+00
+         Now on top of stack       :    1   15.19091   1   2   0.00005  -0.00014   0.01068 -0.03240 -0.05843  0.99777         0 1.000E+00
+ AUSGAB irl,edep                   :  3 4012843986B175B6
+in compute-eloss-g: 3F85DF668D6FB666 402E61BE9B532EEB 4005C3FCD049E77C  31
+in compute-eloss: 3F85DF668D6FB666 402E61BE9B532EEB 4005C3FCD049E77C  31
+out compute-eloss: 3FC6C4CC7FD82276
+out compute-eloss-g: 3FC6C4CC7FD82276
+ AUSGAB irl,edep                   :  2 3FC6C4CC7FD82276
+in compute-eloss-g: 3F95D4503003BAB4 402E06AB6953CE61 4005ABDD5601A496  31
+in compute-eloss: 3F95D4503003BAB4 402E06AB6953CE61 4005ABDD5601A496  31
+out compute-eloss: 3FD6B4D06CD785E8
+out compute-eloss-g: 3FD6B4D06CD785E8
+ AUSGAB irl,edep                   :  2 3FD6B4D06CD785E8
+in compute-eloss-g: 3FA5BB399E946848 402D5104E5ED1232 40057AE2ADD520AD  31
+in compute-eloss: 3FA5BB399E946848 402D5104E5ED1232 40057AE2ADD520AD  31
+out compute-eloss: 3FE691A9D564D70C
+out compute-eloss-g: 3FE691A9D564D70C
+ AUSGAB irl,edep                   :  2 3FE691A9D564D70C
+in compute-eloss-g: 3F91BB609994E7BC 402BE7EA4896C4C1 400515E57D5E9B6A  31
+in compute-eloss: 3F91BB609994E7BC 402BE7EA4896C4C1 400515E57D5E9B6A  31
+out compute-eloss: 3FD263370DCBC1EE
+out compute-eloss-g: 3FD263370DCBC1EE
+ AUSGAB irl,edep                   :  2 3FD263370DCBC1EE
+in compute-eloss-g: 3F6E0372E104E840 402B54D0902866B2 4004EB492BCCA1E6  31
+in compute-eloss: 3F6E0372E104E840 402B54D0902866B2 4004EB492BCCA1E6  31
+out compute-eloss: 3FAF1B3103C12D69
+out compute-eloss-g: 3FAF1B3103C12D69
+ AUSGAB irl,edep                   :  2 3FAF1B3103C12D69
+ bremsstrahlung  about to occur    :    1   13.60490   1   2   0.02672   0.00515   0.09843  0.72100  0.12669  0.68125         0 1.000E+00
+         Resulting photon          :    1   14.01560   1   2   0.02672   0.00515   0.09843  0.72100  0.12669  0.68125         0 1.000E+00
+         Resulting photon          :    2    0.10030   0   2   0.02672   0.00515   0.09843  0.72698  0.11830  0.67639         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    2    0.10030   0   3   0.02841   0.00542   0.10000  0.72698  0.11830  0.67639         0 1.000E+00
+         Now on top of stack       :    1   13.50460   1   2   0.02672   0.00515   0.09843  0.72100  0.12669  0.68125         0 1.000E+00
+ AUSGAB irl,edep                   :  3 3FB9AD07620F3C8E
+in compute-eloss-g: 3F59AEE717EFF200 402B025B5060870C 4004D301B2F3A430  31
+in compute-eloss: 3F59AEE717EFF200 402B025B5060870C 4004D301B2F3A430  31
+out compute-eloss: 3F9A9B2D3AA76592
+out compute-eloss-g: 3F9A9B2D3AA76592
+ AUSGAB irl,edep                   :  2 3F9A9B2D3AA76592
+in compute-eloss-g: 3F41A28774C8C900 402AF50DB9C33359 4004CF100214786C  31
+in compute-eloss: 3F41A28774C8C900 402AF50DB9C33359 4004CF100214786C  31
+out compute-eloss: 3F824480533266D9
+out compute-eloss-g: 3F824480533266D9
+ AUSGAB irl,edep                   :  2 3F824480533266D9
+in compute-eloss-g: 3F2921D52468BC00 402AF07C99AE66BF 4004CDB4EFB17D5F  31
+in compute-eloss: 3F2921D52468BC00 402AF07C99AE66BF 4004CDB4EFB17D5F  31
+out compute-eloss: 3F6A088958367E00
+out compute-eloss-g: 3F6A088958367E00
+ AUSGAB irl,edep                   :  2 3F6A088958367E00
+in compute-eloss-g: 3F11F03381CD2C00 402AEEDC1118E357 4004CD393A0BF0FE  31
+in compute-eloss: 3F11F03381CD2C00 402AEEDC1118E357 4004CD393A0BF0FE  31
+out compute-eloss: 3F5294D5D06E6AC5
+out compute-eloss-g: 3F5294D5D06E6AC5
+ AUSGAB irl,edep                   :  2 3F5294D5D06E6AC5
+in compute-eloss-g: 3EBD87C44BBC5523 402AEE476A6A5FE4 4004CD0D12143AEB  31
+in compute-eloss: 3EBD87C44BBC5523 402AEE476A6A5FE4 4004CD0D12143AEB  31
+out compute-eloss: 3EFE96C698DB5719
+out compute-eloss-g: 3EFE96C698DB5719
+ AUSGAB irl,edep                   :  2 3EFE96C698DB5719
+in compute-eloss-g: 3EE50B1D86CC780D 402AEE4397918CC9 4004CD0BEF4DF2EB  31
+in compute-eloss: 3EE50B1D86CC780D 402AEE4397918CC9 4004CD0BEF4DF2EB  31
+out compute-eloss: 3F25CC3C4AA16BC1
+out compute-eloss-g: 3F25CC3C4AA16BC1
+ AUSGAB irl,edep                   :  2 3F25CC3C4AA16BC1
+in compute-eloss-g: 3EEA9AD6A0F8A67A 402AEE2DCB554228 4004CD0575A33C91  31
+in compute-eloss: 3EEA9AD6A0F8A67A 402AEE2DCB554228 4004CD0575A33C91  31
+out compute-eloss: 3F2B8EFE2194A3A5
+out compute-eloss-g: 3F2B8EFE2194A3A5
+ AUSGAB irl,edep                   :  2 3F2B8EFE2194A3A5
+in compute-eloss-g: 3EEEBC6240A09E1D 402AEE123C572093 4004CCFD45D97D9F  31
+in compute-eloss: 3EEEBC6240A09E1D 402AEE123C572093 4004CCFD45D97D9F  31
+out compute-eloss: 3F2FD67167783E03
+out compute-eloss-g: 3F2FD67167783E03
+ AUSGAB irl,edep                   :  2 3F2FD67167783E03
+ Discard -user request             :    1   13.46474   1   3   0.02852   0.00545   0.10000  0.76318  0.11778  0.63536         0 1.000E+00
+ AUSGAB irl,edep                   :  3 402CF935B5E5B91B
+ END OF HISTORY       9   ****************************************
+
+
+ INITIAL SHOWER VALUES             :    1   20.000   1   2   0.000   0.000   0.000  0.000  0.000  1.000         0 1.000E+00
+in compute-eloss-g: 3EE1AF364041D26A 4034000000000000 4007F7427B73E391  33
+in compute-eloss: 3EE1AF364041D26A 4034000000000000 4007F7427B73E391  33
+out compute-eloss: 3F229E263211C6E1
+out compute-eloss-g: 3F229E263211C6E1
+ AUSGAB irl,edep                   :  2 3F229E263211C6E1
+in compute-eloss-g: 3EC53C79FC43CE3A 4033FFF6B0ECE6F7 4007F73EC2382EEA  33
+in compute-eloss: 3EC53C79FC43CE3A 4033FFF6B0ECE6F7 4007F73EC2382EEA  33
+out compute-eloss: 3F065B66E6324027
+out compute-eloss-g: 3F065B66E6324027
+ AUSGAB irl,edep                   :  2 3F065B66E6324027
+in compute-eloss-g: 3EAA45F7AC216C86 4033FFF3E5800A31 4007F73DA40C0A37  33
+in compute-eloss: 3EAA45F7AC216C86 4033FFF3E5800A31 4007F73DA40C0A37  33
+out compute-eloss: 3EEBA8F2F637231F
+out compute-eloss-g: 3EEBA8F2F637231F
+ AUSGAB irl,edep                   :  2 3EEBA8F2F637231F
+in compute-eloss-g: 3EEF1BE11BD9A5EA 4033FFF30838727F 4007F73D4B88C942  33
+in compute-eloss: 3EEF1BE11BD9A5EA 4033FFF30838727F 4007F73D4B88C942  33
+out compute-eloss: 3F306018B5208EC6
+out compute-eloss-g: 3F306018B5208EC6
+ AUSGAB irl,edep                   :  2 3F306018B5208EC6
+in compute-eloss-g: 3EF66037499AE177 4033FFE2A81FBD5E 4007F736BEAB2CA7  33
+in compute-eloss: 3EF66037499AE177 4033FFE2A81FBD5E 4007F736BEAB2CA7  33
+out compute-eloss: 3F378E888A95387D
+out compute-eloss-g: 3F378E888A95387D
+ AUSGAB irl,edep                   :  2 3F378E888A95387D
+in compute-eloss-g: 3F091FBCD3358C96 4033FFCB199732C9 4007F72D52612EF3  33
+in compute-eloss: 3F091FBCD3358C96 4033FFCB199732C9 4007F72D52612EF3  33
+out compute-eloss: 3F4A732D51598B60
+out compute-eloss-g: 3F4A732D51598B60
+ AUSGAB irl,edep                   :  2 3F4A732D51598B60
+in compute-eloss-g: 3F191F8BB5A73FCC 4033FF96333C9016 4007F718291C2C05  33
+in compute-eloss: 3F191F8BB5A73FCC 4033FF96333C9016 4007F718291C2C05  33
+out compute-eloss: 3F5A72F58B1A763E
+out compute-eloss-g: 3F5A72F58B1A763E
+ AUSGAB irl,edep                   :  2 3F5A72F58B1A763E
+in compute-eloss-g: 3F1746D6163E1010 4033FF2C676663AC 4007F6EDD64377A8  33
+in compute-eloss: 3F1746D6163E1010 4033FF2C676663AC 4007F6EDD64377A8  33
+out compute-eloss: 3F588148CD4BA125
+out compute-eloss-g: 3F588148CD4BA125
+ AUSGAB irl,edep                   :  2 3F588148CD4BA125
+ bremsstrahlung  about to occur    :    1   19.99528   1   2   0.00000   0.00000   0.00028  0.00097 -0.00150  1.00000         0 1.000E+00
+         Resulting photon          :    1   12.37228   1   2   0.00000   0.00000   0.00028  0.00097 -0.00150  1.00000         0 1.000E+00
+         Resulting photon          :    2    8.13399   0   2   0.00000   0.00000   0.00028  0.00950 -0.00749  0.99993         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    2    8.13399   0   3   0.00095  -0.00075   0.10000  0.00950 -0.00749  0.99993         0 1.000E+00
+         Now on top of stack       :    1   11.86129   1   2   0.00000   0.00000   0.00028  0.00097 -0.00150  1.00000         0 1.000E+00
+ AUSGAB irl,edep                   :  3 4020449A68940590
+in compute-eloss-g: 3F32616CB46B6803 4027B8FA5BF2576A 4003C946E3C1D9D0  30
+in compute-eloss: 3F32616CB46B6803 4027B8FA5BF2576A 4003C946E3C1D9D0  30
+out compute-eloss: 3F72EE8A84E17277
+out compute-eloss-g: 3F72EE8A84E17277
+ AUSGAB irl,edep                   :  2 3F72EE8A84E17277
+in compute-eloss-g: 3F4261615F777F9A 4027B69C8AA1BB3C 4003C87A8C8C6FA2  30
+in compute-eloss: 3F4261615F777F9A 4027B69C8AA1BB3C 4003C87A8C8C6FA2  30
+out compute-eloss: 3F82EE5E2830DEAF
+out compute-eloss-g: 3F82EE5E2830DEAF
+ AUSGAB irl,edep                   :  2 3F82EE5E2830DEAF
+in compute-eloss-g: 3F5260E752F1B1F8 4027B1E0F317AF04 4003C6E1A4ABD7C2  30
+in compute-eloss: 3F5260E752F1B1F8 4027B1E0F317AF04 4003C6E1A4ABD7C2  30
+out compute-eloss: 3F92ED9F06573F27
+out compute-eloss-g: 3F92ED9F06573F27
+ AUSGAB irl,edep                   :  2 3F92ED9F06573F27
+in compute-eloss-g: 3F625E24679247B0 4027A86A23948364 4003C3AEFFFC7885  30
+in compute-eloss: 3F625E24679247B0 4027A86A23948364 4003C3AEFFFC7885  30
+out compute-eloss: 3FA2EA4403A7C434
+out compute-eloss-g: 3FA2EA4403A7C434
+ AUSGAB irl,edep                   :  2 3FA2EA4403A7C434
+in compute-eloss-g: 3F724377E9B4B231 4027957FDF90DBA0 4003BD4701BCD5CB  30
+in compute-eloss: 3F724377E9B4B231 4027957FDF90DBA0 4003BD4701BCD5CB  30
+out compute-eloss: 3FB2CDC7C15E2FBC
+out compute-eloss-g: 3FB2CDC7C15E2FBC
+ AUSGAB irl,edep                   :  2 3FB2CDC7C15E2FBC
+in compute-eloss-g: 3F821599B4EA895E 40276FE4500E1F41 4003B07AFF2265DD  30
+in compute-eloss: 3F821599B4EA895E 40276FE4500E1F41 4003B07AFF2265DD  30
+out compute-eloss: 3FC29C8B83B3FBCA
+out compute-eloss-g: 3FC29C8B83B3FBCA
+ AUSGAB irl,edep                   :  2 3FC29C8B83B3FBCA
+in compute-eloss-g: 3F91E408C8CE9F70 4027257221FF4F52 400396E8FDE08C1E  30
+in compute-eloss: 3F772B0D5EBF9400 4026C1E6A164324F 400374365B587472  29
+out compute-eloss: 3FB7D05FC31CDAF2
+out compute-eloss-g: 3FD26588042AD720
+ AUSGAB irl,edep                   :  2 3FD26588042AD720
+in compute-eloss-g: 3F9465E320771924 40269245E1DDF899 40036366946DE9E3  29
+in compute-eloss: 3F9465E320771924 40269245E1DDF899 40036366946DE9E3  29
+out compute-eloss: 3FD4F2BF932CA1F9
+out compute-eloss-g: 3FD4F2BF932CA1F9
+ AUSGAB irl,edep                   :  2 3FD4F2BF932CA1F9
+ Bhabba   about to occur           :    1   10.95837   1   2   0.00830   0.00974   0.05295  0.02185  0.00826  0.99973         0 1.000E+00
+          Resulting e- or e+       :    1   10.58674   1   2   0.00830   0.00974   0.05295  0.05859  0.04864  0.99710         0 1.000E+00
+                                   :    2    0.37163  -1   2   0.00830   0.00974   0.05295 -0.55462 -0.61790  0.55731         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.37163  -1   2   0.00830   0.00974   0.05295 -0.55462 -0.61790  0.55731         0 1.000E+00
+         Now on top of stack       :    1   10.58674   1   2   0.00830   0.00974   0.05295  0.05859  0.04864  0.99710         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3FD7C8CEE3E8EFBC
+in compute-eloss-g: 3F88099A604E4BB5 40252C696E254C0B 4002E0773FFB2177  29
+in compute-eloss: 3F88099A604E4BB5 40252C696E254C0B 4002E0773FFB2177  29
+out compute-eloss: 3FC89E5E62087CEA
+out compute-eloss-g: 3FC89E5E62087CEA
+ AUSGAB irl,edep                   :  2 3FC89E5E62087CEA
+ bremsstrahlung  about to occur    :    1   10.39441   1   2   0.00927   0.01091   0.06455  0.15925  0.08450  0.98362         0 1.000E+00
+         Resulting photon          :    1   10.70992   1   2   0.00927   0.01091   0.06455  0.15925  0.08450  0.98362         0 1.000E+00
+         Resulting photon          :    2    0.19548   0   2   0.00927   0.01091   0.06455  0.13438  0.07936  0.98775         0 1.000E+00
+ AUSGAB irl,edep                   :  2                0
+ Discard -user request             :    2    0.19548   0   3   0.01410   0.01376   0.10000  0.13438  0.07936  0.98775         0 1.000E+00
+         Now on top of stack       :    1   10.19893   1   2   0.00927   0.01091   0.06455  0.15925  0.08450  0.98362         0 1.000E+00
+ AUSGAB irl,edep                   :  3 3FC905982480F706
+in compute-eloss-g: 3F92EE7526E1879B 402465D9940B263B 40029408C9369179  29
+in compute-eloss: 3F92EE7526E1879B 402465D9940B263B 40029408C9369179  29
+out compute-eloss: 3FD35999B8CE3C0B
+out compute-eloss-g: 3FD35999B8CE3C0B
+ AUSGAB irl,edep                   :  2 3FD35999B8CE3C0B
+ bremsstrahlung  about to occur    :    1    9.89658   1   2   0.01177   0.00815   0.08236 -0.11089 -0.35364  0.92879         0 1.000E+00
+         Resulting photon          :    1   10.34444   1   2   0.01177   0.00815   0.08236 -0.11089 -0.35364  0.92879         0 1.000E+00
+         Resulting photon          :    2    0.06314   0   2   0.01177   0.00815   0.08236  0.01910 -0.34389  0.93882         0 1.000E+00
+ Discard  AE,AP<E<ECUT             :    2    0.06314   0   2   0.01177   0.00815   0.08236  0.01910 -0.34389  0.93882         0 1.000E+00
+         Now on top of stack       :    1    9.83344   1   2   0.01177   0.00815   0.08236 -0.11089 -0.35364  0.92879         0 1.000E+00
+ AUSGAB irl,edep                   :  2 3FB029F6FAB9E3BA
+in compute-eloss-g: 3F9210D7E1E6A5BC 4023AAB8D84F4094 4002494BBAEE334E  29
+in compute-eloss: 3F90CA21FBDEAA00 4023A04C3420DACF 4002450D1159310A  28
+out compute-eloss: 3FD1216454399408
+out compute-eloss-g: 3FD26EF8DA064CA0
+ AUSGAB irl,edep                   :  2 3FD26EF8DA064CA0
+in compute-eloss-g: 3F740B1A726092C0 40231741117F0E2F 40020C69DB5BA097  28
+in compute-eloss: 3F740B1A726092C0 40231741117F0E2F 40020C69DB5BA097  28
+out compute-eloss: 3FB46EB81635BC79
+out compute-eloss-g: 3FB46EB81635BC79
+ AUSGAB irl,edep                   :  2 3FB46EB81635BC79
+in compute-eloss-g: 3F5B40A1AD7249C0 4022EE63A152A2B6 4001FB3791992634  28
+in compute-eloss: 3F5B40A1AD7249C0 4022EE63A152A2B6 4001FB3791992634  28
+out compute-eloss: 3F9BC62552FEC938
+out compute-eloss-g: 3F9BC62552FEC938
+ AUSGAB irl,edep                   :  2 3F9BC62552FEC938
+in compute-eloss-g: 3F3BDED9A171C900 4022E0808EA92351 4001F557199FE471  28
+in compute-eloss: 3F3BDED9A171C900 4022E0808EA92351 4001F557199FE471  28
+out compute-eloss: 3F7C66C2C6AF68D2
+out compute-eloss-g: 3F7C66C2C6AF68D2
+ AUSGAB irl,edep                   :  2 3F7C66C2C6AF68D2
+in compute-eloss-g: 3F182CAE596EB800 4022DCF3B6504D64 4001F3D5CAEE9909  28
+in compute-eloss: 3F182CAE596EB800 4022DCF3B6504D64 4001F3D5CAEE9909  28
+out compute-eloss: 3F58A26EB737B8E0
+out compute-eloss-g: 3F58A26EB737B8E0
+ AUSGAB irl,edep                   :  2 3F58A26EB737B8E0
+in compute-eloss-g: 3EB85F801A04A0F6 4022DC2EA2DA93A6 4001F38234543C77  28
+in compute-eloss: 3EB85F801A04A0F6 4022DC2EA2DA93A6 4001F38234543C77  28
+out compute-eloss: 3EF8D631A783140C
+out compute-eloss-g: 3EF8D631A783140C
+ AUSGAB irl,edep                   :  2 3EF8D631A783140C
+in compute-eloss-g: 3E97DEAD69F68E84 4022DC2B88145EB6 4001F380E3344CF9  28
+in compute-eloss: 3E97DEAD69F68E84 4022DC2B88145EB6 4001F380E3344CF9  28
+out compute-eloss: 3ED852EB7ED1A223
+out compute-eloss-g: 3ED852EB7ED1A223
+ AUSGAB irl,edep                   :  2 3ED852EB7ED1A223
+in compute-eloss-g: 3EB7B57B27EC3D5D 4022DC2AC57D02BF 4001F38090A9C040  28
+in compute-eloss: 3EB7B57B27EC3D5D 4022DC2AC57D02BF 4001F38090A9C040  28
+out compute-eloss: 3EF828F0803A7C09
+out compute-eloss-g: 3EF828F0803A7C09
+ AUSGAB irl,edep                   :  2 3EF828F0803A7C09
+in compute-eloss-g: 3EEB53A43DA801A8 4022DC27C05EF2B8 4001F37F48B940BB  28
+in compute-eloss: 3EEB53A43DA801A8 4022DC27C05EF2B8 4001F37F48B940BB  28
+out compute-eloss: 3F2BD8B6BB9B8553
+out compute-eloss-g: 3F2BD8B6BB9B8553
+ AUSGAB irl,edep                   :  2 3F2BD8B6BB9B8553
+in compute-eloss-g: 3EDF291086B78680 4022DC0BE7A8371C 4001F37378D78A8F  28
+in compute-eloss: 3EDF291086B78680 4022DC0BE7A8371C 4001F37378D78A8F  28
+out compute-eloss: 3F1FC0CC74784422
+out compute-eloss-g: 3F1FC0CC74784422
+ AUSGAB irl,edep                   :  2 3F1FC0CC74784422
+ Discard -user request             :    1    9.42966   1   3   0.01051  -0.00860   0.10000  0.01219 -0.59511  0.80356         0 1.000E+00
+ AUSGAB irl,edep                   :  3 4024E73F5741FCE0
+ END OF HISTORY      10   ****************************************
+
+
+
+ Fraction of energy reflected from plate=             1.15015645%
+ Fraction of energy deposited in plate=              13.11627332%
+ Fraction of energy transmitted through plate=       85.73357023%
+                                                 -----------
+ Total fraction of energy accounted for=            100.00000000%
+
+
+
+
+
+================================================================================
+Finished simulation
+
+  Elapsed time:                    0.4 s (  0.000 h)
+  CPU time:                        0.4 s (  0.000 h)
+  Ratio:                          1.006
+
+
+End of run                                             Mon Feb 22 11:36:24 2021
+================================================================================

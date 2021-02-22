@@ -79,7 +79,7 @@ def lines_approx_equal(line1, line2, epsilon=0.000002):
 
 
 class TestTutor4:
-    def test_output(self, caplog):
+    def test_output_electrons(self, caplog):
         """Test that Python tutor4 produces known output"""
 
         logger.propagate = True  # needed for pytest to capture
@@ -102,6 +102,31 @@ class TestTutor4:
             assert lines_approx_equal(line_expect, line_got)
             icount += 1
         assert icount > 200  # check that test is actually testing lots of lines
+
+    def test_output_positrons(self, caplog):
+        """Test that Python tutor4 produces known output for positron shower"""
+
+        logger.propagate = True  # needed for pytest to capture
+        caplog.set_level(logging.DEBUG)
+        # Ensure proper random initial state
+        # (other tests use ranlux)
+
+        egsfortran.init_ranlux(1,0)
+        tutor4.main(iqin=+1, iwatch=2, high_prec=True, ncase=50)
+
+        std_filename = TEST_DATA / "orig-tutor4-positron-watch2-extra-prec.txt"
+        expected = open(std_filename, "r").readlines()
+        got = [rec.message.strip('\n') for rec in caplog.records]
+
+        # Test each line of "data" - ignore headings, etc
+        iter_got = gen_data_lines(got)
+        icount = 0
+        for line_expect in gen_data_lines(expected):
+            line_got = next(iter_got)
+            assert lines_approx_equal(line_expect, line_got)
+            icount += 1
+        assert icount > 200  # check that test is actually testing lots of lines
+
 
     def test_compute_drange(self):
         "Calculate correct values for $COMPUTE-DRANGE in Python"
