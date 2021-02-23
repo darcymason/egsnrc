@@ -205,8 +205,8 @@ PARAMETER $MXSINC=1002;   "ANGLE INTERVALS IN (0,5*PI/2) FOR SINE"
 ;  "---------- BUFFER FLUSH SEMICOLON ----------"
 
 "THE FOLLOWING ARE PARAMETERS FOR AUSGAB CALLS:"
-PARAMETER $MXAUS=55;       "CHANGE IF MORE AUSGAB CALLS ARE ADDED"
-PARAMETER $MXAUSM5=50;     "SET THIS TO $MXAUS VALUE LESS 5"
+PARAMETER $MXAUS=35;       "CHANGE IF MORE AUSGAB CALLS ARE ADDED"
+PARAMETER $MXAUSM5=30;     "SET THIS TO $MXAUS VALUE LESS 5"
 
 "FIRST FIVE AUSGAB CALLS BELOW TURNED ON IN BLOCK DATA (DEFAULT)"
 PARAMETER $TRANAUSB=0;    "BEFORE TRANSPORT"
@@ -2486,13 +2486,9 @@ REPLACE {$SELECT-AZIMUTHAL-ANGLE(#,#);} WITH
 LOOP
 [
     $RANDOMSET xphi;
-    "$pyegs_debug('(a,e16.8)','azim random xphi=',xphi);"
-    "call flush;"
     xphi  = 2*xphi - 1;
     xphi2 = xphi*xphi;
     $RANDOMSET yphi;
-    "$pyegs_debug('(a,e16.8)','azim random yphi=',yphi);"
-    "call flush(i_log);"
     yphi2  = yphi*yphi;
     rhophi2 = xphi2 + yphi2;
 ]WHILE(rhophi2 > 1);
@@ -3286,6 +3282,12 @@ REPLACE {$UPDATE-DEMFP;} WITH
 REPLACE {$COMPUTE-ELOSS(#,#,#,#,#);} WITH
 "        =========================="
 {;
+  $egs_info('(a,2I4,3Z17,I4)','in compute-eloss:',
+        lelec, medium,
+        transfer({P1}, 1_8),
+        transfer({P2}, 1_8),
+        transfer({P3}, 1_8),
+        {P4});
   IF( lelec < 0 ) [
       $EVALUATE dedxmid USING ededx({P3});
       aux = ededx1({P4},medium)/dedxmid;
@@ -3297,12 +3299,26 @@ REPLACE {$COMPUTE-ELOSS(#,#,#,#,#);} WITH
   /*
   {P5} = dedxmid*{P1};  " Energy loss using stopping power at the beginning "
   */
+
   {P5} = dedxmid*{P1}*rhof; "IK: rhof scaling bug, June 9 2006"
                             "rhof scaling must be done here and NOT in "
                             "$COMPUTE-ELOSS-G below!"
+  /*  $egs_info('(a,4Z17)','de=dedxmid*step*rhof:',
+        transfer({P5}, 1_8), transfer(dedxmid, 1_8), transfer({P1}, 1_8),
+        transfer(rhof, 1_8));
+  */
   fedep = {P5}/{P2};
+  "  {P5} = {P5}*(1-0.5*fedep*aux*(1-0.333333*fedep*(aux-1-   "
+  "           0.25*fedep*(2-aux*(4-aux)))));    "
+  /*   $egs_info('(a,3Z17)','fedep, aux, partial:',
+        transfer(fedep, 1_8),
+        transfer(aux, 1_8),
+        transfer(0.333333*fedep*(aux-1-
+             0.25*fedep*(2-aux*(4-aux))), 1_8));
+  */
   {P5} = {P5}*(1-0.5*fedep*aux*(1-0.333333*fedep*(aux-1-
              0.25*fedep*(2-aux*(4-aux)))));
+  $egs_info('(a,Z17)','out compute-eloss:', transfer({P5}, 1_8));
 }
 ;
 
@@ -3311,6 +3327,13 @@ REPLACE {$COMPUTE-ELOSS(#,#,#,#,#);} WITH
 REPLACE {$COMPUTE-ELOSS-G(#,#,#,#,#);} WITH
 "        ============================"
 {
+  $egs_info('(a,2I4,3Z17,I4, Z17)','in compute-eloss-g:',
+        lelec, medium,
+        transfer({P1}, 1_8),
+        transfer({P2}, 1_8),
+        transfer({P3}, 1_8),
+        {P4},
+        transfer(range, 1_8));
   tuss = range - range_ep(qel,{P4},medium)/rhof;
     " here tuss is the range between the initial energy and the next lower "
     " energy on the interpolation grid "
@@ -3345,7 +3368,8 @@ REPLACE {$COMPUTE-ELOSS-G(#,#,#,#,#);} WITH
           {P5} = {P5} + {P2} - eketmp;
       ]
   ]
-}
+  $egs_info('(a,Z17)','out compute-eloss-g:', transfer({P5}, 1_8));
+  }
 ;
 %E  "egsnrc.macros"
 "============================================================================"
@@ -3574,7 +3598,7 @@ REPLACE {$egs_warning(#,#);} WITH {
   $warning({P1},{P2});
 };
 REPLACE {$warning(#,#);} WITH { write(i_log,{P1}) {P2}; };
-REPLACE {$egs_info(#,#);} WITH { write(i_log,{P1}) {P2}; call flush;};
+REPLACE {$egs_info(#,#);} WITH { write(i_log,{P1}) {P2}; };
 REPLACE {$declare_write_buffer;} WITH {;};
 
 
