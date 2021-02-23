@@ -1,5 +1,33 @@
 # util.py
 
+
+def float_from_fort_hex(hex_str):
+    return float.fromhex(py_hex_from_fort_hex(hex_str))
+
+def py_hex_from_fort_hex(hex_str) -> str:
+    """Return a Python float from a Fortran Z17 exact float hex output"""
+    # See e.g. https://en.wikipedia.org/wiki/Double-precision_floating-point_format
+    # for description.  52 bit fraction is stored, but could be implied leading
+    # zero or 1.
+    hex_str = hex_str.strip()
+    if hex_str == "0":
+        return '0x0.0p+0'
+    if len(hex_str) < 16:
+        hex_str = f"{hex_str:>016}"
+
+    # first three hex chars = 1 bit sign, 11-bit exponent
+    sign_exp, fraction = int(hex_str[:3], 16), int(hex_str[3:], 16)
+    sign = sign_exp >> 11
+    sign_char = "-" if sign == 1 else " "
+
+    exponent = sign_exp & 0x7FF
+    leading_bit = 1
+    if exponent == 0:
+        leading_bit = "0"
+        exponent = 1
+    fraction_hex = hex(fraction)[2:]  # exclude the leading "0x" Python adds
+    return f"{sign_char}0x{leading_bit}.{fraction_hex:>013}p{exponent-1023}"
+
 def fort_hex(values):
     """Return a list of floats in Fortran hex format
 
@@ -53,5 +81,3 @@ def for_E18(values):
 # print([f"{x:.18e}" for x in vals])
 # print(for_E18(vals))
 
-vals = [1.2345, 22.22, -1e-323]
-print(fort_hex(vals))

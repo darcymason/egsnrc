@@ -1,7 +1,8 @@
 from math import log
 from egsnrc.commons import *
+from egsnrc import config
 import numpy
-from .util import for_E18, fort_hex
+from egsnrc.util import for_E18, fort_hex
 
 import logging
 logger = logging.getLogger("egsnrc")
@@ -106,17 +107,24 @@ def calc_tstep_from_demfp(qel,lelec, medium, lelke, demfp, sig, eke, elke, total
 
 
 
-# Get exact match to Fortan constant 0.333333 (single prec) used in
-# compute-eloss in EGSnrc Mortran   XXX what should it be, exactly?
+# Get exact match to Fortan constants (single prec) used in EGSnrc Mortran
 # Python is always double prec so it represented this constant differently
 # than Fortan without the "D0" suffix to mark it as double
-dot_333333 = float.fromhex('0x1.55553e0000000p-2')  # XXX
+# if `test_precision`, then use the EGSnrc Mortran to match exactly for
+# comparing outputs exactly
+if config.test_precision:
+    point_333333 = float.fromhex('0x1.55553e0000000p-2')
+    point_99 =float.fromhex('0x1.fae1480000000p-1')
+else:
+    point_333333 = 0.333333
+    point_99 = 0.99
 
-def compute_eloss(lelec, medium, step, eke_, elke_, lelke_):
+
+def compute_eloss(lelec, medium, step, eke, elke, lelke):
     """"Compute the energy loss due to sub-threshold processes for a path-length `step`.
 
-    The energy at the beginning of the step is `eke_`, `elke_`=log(`eke_`),
-    `lelke_` is the interpolation index.
+    The energy at the beginning of the step is `eke`, `elke`=log(`eke`),
+    `lelke` is the interpolation index.
     The formulae are based on the logarithmic interpolation for dedx
     used in EGSnrc.
 
@@ -130,39 +138,41 @@ def compute_eloss(lelec, medium, step, eke_, elke_, lelke_):
     Assumes that initial and final energy are in the same interpolation bin.
 
     """
-    # print("fn: ",lelec, medium, step, eke_, elke_, lelke_)
+    # print("fn: ",lelec, medium, step, eke, elke, lelke)
 
-    logger.debug(f"in compute-eloss:{fort_hex([step, eke_, elke_])}{lelke_:4}")
+    # logger.debug(f"in compute-eloss:{fort_hex([step, eke, elke])}{lelke:4}")
     # ** 0-based
     medium_m1 = medium - 1
-    lelke_m1 = lelke_ - 1
+    lelke_m1 = lelke - 1
 
     if lelec < 0:
-        dedxmid = ededx1[lelke_m1, medium_m1]*elke_+ ededx0[lelke_m1, medium_m1]  # EVALUATE dedxmid USING ededx(elke_)
+        dedxmid = ededx1[lelke_m1, medium_m1]*elke+ ededx0[lelke_m1, medium_m1]  # EVALUATE dedxmid USING ededx(elke)
         aux = ededx1[lelke_m1, medium_m1]/dedxmid
     else:
-        dedxmid = pdedx1[lelke_m1, medium_m1]*elke_+ pdedx0[lelke_m1, medium_m1]  # EVALUATE dedxmid USING pdedx(elke_)
+        dedxmid = pdedx1[lelke_m1, medium_m1]*elke+ pdedx0[lelke_m1, medium_m1]  # EVALUATE dedxmid USING pdedx(elke)
         aux = pdedx1[lelke_m1, medium_m1]/dedxmid
 
     # de = dedxmid*tuss #  Energy loss using stopping power at the beginning
     de = dedxmid*step*rhof  # IK: rhof scaling bug, June 9 2006
                             # rhof scaling must be done here and NOT in
                             # $ COMPUTE-ELOSS-G
-    # logger.debug(f"de=dedxmid*step*rhof:{fort_hex([de, dedxmid, step, rhof])}")
-    fedep = de / eke_
+    fedep = de / eke
 
-    de *= 1-0.5*fedep*aux*(1-dot_333333*fedep*(aux-1-0.25*fedep*(2-aux*(4-aux))))
-    logger.debug(f"out compute-eloss:{fort_hex(de)}")
+    de *= 1 - 0.5*fedep*aux*(
+        1 - point_333333*fedep*(aux - 1 -0.25*fedep*(2-aux*(4-aux)))
+    )
+
+    # logger.debug(f"out compute-eloss:{fort_hex(de)}")
     return de
 
 
-def compute_eloss_g(lelec, medium, step, eke_, elke_, lelke_, range_):
+def compute_eloss_g(lelec, medium, step, eke, elke, lelke, range_):
     """A generalized version of `compute_eloss`"""
     # ** 0-based arrays in Python
     medium_m1 = medium - 1
-    lelke_m1 = lelke_ - 1
+    lelke_m1 = lelke - 1
 
-    logger.debug(f"in compute-eloss-g:{fort_hex([step, eke_, elke_])}{lelke_:4}")
+    logger.debug(f"in compute-eloss-g:{fort_hex([step, eke, elke])}{lelke:4}")
     # Note: range_ep IS 0-based already in first dimn
 
     qel = 0 if lelec==-1 else 1  # recalc here to not bother passing in both
@@ -171,21 +181,21 @@ def compute_eloss_g(lelec, medium, step, eke_, elke_, lelke_, range_):
         #  energy on the interpolation grid
     if tuss >= step:
         #  Final energy is in the same interpolation bin
-        # --- Inline replace: $ COMPUTE_ELOSS(tustep,eke_,elke_,lelke_,de); -----
-        de = compute_eloss(lelec, medium, step, eke_, elke_, lelke_)
+        # --- Inline replace: $ COMPUTE_ELOSS(tustep,eke,elke,lelke,de); -----
+        de = compute_eloss(lelec, medium, step, eke, elke, lelke)
 
     else:  # Must find first the table index where the step ends using
            #  pre-calculated ranges
-        lelktmp = lelke_
+        lelktmp = lelke
         tuss = (range_ - step) * rhof
         #  now tuss is the range of the final energy electron
         #  scaled to the default mass density from PEGS4
 
         if tuss <= 0:
-            de = eke_ - te[medium_m1]*0.99
+            de = eke - te[medium_m1]*point_99
             #  i.e., if the step we intend to take is longer than the particle
             #  range, the particle energy goes down to the threshold
-            # (eke_ is the initial particle energy)
+            # (eke is the initial particle energy)
             # originally the entire energy was lost, but msdist_xxx is not prepared
             # to deal with such large eloss fractions => changed July 2005.
         else:
@@ -200,7 +210,7 @@ def compute_eloss_g(lelec, medium, step, eke_, elke_, lelke_, range_):
             tuss = (range_ep[qel, lelktmp_m1+1, medium_m1] - tuss) / rhof
             # --- Inline replace: $ COMPUTE_ELOSS(tuss,eketmp,elktmp,lelktmp,de); -----
             de = compute_eloss(lelec, medium, tuss, eketmp, elktmp, lelktmp)
-            de = de + eke_ - eketmp
+            de = de + eke - eketmp
     logger.debug(f"out compute-eloss-g:{fort_hex(de)}")
     return de
 

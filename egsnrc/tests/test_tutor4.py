@@ -1,10 +1,15 @@
-import pytest
-from pathlib import Path
 
+import pytest
+from egsnrc import config  # import and line below must precede calcfuncs
+config.test_precision = True
+
+from pathlib import Path
 pytest.importorskip("egsnrc.egsfortran")  # from numpy.f2py, used while in transition
 from egsnrc import egsfortran
 from egsnrc.egs_home.tutor4 import tutor4
 from egsnrc import calcfuncs
+
+from egsnrc.util import float_from_fort_hex
 
 import logging
 logger = logging.getLogger("egsnrc")
@@ -17,25 +22,27 @@ TUTOR4_PATH = HERE.parent / "egs_home" / "tutor4" / "tutor4.py"
 
 # @pytest.mark.skipif(sys.platform=="win32")
 
-def known_in_out(filepath, in_types, out_types):
+def known_in_out(filepath, in_types, out_types, description=""):
     """Iterator over a filename, yielding known inputs and result"""
     with open(filepath, 'r') as f:
         lines = f.readlines()
 
     gen = iter(lines)
+    in_linestart = "in " + description
+    out_linestart = "out " + description
     for line in gen:
-        if not line.startswith("in "):
+        if not line.startswith(in_linestart):
             continue
-        inputs = line[3:].split()  # split after 'in '
+        inputs = line[len(in_linestart):].split()  # split after 'in '
 
         assert len(inputs) == len(in_types)
         inputs = [typ(x.strip()) for x, typ in zip(inputs, in_types)]
 
         out_line = next(gen)
-        while not out_line.startswith("out "):
+        while not out_line.startswith(out_linestart):
             out_line = next(gen)
 
-        outputs = out_line[4:].split() # split after 'out '
+        outputs = out_line[len(out_linestart):].split() # split after 'out '
         if not isinstance(out_types, (list, tuple)):
             out_types = (out_types,)
 
@@ -79,9 +86,19 @@ def lines_approx_equal(line1, line2, epsilon=0.000002):
 
 
 class TestTutor4:
+    """Tests related to inputs/outputs of EGSnrc Tutor4 example simulation"""
+    def setup(self):
+        tutor4.init()
+
+    @pytest.fixture(autouse=True)
+    def test_precision(self):
+        original = config.test_precision
+        config.test_precision = True
+        yield
+        config.test_precision = original
+
     def test_output_electrons(self, caplog):
         """Test that Python tutor4 produces known output"""
-
         logger.propagate = True  # needed for pytest to capture
         caplog.set_level(logging.DEBUG)
         # Ensure proper random initial state
@@ -158,31 +175,42 @@ class TestTutor4:
     def test_compute_eloss(self):
         "Calc correct values for $COMPUTE-ELOSS in Python"
         # Compare against ones captured from TUTOR4 run with extra prints
-        # tutor4.init()  # get all data loaded
         # Known inputs from Mortran tutor4 run
-        for inputs, expected in known_in_out(TEST_DATA / "compute-eloss.txt",
-            (int, int, float, float, float, int), float
+        float_hex = float_from_fort_hex
+        icount = 0
+        for inputs, expected in known_in_out(
+            TEST_DATA / "fort_tut4_compute_elosses.txt",
+            (int, int, float_hex, float_hex, float_hex, int),
+            float_hex,
+            "compute-eloss:"
         ):
             #
             # print("in ", ",".join(str(x) for x in inputs))
             got = calcfuncs.compute_eloss(*inputs)
 
-            assert got == pytest.approx(expected,abs=0.0000001)
+            assert expected == got
+            icount += 1
+        assert icount > 500
 
     def test_compute_eloss_g(self):
         "Calc correct values for $COMPUTE-ELOSS-G in Python"
         # Compare against ones captured from TUTOR4 run with extra prints
-        # tutor4.init()  # get all data loaded
         # Known input and output from Mortran tutor4 run
-        for inputs, expected in known_in_out(TEST_DATA / "compute-eloss-g.txt",
+        float_hex = float_from_fort_hex
+        icount = 0
+        for inputs, expected in known_in_out(
+            TEST_DATA / "fort_tut4_compute_elosses.txt",
             # lelec, medium, step, eke, elke, lelke, range_
-            (int, int, float, float, float, int, float), float
+            (int, int, float_hex, float_hex, float_hex, int, float_hex),
+            float_hex,
+            'compute-eloss-g:'
         ):
-            #
             # print("in ", ",".join(str(x) for x in inputs))
             got = calcfuncs.compute_eloss_g(*inputs)
+            assert got == expected
+            icount += 1
+        assert icount > 500  # ensure many, both q = +/- 1, checked
 
-            assert got == pytest.approx(expected,abs=0.0000001)
 
     def test_calculate_xi(self):
         "Calc correct values for $CALCULATE-XI in Python"
