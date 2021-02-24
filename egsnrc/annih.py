@@ -137,8 +137,9 @@ def annih():
         esg2 = pesg2
         e[np_m1] = pesg2
         iq[np_m1] = 0
-        np_m2 = np_m1 - 1
+
         # transfer properties to (np) FROM (np-1)
+        np_m2 = np_m1 - 1
         x[np_m1] = x[np_m2]; y[np_m1] = y[np_m2]; z[np_m1] = z[np_m2]
         ir[np_m1] = ir[np_m2]
         wt[np_m1] = wt[np_m2]

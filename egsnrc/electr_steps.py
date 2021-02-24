@@ -8,7 +8,7 @@ from egsnrc.calcfuncs import (
     calc_tstep_from_demfp, calculate_xi, compute_drange,
     compute_eloss, compute_eloss_g
 )
-from egsnrc.uphi import uphi
+from egsnrc.angles import uphi
 
 from math import log
 
