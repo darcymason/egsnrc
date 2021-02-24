@@ -3,6 +3,7 @@ from egsnrc.params import *
 from egsnrc.commons import *
 from egsnrc.constants import *
 from egsnrc.electr_steps import tstep_ustep
+from .annih import annih
 
 import logging
 logger = logging.getLogger('egsnrc')
@@ -132,7 +133,7 @@ def electr(hownear, howfar, ausgab) -> int:
             break
 
         # Follow the one particle  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-        particle_outcome, lelke = tstep_ustep(
+        particle_outcome, lelke, eie, peie = tstep_ustep(
             lelec, medium, irl,
             eie, peie,
             hownear, howfar, ausgab)
@@ -314,7 +315,7 @@ def electr(hownear, howfar, ausgab) -> int:
         if edep < peie:
             if iausfl[ANNIHRAUSB-1+1] != 0:  # ** 0-based
                 ausgab(ANNIHRAUSB)
-            annih_at_rest()
+            egsfortran.annih_at_rest()
             if particle_selection_annihrest:
                 particle_selection_annihrest()
 

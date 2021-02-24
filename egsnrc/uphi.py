@@ -2,7 +2,7 @@ from math import sqrt
 
 from egsnrc.commons import *
 from egsnrc.params import *
-from egsnrc.randoms import randomset
+from egsnrc.angles import select_azimuthal_angle
 
 import logging
 logger = logging.getLogger("egsnrc")
@@ -65,19 +65,7 @@ def uphi(ientry, lvl):
     # $evaluate cosphi using sin(cphi);
 
     # $select-azimuthal-angle(cosphi,sinphi);
-    rhophi2 = 99  # dummy to start the loop
-    while rhophi2 > 1:  # LOOP
-        xphi = randomset()
-        # logger.debug(f"xphi random: {xphi}")
-        xphi  = 2*xphi - 1
-        xphi2 = xphi*xphi
-        yphi = randomset()
-        yphi2  = yphi*yphi
-        rhophi2 = xphi2 + yphi2
-
-    rhophi2 = 1/rhophi2
-    cosphi  = (xphi2 - yphi2)*rhophi2
-    sinphi  = 2*xphi*yphi*rhophi2
+    cosphi, sinphi = select_azimuthal_angle()
 
     #   use the following entry for the second of two particles when we"
     #   know two particles have a relationship in their corrections.   "

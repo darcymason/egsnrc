@@ -1,10 +1,15 @@
-import pytest
-from pathlib import Path
 
+import pytest
+from egsnrc import config  # import and line below must precede calcfuncs
+config.test_precision = True
+
+from pathlib import Path
 pytest.importorskip("egsnrc.egsfortran")  # from numpy.f2py, used while in transition
 from egsnrc import egsfortran
 from egsnrc.egs_home.tutor4 import tutor4
 from egsnrc import calcfuncs
+
+from egsnrc.util import float_from_fort_hex as float_hex
 
 import logging
 logger = logging.getLogger("egsnrc")
@@ -17,25 +22,27 @@ TUTOR4_PATH = HERE.parent / "egs_home" / "tutor4" / "tutor4.py"
 
 # @pytest.mark.skipif(sys.platform=="win32")
 
-def known_in_out(filepath, in_types, out_types):
+def known_in_out(filepath, in_types, out_types, description=""):
     """Iterator over a filename, yielding known inputs and result"""
     with open(filepath, 'r') as f:
         lines = f.readlines()
 
     gen = iter(lines)
+    in_linestart = "in " + description
+    out_linestart = "out " + description
     for line in gen:
-        if not line.startswith("in "):
+        if not line.startswith(in_linestart):
             continue
-        inputs = line[3:].split()  # split after 'in '
+        inputs = line[len(in_linestart):].split()  # split after 'in '
 
-        assert len(inputs) == len(in_types)
+        assert len(inputs) == len(in_types), "Mismatch in input types and inputs"
         inputs = [typ(x.strip()) for x, typ in zip(inputs, in_types)]
 
         out_line = next(gen)
-        while not out_line.startswith("out "):
+        while not out_line.startswith(out_linestart):
             out_line = next(gen)
 
-        outputs = out_line[4:].split() # split after 'out '
+        outputs = out_line[len(out_linestart):].split() # split after 'out '
         if not isinstance(out_types, (list, tuple)):
             out_types = (out_types,)
 
@@ -61,6 +68,25 @@ def line_data(line):
     return data
 
 
+def check_known_in_out(
+    filename, func, input_types, output_types, description, min_count
+):
+    """Compare against ones captured from TUTOR4 run with extra prints
+    """
+    icount = 0
+    for inputs, expected in known_in_out(
+        filename, input_types, output_types, description
+    ):
+        # print("in ", ",".join(str(x) for x in inputs))
+        output = func(*inputs)
+        if isinstance(expected, (list, tuple)):
+            for got, expect in zip(output, expected):
+                assert expect == got
+        else:
+            assert expected == output
+        icount += 1
+    assert icount > min_count
+
 def lines_approx_equal(line1, line2, epsilon=0.000002):
     line1 = line1.strip()
     line2 = line2.strip()
@@ -72,116 +98,134 @@ def lines_approx_equal(line1, line2, epsilon=0.000002):
         line2_data = line_data(line2)
         if len(line1_data) != len(line2_data):
             return False  # however, should never be the case
-        return all(
+        match = all(
             abs(d1 - d2) < epsilon
             for d1, d2 in zip(line1_data, line2_data)
         )
+        return match
 
 
 class TestTutor4:
-    def test_output(self, caplog):
-        """Test that Python tutor4 produces known output"""
+    """Tests related to inputs/outputs of EGSnrc Tutor4 example simulation"""
+    def setup(self):
+        tutor4.init()
+        egsfortran.init_ranlux(1,0)
+        egsfortran.ranlux(egsfortran.randomm.rng_array)
+        egsfortran.randomm.rng_seed = 1
 
+    def test_output_watch2_elec(self, caplog):
+        """Test Python tutor4 produces known output - electrons"""
         logger.propagate = True  # needed for pytest to capture
         caplog.set_level(logging.DEBUG)
         # Ensure proper random initial state
         # (other tests use ranlux)
 
-        egsfortran.init_ranlux(1,0)
-        tutor4.main(iwatch=2, high_prec=True)
+        # Expected data
+        std_filename = TEST_DATA / "fort_tut4_elec_outputs.txt"
+        with open(std_filename, "r") as f:
+            expected = f.readlines()
 
-        std_filename = TEST_DATA / "orig-tutor4-watch2-extra-prec.txt"
-        expected = open(std_filename, "r").readlines()
+        tutor4.main(iqin=-1, iwatch=2, high_prec=True, ncase=20)
         got = [rec.message.strip('\n') for rec in caplog.records]
 
         # Test each line of "data" - ignore headings, etc
-        iter_got = gen_data_lines(got)
+        iter_expect = gen_data_lines(expected)
         icount = 0
-        for line_expect in gen_data_lines(expected):
-            line_got = next(iter_got)
-            assert lines_approx_equal(line_expect, line_got)
+        for line_got in gen_data_lines(got):
+            line_expect = next(iter_expect)
+            assert lines_approx_equal(line_expect, line_got), (
+                f"Expected line:\n{line_expect}\ngot:\n{line_got}"
+            )
             icount += 1
-        assert icount > 200  # check that test is actually testing lots of lines
+        assert icount > 400  # check that test is actually testing lots of lines
+
+    def test_output_watch2_pos(self, caplog):
+        """Test Python tutor4 produces known output - electrons"""
+        logger.propagate = True  # needed for pytest to capture
+        caplog.set_level(logging.DEBUG)
+        # Ensure proper random initial state
+        # (other tests use ranlux)
+
+        # Expected data
+        std_filename = TEST_DATA / "fort_tut4_pos_outputs.txt"
+        with open(std_filename, "r") as f:
+            expected = f.readlines()
+        tutor4.main(iqin=+1, iwatch=2, high_prec=True, ncase=20)
+
+        got = [rec.message.strip('\n') for rec in caplog.records]
+
+        # Test each line of "data" - ignore headings, etc
+        iter_expect = gen_data_lines(expected)
+        icount = 0
+        for line_got in gen_data_lines(got):
+            line_expect = next(iter_expect)
+            assert lines_approx_equal(line_expect, line_got), (
+                f"Expected line:\n{line_expect}\ngot:\n{line_got}"
+            )
+            icount += 1
+        assert icount > 400  # check that test is actually testing lots of lines
 
     def test_compute_drange(self):
         "Calculate correct values for $COMPUTE-DRANGE in Python"
-        # Compare against ones captured from TUTOR4 run with extra prints
-        # tutor4.init()  # get all data loaded
-        # Known inputs for compute-drange from Mortran tutor4 run
-        for inputs, expected in known_in_out(TEST_DATA / "compute-drange.txt",
-            (int, int, float, float, int, float, float), float
-        ):
-            # compute_drange(lelec, medium, eke1, eke2, lelke1, elke1, elke2)
-            got = calcfuncs.compute_drange(*inputs)
-            assert got == pytest.approx(expected,abs=0.0000001)
+
+        check_known_in_out(
+            TEST_DATA / "fort_tut4_calcfuncs.txt",
+            calcfuncs.compute_drange,
+            (int, int, float_hex, float_hex, int, float_hex, float_hex),
+            float_hex,
+            "compute-drange:",
+            600
+        )
 
     def test_calc_tstep(self):
         "Calc correct values for modified $CALCULATE-TSTEP-FROM-DEMFP in Python"
-        # Compare against ones captured from TUTOR4 run with extra prints
-        # tutor4.init()  # get all data loaded
-        # Known inputs from Mortran tutor4 run
-        for inputs, expected in known_in_out(TEST_DATA / "calc-tstep.txt",
-            (int, int, int, int, float, float, float, float, float), float
-        ):
-            #
-            # print("in ", ",".join(str(x) for x in inputs))
-
-            got = calcfuncs.calc_tstep_from_demfp(*inputs)
-            # print(got, expected)
-            assert got == pytest.approx(expected,abs=0.0000001)
+        # tutor4.init()  # need arrays etc. loaded, so if this is on its own
+        # Somehow vacdst was changed while running other tests, to
+        #   just under 1e8 (99_999_999.9xxx), so reset for this test
+        #   (used in one branch of calc_tstep_from_demfp)
+        egsfortran.bounds.vacdst = 1e8
+        check_known_in_out(
+            TEST_DATA / "fort_tut4_calcfuncs.txt",
+            calcfuncs.calc_tstep_from_demfp,
+            (int,)*4 + (float_hex,)*5,
+            float_hex,
+            "calc-tstep-from-demfp:",
+            75
+        )
 
     def test_compute_eloss(self):
         "Calc correct values for $COMPUTE-ELOSS in Python"
-        # Compare against ones captured from TUTOR4 run with extra prints
-        # tutor4.init()  # get all data loaded
-        # Known inputs from Mortran tutor4 run
-        for inputs, expected in known_in_out(TEST_DATA / "compute-eloss.txt",
-            (int, int, float, float, float, int), float
-        ):
-            #
-            # print("in ", ",".join(str(x) for x in inputs))
-            got = calcfuncs.compute_eloss(*inputs)
-
-            assert got == pytest.approx(expected,abs=0.0000001)
+        check_known_in_out(
+            TEST_DATA / "fort_tut4_calcfuncs.txt",
+            calcfuncs.compute_eloss,
+            (int, int, float_hex, float_hex, float_hex, int),
+            float_hex,
+            "compute-eloss:",
+            500
+        )
 
     def test_compute_eloss_g(self):
         "Calc correct values for $COMPUTE-ELOSS-G in Python"
-        # Compare against ones captured from TUTOR4 run with extra prints
-        # tutor4.init()  # get all data loaded
-        # Known input and output from Mortran tutor4 run
-        for inputs, expected in known_in_out(TEST_DATA / "compute-eloss-g.txt",
-            # lelec, medium, step, eke, elke, lelke, range_
-            (int, int, float, float, float, int, float), float
-        ):
-            #
-            # print("in ", ",".join(str(x) for x in inputs))
-            got = calcfuncs.compute_eloss_g(*inputs)
-
-            assert got == pytest.approx(expected,abs=0.0000001)
+        check_known_in_out(
+            TEST_DATA / "fort_tut4_calcfuncs.txt",
+            calcfuncs.compute_eloss_g,
+            (int, int, float_hex, float_hex, float_hex, int, float_hex),
+            float_hex,
+            "compute-eloss-g:",
+            500
+        )
 
     def test_calculate_xi(self):
         "Calc correct values for $CALCULATE-XI in Python"
-        # Compare against ones captured from TUTOR4 run with extra prints
-        # tutor4.init()  # get all data loaded
 
-        # Need setting here to get to IF conditions where this code applies
-        from egsnrc.commons import et_control
-        et_control.exact_bca = True
-
-        # Known input and output from Mortran/Fortran tutor4 run
-        for inputs, expected in known_in_out(TEST_DATA / "calc-xi.txt",
-            # lelec, medium, ekems, rmt2, rmsq, xccl, blccl, step
-            (int, int, float, float, float, float, float, float),
-            (float, float)
-        ):
-            #
-            # print("in ", ",".join(str(x) for x in inputs))
-
-            got = calcfuncs.calculate_xi(*inputs)
-            for a_got, a_expected in zip(got, expected):
-                assert a_got == pytest.approx(a_expected,abs=0.0000001)
-
-        et_control.exact_bca = False
+        check_known_in_out(
+            TEST_DATA / "calc_not_exact_bca.txt",
+            calcfuncs.calculate_xi,
+            (int, int) + (float_hex,)*6,
+            (float_hex, float_hex),
+            "calc-xi:",
+            80
+        )
 
     def test_pi_zero(self):
         with pytest.raises(NotImplementedError):

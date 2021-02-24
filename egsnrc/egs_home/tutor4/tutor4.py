@@ -4,9 +4,11 @@ import os
 from egsnrc import egsfortran
 from egsnrc import watch
 from egsnrc.electr import electr
+from egsnrc.util import for_E18, fort_hex  # for debugging vs mortran
 import logging
 import numpy  # cannot use `np` as is an EGS var!!
 from math import log  # for calculate_tstep_...
+
 
 # Get all common blocks
 from egsnrc.commons import *
@@ -15,8 +17,6 @@ from egsnrc.calcfuncs import (
     calc_tstep_from_demfp,
     compute_eloss, compute_eloss_g
 )
-
-
 
 
 init_done = False  # run init() only once, else crashes (unknown reason)
@@ -63,6 +63,8 @@ def ausgab(iarg, **kwargs):
 
     if iarg <= 4:
         irl = ir[np-1] # pick up current region number  ** 0-based
+        msg = " AUSGAB irl,edep"
+        # logger.debug(f"{msg:<35}:{irl:3}{fort_hex(edep)}")
         escore[irl-1] += edep
 
 
@@ -220,31 +222,31 @@ def print_info():
 def init(iwatch=1, high_prec=False):
     global init_done
 
-    if init_done:
-        return
-    # print("---Before setting pegs_file and user_code --", flush=True)
-    # print_info()
+    # import importlib
+    # importlib.reload(egsfortran)
+    if not init_done:
+        # print("---Before setting pegs_file and user_code --", flush=True)
+        # print_info()
+        egsfortran.egs_set_defaults()
+        egsfortran.egs_check_arguments()
+        egsfortran.flush_output()
 
-    egsfortran.egs_set_defaults()
-    egsfortran.egs_check_arguments()
-    egsfortran.flush_output()
+        # print("COMMON IO")
+        # print("---------")
+        # for name in dir(egsfortran.egs_io):
+        #     if not name.startswith("_"):
+        #         print(f'   {name} =', getattr(egsfortran.egs_io, name))
 
-    # print("COMMON IO")
-    # print("---------")
-    # for name in dir(egsfortran.egs_io):
-    #     if not name.startswith("_"):
-    #         print(f'   {name} =', getattr(egsfortran.egs_io, name))
-
-    egsfortran.egs_io.egs_home = f"{str(EGS_HOME) + '/':<128}"  # need trailing "/"
-    egsfortran.egs_io.pegs_file = f"{PEGS_FILE:<256}"
-    egsfortran.egs_io.user_code = f"{USER_CODE:<64}"
+        egsfortran.egs_io.egs_home = f"{str(EGS_HOME) + '/':<128}"  # need trailing "/"
+        egsfortran.egs_io.pegs_file = f"{PEGS_FILE:<256}"
+        egsfortran.egs_io.user_code = f"{USER_CODE:<64}"
 
 
-    print("\n---After setting pegs_file and user_code --", flush=True)
-    print_info()
+        print("\n---After setting pegs_file and user_code --", flush=True)
+        print_info()
 
-    egsfortran.egs_init1()
-    # ----- end equiv of egs_init
+        egsfortran.egs_init1()
+        # ----- end equiv of egs_init
 
     # Gotta be a better way, but for now this works.
     #  Blanking the third line because "NAI" is the default value in this array (??)
@@ -272,26 +274,33 @@ def init(iwatch=1, high_prec=False):
     # STEP 3   HATCH-CALL
     # ---------------------------------------------------------------------
 
-    logger.info('  Start tutor1\n\n CALL HATCH to get cross-section data\n')
-    egsfortran.hatch()  #     pick up cross section data for TA
-    #                data file must be assigned to unit 12
+    if not init_done:
+        logger.info('  Start tutor1\n\n CALL HATCH to get cross-section data\n')
+        egsfortran.hatch()  #     pick up cross section data for TA
+        #                data file must be assigned to unit 12
 
-    egsfortran.flush_output()  # gfortran only - else doesn't print all lines
+        egsfortran.flush_output()  # gfortran only - else doesn't print all lines
 
-    logger.info(
-        '\n knock-on electrons can be created and any electron followed down to\n'
-        "                                       "
-        f'{ae[0]-prm:8.3} MeV kinetic energy\n'
-        ' brem photons can be created and any photon followed down to      \n'
-        "                                       "
-        f'{ap[0]:8.3f} MeV'
-        # Compton events can create electrons and photons below these cutoffs
-    )# OUTPUT AE(1)-PRM, AP(1);
+        logger.info(
+            '\n knock-on electrons can be created and any electron followed down to\n'
+            "                                       "
+            f'{ae[0]-prm:8.3} MeV kinetic energy\n'
+            ' brem photons can be created and any photon followed down to      \n'
+            "                                       "
+            f'{ap[0]:8.3f} MeV'
+            # Compton events can create electrons and photons below these cutoffs
+        )# OUTPUT AE(1)-PRM, AP(1);
 
     # ---------------------------------------------------------------------
     # STEP 4  INITIALIZATION-FOR-HOWFAR and HOWNEAR
     # ---------------------------------------------------------------------
-    geom.zbound=0.1  #      plate is 1 mm thick
+    # Standard tutor4.mortran has zbound=0.1 (without D0, so single precision)
+    # Here mimic that exact single precision number to get identical results
+    # Even before end of history one, a min(tustep, tperp (from hownear)) is
+    # different between Python and Fortran without this.
+    point1_single_prec = float.fromhex('0x1.99999a0000000p-4')
+    # OR, change tutor4.mortran to 0.1D0 and then compare with 0.1 below
+    geom.zbound=0.1  # point1_single_prec  #      plate is 1 mm thick
 
     # ---------------------------------------------------------------------
     # STEP 5  INITIALIZATION-FOR-AUSGAB
@@ -329,7 +338,7 @@ def main(iqin=-1, iwatch=1, high_prec=False, ncase=10):
     # et_control.exact_bca = False
     # et_control.spin_effects = True
     # iqin=-1  #                incident charge - electrons
-    ein=20 + prm
+    ein=20.0 + prm
     ei=20.0  #    20 MeV kinetic energy"
     xin = yin = zin = 0.0  #      incident at origin
     uin = vin = 0.0; win=1.0  #  moving along Z axis
@@ -352,17 +361,18 @@ def main(iqin=-1, iwatch=1, high_prec=False, ncase=10):
             f"{uin:7.3f}{vin:7.3f}{win:7.3f}"  # should be 8.3 like x,y,z but get extra spaces
             f"{latchi:10}{wtin:10.3E}",
             )
-            shower(iqin,ein,xin,yin,zin,uin,vin,win,irin,wtin)
-            egsfortran.flush_output()
-            watch.watch(-1, iwatch)  # print a message that this history is over
-            egsfortran.flush_output()
+        shower(iqin,ein,xin,yin,zin,uin,vin,win,irin,wtin)
+
+        # egsfortran.flush_output()
+        watch.watch(-1, iwatch)  # print a message that this history is over
+        # egsfortran.flush_output()
 
     # -----------------------------------------------------------------
     # STEP 8   OUTPUT-OF-RESULTS
     # -----------------------------------------------------------------
 
-    anorm = 100. / ((ein + float(iqin) * prm) * float(ncase))
     # normalize to % of total input energy
+    anorm = 100. / ((ein + iqin*prm) * ncase)
     total = sum(escore)
 
     msgs = (
@@ -372,12 +382,12 @@ def main(iqin=-1, iwatch=1, high_prec=False, ncase=10):
     )
     logger.info("\n")
     for i in range(3):
-        logger.info(f"{msgs[i]:<49}{escore[i]*anorm:10.3f}%")
+        logger.info(f"{msgs[i]:<49}{escore[i]*anorm:15.8f}%")
 
     logger.info(" "*49 + "-"*11)
 
     msg = ' Total fraction of energy accounted for='
-    logger.info(f'{msg:<49}{total*anorm:10.3f}%\n\n\n')
+    logger.info(f'{msg:<49}{total*anorm:15.8f}%\n\n\n')
 
         # -----------------------------------------------------------------
     # STEP 9   finish run
@@ -487,23 +497,40 @@ def hownear(x, y, z, irl):
 
 if __name__ == "__main__":
     import sys
+    import cProfile as profile
+    import pstats
     HERE  = Path(__file__).resolve().parent
     TEST_DATA = HERE.parent.parent / "tests" / "data"
 
-    iwatch = 2
-    high_prec = True
+    high_prec = False
+    filename = HERE / "profile.stats"
     if len(sys.argv) == 1:
-        main(iwatch=iwatch, high_prec=high_prec)
-    else:
+        # profile.run(
+        #     "main(iwatch=iwatch, high_prec=high_prec, ncase=2000)",
+        #     str(filename)
+        # )
+        # stats = pstats.Stats('profile.stats')
+        main(iwatch=iwatch, high_prec=high_prec, ncase=2000)
+
+        # Clean up filenames for the report
+        # stats.strip_dirs()
+
+        # Sort the statistics by the cumulative time spent
+        # in the function
+        # stats.sort_stats('cumulative')
+        # stats.print_stats(20)
+    elif sys.argv[1] == "gen":
         # Else, generating validation data for tests
         # generate for both e- and e+
         # filename = sys.argv[1]
         # for now, user still has to redirect to ../../tests/data/(filename)
-        if sys.argv[1] != "gen":
-            print("Only accept 'gen' as optional argument")
-        else:
-            print("# e-   ----------------------------")
-            main(-1, iwatch=iwatch, high_prec=high_prec)
-            print("\n\n# e+   ----------------------------")
-            main(+1, iwatch=iwatch, high_prec=high_prec)
-
+        print("# e-   ----------------------------")
+        main(-1, iwatch=iwatch, high_prec=high_prec)
+        print("\n\n# e+   ----------------------------")
+        main(+1, iwatch=iwatch, high_prec=high_prec)
+    elif sys.argv[1] == "e+":
+        main(iqin=+1, iwatch=2, high_prec=True, ncase=20)
+    elif sys.argv[1] == "e-":
+        main(iqin=-1, iwatch=2, high_prec=True, ncase=20)
+    else:
+        print(f"Unknown argument {sys.argv[1]}")

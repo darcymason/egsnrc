@@ -128,9 +128,9 @@ pi5d2 = uphiot.pi5d2
 #  from tutor1.f: DATA RM,PRM,PRMT2,PZERO/0.5109989461,0.5109989461,1.0219978922,0.D0/
 useful = egsfortran.useful
 pzero = useful.pzero = 0.0
-prm = useful.prm = 0.5109989461
-prmt2 = useful.prmt2 = 1.0219978922
-rm = useful.rm = 0.5109989461
+prm = useful.prm = 0.51099896430969238
+prmt2 = useful.prmt2 = 1.0219979286193848  # from fortran gdb, was 1.0219978922
+rm = useful.rm = 0.51099896430969238  # was 0.5109989461, updated from fortr gdb
 medium = useful.medium
 medold = useful.medold
 

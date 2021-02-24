@@ -2,6 +2,7 @@ from egsnrc.randoms import randomset
 from egsnrc.params import *
 from egsnrc.commons import *
 from egsnrc.constants import *
+from egsnrc.util import fort_hex  # for detailed debug tracing
 
 from egsnrc.calcfuncs import (
     calc_tstep_from_demfp, calculate_xi, compute_drange,
@@ -45,6 +46,7 @@ update_demfp = None
 user_controls_tstep_recursion = None
 user_range_discard = None
 
+# @profile  # for line_profiler
 def tstep_ustep(
     lelec, medium, irl,
     eie, peie,
@@ -71,6 +73,11 @@ def tstep_ustep(
     ytrans = numpy.array(0, dtype=numpy.float64)
     ztrans = numpy.array(0, dtype=numpy.float64)
 
+    # Define local variables for increased lookup speed
+    call_tranausb = True if iausfl[TRANAUSB] !=0 else False
+    call_tranausa = True if iausfl[TRANAUSA] !=0 else False
+    smallest_electron_mfp = EPSEMFP
+
     qel = 0 if lelec == -1 else 1  # for array indexing
     medium_m1 = medium - 1  # ** 0-based
     irl_m1 = irl - 1
@@ -96,7 +103,7 @@ def tstep_ustep(
                 # logger.info(f'random rnne1={rnne1:0.8e}')
                 if rnne1 == 0.0:
                     rnne1=1.e-30
-                demfp = max(-log(rnne1), EPSEMFP)
+                demfp = max(-log(rnne1), smallest_electron_mfp)
             # End inline replace: $ SELECT_ELECTRON_MFP; ----
             # demfp = differential electron mean free path
             # logger.debug(f"** Random: {rnne1} **")
@@ -202,10 +209,10 @@ def tstep_ustep(
                 else:
                     # --- Inline replace: $ CALCULATE_TSTEP_FROM_DEMFP; -----
                     if compute_tstep:
-                        total_de = demfp/sig
-                        epcont.tstep = calc_tstep_from_demfp(qel,lelec,medium,lelke,
-                                                    demfp,sig,eke,elke,total_de)
-                        total_tstep = tstep
+                        total_de = demfp / sig
+                        total_tstep = calc_tstep_from_demfp(
+                            qel,lelec,medium,lelke,demfp,sig,eke,elke,total_de
+                        )
                         compute_tstep = False
 
                     epcont.tstep = total_tstep / rhof #  non-default density scaling
@@ -273,7 +280,7 @@ def tstep_ustep(
                         # particle cannot escape local region
                         # set idisc 1 for electrons, 99 for positrons
                         epcont.idisc = 50 + 49*iq[np_m1]
-                        return USER_ELECTRON_DISCARD, lelke
+                        return USER_ELECTRON_DISCARD, lelke, eie, peie
                 # End inline replace: $ RANGE_DISCARD; ----
 
                 if user_range_discard:
@@ -446,7 +453,7 @@ def tstep_ustep(
                             )
                             dosingle = False
                             stack.np -= 1
-                            return LAMBDA_WARNING, ircode
+                            return LAMBDA_WARNING, ircode, eie, peie
                         epcont.ustep = tustep
                     else:
                         # Boundary crossing a la EGS4/PRESTA-I but using
@@ -500,7 +507,7 @@ def tstep_ustep(
             # Now see if user requested discard
             if idisc > 0: # idisc is returned by howfar:
                 # User requested immediate discard
-                return USER_ELECTRON_DISCARD, None
+                return USER_ELECTRON_DISCARD, None, eie, peie
 
             # --- Inline replace: $ CHECK_NEGATIVE_USTEP; -----
             if check_negative_ustep:
@@ -513,12 +520,12 @@ def tstep_ustep(
                 # in.  A message is written out whenever ustep is less than -1.e-4
                 if ustep < -1e-4:
                     ierust += 1
-                    # logger.debug(
-                    #     f"{ierust:4d} Negative ustep = {ustep:12.5e}"
-                    #     f" dedx={dedx:8.4f} ke={e[np_m1]-prm:8.4f}"
-                    #     f" ir,irnew,irold ={ir[np_m1]:4d},{irnew:4d},{irold:4d}"
-                    #     f" x,y,z ={x[np_m1]:10.3e},{y[np_m1]:10.3e},{z[np_m1]:10.3e}"
-                    # )
+                    logger.info(
+                        f"{ierust:4d} Negative ustep = {ustep:12.5e}"
+                        f" dedx={dedx:8.4f} ke={e[np_m1]-prm:8.4f}"
+                        f" ir,irnew,irold ={ir[np_m1]:4d},{irnew:4d},{irold:4d}"
+                        f" x,y,z ={x[np_m1]:10.3e},{y[np_m1]:10.3e},{z[np_m1]:10.3e}"
+                    )
                     if ierust > 1000:
                         logger.critical(
                             '\n\n\n\n Called exit---too many ustep errors\n\n\n'
@@ -547,9 +554,8 @@ def tstep_ustep(
                         # additional vacuum transport in em field
                         epcont.e_range =  vacdst
                         # logger.info("vacuum step")
-                        iarg=TRANAUSB
-                        if iausfl[iarg-1+1] != 0:  # ** 0-based
-                            ausgab(iarg)
+                        if call_tranausb:
+                            ausgab(TRANAUSB)
                         # Transport the particle
                         x[np_m1] += u[np_m1]*vstep
                         y[np_m1] += v[np_m1]*vstep
@@ -577,13 +583,12 @@ def tstep_ustep(
                     # End inline replace: $ electron_region_change; ----
 
                 if ustep != 0:
-                    iarg=TRANAUSA
-                    if iausfl[iarg+1] != 0:
-                        ausgab(iarg)
+                    if call_tranausa:
+                        ausgab(TRANAUSA)
                 if eie <= ecut[irl_m1]:
-                    return ECUT_DISCARD, None
+                    return ECUT_DISCARD, None, eie, peie
                 if ustep != 0 and idisc < 0:
-                    return USER_ELECTRON_DISCARD, None
+                    return USER_ELECTRON_DISCARD, None, eie, peie
 
                 next_tstep = True
                 break  # out of ustep (next :TSTEP:)
@@ -789,8 +794,8 @@ def tstep_ustep(
                     #         UVWAUSA, msg="domultiple/dosingle after", uf=u_final, vf=v_final, wf=w_final
                     #     )
 
-                    logger.debug(f'Called UPHI: final uvw={u_final},{v_final},{w_final}')
-                    logger.debug(f'Called UPHI: uvw={u[np_m1]},{v[np_m1]},{w[np_m1]}')
+                    # logger.debug(f'Called UPHI: final uvw={u_final},{v_final},{w_final}')
+                    # logger.debug(f'Called UPHI: uvw={u[np_m1]},{v[np_m1]},{w[np_m1]}')
                     u[np_m1], v[np_m1], w[np_m1] = uvw_tmp
                 else:
                     epcont.u_final = u[np_m1]; epcont.v_final = v[np_m1]; epcont.w_final = w[np_m1]
@@ -799,9 +804,8 @@ def tstep_ustep(
                     #         UVWAUSA, msg="NOT domultiple/dosingle", uf=u_final, vf=v_final, wf=w_final
                     #     )
 
-            iarg=TRANAUSB
-            if iausfl[iarg-1+1] != 0:  # ** 0-based
-                ausgab(iarg)
+            if call_tranausb:
+                ausgab(TRANAUSB)
 
             # Transport the particle
             x[np_m1] = x_final; y[np_m1] = y_final; z[np_m1] = z_final
@@ -815,7 +819,7 @@ def tstep_ustep(
             #     f"Transport: new xyz/uvw={x[np_m1]} {y[np_m1]} {z[np_m1]}"
             #     f" {u[np_m1]} {v[np_m1]} {w[np_m1]}"
             # )
-            dnear[np_m1] = dnear[np_m1] - vstep
+            dnear[np_m1] -= vstep
             epcont.irold = ir[np_m1] # save previous region
 
             if set_angles_em_field:
@@ -839,7 +843,7 @@ def tstep_ustep(
             #     but the old region => confusion in the geometry routine
             #     is very likely.      Jan 27 2004
             if irnew == irl and eie <= ecut[irl_m1]:
-                return ECUT_DISCARD, None
+                return ECUT_DISCARD, None, eie, peie
 
             useful.medold = medium
             if medium != 0:
@@ -862,17 +866,16 @@ def tstep_ustep(
                 # End inline replace: $ electron_region_change; ---- ]
 
             # After transport call to user scoring routine
-            iarg=TRANAUSA
-            if iausfl[iarg-1+1] != 0:  # ** 0-based
-                ausgab(iarg)
+            if call_tranausa:
+                ausgab(TRANAUSA)
 
             if eie <= ecut[irl_m1]:
-                return ECUT_DISCARD, None
+                return ECUT_DISCARD, None, eie, peie
 
             # Now check for deferred discard request.  May have been set
             # by either howfar, or one of the transport ausgab calls
             if idisc < 0:
-                return USER_ELECTRON_DISCARD, None
+                return USER_ELECTRON_DISCARD, None, eie, peie
 
             if medium != medold:
                 # logger.info('medium != medold, next tstep')
@@ -886,14 +889,14 @@ def tstep_ustep(
             if update_demfp:
                 update_demfp()
             else:
-                demfp = demfp - save_de*sig
-                total_de = total_de - save_de
-                total_tstep = total_tstep - tvstep*rhof
+                demfp -= save_de * sig
+                total_de -= save_de
+                total_tstep -= tvstep * rhof
                 if total_tstep < 1e-9 :
                     demfp = 0
             # End inline replace: $ UPDATE_DEMFP; ----
 
-            if demfp < EPSEMFP:
+            if demfp < smallest_electron_mfp:
                 break  # end ustep loop
 
 
@@ -933,5 +936,5 @@ def tstep_ustep(
         # logger.info(f'random rfict={rfict:0.8e}')
 
         if rfict <= sigratio:
-            return None, lelke   # end tstep loop, else continue looping
+            return None, lelke, eie, peie   # end tstep loop, else continue looping
 

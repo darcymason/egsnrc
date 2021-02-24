@@ -242,7 +242,10 @@ def watch(iarg, iwatch, **kwargs):
             if np > npold:  # have not cleared the stack with rus rou
                 for ip_m1 in range(npold-1,npold+1):
                     ke = e[ip_m1] - abs(iq[ip_m1]) * rm
-                    msg = 'compton electron created' if iq[ip_m1] != 0 else 'compton scattered photon'
+                    msg = '          compton ' + (
+                        'electron created' if iq[ip_m1] != 0
+                        else 'scattered photon'
+                    )
                     icount += 1
                     log_it(std_data(msg, ip_m1, ke))
 
