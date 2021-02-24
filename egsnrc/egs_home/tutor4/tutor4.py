@@ -9,6 +9,7 @@ import logging
 import numpy  # cannot use `np` as is an EGS var!!
 from math import log  # for calculate_tstep_...
 
+
 # Get all common blocks
 from egsnrc.commons import *
 
@@ -63,7 +64,7 @@ def ausgab(iarg, **kwargs):
     if iarg <= 4:
         irl = ir[np-1] # pick up current region number  ** 0-based
         msg = " AUSGAB irl,edep"
-        logger.debug(f"{msg:<35}:{irl:3}{fort_hex(edep)}")
+        # logger.debug(f"{msg:<35}:{irl:3}{fort_hex(edep)}")
         escore[irl-1] += edep
 
 
@@ -221,31 +222,31 @@ def print_info():
 def init(iwatch=1, high_prec=False):
     global init_done
 
-    if init_done:
-        return
-    # print("---Before setting pegs_file and user_code --", flush=True)
-    # print_info()
+    # import importlib
+    # importlib.reload(egsfortran)
+    if not init_done:
+        # print("---Before setting pegs_file and user_code --", flush=True)
+        # print_info()
+        egsfortran.egs_set_defaults()
+        egsfortran.egs_check_arguments()
+        egsfortran.flush_output()
 
-    egsfortran.egs_set_defaults()
-    egsfortran.egs_check_arguments()
-    egsfortran.flush_output()
+        # print("COMMON IO")
+        # print("---------")
+        # for name in dir(egsfortran.egs_io):
+        #     if not name.startswith("_"):
+        #         print(f'   {name} =', getattr(egsfortran.egs_io, name))
 
-    # print("COMMON IO")
-    # print("---------")
-    # for name in dir(egsfortran.egs_io):
-    #     if not name.startswith("_"):
-    #         print(f'   {name} =', getattr(egsfortran.egs_io, name))
-
-    egsfortran.egs_io.egs_home = f"{str(EGS_HOME) + '/':<128}"  # need trailing "/"
-    egsfortran.egs_io.pegs_file = f"{PEGS_FILE:<256}"
-    egsfortran.egs_io.user_code = f"{USER_CODE:<64}"
+        egsfortran.egs_io.egs_home = f"{str(EGS_HOME) + '/':<128}"  # need trailing "/"
+        egsfortran.egs_io.pegs_file = f"{PEGS_FILE:<256}"
+        egsfortran.egs_io.user_code = f"{USER_CODE:<64}"
 
 
-    print("\n---After setting pegs_file and user_code --", flush=True)
-    print_info()
+        print("\n---After setting pegs_file and user_code --", flush=True)
+        print_info()
 
-    egsfortran.egs_init1()
-    # ----- end equiv of egs_init
+        egsfortran.egs_init1()
+        # ----- end equiv of egs_init
 
     # Gotta be a better way, but for now this works.
     #  Blanking the third line because "NAI" is the default value in this array (??)
@@ -273,21 +274,22 @@ def init(iwatch=1, high_prec=False):
     # STEP 3   HATCH-CALL
     # ---------------------------------------------------------------------
 
-    logger.info('  Start tutor1\n\n CALL HATCH to get cross-section data\n')
-    egsfortran.hatch()  #     pick up cross section data for TA
-    #                data file must be assigned to unit 12
+    if not init_done:
+        logger.info('  Start tutor1\n\n CALL HATCH to get cross-section data\n')
+        egsfortran.hatch()  #     pick up cross section data for TA
+        #                data file must be assigned to unit 12
 
-    egsfortran.flush_output()  # gfortran only - else doesn't print all lines
+        egsfortran.flush_output()  # gfortran only - else doesn't print all lines
 
-    logger.info(
-        '\n knock-on electrons can be created and any electron followed down to\n'
-        "                                       "
-        f'{ae[0]-prm:8.3} MeV kinetic energy\n'
-        ' brem photons can be created and any photon followed down to      \n'
-        "                                       "
-        f'{ap[0]:8.3f} MeV'
-        # Compton events can create electrons and photons below these cutoffs
-    )# OUTPUT AE(1)-PRM, AP(1);
+        logger.info(
+            '\n knock-on electrons can be created and any electron followed down to\n'
+            "                                       "
+            f'{ae[0]-prm:8.3} MeV kinetic energy\n'
+            ' brem photons can be created and any photon followed down to      \n'
+            "                                       "
+            f'{ap[0]:8.3f} MeV'
+            # Compton events can create electrons and photons below these cutoffs
+        )# OUTPUT AE(1)-PRM, AP(1);
 
     # ---------------------------------------------------------------------
     # STEP 4  INITIALIZATION-FOR-HOWFAR and HOWNEAR
@@ -527,6 +529,8 @@ if __name__ == "__main__":
         print("\n\n# e+   ----------------------------")
         main(+1, iwatch=iwatch, high_prec=high_prec)
     elif sys.argv[1] == "e+":
-        main(iqin=+1, iwatch=1, high_prec=True, ncase=10)
+        main(iqin=+1, iwatch=2, high_prec=True, ncase=20)
+    elif sys.argv[1] == "e-":
+        main(iqin=-1, iwatch=2, high_prec=True, ncase=20)
     else:
         print(f"Unknown argument {sys.argv[1]}")

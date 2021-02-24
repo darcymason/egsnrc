@@ -1320,6 +1320,15 @@ REPLACE {$SET-USTEP;} WITH
 
 REPLACE {$CALCULATE-XI(#);} WITH
 {
+    $egs_info('(a, 2I4, 6Z17)','in calc-xi:',
+    lelec, medium,
+    transfer(ekems, 1_8),
+    transfer(rmt2, 1_8),
+    transfer(rmsq, 1_8),
+    transfer(xccl, 1_8),
+    transfer(blccl, 1_8),
+    transfer({P1}, 1_8));
+
   p2 = ekems*(ekems+rmt2); beta2 = p2/(p2 + rmsq);
   chia2 = xccl/(4*blccl*p2);
                                 "Note that our chia2 is Moliere chia2/4"
@@ -1342,6 +1351,7 @@ REPLACE {$CALCULATE-XI(#);} WITH
   ]
   ELSE [ xi_corr = 1; etap = 1; ]
   xi = xi*(Log(1+1./chia2)-1/(1+chia2));
+  $egs_info('(a,2Z17)','out calc-xi:',transfer(xi, 1_8), transfer(blccl, 1_8));
 }
 
 REPLACE {$SET-TVSTEP;} WITH
@@ -3164,6 +3174,13 @@ REPLACE {$CALCULATE-TSTEP-FROM-DEMFP;} WITH
 {;
   IF( compute_tstep ) [
     total_de = demfp/sig; fedep = total_de;
+
+    /*  $egs_info('(a,4I4,5Z17)','in calc-tstep-from-demfp:',
+    qel, lelec, medium, lelke,
+    transfer(demfp, 1_8), transfer(sig, 1_8),
+    transfer(eke, 1_8), transfer(elke, 1_8),
+    transfer(total_de, 1_8));  */
+
     ekef  = eke - fedep;
     IF( ekef <= E_array(1,medium) ) [ tstep = vacdst; ]
     ELSE
@@ -3192,6 +3209,8 @@ REPLACE {$CALCULATE-TSTEP-FROM-DEMFP;} WITH
     compute_tstep = .false.;
   ]
   tstep = total_tstep/rhof;  " non-default density scaling "
+  /*  $egs_info('(a,z17)', 'out calc-tstep-from-demfp:',
+      transfer(tstep, 1_8)); */
 }
 ;
 
@@ -3206,6 +3225,14 @@ REPLACE {$CALCULATE-TSTEP-FROM-DEMFP;} WITH
 REPLACE {$COMPUTE-DRANGE(#,#,#,#,#,#);} WITH
 "        ============================="
 {
+    /*  $egs_info('(a, 2I4, 2Z17,I4, 2Z17)','in compute-drange:',
+    lelec, medium,
+    transfer({P1}, 1_8),
+    transfer({P2}, 1_8),
+    {P3},
+    transfer({P4}, 1_8),
+    transfer({P5}, 1_8));  */
+
   fedep = 1 - {P2}/{P1};
   elktmp = 0.5*({P4}+{P5}+0.25*fedep*fedep*(1+fedep*(1+0.875*fedep)));
            " the above evaluates the logarithm of the midpoint energy"
@@ -3225,6 +3252,7 @@ REPLACE {$COMPUTE-DRANGE(#,#,#,#,#,#);} WITH
   aux = aux*(1+2*aux)*(fedep/(2-fedep))**2/6;
   "{P6} = fedep*{P1}/dedxmid*(1+aux);"
   {P6} = fedep*{P1}*dedxmid*(1+aux);
+  /*  $egs_info('(a,Z17)','out compute-drange:',transfer({P6}, 1_8));  */
 }
 ;
 
@@ -3282,12 +3310,12 @@ REPLACE {$UPDATE-DEMFP;} WITH
 REPLACE {$COMPUTE-ELOSS(#,#,#,#,#);} WITH
 "        =========================="
 {;
-  $egs_info('(a,2I4,3Z17,I4)','in compute-eloss:',
+  /*   $egs_info('(a,2I4,3Z17,I4)','in compute-eloss:',
         lelec, medium,
         transfer({P1}, 1_8),
         transfer({P2}, 1_8),
         transfer({P3}, 1_8),
-        {P4});
+        {P4});   */
   IF( lelec < 0 ) [
       $EVALUATE dedxmid USING ededx({P3});
       aux = ededx1({P4},medium)/dedxmid;
@@ -3318,7 +3346,7 @@ REPLACE {$COMPUTE-ELOSS(#,#,#,#,#);} WITH
   */
   {P5} = {P5}*(1-0.5*fedep*aux*(1-0.333333*fedep*(aux-1-
              0.25*fedep*(2-aux*(4-aux)))));
-  $egs_info('(a,Z17)','out compute-eloss:', transfer({P5}, 1_8));
+  /*  $egs_info('(a,Z17)','out compute-eloss:', transfer({P5}, 1_8));  */
 }
 ;
 
@@ -3327,13 +3355,13 @@ REPLACE {$COMPUTE-ELOSS(#,#,#,#,#);} WITH
 REPLACE {$COMPUTE-ELOSS-G(#,#,#,#,#);} WITH
 "        ============================"
 {
-  $egs_info('(a,2I4,3Z17,I4, Z17)','in compute-eloss-g:',
+  /*  $egs_info('(a,2I4,3Z17,I4, Z17)','in compute-eloss-g:',
         lelec, medium,
         transfer({P1}, 1_8),
         transfer({P2}, 1_8),
         transfer({P3}, 1_8),
         {P4},
-        transfer(range, 1_8));
+        transfer(range, 1_8));  */
   tuss = range - range_ep(qel,{P4},medium)/rhof;
     " here tuss is the range between the initial energy and the next lower "
     " energy on the interpolation grid "
@@ -3368,7 +3396,7 @@ REPLACE {$COMPUTE-ELOSS-G(#,#,#,#,#);} WITH
           {P5} = {P5} + {P2} - eketmp;
       ]
   ]
-  $egs_info('(a,Z17)','out compute-eloss-g:', transfer({P5}, 1_8));
+  /*  $egs_info('(a,Z17)','out compute-eloss-g:', transfer({P5}, 1_8));  */
   }
 ;
 %E  "egsnrc.macros"

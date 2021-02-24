@@ -1,3 +1,4 @@
+
 %C80
 "#############################################################################"
 "                                                                             "
@@ -49,7 +50,6 @@ REPLACE {$CNTOUT(#);(#);} WITH {
    W({P1}),LATCH({P1}),WT({P1});  ({P2},I5,F11.5,2I4,3F10.5,3F9.5,I10,1PE10.3);
 }
 
-
 %L
 %E
 !INDENT M 4;    "indent each MORTRAN nesting level by 4"
@@ -75,7 +75,7 @@ REPLACE {;COMIN/SCORE/;} WITH {
    ;COMMON/SCORE/ESCORE(3),IWATCH; $INTEGER IWATCH; REAL*8 ESCORE;
 }
 
-;COMIN/BOUNDS,GEOM,MEDIA,MISC,SCORE,STACK,THRESH,USEFUL/;"NOTE ; BEFORE COMIN"
+;COMIN/BOUNDS,GEOM,MEDIA,MISC,SCORE,STACK,THRESH,USEFUL,ET-Control/;"NOTE ; BEFORE COMIN"
 "       The above expands into a series of COMMON statements"
 "       BOUNDS contains ECUT and PCUT"
 "       GEOM passes info to our HOWFAR routine"
@@ -94,6 +94,7 @@ DATA  MEDARR /$S'TA',22*' '/; "place medium name in an array"
 "                            $S is a MORTRAN macro to expand strings"
 
 " Initialize the EGSnrc system "
+
 call egs_init;
 
 DO I=1,24[MEDIA(I,1)=MEDARR(I);]"this is to avoid a data statement for"
@@ -134,7 +135,7 @@ ZBOUND=0.1d0;"     plate is 1 mm thick"
 "---------------------------------------------------------------------"
 DO I=1,3[ESCORE(I)=0.0;]"zero scoring array before starting"
 
-IWATCH=1;     "This determines the type and amount of output"
+IWATCH=2;     "This determines the type and amount of output"
               "=1 => print info about each interaction"
               "=2 => print info about same + each electron step"
               "=4 => create a file to be displayed by EGS_Windows"
@@ -143,10 +144,11 @@ IWATCH=1;     "This determines the type and amount of output"
 
 CALL WATCH(-99,IWATCH);  "Initializes calls to AUSGAB for WATCH"
 
-write(*, '(A, 2Z17, E28.18)') 'TEST -0.99 sgl dbl',
-       transfer(-0.99, 1_8),
-       transfer(-0.99D0, 1_8),
-       0.99;
+
+write(*, '(A, 2Z017, E28.18)') 'TEST -2**1025 sgl dbl',
+       transfer(1d0, 1_8),
+       transfer(2d0, 1_8),
+       vacdst;
 call flush();
 
 "---------------------------------------------------------------------"
@@ -154,9 +156,9 @@ call flush();
 "---------------------------------------------------------------------"
 "Define initial variables for 20 MeV beam of electrons incident"
 "perpendicular to the slab"
-
-IQIN=+1;"               incident charge - electrons"
-EIN=20 + PRM;EI=20.0d0;"    20 MeV kinetic energy"
+"exact_bca = .false.;"  " XXX for some tests "
+IQIN=-1;"               incident charge - electrons"
+EIN=20.0D0 + PRM;EI=20.0d0;"    20 MeV kinetic energy"
 /XIN,YIN,ZIN/=0.0;"     incident at origin"
 /UIN,VIN/=0.0;WIN=1.0;" moving along Z axis"
 IRIN=2;"                starts in region 2, could be 1"
@@ -165,7 +167,7 @@ WTIN=1.0;"              weight = 1 since no variance reduction used"
 "---------------------------------------------------------------------"
 "STEP 7   SHOWER-CALL                                                 "
 "---------------------------------------------------------------------"
-NCASE=10;  "INITIATE THE SHOWER NCASE TIMES"
+NCASE=20;  "INITIATE THE SHOWER NCASE TIMES"
 
 
 DO I=1,NCASE [
@@ -232,9 +234,9 @@ IF (IWATCH > 0 ) CALL WATCH(IARG,IWATCH); "handles printouts of data"
 IF(IARG <= 4) [
    IRL = IR(NP);" pick up current region number"
    ESCORE(IRL)=ESCORE(IRL)+EDEP;
-   $egs_info('(a,I3,Z17)', ' AUSGAB irl,edep                   :',
+   /*  $egs_info('(a,I3,Z17)', ' AUSGAB irl,edep                   :',
               irl, transfer(edep, 1_8));
-   call flush();
+   call flush();  */
 ]
 RETURN;END;"end of ausgab"
 

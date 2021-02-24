@@ -57,7 +57,9 @@ def compute_drange(lelec, medium, eke1, eke2, lelke1, elke1, elke2):
     return fedep*eke1*dedxmid*(1+aux)
 
 
-def calc_tstep_from_demfp(qel,lelec, medium, lelke, demfp, sig, eke, elke, total_de):
+def calc_tstep_from_demfp(
+    qel,lelec, medium, lelke, demfp, sig, eke, elke, total_de
+):
     """Calculate path length to the next discrete interaction
 
     Once the sub-threshold processes energy loss to the next discrete
@@ -172,7 +174,7 @@ def compute_eloss_g(lelec, medium, step, eke, elke, lelke, range_):
     medium_m1 = medium - 1
     lelke_m1 = lelke - 1
 
-    logger.debug(f"in compute-eloss-g:{fort_hex([step, eke, elke])}{lelke:4}")
+    # logger.debug(f"in compute-eloss-g:{fort_hex([step, eke, elke])}{lelke:4}")
     # Note: range_ep IS 0-based already in first dimn
 
     qel = 0 if lelec==-1 else 1  # recalc here to not bother passing in both
@@ -211,7 +213,7 @@ def compute_eloss_g(lelec, medium, step, eke, elke, lelke, range_):
             # --- Inline replace: $ COMPUTE_ELOSS(tuss,eketmp,elktmp,lelktmp,de); -----
             de = compute_eloss(lelec, medium, tuss, eketmp, elktmp, lelktmp)
             de = de + eke - eketmp
-    logger.debug(f"out compute-eloss-g:{fort_hex(de)}")
+    # logger.debug(f"out compute-eloss-g:{fort_hex(de)}")
     return de
 
 

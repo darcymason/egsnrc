@@ -73,18 +73,17 @@ def check_known_in_out(
 ):
     """Compare against ones captured from TUTOR4 run with extra prints
     """
-
     icount = 0
     for inputs, expected in known_in_out(
         filename, input_types, output_types, description
     ):
         # print("in ", ",".join(str(x) for x in inputs))
-        outputs = func(*inputs)
+        output = func(*inputs)
         if isinstance(expected, (list, tuple)):
-            for got, expect in zip(outputs, expected):
+            for got, expect in zip(output, expected):
                 assert expect == got
         else:
-            assert expected == outputs
+            assert expected == output
         icount += 1
     assert icount > min_count
 
@@ -99,71 +98,72 @@ def lines_approx_equal(line1, line2, epsilon=0.000002):
         line2_data = line_data(line2)
         if len(line1_data) != len(line2_data):
             return False  # however, should never be the case
-        return all(
+        match = all(
             abs(d1 - d2) < epsilon
             for d1, d2 in zip(line1_data, line2_data)
         )
+        return match
 
 
 class TestTutor4:
     """Tests related to inputs/outputs of EGSnrc Tutor4 example simulation"""
     def setup(self):
         tutor4.init()
+        egsfortran.init_ranlux(1,0)
+        egsfortran.ranlux(egsfortran.randomm.rng_array)
+        egsfortran.randomm.rng_seed = 1
 
-    @pytest.fixture(autouse=True)
-    def test_precision(self):
-        original = config.test_precision
-        config.test_precision = True
-        yield
-        config.test_precision = original
-
-    def test_output_electrons(self, caplog):
-        """Test that Python tutor4 produces known output"""
+    def test_output_watch2_elec(self, caplog):
+        """Test Python tutor4 produces known output - electrons"""
         logger.propagate = True  # needed for pytest to capture
         caplog.set_level(logging.DEBUG)
         # Ensure proper random initial state
         # (other tests use ranlux)
 
-        egsfortran.init_ranlux(1,0)
-        tutor4.main(iwatch=2, high_prec=True)
+        # Expected data
+        std_filename = TEST_DATA / "fort_tut4_elec_outputs.txt"
+        with open(std_filename, "r") as f:
+            expected = f.readlines()
 
-        std_filename = TEST_DATA / "orig-tutor4-watch2-extra-prec.txt"
-        expected = open(std_filename, "r").readlines()
+        tutor4.main(iqin=-1, iwatch=2, high_prec=True, ncase=20)
         got = [rec.message.strip('\n') for rec in caplog.records]
 
         # Test each line of "data" - ignore headings, etc
-        iter_got = gen_data_lines(got)
+        iter_expect = gen_data_lines(expected)
         icount = 0
-        for line_expect in gen_data_lines(expected):
-            line_got = next(iter_got)
-            assert lines_approx_equal(line_expect, line_got)
+        for line_got in gen_data_lines(got):
+            line_expect = next(iter_expect)
+            assert lines_approx_equal(line_expect, line_got), (
+                f"Expected line:\n{line_expect}\ngot:\n{line_got}"
+            )
             icount += 1
-        assert icount > 200  # check that test is actually testing lots of lines
+        assert icount > 400  # check that test is actually testing lots of lines
 
-    def test_output_positrons(self, caplog):
-        """Test that Python tutor4 produces known output for positron shower"""
-
+    def test_output_watch2_pos(self, caplog):
+        """Test Python tutor4 produces known output - electrons"""
         logger.propagate = True  # needed for pytest to capture
         caplog.set_level(logging.DEBUG)
         # Ensure proper random initial state
         # (other tests use ranlux)
 
-        egsfortran.init_ranlux(1,0)
-        tutor4.main(iqin=+1, iwatch=2, high_prec=True, ncase=50)
+        # Expected data
+        std_filename = TEST_DATA / "fort_tut4_pos_outputs.txt"
+        with open(std_filename, "r") as f:
+            expected = f.readlines()
+        tutor4.main(iqin=+1, iwatch=2, high_prec=True, ncase=20)
 
-        std_filename = TEST_DATA / "orig-tutor4-positron-watch2-extra-prec.txt"
-        expected = open(std_filename, "r").readlines()
         got = [rec.message.strip('\n') for rec in caplog.records]
 
         # Test each line of "data" - ignore headings, etc
-        iter_got = gen_data_lines(got)
+        iter_expect = gen_data_lines(expected)
         icount = 0
-        for line_expect in gen_data_lines(expected):
-            line_got = next(iter_got)
-            assert lines_approx_equal(line_expect, line_got)
+        for line_got in gen_data_lines(got):
+            line_expect = next(iter_expect)
+            assert lines_approx_equal(line_expect, line_got), (
+                f"Expected line:\n{line_expect}\ngot:\n{line_got}"
+            )
             icount += 1
-        assert icount > 200  # check that test is actually testing lots of lines
-
+        assert icount > 400  # check that test is actually testing lots of lines
 
     def test_compute_drange(self):
         "Calculate correct values for $COMPUTE-DRANGE in Python"
@@ -179,7 +179,11 @@ class TestTutor4:
 
     def test_calc_tstep(self):
         "Calc correct values for modified $CALCULATE-TSTEP-FROM-DEMFP in Python"
-
+        # tutor4.init()  # need arrays etc. loaded, so if this is on its own
+        # Somehow vacdst was changed while running other tests, to
+        #   just under 1e8 (99_999_999.9xxx), so reset for this test
+        #   (used in one branch of calc_tstep_from_demfp)
+        egsfortran.bounds.vacdst = 1e8
         check_known_in_out(
             TEST_DATA / "fort_tut4_calcfuncs.txt",
             calcfuncs.calc_tstep_from_demfp,
