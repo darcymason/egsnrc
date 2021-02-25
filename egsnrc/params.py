@@ -23,10 +23,13 @@ PEGSCUTAUS: numpy.int32 = 2
 ANNIHRAUSB: numpy.int32 = 28
 ANNIHRAUSA: numpy.int32 = 14
 USERDAUS: numpy.int32 = 3
+EIIB: numpy.int32 = 31  # Before EII
+EIIA: numpy.int32 = 32  # After EII
+
 
 EM_MACROS_ACTIVE = False
 
-# XXX extra AUSFL flags for debugging
+# XXX extra AUSFL flags for debugging - DLM 2021-02
 RANDOMNUM = 40
 PRESTAIIA = 41
 PRESTAIA = 42
@@ -37,3 +40,19 @@ XYZAUSB = 46
 XYZAUSA = 47
 UVWAUSB = 48
 UVWAUSA = 49
+
+# for EII-Data
+MAX_EII_SHELLS = 40  # Maximum number of shells participating
+                     # in EII in a simulation
+N_EII_BINS = 250  # Number of bins for EII x-section interpolations
+MAX_EII_BINS = N_EII_BINS * MAX_EII_SHELLS
+
+# Common block EDGE
+MXELEMENT = 100  #  Number of elements
+MXSHXSEC = 30  #  Number of shells available
+MXSHELL = 6  #  Number of shells treated
+MXINTER = 5  #  $MXSHELL-1
+MXTRANS = 39  #  Number of possible transitions
+MXEDGE = 16  #  max. number of edges above 1 keV
+# PHOTOUNIT = i_photo_relax  #  unit number for photo_relax.data
+# PHOCSUNIT = i_photo_cs  #  unit number for photo_cs.data

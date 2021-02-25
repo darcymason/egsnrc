@@ -6,6 +6,7 @@ from egsnrc.electr_steps import tstep_ustep
 from .annih import annih
 from .bhabha import bhabha
 from .brems import brems
+from .moller import moller
 
 import logging
 logger = logging.getLogger('egsnrc')
@@ -184,7 +185,7 @@ def electr(hownear, howfar, ausgab) -> int:
 
             if iausfl[MOLLAUSB-1+1] != 0:  # ** 0-based
                 ausgab(MOLLAUSB)
-            egsfortran.moller()
+            moller()  # egsfortran.moller()
             if particle_selection_moller:
                 particle_selection_moller()
 
