@@ -23,12 +23,37 @@ def bhabha():
     # COMIN/DEBUG,EGS-VARIANCE-REDUCTION,STACK,
     # THRESH,UPHIOT,USEFUL,RANDOM/
 
+    # Local variables
+    # $ENERGY PRECISION
+    #       peip,     precise total energy of incident positron
+    #       pekin,    precise kinetic energy of incident positron
+    #       pekse2,   precise kinetic energy of second 'electron'
+    #       pese1,    precise total energy of first 'electron'
+    #       pese2,    precise total energy of second 'electron'
+    #       h1,       used in direction cosine calculations
+    #       dcosth;   polar scattering angle for more energetic 'electron'
+    # $REAL eip,      total energy of incident positron
+    #       ekin,     kinetic energy of incident positron
+    #       t0,       kinetic energy of incident positron in units of rm
+    #       e0,       total energy of incident positron in units of rm
+    #       e02,      e0**2
+    #       yy,       1 / (t0 + 2)
+    #       y2,yp,yp2,various functions of yy
+    #       beta2,    incident positron velocity in units of c
+    #       ep0,      minimum fractional energy of a secondary 'electron'
+    #       ep0c,     1 - ep0
+    #       b1,b2,b3,b4,  used in rejection function calculation
+    #       br,       kinetic energy fraction of the 2nd 'electron'
+    #       rejf2,    rejection function
+    #       ese1,     total energy of 1st 'electron'
+    #       ese2;     total energy of 2nd 'electron'
+
     stack.npold = np  # Set the old stack counter
     np_m1 = np - 1
     medium_m1 = medium - 1
-    peip = e[np_m1]  # PRECISE ENERGY OF INCIDENT POSITRON
-    eip = peip  # ENERGY OF INCIDENT POSITRON
-    pekin = peip - prm  # PRECISE K.E. OF INCIDENT POSITRON
+    peip = e[np_m1]  # Precise energy of incident positron
+    eip = peip  # Energy of incident positron
+    pekin = peip - prm  # Precise k.e. of incident positron
     ekin = pekin
     t0 = ekin / rm
     e0 = t0 + 1.

@@ -5,6 +5,8 @@ from egsnrc.constants import *
 from egsnrc.electr_steps import tstep_ustep
 from .annih import annih
 from .bhabha import bhabha
+from .brems import brems
+
 import logging
 logger = logging.getLogger('egsnrc')
 
@@ -38,7 +40,7 @@ start_new_particle = None
 def ebrems(ausgab):
     if iausfl[BREMAUSB-1+1] != 0:  # ** 0-based
         ausgab(BREMAUSB)
-    egsfortran.brems()
+    brems()  # egsfortran.brems()
 
     if particle_selection_brems:
         particle_selection_brems()
@@ -239,7 +241,7 @@ def electr(hownear, howfar, ausgab) -> int:
             # It is in-flight annihilation
             if iausfl[ANNIHFAUSB-1+1] != 0:  # ** 0-based
                 ausgab(ANNIHFAUSB)
-            egsfortran.annih()
+            annih()  # egsfortran.annih()
             if particle_selection_annih:
                 particle_selection_annih()
             np_m1 = np - 1  # changing particles

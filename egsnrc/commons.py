@@ -199,3 +199,46 @@ ch_steps = egsfortran.ch_steps
 count_pii_steps = ch_steps.count_pii_steps
 count_all_steps = ch_steps.count_all_steps
 is_ch_step = ch_steps.is_ch_step
+
+
+#  COMMON block nist_brems --------
+nist_brems = egsfortran.nist_brems
+nb_fdata = nist_brems.nb_fdata
+nb_xdata = nist_brems.nb_xdata
+nb_wdata = nist_brems.nb_wdata
+nb_idata = nist_brems.nb_idata
+nb_emin = nist_brems.nb_emin
+nb_emax = nist_brems.nb_emax
+nb_lemin = nist_brems.nb_lemin
+nb_lemax = nist_brems.nb_lemax
+nb_dle = nist_brems.nb_dle
+nb_dlei = nist_brems.nb_dlei
+log_ap = nist_brems.log_ap
+
+
+#  COMMON block brempr --------
+brempr = egsfortran.brempr
+ibrdst = brempr.ibrdst
+iprdst = brempr.iprdst
+ibr_nist = brempr.ibr_nist
+pair_nrc = brempr.pair_nrc
+itriplet = brempr.itriplet
+dl1 = brempr.dl1
+dl2 = brempr.dl2
+dl3 = brempr.dl3
+dl4 = brempr.dl4
+dl5 = brempr.dl5
+dl6 = brempr.dl6
+alphi = brempr.alphi
+bpar = brempr.bpar
+delpos = brempr.delpos
+wa = brempr.wa
+pz = brempr.pz
+zelem = brempr.zelem
+rhoz = brempr.rhoz
+pwr2i = brempr.pwr2i
+delcm = brempr.delcm
+zbrang = brempr.zbrang
+lzbrang = brempr.lzbrang
+nne = brempr.nne
+asym = brempr.asym
