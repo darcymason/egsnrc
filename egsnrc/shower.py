@@ -1,5 +1,5 @@
 from egsnrc import egsfortran
-
+from egsnrc.angles import uphi
 ranlux = egsfortran.ranlux
 rng_seed = egsfortran.randomm.rng_seed
 rng_array = egsfortran.randomm.rng_array
