@@ -34,8 +34,6 @@ particle_selection_moller = particle_selection_electr
 start_new_particle = None
 
 
-ierust = 0 # To count negative ustep's
-
 # Define ebrems as is used in several places
 def ebrems(ausgab):
     if iausfl[BREMAUSB-1+1] != 0:  # ** 0-based
@@ -62,9 +60,6 @@ def electr(hownear, howfar, ausgab) -> int:
     #                                      for low energy transport
     #    egsnrc v0.1   Darcy Mason  Transpiled to Python
     # ******************************************************************
-
-    global ierust
-
 
     # --- Inline replace: $ CALL_USER_ELECTRON -----
     if call_user_electron:

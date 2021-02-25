@@ -22,7 +22,6 @@ def bhabha():
     # $ comin_bhabha # DEFAULT REPLACEMENT PRODUCES THE FOLLOWING:
     # COMIN/DEBUG,EGS-VARIANCE-REDUCTION,STACK,
     # THRESH,UPHIOT,USEFUL,RANDOM/
-    global np
 
     stack.npold = np  # Set the old stack counter
     np_m1 = np - 1
