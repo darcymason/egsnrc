@@ -263,9 +263,8 @@ def brems():
                 rejmax = rjarg1*rjarg3 - rjarg2
                 while True:
                     y2tst = randomset()
-                    rtest = randomset()
                     aux3 = z2maxi / (y2tst + (1 - y2tst) * z2maxi)
-                    rtest = rtest * aux3 *rejmax
+                    rtest = randomset() * aux3 *rejmax
                     y2tst = aux3**2 - 1
                     y2tst1 = esedei * y2tst / aux3**4
                     aux4 = 16 * y2tst1 - rjarg2
