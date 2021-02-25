@@ -242,3 +242,35 @@ zbrang = brempr.zbrang
 lzbrang = brempr.lzbrang
 nne = brempr.nne
 asym = brempr.asym
+
+
+#  COMMON block eii_data --------
+eii_data = egsfortran.eii_data
+eii_l_factor = eii_data.eii_l_factor
+eii_flag = eii_data.eii_flag
+eii_xsection_a = eii_data.eii_xsection_a
+eii_xsection_b = eii_data.eii_xsection_b
+eii_cons = eii_data.eii_cons
+eii_a = eii_data.eii_a
+eii_b = eii_data.eii_b
+eii_z = eii_data.eii_z
+eii_sh = eii_data.eii_sh
+eii_nshells = eii_data.eii_nshells
+eii_nsh = eii_data.eii_nsh
+eii_first = eii_data.eii_first
+eii_no = eii_data.eii_no
+
+
+#  COMMON block edge --------
+edge = egsfortran.edge
+binding_energies = edge.binding_energies
+interaction_prob = edge.interaction_prob
+relaxation_prob = edge.relaxation_prob
+edge_energies = edge.edge_energies
+edge_number = edge.edge_number
+edge_a = edge.edge_a
+edge_b = edge.edge_b
+edge_c = edge.edge_c
+edge_d = edge.edge_d
+iedgfl = edge.iedgfl
+iphter = edge.iphter
