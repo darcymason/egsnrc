@@ -4,7 +4,7 @@ from egsnrc.commons import *
 from egsnrc.constants import *
 from egsnrc.electr_steps import tstep_ustep
 from .annih import annih
-
+from .bhabha import bhabha
 import logging
 logger = logging.getLogger('egsnrc')
 
@@ -34,8 +34,6 @@ particle_selection_moller = particle_selection_electr
 start_new_particle = None
 
 
-ierust = 0 # To count negative ustep's
-
 # Define ebrems as is used in several places
 def ebrems(ausgab):
     if iausfl[BREMAUSB-1+1] != 0:  # ** 0-based
@@ -62,9 +60,6 @@ def electr(hownear, howfar, ausgab) -> int:
     #                                      for low energy transport
     #    egsnrc v0.1   Darcy Mason  Transpiled to Python
     # ******************************************************************
-
-    global ierust
-
 
     # --- Inline replace: $ CALL_USER_ELECTRON -----
     if call_user_electron:
@@ -232,12 +227,12 @@ def electr(hownear, howfar, ausgab) -> int:
             # It is bhabha
             if iausfl[BHABAUSB-1+1] != 0:  # ** 0-based
                 ausgab(BHABAUSB)
-            egsfortran.bhabha()
+            bhabha()  # egsfortran.bhabha()
             if particle_selection_bhabha:
                 particle_selection_bhabha()
             if iausfl[BHABAUSA-1+1] != 0:  # ** 0-based
                 ausgab(BHABAUSA)
-            np_m1 = np - 1 # if new particle
+            np_m1 = np - 1 # if case of new particle
             if iq[np_m1] == 0:
                 return ircode
         else:
@@ -247,7 +242,7 @@ def electr(hownear, howfar, ausgab) -> int:
             egsfortran.annih()
             if particle_selection_annih:
                 particle_selection_annih()
-            np_m1 = np - 1 # changing particles
+            np_m1 = np - 1  # changing particles
             if iausfl[ANNIHFAUSA-1+1] != 0:  # ** 0-based
                 ausgab(ANNIHFAUSA)
 

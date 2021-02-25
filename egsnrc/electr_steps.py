@@ -8,7 +8,7 @@ from egsnrc.calcfuncs import (
     calc_tstep_from_demfp, calculate_xi, compute_drange,
     compute_eloss, compute_eloss_g
 )
-from egsnrc.uphi import uphi
+from egsnrc.angles import uphi
 
 from math import log
 
@@ -46,6 +46,10 @@ update_demfp = None
 user_controls_tstep_recursion = None
 user_range_discard = None
 
+
+ierust = 0 # To count negative ustep's
+
+
 # @profile  # for line_profiler
 def tstep_ustep(
     lelec, medium, irl,
@@ -60,7 +64,7 @@ def tstep_ustep(
         Flag for reason returning, user_electron_discard or ecut_discard,
         or None for no reason (rdict > sigratio in tstep check)
     """
-    global costhe, sinthe
+    global costhe, sinthe, ierust
 
     next_tstep = False  # flag for jumping out of ustep to top of tstep loop
 
