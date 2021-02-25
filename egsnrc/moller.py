@@ -1,4 +1,3 @@
-
 from math import sqrt
 from .commons import *
 from .params import *
@@ -190,4 +189,3 @@ def moller():
     uphiot.sinthe = -sqrt(1.0 - dcosth)
     uphiot.costhe = sqrt(dcosth)
     uphi(3,2)
-
