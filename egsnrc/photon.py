@@ -149,6 +149,7 @@ def photon(howfar, ausgab):
 
             # :PTRANS:
             while True:  # photon transport loop
+                EXIT_PTRANS = False
                 if medium == 0:
                     epcont.tstep = vacdst
                 else:
@@ -252,14 +253,15 @@ def photon(howfar, ausgab):
                     break # XXX
 
                 if medium != medold:
-                    break  # XXX EXIT :PTRANS:
+                    break  # exit :PTRANS: loop
 
-                if medium != 0 and dpmfp <= epsgmfp:
+                if medium != 0 and dpmfp <= EPSGMFP:
                     # Time for an interaction
+                    EXIT_PTRANS = True
                     break  # XXX EXIT :PNEWMEDIUM:
 
             # :PTRANS: LOOP
-            if particle_outcome is not None:
+            if EXIT_PTRANS or particle_outcome is not None:
                 break
 
         # :PNEWMEDIUM: LOOP
@@ -274,7 +276,7 @@ def photon(howfar, ausgab):
         else:
             if iraylr[irl_m1]  == 1:
                 rnno37 = randomset()
-                if rnno37 <= (1.0 - COHFAC):
+                if rnno37 <= (1.0 - cohfac):
                     if iausfl[RAYLAUSB-1+1] != 0:
                         ausgab(RAYLAUSB)
                     stack.npold = np
@@ -297,7 +299,7 @@ def photon(howfar, ausgab):
                 if rnno39 <= (1.0 - PHOTONUCFAC):
                     if iausfl[PHOTONUCAUSB-1+1] != 0:
                         ausgab(PHOTONUCAUSB)
-                    egsfortran.PHOTONUC()
+                    egsfortran.photonuc()
                     if iausfl[PHOTONUCAUSA-1+1] != 0:
                         ausgab(PHOTONUCAUSA)
                     goto_PNEWENERGY = True
@@ -313,13 +315,13 @@ def photon(howfar, ausgab):
         if rnno36 <= gbr1 and e[np_m1] > rmt2:
             # IT WAS A PAIR PRODUCTION
             if iausfl[PAIRAUSB-1+1] != 0:
-                        ausgab(PAIRAUSB)
-            egsfortran.PAIR
+                ausgab(PAIRAUSB)
+            egsfortran.pair()
             if particle_selection_pair:
                 particle_selection_pair()
 
             if iausfl[PAIRAUSA-1+1] != 0:
-                        ausgab(PAIRAUSA)
+                ausgab(PAIRAUSA)
 
             if iq[np_m1] != 0:
                 break  # XXX EXIT :PNEWENERGY:
@@ -344,7 +346,7 @@ def photon(howfar, ausgab):
         else:
             if iausfl[PHOTOAUSB+1-1] != 0:
                 ausgab(PHOTOAUSB)
-            egsfortran.PHOTO
+            egsfortran.photo()
             if particle_selection_photo:
                 particle_selection_photo()
 
@@ -377,7 +379,8 @@ def photon(howfar, ausgab):
     # :PNEWENERGY: LOOP
 
     # If here, means electron to be transported next
-    return ircode
+    if particle_outcome is None:
+        return ircode
 
     # ---------------------------------------------
     # PHOTON CUTOFF ENERGY DISCARD SECTION
@@ -406,7 +409,7 @@ def photon(howfar, ausgab):
         if iausfl[USERDAUS-1+1] != 0:
             ausgab(USERDAUS)
         ircode = 2
-        stack.np += 1
+        stack.np -= 1
         return ircode
     else:
         raise ValueError(f"Unhandled particle outcome ({particle_outcome})")
