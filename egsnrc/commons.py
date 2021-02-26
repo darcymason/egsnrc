@@ -274,3 +274,27 @@ edge_c = edge.edge_c
 edge_d = edge.edge_d
 iedgfl = edge.iedgfl
 iphter = edge.iphter
+
+
+#  COMMON block photin --------
+photin = egsfortran.photin
+dpmfp = photin.dpmfp
+ebinda = photin.ebinda
+ge0 = photin.ge0
+ge1 = photin.ge1
+gmfp0 = photin.gmfp0
+gbr10 = photin.gbr10
+gbr20 = photin.gbr20
+gmfp1 = photin.gmfp1
+gbr11 = photin.gbr11
+gbr21 = photin.gbr21
+rco0 = photin.rco0
+rco1 = photin.rco1
+rsct0 = photin.rsct0
+rsct1 = photin.rsct1
+cohe0 = photin.cohe0
+cohe1 = photin.cohe1
+photonuc0 = photin.photonuc0
+photonuc1 = photin.photonuc1
+mpgem = photin.mpgem
+ngr = photin.ngr
