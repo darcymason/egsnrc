@@ -1,112 +1,125 @@
 from egsnrc import egsfortran
-from egsnrc.angles import uphi
-ranlux = egsfortran.ranlux
-rng_seed = egsfortran.randomm.rng_seed
-rng_array = egsfortran.randomm.rng_array
+from .commons import *
+from .angles import uphi
+from .electr import electr
+import numpy
 
+def shower(iqi, ei, xi, yi, zi, ui, vi, wi, iri, wti, callbacks):
+    """Track a particle and others created during its simulation
 
-np = egsfortran.stack.np
-npold = egsfortran.stack.npold
+    Parameters
+    ----------
+    iqi: int
+        initial particle charge
+    ei: float
+        initial shower energy
+    xi, yi, zi:  (float, float, float)
+        initial co-ordinates
+    ui, vi, wi: (float, float, float)
+        initial direction cosines
+    iri: int
+        initial region number
+    wti: float
+        initial weight
+    callbacks: dict
+        Callback functions for `hownear`, `howfar` and `ausgab`
 
-# CALLBACKS ----
+    """
 
-def randomset():
-# randomm
-    global rng_seed, rng_array, seeds
+    hownear = callbacks['hownear']
+    howfar = callbacks['howfar']
+    ausgab = callbacks['ausgab']
+    egsfortran.ausgab = ausgab  # for functions still in egsfortran to call
 
-    if rng_seed > 24:
-        ranlux(rng_array)
-        rng_seed = 1
-
-    random_num = rng_array[rng_seed-1]
-    rng_seed += 1
-
-    return random_num
-
-
-# ******************************************************************
-#                                National Research Council of Canada
-def SHOWER(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
-    #
-    # ******************************************************************
-
-    # stack
-    global e, x, y, z, u, v, w, dnear, wt, iq, ir, latch, latchi, np, npold
-    # uphiot
-    global theta, sinthe, costhe, sinphi, cosphi, pi, twopi, pi5d2
-
+    # msg = ", ".join(
+    #     f"{x}={locals()[x]}"
+    #     for x in "iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti".split(",")
+    # )
+    # logger.info(f"Called shower with {msg}")
+    ircode = numpy.array(0)  # meed rank-0 array for output var in f2py
 
     # $ comin_shower # DEFAULT REPLACEMENT PRODUCES THE FOLLOWING:
                     # COMIN/DEBUG,STACK,UPHIOT,RANDOM/
-
-    # # Input variables
-    # ;real*8 EI,      # initial shower energy
-    #       XI,YI,ZI,# initial co-ordinates
-    #       UI,VI,WI,# initial direction cosines
-    #       WTI # initial weight
-
-    # ;integer*4
-    #       IQI,     # initial particle charge
-    #       IRI # initial region number
-
     # # Local variables
     # DOUBLE PRECISION
-    #       DEG,    # energy for pi-zero option
-    #       DPGL,   # angle factor for pi-zero option
-    #       DEI,    # incident energy for pi-zero option
-    #       DPI,    # intermediate factor for pi-zero option
-    #       DCSTH,  # random number for pi-zero option
-    #       DCOSTH, # cos(theta) for pi-zero option
-    #       PI0MSQ # pi-zero mass squared (in MeV**2)
+    # deg,    energy for pi-zero option
+    # dpgl,   angle factor for pi-zero option
+    # dei,    incident energy for pi-zero option
+    # dpi,    intermediate factor for pi-zero option
+    # dcsth,  random number for pi-zero option
+    # dcosth, cos(theta) for pi-zero option
+    # pi0msq  pi-zero mass squared (in MeV**2)
 
-    # ;real*8 DNEARI, # initial distance to closest boundary
-    #       CSTH # random number for pi-zero option
+    # real*8
+    # dneari, initial distance to closest boundary
+    # csth,  random number for pi-zero option
 
-    # ;integer*4
-    #       IRCODE # status returned by ELECTR or PHOTON
+    # integer*4
+    # ircode  status returned by ELECTR or PHOTON
 
-    PI0MSQ = 1.8215416D4  # PI-ZERO MASS (MEV) SQUARED
+    pi0msq = 1.8215416  # PI-ZERO MASS (MEV) SQUARED
 
-    np=1
-    npold = np # Set the old stack counter
+    stack.np=1
+    stack.npold = stack.np # Set the old stack counter
     dneari=0.0
-    iq[0]=iqi; e[0]=ei; u[0]=ui; v[0]=vi; w[0]=wi
+    iq[0]=iqi
+    e[0]=ei
+    u[0]=ui
+    v[0]=vi
+    w[0]=wi
 
+    # TRANSFER PROPERTIES TO [0] FROM I  # ** 0-based, is to [1] in Mortran
+    x[0]=xi
+    y[0]=yi
+    z[0]=zi
+    ir[0]=iri
+    wt[0]=wti
+    dnear[0]=dneari
+    latch[0]=latchi
 
-    # TRANSFER PROPERTIES TO [0] FROM I
-    x[0]=xi;y[0]=yi;z[0]=zi;ir[0]=iri
-    wt[0]=wti;dnear[0]=dneari;latch[0]=latchi
-
-    if IQI == 2:
+    if iqi == 2:
         # PI-ZERO OPTION
-        # IF(EI <= PI0MSQ) [OUTPUT EI;    corrected Oct 24 1995 e-mail Hideo H
+        # if EI <= PI0MSQ) [OUTPUT EI;    corrected Oct 24 1995 e-mail Hideo H
         #                   noted by      Dr.  Muroyama at Nagoya University
-        if ei**2 <= pi0msq:
-            msg = (
-                ' Stopped in subroutine SHOWER---PI-ZERO option invoked'
-                f' but the total energy was too small (EI={ei} MeV)'
-            )
-            raise ValueError(msg)
+        raise NotImplementedError("egsnrc Python not tested for PI-ZERO")
+        # if ei**2 <= pi0msq:
+        #     msg = (
+        #         ' Stopped in subroutine SHOWER---PI-ZERO option invoked'
+        #         f' but the total energy was too small (EI={ei} MeV)'
+        #     )
+        #     raise ValueError(msg)
 
-        csth = randomset()
-        dcsth=csth; dei=ei; dpi=dsqrt(dei*dei-pi0msq)
-        deg=dei+dpi*dcsth; dpgl=dpi+dei*dcsth; dcosth=dpgl/deg
-        costhe=dcosth; sinthe=dsqrt(1.d0-dcosth*dcosth)
-        iq[0]=0; e[0]=deg/2.
-        call uphi(2,1)
-        np=2
-        deg=dei-dpi*dcsth; dpgl=dpi-dei*dcsth; dcosth=dpgl/deg
-        costhe=dcosth; sinthe=-dsqrt(1.d0-dcosth*dcosth)
-        iq(2)=0; e(2)=deg/2.
-        egsfortran.uphi(3,2)
+        # csth = randomset()
+        # dcsth=csth; dei=ei; dpi=dsqrt(dei*dei-pi0msq)
+        # deg=dei+dpi*dcsth; dpgl=dpi+dei*dcsth; dcosth=dpgl/deg
+        # uphiot.costhe=dcosth
+        # uphiot.sinthe=dsqrt(1.0-dcosth*dcosth)
+        # iq[0]=0
+        # e[0]=deg/2.
+        # uphi(2,1)
+        # stack.np=2
+        # deg=dei-dpi*dcsth
+        # dpgl=dpi-dei*dcsth
+        # dcosth=dpgl/deg
+        # uphiot.costhe=dcosth
+        # uphiot.sinthe=-sqrt(1.0-dcosth*dcosth)
+        # iq[2-1]=0
+        # e[2-1]=deg/2.
+        # uphi(3,2)
 
 
     while np > 0:
         #  DEFAULT FOR $ KERMA-INSERT; IS ; (NULL)
-        if  iq[np-1] == 0:
-            call egsfortran.photon(ircode)
+        if  iq[np-1] == 0:  # np-1 for ** 0-based in Python
+            egsfortran.photon(ircode, howfar)
         else:
-            call egsfortran.electr(ircode)
-
-    # end of subroutine shower
-
+            # Note, callbacks have to be passed as extra parameters
+            # even if not in the mortran call arguments,
+            # unless intent(callback,hide) is used in f2py comments,
+            # in which case, need to set `egsfortran.hownear = hownear`
+            # egsfortran.electr(ircode, howfar) #, hownear,
+            #     calc_tstep_from_demfp,
+            #     compute_eloss, compute_eloss_g
+            # )
+            ircode = electr(hownear, howfar, ausgab)
+        # egsfortran.flushoutput()

@@ -4,6 +4,7 @@ import os
 from egsnrc import egsfortran
 from egsnrc import watch
 from egsnrc.electr import electr
+from egsnrc.shower import shower
 from egsnrc.util import for_E18, fort_hex  # for debugging vs mortran
 import logging
 import numpy  # cannot use `np` as is an EGS var!!
@@ -36,7 +37,15 @@ escore = score.escore
 logger = logging.getLogger('egsnrc')  # XXX later `egsnrc`
 
 HEN_HOUSE = Path(os.environ["HEN_HOUSE"])
-EGS_HOME = Path(os.environ['EGS_HOME'])
+
+# Define paths based on current location
+# this python file should be in the user code directory under egs_home
+#  - e.g. in tutor1, tutor2, etc.
+HERE  = Path(__file__).resolve().parent
+EGS_HOME = HERE.parent
+EGS_CONFIG = os.environ['EGS_CONFIG']
+USER_CODE = HERE.name
+PEGS_FILE = "tutor_data"
 
 
 def ausgab(iarg, **kwargs):
@@ -66,122 +75,6 @@ def ausgab(iarg, **kwargs):
         msg = " AUSGAB irl,edep"
         # logger.debug(f"{msg:<35}:{irl:3}{fort_hex(edep)}")
         escore[irl-1] += edep
-
-
-egsfortran.ausgab = ausgab
-
-# ******************************************************************
-#                                National Research Council of Canada
-def shower(iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti):
-    #
-    # ******************************************************************
-
-    # stack
-    # global e, x, y, z, u, v, w, dnear, wt, iq, ir, latch, latchi, np, npold
-    # uphiot
-    # global theta, sinthe, costhe, sinphi, cosphi, pi, twopi, pi5d2
-
-    # msg = ", ".join(f"{x}={locals()[x]}" for x in "iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti".split(","))
-    # logger.info(f"Called shower with {msg}")
-    ircode = numpy.array(0)  # meed rank-0 array for output var in f2py
-
-    # $ comin_shower # DEFAULT REPLACEMENT PRODUCES THE FOLLOWING:
-                    # COMIN/DEBUG,STACK,UPHIOT,RANDOM/
-
-    # # Input variables
-    # ;real*8 EI,      # initial shower energy
-    #       XI,YI,ZI,# initial co-ordinates
-    #       UI,VI,WI,# initial direction cosines
-    #       WTI # initial weight
-
-    # ;integer*4
-    #       IQI,     # initial particle charge
-    #       IRI # initial region number
-
-    # # Local variables
-    # DOUBLE PRECISION
-    #       DEG,    # energy for pi-zero option
-    #       DPGL,   # angle factor for pi-zero option
-    #       DEI,    # incident energy for pi-zero option
-    #       DPI,    # intermediate factor for pi-zero option
-    #       DCSTH,  # random number for pi-zero option
-    #       DCOSTH, # cos(theta) for pi-zero option
-    #       PI0MSQ # pi-zero mass squared (in MeV**2)
-
-    # ;real*8 DNEARI, # initial distance to closest boundary
-    #       CSTH # random number for pi-zero option
-
-    # ;integer*4
-    #       IRCODE # status returned by ELECTR or PHOTON
-
-    PI0MSQ = 1.8215416  # PI-ZERO MASS (MEV) SQUARED
-
-    stack.np=1
-    stack.npold = stack.np # Set the old stack counter
-    dneari=0.0
-    iq[0]=iqi
-    e[0]=ei
-    u[0]=ui; v[0]=vi; w[0]=wi
-
-
-    # TRANSFER PROPERTIES TO [0] FROM I  # ** 0-based, is [1] in Mortran
-    x[0]=xi; y[0]=yi; z[0]=zi
-    ir[0]=iri
-    wt[0]=wti
-    dnear[0]=dneari
-    latch[0]=latchi
-
-    if iqi == 2:
-        # PI-ZERO OPTION
-        # if EI <= PI0MSQ) [OUTPUT EI;    corrected Oct 24 1995 e-mail Hideo H
-        #                   noted by      Dr.  Muroyama at Nagoya University
-        raise NotImplementedError("egsnrc Python not tested for PI-ZERO")
-        # if ei**2 <= pi0msq:
-        #     msg = (
-        #         ' Stopped in subroutine SHOWER---PI-ZERO option invoked'
-        #         f' but the total energy was too small (EI={ei} MeV)'
-        #     )
-        #     raise ValueError(msg)
-
-        # csth = randomset()
-        # dcsth=csth; dei=ei; dpi=dsqrt(dei*dei-pi0msq)
-        # deg=dei+dpi*dcsth; dpgl=dpi+dei*dcsth; dcosth=dpgl/deg
-        # costhe=dcosth; sinthe=dsqrt(1.0-dcosth*dcosth)  # "1.D0" -> "1.0" ???
-        # iq[0]=0; e[0]=deg/2.
-        # egsfortran.uphi(2,1)
-        # stack.np=2
-        # deg=dei-dpi*dcsth; dpgl=dpi-dei*dcsth; dcosth=dpgl/deg
-        # costhe=dcosth; sinthe=-dsqrt(1.0-dcosth*dcosth)  # "1.D0" -> "1.0" ???
-        # iq[2-1]=0; e[2-1]=deg/2.
-        # egsfortran.uphi(3,2)
-
-
-    while np > 0:
-        #  DEFAULT FOR $ KERMA-INSERT; IS ; (NULL)
-        if  iq[np-1] == 0:  # -1 for ** 0-based in Python
-            egsfortran.photon(ircode, howfar)
-        else:
-            # Note, callbacks have to be passed as extra parameters
-            # even if not in the mortran call arguments,
-            # unless intent(callback,hide) is used in f2py comments,
-            # in which case, need to set `egsfortran.hownear = hownear`
-            # egsfortran.electr(ircode, howfar) #, hownear,
-            #     calc_tstep_from_demfp,
-            #     compute_eloss, compute_eloss_g
-            # )
-            ircode = electr(hownear, howfar, ausgab)
-        # egsfortran.flushoutput()
-    # ---------------- end of subroutine shower
-
-
-# Define paths based on current location
-# this python file should be in the user code directory under egs_home
-#  - e.g. in tutor1, tutor2, etc.
-HERE  = Path(__file__).resolve().parent
-EGS_HOME = HERE.parent
-EGS_CONFIG = os.environ['EGS_CONFIG']
-USER_CODE = HERE.name
-PEGS_FILE = "tutor_data"
 
 
 def print_info():
@@ -352,6 +245,8 @@ def main(iqin=-1, iwatch=1, high_prec=False, ncase=10):
     # INITIATE THE SHOWER NCASE TIMES
     #  ncase=10 # now from function call parameter
 
+    callbacks = {'hownear': hownear, 'howfar': howfar, 'ausgab': ausgab}
+
     for i in range(ncase):
         if (iwatch != 0) and (iwatch != 4):
             logger.debug(
@@ -361,7 +256,7 @@ def main(iqin=-1, iwatch=1, high_prec=False, ncase=10):
             f"{uin:7.3f}{vin:7.3f}{win:7.3f}"  # should be 8.3 like x,y,z but get extra spaces
             f"{latchi:10}{wtin:10.3E}",
             )
-        shower(iqin,ein,xin,yin,zin,uin,vin,win,irin,wtin)
+        shower(iqin,ein,xin,yin,zin,uin,vin,win,irin,wtin, callbacks)
 
         # egsfortran.flush_output()
         watch.watch(-1, iwatch)  # print a message that this history is over

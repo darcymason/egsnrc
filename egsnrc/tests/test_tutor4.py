@@ -1,4 +1,3 @@
-
 import pytest
 from egsnrc import config  # import and line below must precede calcfuncs
 config.test_precision = True
@@ -229,4 +228,5 @@ class TestTutor4:
 
     def test_pi_zero(self):
         with pytest.raises(NotImplementedError):
-            tutor4.shower(2, 100, 0, 0, 0, 0, 0, 1, 1, 1)
+            callbacks = {x: None for x in ('hownear', 'howfar', 'ausgab')}
+            tutor4.shower(2, 100, 0, 0, 0, 0, 0, 1, 1, 1, callbacks)
