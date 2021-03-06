@@ -3,6 +3,7 @@ from egsnrc.randoms import randomset
 from egsnrc.params import *
 from egsnrc.commons import *
 from egsnrc.constants import *
+from .photo import photo
 
 from math import log
 
@@ -89,16 +90,20 @@ def photon(howfar, ausgab):
     logger.debug("Entered PHOTON")
     ircode = 1 # set up normal return
     np_m1 = np - 1  # ** 0-based Python
+
     peig = e[np_m1]
     eig = peig  # energy of incident gamma
+
     irl = ir[np_m1]
     irl_m1 = irl - 1  # ** 0-based Python
+
     medium_m1 = medium - 1
 
     # Set up flags for discards (For Python, DLM 2021-02)
     particle_outcome = None
     PCUT_DISCARD = 1
     USER_PHOTON_DISCARD = 2
+    PAIR_ELECTRONS_KILLED = 3
 
 
     # --- Inline replace: $ start_new_particle; -----
@@ -135,7 +140,7 @@ def photon(howfar, ausgab):
         # NOTE:  This template can also be over-ridden by other schemes,
         #        such as the 'exponential transform' technique.
 
-        irold = ir[np_m1]  # Initialize previous region
+        epcont.irold = ir[np_m1]  # Initialize previous region
 
         # :PNEWMEDIUM:
         while True:  # Here each time we change medium during photon transport
@@ -148,8 +153,8 @@ def photon(howfar, ausgab):
                 gmfpr0 = gmfp1[lgle_m1, medium_m1]*gle+ gmfp0[lgle_m1, medium_m1]
 
             # :PTRANS:
+            INTERACTION_READY = False
             while True:  # photon transport loop
-                EXIT_PTRANS = False
                 if medium == 0:
                     epcont.tstep = vacdst
                 else:
@@ -244,37 +249,42 @@ def photon(howfar, ausgab):
                 # oct 31 bug found by C Ma. PCUT discard now after AUSGAB call
                 if eig <= pcut[irl_m1]:
                     particle_outcome = PCUT_DISCARD
-                    break # XXX
+                    break
 
                 # Now check for deferred discard request. May have been set
                 # by either howfar, or one of the transport ausgab calls
                 if idisc < 0:
                     particle_outcome = USER_PHOTON_DISCARD
-                    break # XXX
+                    break
 
                 if medium != medold:
                     break  # exit :PTRANS: loop
 
                 if medium != 0 and dpmfp <= EPSGMFP:
                     # Time for an interaction
-                    EXIT_PTRANS = True
-                    break  # XXX EXIT :PNEWMEDIUM:
+                    INTERACTION_READY = True
+                    break  # EXIT :PNEWMEDIUM:
 
-            # :PTRANS: LOOP
-            if EXIT_PTRANS or particle_outcome is not None:
+                # end :PTRANS: loop
+            # --------------------------
+            # in :PNEWMEDIUM: loop
+            if INTERACTION_READY or particle_outcome is not None:
                 break
-
-        # :PNEWMEDIUM: LOOP
+            # end :PNEWMEDIUM: loop
+        # ----------
+        # in :PNEWENERGY: loop
         if particle_outcome is not None:
-            break
+            break  # go to discard sections
 
-        #    It is finally time to interact.
-        #    The following macro allows one to introduce rayleigh scattering
+        # continue PNEWENERGY loop with interaction ...
+
+        # It is finally time to interact.
+        # The following allows one to introduce rayleigh scattering
         # --- Inline replace: $ RAYLEIGH_SCATTERING; -----
         if rayleigh_scattering:
             rayleigh_scattering()
         else:
-            if iraylr[irl_m1]  == 1:
+            if iraylr[irl_m1] == 1:
                 rnno37 = randomset()
                 if rnno37 <= (1.0 - cohfac):
                     if iausfl[RAYLAUSB-1+1] != 0:
@@ -286,8 +296,7 @@ def photon(howfar, ausgab):
                     uphi(2,1)
                     if iausfl[RAYLAUSA-1+1] != 0:
                         ausgab(RAYLAUSA)
-                    goto_PNEWENERGY = True
-                    break # XXX
+                    continue # goto :PNEWENERGY:
         # End inline replace: $ RAYLEIGH_SCATTERING; ----
         # Ali:photonuclear, 1 line
         # --- Inline replace: $ PHOTONUCLEAR; -----
@@ -302,10 +311,7 @@ def photon(howfar, ausgab):
                     egsfortran.photonuc()
                     if iausfl[PHOTONUCAUSA-1+1] != 0:
                         ausgab(PHOTONUCAUSA)
-                    goto_PNEWENERGY = True
-                    break # XXX
-
-
+                    continue  # :PNEWENERGY: loop
         # End inline replace: $ PHOTONUCLEAR; ----
         rnno36 = randomset() # This random number determines which interaction
         #    GBR1 = PAIR / (PAIR + COMPTON + PHOTO) = PAIR / GTOTAL
@@ -324,16 +330,22 @@ def photon(howfar, ausgab):
                 ausgab(PAIRAUSA)
 
             if iq[np_m1] != 0:
-                break  # XXX EXIT :PNEWENERGY:
+                break  # EXIT :PNEWENERGY:
             else:  # this may happen if pair electrons killed via Russian Roul
-                goto_PAIR_ELECTRONS_KILLED = True
-                break # XXX
+                # :PAIR_ELECTRONS_KILLED:
+                # If here, then gamma is lowest energy particle.
+                peig = e[np_m1]
+                eig = peig
+                if eig < pcut[irl_m1]:
+                    particle_outcome = PCUT_DISCARD
+                    break
+                continue  # repeat PNEWENERGY loop
 
         #     GBR2 = (PAIR + COMPTON) / GTOTAL
         # evaluate gbr2 using gbr2(gle)
         gbr2 = gbr21[lgle_m1, medium_m1]*gle+ gbr20[lgle_m1, medium_m1]
         if rnno36 < gbr2:
-            # IT WAS A COMPTON
+            # It was a compton
             if iausfl[COMPAUSB+1-1] != 0:
                 ausgab(COMPAUSB)
             egsfortran.compt()
@@ -346,7 +358,7 @@ def photon(howfar, ausgab):
         else:
             if iausfl[PHOTOAUSB+1-1] != 0:
                 ausgab(PHOTOAUSB)
-            egsfortran.photo()
+            photo()  # egsfortran.photo()
             if particle_selection_photo:
                 particle_selection_photo()
 
@@ -369,21 +381,15 @@ def photon(howfar, ausgab):
                 break  # XXX EXIT :PNEWENERGY:
         # End of photo electric block
 
-        # :PAIR_ELECTRONS_KILLED:
-        # If here, then gamma is lowest energy particle.
-        peig = e[np_m1]
-        eig = peig
-        if eig < pcut[irl_m1]:
-            goto_PCUT_DISCARD = True
-            break # XXX
-    # :PNEWENERGY: LOOP
+        # end :PNEWENERGY: LOOP ---------
 
-    # If here, means electron to be transported next
+
     if particle_outcome is None:
+        # If here, means electron to be transported next
         return ircode
 
     # ---------------------------------------------
-    # PHOTON CUTOFF ENERGY DISCARD SECTION
+    # Photon cutoff energy discard section
     # ---------------------------------------------
     if particle_outcome == PCUT_DISCARD:
         if medium > 0:
@@ -395,8 +401,10 @@ def photon(howfar, ausgab):
             idr = EGSCUTAUS
 
         epcont.edep = peig  # get energy deposition for user
+        # inline replace $ PHOTON-TRACK-END
         if iausfl[idr-1+1] != 0:
             ausgab(idr)
+        # --- end inline replace
         ircode = 2
         stack.np -= 1
         return ircode

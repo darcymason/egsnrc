@@ -298,3 +298,9 @@ photonuc0 = photin.photonuc0
 photonuc1 = photin.photonuc1
 mpgem = photin.mpgem
 ngr = photin.ngr
+
+
+#  COMMON block x_options --------
+x_options = egsfortran.x_options
+eadl_relax = x_options.eadl_relax
+mcdf_pe_xsections = x_options.mcdf_pe_xsections
