@@ -2,7 +2,8 @@ import numpy
 
 MXSTACK = 40  # must be same as when f2py egsfortan created
 
-EPSEMFP: numpy.float64 = 1.E-8
+EPSEMFP: numpy.float64 = 1.E-8  # smallest electron mfp value
+EPSGMFP: numpy.float64 = 1.E-8  # smallest gamma mfp value
 RANDOMIZE_TUSTEP: bool = False
 PRESTA_II: numpy.int32 = 0
 EM_MACROS_ACTIVE: bool = False
@@ -14,6 +15,12 @@ BHABAUSB: numpy.int32 = 10
 BHABAUSA: numpy.int32 = 11
 ANNIHFAUSB: numpy.int32 = 12
 ANNIHFAUSA: numpy.int32 = 13
+PAIRAUSB: numpy.int32 = 15  # before pair() call
+PAIRAUSA: numpy.int32 = 16  # after pair() call
+COMPAUSB: numpy.int32 = 17  # before compt() call
+COMPAUSA: numpy.int32 = 18  # after compt() call
+PHOTOAUSB: numpy.int32 = 19  # before photo() call
+PHOTOAUSA: numpy.int32 = 20  # after photo() call
 UPHIAUSB: numpy.int32 = 21
 UPHIAUSA: numpy.int32 = 22
 BREMAUSB: numpy.int32 = 6

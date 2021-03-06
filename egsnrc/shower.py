@@ -2,6 +2,8 @@ from egsnrc import egsfortran
 from .commons import *
 from .angles import uphi
 from .electr import electr
+from .photon import photon
+
 import numpy
 
 def shower(iqi, ei, xi, yi, zi, ui, vi, wi, iri, wti, callbacks):
@@ -111,7 +113,7 @@ def shower(iqi, ei, xi, yi, zi, ui, vi, wi, iri, wti, callbacks):
     while np > 0:
         #  DEFAULT FOR $ KERMA-INSERT; IS ; (NULL)
         if  iq[np-1] == 0:  # np-1 for ** 0-based in Python
-            egsfortran.photon(ircode, howfar)
+            egsfortran.photon(ircode, howfar)  # ircode = photon(howfar, ausgab)
         else:
             # Note, callbacks have to be passed as extra parameters
             # even if not in the mortran call arguments,
