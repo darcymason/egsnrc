@@ -51,6 +51,8 @@
 REPLACE {$MXMED} WITH {1}   "only 1 medium in the problem(default 10)"
 REPLACE {$MXREG} WITH {3}   "only 3 geometric regions (default 2000)"
 REPLACE {$MXSTACK} WITH {15}"less than 15 particles on stack at once"
+REPLACE {$MXAUS} WITH {55}
+REPLACE {$MXAUSM5} WITH {50}
 
 "Define a common to pass information to the geometry routine HOWFAR"
 REPLACE {;COMIN/GEOM/;} WITH {;COMMON/GEOM/ZBOUND;$REAL ZBOUND;}
