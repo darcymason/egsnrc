@@ -26,6 +26,7 @@ def test_pegs_read():
     # Values exported from tutor4 Mortran via $egs_info macro for TA:
     ta = media['ta']
     tol = 1e-5
+    # Sample expected values:
     assert 0.999978E+00 == pytest.approx(ta['dl1'][0], tol)
     assert 0.100044E+01 == pytest.approx(ta['dl1'][-1], tol)
     assert 0.952000E+00 == pytest.approx(ta['dl6'][-1], tol)
@@ -75,4 +76,28 @@ def test_pegs_read():
     for var, expected in zip(vars_1, expected_var1_last):
         assert float(expected) == pytest.approx(ta[var][-1])
 
+    # PHOTIN
+    # EBINDA, GE0, GE1    0.674160E-01    0.108496E+03    0.231254E+02
+    assert 0.674160E-01 == ta['ebinda']
+    assert 0.108496E+03 == ta['ge0']
+    assert 0.231254E+02 == ta['ge1']
+
+    var_names = 'gmfp gbr1 gbr2'.split()
+    vars_0 = [var_name + "0" for var_name in var_names]
+    vars_1 = [var_name + "1" for var_name in var_names]
+    expected_var0_0 =  "0.924862E-02    0.000000E+00    0.968388E-02".split()
+    expected_var0_last = "0.276774E+01    0.774469E+00    0.995661E+00".split()
+    expected_var1_0 =  "0.187401E-02    0.000000E+00    0.196035E-02".split()
+    expected_var1_last = "-0.205889E+00    0.453419E-01    0.904219E-03".split()
+    for var, expected in zip(vars_0, expected_var0_0):
+        assert float(expected) == pytest.approx(ta[var][0])
+
+    for var, expected in zip(vars_0, expected_var0_last):
+        assert float(expected) == pytest.approx(ta[var][-1])
+
+    for var, expected in zip(vars_1, expected_var1_0):
+        assert float(expected) == pytest.approx(ta[var][0])
+
+    for var, expected in zip(vars_1, expected_var1_last):
+        assert float(expected) == pytest.approx(ta[var][-1])
 

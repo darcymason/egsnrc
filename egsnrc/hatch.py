@@ -898,4 +898,29 @@ def read_pegs(filename: str, requested_media: set):
                 {var_name+"1": arr1s[i] for i, var_name in enumerate(var_names)}
             )
 
+            # PHOTIN
+            # EBINDA(IM),$LGN(GE(IM)/0,1/);
+            # $LGN(GMFP,GBR1,GBR2(I,IM)/0,1/),I=1,NGE);
+            nge = medium_dict['mge']
+            floats = read_floats(f, 1+2)
+            medium_dict.update({
+                'ebinda': floats[0],
+                'ge0': floats[1],
+                'ge1': floats[2]
+            })
+
+            floats = read_floats(f, 3*2*nge)
+            floats.shape = (nge, 3, 2)
+
+            arr0s = floats[:,:,0].transpose()
+            arr1s = floats[:,:,1].transpose()
+            var_names = "gmfp gbr1 gbr2".split()
+            medium_dict.update(
+                {var_name+"0": arr0s[i] for i, var_name in enumerate(var_names)}
+            )
+            medium_dict.update(
+                {var_name+"1": arr1s[i] for i, var_name in enumerate(var_names)}
+            )
+
+
     return media_dict
