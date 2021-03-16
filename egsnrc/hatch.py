@@ -848,6 +848,7 @@ def read_pegs(filename: str, requested_media: set):
             # IRAYL:  Rayleigh switch from PEGS
             # e.g. for NaI in tutor_data:
             # '     0  199    0   46    0    0    0    1    0'
+            # Note, is one extra int in vals, zip goes to shorter list
             keys = "msge mge mseke meke mleke mcmfp mrange irayl".split()
             vals = [int(x) for x in next(f).split()]
             medium_dict.update(zip(keys, vals))
@@ -922,5 +923,30 @@ def read_pegs(filename: str, requested_media: set):
                 {var_name+"1": arr1s[i] for i, var_name in enumerate(var_names)}
             )
 
+            if medium_dict['irayl'] != 1:
+                continue
+
+            # Rayleigh
+            # READ(KMPI,:INT:) NGR(IM);
+            ngr = int(next(f).strip())
+
+            # READ(KMPI,:FLT:)$LGN(RCO(IM)/0,1/);
+            medium_dict['rco0'], medium_dict['rco1'] = read_floats(f, 2)
+
+            # READ(KMPI,:FLT:)($LGN(RSCT(I,IM)/0,1/),I=1,NGRIM);
+            floats = read_floats(f, 2*ngr)
+            floats.shape = (ngr, 2)
+            medium_dict.update({
+                'rsct0': floats[:, 0].transpose(),
+                'rsct1': floats[:, 1].transpose(),
+            })
+
+            # READ(KMPI,:FLT:)($LGN(COHE(I,IM)/0,1/),I=1,NGE);
+            floats = read_floats(f, 2*nge)
+            floats.shape = (nge, 2)
+            medium_dict.update({
+                'cohe0': floats[:, 0].transpose(),
+                'cohe1': floats[:, 1].transpose(),
+            })
 
     return media_dict

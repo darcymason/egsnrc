@@ -101,3 +101,19 @@ def test_pegs_read():
     for var, expected in zip(vars_1, expected_var1_last):
         assert float(expected) == pytest.approx(ta[var][-1])
 
+    # Rayleigh
+    # rco0, rco1    0.200000E+01    0.980000E+02
+    # rsct0, rsct1, cohe0, cohe1 first    0.000000E+00    0.909368E+00    0.827603E+00   -0.334864E-01
+    # rsct0, rsct1, cohe0, cohe1 last   -0.601142E+04    0.641142E+04    0.100000E+01    0.000000E+00
+
+    assert 0 == ta['rsct0'][0]
+    assert -0.601142E+04 == ta['rsct0'][-1]
+
+    assert 0.909368E+00 == ta['rsct1'][0]
+    assert 0.641142E+04 == ta['rsct1'][-1]
+
+    assert 0.827603E+00 == ta['cohe0'][0]
+    assert 0.100000E+01 == ta['cohe0'][-1]
+
+    assert -0.334864E-01 == ta['cohe1'][0]
+    assert 0 == ta['cohe1'][-1]
