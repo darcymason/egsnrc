@@ -4,6 +4,9 @@ from egsnrc import config
 import numpy
 from egsnrc.util import for_E18, fort_hex
 
+from jax import vmap
+import jax.numpy as jnp
+
 import logging
 logger = logging.getLogger("egsnrc")
 
@@ -153,6 +156,65 @@ def compute_eloss(lelec, medium, step, eke, elke, lelke):
     else:
         dedxmid = pdedx1[lelke_m1, medium_m1]*elke+ pdedx0[lelke_m1, medium_m1]  # EVALUATE dedxmid USING pdedx(elke)
         aux = pdedx1[lelke_m1, medium_m1]/dedxmid
+
+    # de = dedxmid*tuss #  Energy loss using stopping power at the beginning
+    de = dedxmid*step*rhof  # IK: rhof scaling bug, June 9 2006
+                            # rhof scaling must be done here and NOT in
+                            # $ COMPUTE-ELOSS-G
+    fedep = de / eke
+
+    de *= 1 - 0.5*fedep*aux*(
+        1 - point_333333*fedep*(aux - 1 -0.25*fedep*(2-aux*(4-aux)))
+    )
+
+    # logger.debug(f"out compute-eloss:{fort_hex(de)}")
+    return de
+
+
+def vect_compute_eloss(lelec, medium, step, eke, elke, lelke):
+    """"Compute the energy losses due to sub-threshold processes for `step`s.
+
+    The energy at the beginning of the step is `eke`, `elke`=log(`eke`),
+    `lelke` is the interpolation index.
+    The formulae are based on the logarithmic interpolation for dedx
+    used in EGSnrc.
+
+    This version of the function has changes to allow for jax vectorization
+    using `vmap` (`if` branch changed to `jnp.where`)
+
+    Returns
+    -------
+    REAL
+        energy loss
+
+    Note
+    ----
+    Assumes that initial and final energy are in the same interpolation bin.
+
+    """
+    # print("fn: ",lelec, medium, step, eke, elke, lelke)
+
+    # logger.debug(f"in compute-eloss:{fort_hex([step, eke, elke])}{lelke:4}")
+    # ** 0-based
+
+    # Convert arrays to jax arrays
+    jededx1 = jnp.asarray(ededx1)
+    jededx0 = jnp.asarray(ededx0)
+    jpdedx1 = jnp.asarray(pdedx1)
+    jpdedx0 = jnp.asarray(pdedx0)
+
+    medium_m1 = medium - 1
+    lelke_m1 = lelke - 1
+
+    # condition on (if lelec < 0:) - data for e vs p (e- vs e+)
+    jdedx1 = jnp.where(lelec < 0, jededx1, jpdedx1)
+    jdedx0 = jnp.where(lelec < 0, jededx0, jpdedx0)
+    # EVALUATE dedxmid USING ededx(elke)
+    dedxmid = jdedx1[lelke_m1, medium_m1]*elke+ jdedx0[lelke_m1, medium_m1]
+    aux = jdedx1[lelke_m1, medium_m1]/dedxmid
+    # else:
+    #     dedxmid = pdedx1[lelke_m1, medium_m1]*elke+ pdedx0[lelke_m1, medium_m1]  # EVALUATE dedxmid USING pdedx(elke)
+    #     aux = pdedx1[lelke_m1, medium_m1]/dedxmid
 
     # de = dedxmid*tuss #  Energy loss using stopping power at the beginning
     de = dedxmid*step*rhof  # IK: rhof scaling bug, June 9 2006
