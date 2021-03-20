@@ -1,4 +1,7 @@
 import pytest
+from jax import vmap
+import jax.numpy as jnp
+
 from egsnrc import config  # import and line below must precede calcfuncs
 config.test_precision = True
 
@@ -9,6 +12,7 @@ from egsnrc.egs_home.tutor4 import tutor4
 from egsnrc import calcfuncs
 
 from egsnrc.util import float_from_fort_hex as float_hex
+
 
 import logging
 logger = logging.getLogger("egsnrc")
@@ -230,3 +234,41 @@ class TestTutor4:
         with pytest.raises(NotImplementedError):
             callbacks = {x: None for x in ('hownear', 'howfar', 'ausgab')}
             tutor4.shower(2, 100, 0, 0, 0, 0, 0, 1, 1, 1, callbacks)
+
+    def test_compute_eloss_vect(self):
+        from jax import vmap
+
+        # Collect all inputs and outputs together
+        all_inputs = []
+        all_expected = []
+        for inputs, expected in known_in_out(
+            TEST_DATA / "fort_tut4_calcfuncs.txt",
+            (int, int, float_hex, float_hex, float_hex, int),
+            float_hex,
+            "compute-eloss:"
+        ):
+            all_inputs.append(inputs)
+            all_expected.append(expected)
+
+        # Need to separate out each input (columns)
+        # Transpose the 2d list, then unpack rows into variables passed to func
+        all_inputs_T = list(zip(*all_inputs))
+        lelec, medium, step, eke, elke, lelke = all_inputs_T
+        # Type them
+        lelec = jnp.array(lelec, dtype=jnp.int32)
+        medium = jnp.array(medium, dtype=jnp.int32)
+        step = jnp.array(step)
+        eke = jnp.array(eke)
+        elke = jnp.array(elke)
+        lelke = jnp.array(lelke, dtype=jnp.int32)
+
+        # Make vectorized function
+        vcompute_eloss = vmap(calcfuncs.vect_compute_eloss)
+
+        # Calc outputs in vmapped function
+        all_got = vcompute_eloss(lelec, medium, step, eke, elke, lelke)
+        #
+        assert len(all_expected) == len(all_got)
+        for expected, got in zip(all_expected, all_got):
+            assert expected == pytest.approx(got)
+
