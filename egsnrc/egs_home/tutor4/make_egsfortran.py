@@ -65,7 +65,7 @@ with working_dir(HERE):
         # Likely will be fixed in patch numpy release, or at least will
         # work if create one Fortran function called from many
         # (see also https://github.com/numpy/numpy/issues/18341)
-        f"python3.9 -m numpy.f2py {F2PY_OPTIONS} -c {LIB_NAME}.pyf {USER_CODE_FORTRAN}".split(),
+        f"python3.8 -m numpy.f2py {F2PY_OPTIONS} -c {LIB_NAME}.pyf {USER_CODE_FORTRAN}".split(),
         # capture_output=True, encoding="utf8"
     )
     if proc.returncode != 0:
