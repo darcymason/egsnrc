@@ -25,7 +25,7 @@ def get_xsection_table(filename):
         # for i in range(data_lines):
         #     z_data.append(float(x) for x in lines[i_line+i].strip().split())
         # z_data = np.loadtxt(lines, skiprows=i_line, max_rows=data_lines)
-        z_data = z_data.reshape((-1, 2))
+        z_data = z_data.reshape((-1, 2)).transpose()
         data.append(z_data)
         print(f"Count {count}, len(data): {len(z_data)}")
         i_line += data_lines
@@ -421,6 +421,8 @@ def egs_init_user_photon(prefix,comp_prefix,photonuc_prefix,out):
     # # return; end;
 
 if __name__ == "__main__":
-    data_filename = DATA_DIR / "xcom_photo.data"
+    # data_filename = DATA_DIR / "xcom_photo.data"
+    data_filename = DATA_DIR / "xcom_pair.data"
     data = get_xsection_table(data_filename)
-    print(data)
+    for i in range(10):
+        print(data[i][0][:8])
