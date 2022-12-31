@@ -1,3 +1,4 @@
+from typing import Tuple
 from egsnrc.randoms import randomset
 from egsnrc.params import *
 from egsnrc.commons import *
@@ -52,10 +53,10 @@ ierust = 0 # To count negative ustep's
 
 # @profile  # for line_profiler
 def tstep_ustep(
-    lelec, medium, irl,
-    eie, peie,
+    lelec:int, medium: int, irl:int,
+    eie: float, peie:float,
     hownear, howfar, ausgab
-) -> int:
+) -> Tuple[int, int, float, float]:
     """Follow one particle until is cut
 
     Returns
@@ -64,6 +65,13 @@ def tstep_ustep(
         Flag for reason returning, user_electron_discard or ecut_discard,
         or None for no reason (rdict > sigratio in tstep check)
     """
+    # Important definitions:
+    # tstep  = total pathlength to the next discrete interaction
+    # vacdst = infinity (actually 10^8)
+    # tustep = total pathlength of the electron step
+    # ustep  = projected transport distance in the
+    #          direction of motion at the start of the step
+
     global costhe, sinthe, ierust
 
     next_tstep = False  # flag for jumping out of ustep to top of tstep loop
@@ -167,7 +175,8 @@ def tstep_ustep(
             # logger.debug("New USTEP -----------------------------")
             if medium == 0:  # vacuum
                 epcont.tstep = vacdst
-                epcont.tustep = epcont.ustep = tstep
+                epcont.tustep = tstep
+                epcont.ustep = tstep
                 callhowfar = True # Always call HOWFAR for vacuum steps!
 
                 # (Important definitions:

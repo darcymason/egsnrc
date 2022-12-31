@@ -41,10 +41,13 @@ def select_azimuthal_angle() -> Tuple[float, float]:
     return (xphi2 - yphi2)*rhophi2, 2*xphi*yphi*rhophi2
 
 
-a = b = c = 0.0  # Save for connected calls to uphi. See comments below
+# Save for connected calls to uphi. See comments below
+a: float = 0.0
+b: float = 0.0
+c: float = 0.0
 
 
-def uphi(ientry, lvl):
+def uphi(ientry: int, lvl: int):
     """Uniform phi distribution
 
     Set coordinates for new particle or reset direction cosines of

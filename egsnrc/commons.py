@@ -8,21 +8,21 @@ seeds = randomm.seeds
 
 #  COMMON block stack --------
 stack = egsfortran.stack
-e = stack.e
-x = stack.x
-y = stack.y
-z = stack.z
-u = stack.u
-v = stack.v
-w = stack.w
+e: float = stack.e
+x: float = stack.x
+y: float = stack.y
+z: float = stack.z
+u: float = stack.u
+v: float = stack.v
+w: float = stack.w
 dnear = stack.dnear
-wt = stack.wt
-iq = stack.iq
-ir = stack.ir
+wt: float = stack.wt
+iq: int = stack.iq
+ir: int = stack.ir
 latch = stack.latch
 latchi = stack.latchi
-np = stack.np
-npold = stack.npold
+np: int = stack.np
+npold: int = stack.npold
 
 #  COMMON block media --------
 media_ = egsfortran.media  # underscore because `media`* is also an attribute
