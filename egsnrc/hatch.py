@@ -35,11 +35,7 @@ def get_xsection_table(filename):
             count = int(count_line)
             # Calc number of lines needed at 4 data pairs per line
             num_lines = count // 4 + (1 if count % 4 else 0)
-            z_data = np.loadtxt(
-                x
-                for _ in range(num_lines)
-                for x in next(f).split()
-            )
+            z_data = np.loadtxt(x for _ in range(num_lines) for x in next(f).split())
             # reformat data to array of log_e and array of log_barns
             z_data = z_data.reshape((-1, 2)).transpose()
             data.append(z_data)
@@ -47,9 +43,11 @@ def get_xsection_table(filename):
 
     return data
 
+
 # egsi_get_data copied here for reference on how post-processing is done
 
-def egsi_get_data(flag,n,ne,zsorted,pz_sorted,ge1,ge0,data):
+
+def egsi_get_data(flag, n, ne, zsorted, pz_sorted, ge1, ge0, data):
     """Get photon cross-section data
 
     Parameters
@@ -91,6 +89,7 @@ def egsi_get_data(flag,n,ne,zsorted,pz_sorted,ge1,ge0,data):
     # "commented original routine is at the bottom.
     # "
     # " flag = 3: photonuclear
+
 
 # rewind(iunit);
 # iz_old = 0;
@@ -158,6 +157,7 @@ def egsi_get_data(flag,n,ne,zsorted,pz_sorted,ge1,ge0,data):
 
 # return; end egsi_get_data;
 
+
 def photo_binding_energies(photo_data):
     """Return binding energies for each Z value
     Parameters
@@ -175,11 +175,12 @@ def photo_binding_energies(photo_data):
     for log_e_arr, _ in photo_data:
         diff = np.diff(log_e_arr)  # diff of log energies
         edge_indices = np.where(diff < 1e-5)[0] + 1  # +1 for second of the pair
-        z_edges = np.exp(log_e_arr[edge_indices]) if len(edge_indices)!=0 else []
+        z_edges = np.exp(log_e_arr[edge_indices]) if len(edge_indices) != 0 else []
         binding_energies.append(z_edges)
         # IF( ~eadl_relax & k >= 4 ) EXIT;  ?? in original mortran
 
     return binding_energies
+
 
 def egs_init_user_photon(prefix):
     """
@@ -214,8 +215,8 @@ def egs_init_user_photon(prefix):
             photonuc_file*144;
     """
 
-    print('(Re)-initializing photon cross sections')
-    print(' with files from the series: ', prefix)
+    print("(Re)-initializing photon cross sections")
+    print(" with files from the series: ", prefix)
 
     # print(' Compton cross sections: ', comp_prefix)
 
@@ -318,8 +319,6 @@ def egs_init_user_photon(prefix):
     binding_energies = photo_binding_energies(photo_data)
 
     return photo_data, binding_energies
-
-
 
     # IF (mcdf_pe_xsections)[call egs_read_shellwise_pe();]
 
@@ -488,6 +487,7 @@ def egs_init_user_photon(prefix):
 
     # # return; end;
 
+
 if __name__ == "__main__":
     # data_filename = DATA_DIR / "xcom_photo.data"
     # data_filename = DATA_DIR / "xcom_pair.data"
@@ -496,6 +496,6 @@ if __name__ == "__main__":
     #     print(data[i][0][:8])
     photo_data, binding_energies = egs_init_user_photon("xcom")
     for z in [1, 6, 10, 11, 20, 73, 82, 92]:
-        energy_list = ', '.join(str(x) for x in binding_energies[z])
+        energy_list = ", ".join(str(x) for x in binding_energies[z])
         print(f"{z=} Binding energies: {energy_list}")
     # print(binding_energies[-10:])

@@ -1,6 +1,7 @@
 import pytest
 from egsnrc.hatch import DATA_DIR, photo_binding_energies, get_xsection_table
 
+
 def test_binding_energies():
     """Test photo binding energies calculation from xcom photo data above 1 keV"""
     # Known binding energies (eV) from https://xdb.lbl.gov/Section1/Table_1-1.pdf
@@ -20,14 +21,12 @@ def test_binding_energies():
         92: (
             "115606 21757 20948 17166 5548 5182 4303 3728 3552 1439 1271 1043 "
             "778.3 736.2 388.2 377.4 321 257 192 102.8 94.2 43.9 26.8 16.8"
-        )
+        ),
     }
     photo_data = get_xsection_table(DATA_DIR / "xcom_photo.data")
     binding_energies = photo_binding_energies(photo_data)
     for Z, known_energies_str in known_binding_energies.items():
         known_energies = sorted(
-            float(x) / 1_000_000 for x in known_energies_str.split()
-            if float(x) >= 1000
+            float(x) / 1_000_000 for x in known_energies_str.split() if float(x) >= 1000
         )
         assert binding_energies[Z] == pytest.approx(known_energies, abs=0.00001)
-
