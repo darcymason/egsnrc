@@ -1,3 +1,12 @@
+# hatch.py
+"""Get physics data for EGSnrc run
+
+Hatch is called before simulation begins.
+For Photons, hatch calls egs_init_user_photon, which in turn
+opens files via egsi_get_data, for compton, photoelectric, pair, triplet,
+Rayleigh (depending on the settings) and does corrections on some of the data.
+"""
+
 from pathlib import Path
 import numpy as np
 
@@ -14,46 +23,64 @@ def get_xsection_table(filename):
     for z in range(1, 101):
         count = int(lines[i_line])
         i_line += 1
-        # 2 values per item, 8 values stored per line, so 4 data point pairs
-        # Calc number of lines needed
-        data_lines = count // 4 + (1 if count % 4 else 0)
+        # Calc number of lines needed at 4 pairs (log_e, log_barns) per line
+        num_lines = count // 4 + (1 if count % 4 else 0)
         z_data = np.loadtxt(
             x
-            for i in range(data_lines)
+            for i in range(num_lines)
             for x in lines[i_line + i].strip().split()
         )
-        # for i in range(data_lines):
-        #     z_data.append(float(x) for x in lines[i_line+i].strip().split())
-        # z_data = np.loadtxt(lines, skiprows=i_line, max_rows=data_lines)
         z_data = z_data.reshape((-1, 2)).transpose()
         data.append(z_data)
-        print(f"Count {count}, len(data): {len(z_data)}")
-        i_line += data_lines
+        # print(f"Count {count}, len(data): {len(z_data[0])}")
+        i_line += num_lines
 
     return data
 
 # egsi_get_data copied here for reference on how post-processing is done
 
-# subroutine egsi_get_data(flag,iunit,n,ne,zsorted,pz_sorted,ge1,ge0,data);
-# "=========================================================================="
-# implicit none;
-# COMIN/EGS-IO/;
-# $REAL    eth;
-# $INTEGER flag,iunit,n,ne;
-# $REAL    ge1,ge0,zsorted(*),pz_sorted(*),data(*);
-# $REAL    etmp($MXINPUT),ftmp($MXINPUT);
-# $REAL    gle,sig,p,e;
-# $INTEGER i,j,k,kk,iz,iz_old,ndat,iiz;
+def egsi_get_data(flag,n,ne,zsorted,pz_sorted,ge1,ge0,data):
+    """Get photon cross-section data
 
-# ;COMIN/USEFUL/;
+    Parameters
+    ----------
+    flag : int
+        0: photoelectric, Rayleigh, Compton
+        1: pair
+        2: triplet
+        3: photonuclear
+    n : _type_
+        _description_
+    ne : _type_
+        _description_
+    zsorted : _type_
+        _description_
+    pz_sorted : _type_
+        _description_
+    ge1 : _type_
+        _description_
+    ge0 : _type_
+        _description_
+    data : _type_
+        _description_
+    """
+    # "=========================================================================="
+    # implicit none;
+    # COMIN/EGS-IO/;
+    # $REAL    eth;
+    # $INTEGER flag,iunit,n,ne;
+    # $REAL    ge1,ge0,zsorted(*),pz_sorted(*),data(*);
+    # $REAL    etmp($MXINPUT),ftmp($MXINPUT);
+    # $REAL    gle,sig,p,e;
+    # $INTEGER i,j,k,kk,iz,iz_old,ndat,iiz;
 
-# "Ali:photonuc. The whole routine is commented out and re-written
-# "to accommodate reading photonuclear cross sections. A copy of the
-# "commented original routine is at the bottom.
-# " flag = 0: photoelectric, Rayleigh, Compton
-# " flag = 1: pair
-# " flag = 2: triplet
-# " flag = 3: photonuclear
+    # ;COMIN/USEFUL/;
+
+    # "Ali:photonuc. The whole routine is commented out and re-written
+    # "to accommodate reading photonuclear cross sections. A copy of the
+    # "commented original routine is at the bottom.
+    # "
+    # " flag = 3: photonuclear
 
 # rewind(iunit);
 # iz_old = 0;
@@ -123,7 +150,7 @@ def get_xsection_table(filename):
 
 
 
-def egs_init_user_photon(prefix,comp_prefix,photonuc_prefix,out):
+def egs_init_user_photon(prefix):
     """
     $INTEGER      out;
     ;COMIN/BREMPR,EDGE,EGS-IO,MEDIA,PHOTIN,THRESH,COMPTON-DATA,X-OPTIONS/;
@@ -159,7 +186,7 @@ def egs_init_user_photon(prefix,comp_prefix,photonuc_prefix,out):
     print('(Re)-initializing photon cross sections')
     print(' with files from the series: ', prefix)
 
-    print(' Compton cross sections: ', comp_prefix)
+    # print(' Compton cross sections: ', comp_prefix)
 
     # "Ali:photonuc, 1 block"
     # IF(iphotonuc = 1) [
@@ -179,10 +206,10 @@ def egs_init_user_photon(prefix,comp_prefix,photonuc_prefix,out):
     pair_file = DATA_DIR / f"{prefix}_pair.data"
     triplet_file = DATA_DIR / f"{prefix}_triplet.data"
     rayleigh_file = DATA_DIR / f"{prefix}_rayleigh.data"
-    if input_compton_data:
-        compton_file = DATA_DIR / f"{prefix}_compton.data"
-    else:
-        compton_file = DATA_DIR / 'compton_sigma.data'
+    # if input_compton_data:
+    compton_file = DATA_DIR / f"{prefix}_compton.data"
+    # else:
+    #     compton_file = DATA_DIR / 'compton_sigma.data'
 
     print(f" Using Compton cross sections from {compton_file}")
 
@@ -254,8 +281,21 @@ def egs_init_user_photon(prefix,comp_prefix,photonuc_prefix,out):
     #     ]
     # ]
 
+    # Populate the binding energies array based on sudden jumps in photo table
+    # binding_energies is 2D array of [z, 1D array of energies]
+    photo_data = get_xsection_table(photo_file)
+    binding_energies = []
+    for log_e_arr, _ in photo_data:
+        diffs = np.diff(log_e_arr)  # diff of log energies
+        edge_indices = np.where(diffs < 1e-5)[0] + 1  # +1 for second of the pair
+        z_edges = np.exp(log_e_arr.take(edge_indices))
+        binding_energies.append(z_edges)
+        # IF( ~eadl_relax & k >= 4 ) EXIT;  ??
+
+
     # IF (mcdf_pe_xsections)[call egs_read_shellwise_pe();]
 
+    # GE0,GE1,     "used for indexing in logarithmic interpolations"
     # DO medium = 1,nmed [
 
     #     mge(medium) = $MXGE; nge = $MXGE;
@@ -422,7 +462,8 @@ def egs_init_user_photon(prefix,comp_prefix,photonuc_prefix,out):
 
 if __name__ == "__main__":
     # data_filename = DATA_DIR / "xcom_photo.data"
-    data_filename = DATA_DIR / "xcom_pair.data"
-    data = get_xsection_table(data_filename)
-    for i in range(10):
-        print(data[i][0][:8])
+    # data_filename = DATA_DIR / "xcom_pair.data"
+    # data = get_xsection_table(data_filename)
+    # for i in range(10):
+    #     print(data[i][0][:8])
+    egs_init_user_photon("xcom")
