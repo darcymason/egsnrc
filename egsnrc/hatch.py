@@ -13,27 +13,37 @@ import numpy as np
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
 
-
 def get_xsection_table(filename):
-    with open(filename, "r") as f:
-        lines = f.readlines()
+    """Read tables of log energy, log barns pairs
 
-    i_line = 0
-    data = []
-    for z in range(1, 101):
-        count = int(lines[i_line])
-        i_line += 1
-        # Calc number of lines needed at 4 pairs (log_e, log_barns) per line
-        num_lines = count // 4 + (1 if count % 4 else 0)
-        z_data = np.loadtxt(
-            x
-            for i in range(num_lines)
-            for x in lines[i_line + i].strip().split()
-        )
-        z_data = z_data.reshape((-1, 2)).transpose()
-        data.append(z_data)
-        # print(f"Count {count}, len(data): {len(z_data[0])}")
-        i_line += num_lines
+    File format (text) is as follows:
+    For each element Z from 1 to 100:
+        First line has the number of (log_e, log_barns) pairs to follow
+        Lines follow with 8 values (four pairs) per line,
+           until last line with up to 8 to complete the count.
+
+    Returns
+    -------
+    data:  list[np.ndarray, np.ndarray]
+        where the list index is atomic number Z
+        and the two arrays are log(energy in MeV) and log(cross-section in barns)
+        Data is 0-based, so the first entry (impossible Z=0) is two empty lists.
+    """
+    with open(filename, "r") as f:
+        data = [([], [])]  # empty entries for non-existent Z=0
+        for count_line in f:  # next() below will read to next count
+            count = int(count_line)
+            # Calc number of lines needed at 4 data pairs per line
+            num_lines = count // 4 + (1 if count % 4 else 0)
+            z_data = np.loadtxt(
+                x
+                for _ in range(num_lines)
+                for x in next(f).split()
+            )
+            # reformat data to array of log_e and array of log_barns
+            z_data = z_data.reshape((-1, 2)).transpose()
+            data.append(z_data)
+            # print(f"Count {count}, len(data): {len(z_data[0])}")
 
     return data
 
@@ -148,7 +158,28 @@ def egsi_get_data(flag,n,ne,zsorted,pz_sorted,ge1,ge0,data):
 
 # return; end egsi_get_data;
 
+def photo_binding_energies(photo_data):
+    """Return binding energies for each Z value
+    Parameters
+    ----------
+    photo_data: list[np.ndarray, np.ndarray]
+        For each Z, an array of log energy and array of log barns,
+        as returned by get_xsection_table
+    Returns
+    -------
+    binding_energies: list[list]
+        outer list index is atomic number Z (Z=0 included at 0 index),
+        inner list is the binding energies in MeV for that Z value (may be empty)
+    """
+    binding_energies = []
+    for log_e_arr, _ in photo_data:
+        diff = np.diff(log_e_arr)  # diff of log energies
+        edge_indices = np.where(diff < 1e-5)[0] + 1  # +1 for second of the pair
+        z_edges = np.exp(log_e_arr[edge_indices]) if len(edge_indices)!=0 else []
+        binding_energies.append(z_edges)
+        # IF( ~eadl_relax & k >= 4 ) EXIT;  ?? in original mortran
 
+    return binding_energies
 
 def egs_init_user_photon(prefix):
     """
@@ -284,13 +315,10 @@ def egs_init_user_photon(prefix):
     # Populate the binding energies array based on sudden jumps in photo table
     # binding_energies is 2D array of [z, 1D array of energies]
     photo_data = get_xsection_table(photo_file)
-    binding_energies = []
-    for log_e_arr, _ in photo_data:
-        diffs = np.diff(log_e_arr)  # diff of log energies
-        edge_indices = np.where(diffs < 1e-5)[0] + 1  # +1 for second of the pair
-        z_edges = np.exp(log_e_arr.take(edge_indices))
-        binding_energies.append(z_edges)
-        # IF( ~eadl_relax & k >= 4 ) EXIT;  ??
+    binding_energies = photo_binding_energies(photo_data)
+
+    return photo_data, binding_energies
+
 
 
     # IF (mcdf_pe_xsections)[call egs_read_shellwise_pe();]
@@ -466,4 +494,8 @@ if __name__ == "__main__":
     # data = get_xsection_table(data_filename)
     # for i in range(10):
     #     print(data[i][0][:8])
-    egs_init_user_photon("xcom")
+    photo_data, binding_energies = egs_init_user_photon("xcom")
+    for z in [1, 6, 10, 11, 20, 73, 82, 92]:
+        energy_list = ', '.join(str(x) for x in binding_energies[z])
+        print(f"{z=} Binding energies: {energy_list}")
+    # print(binding_energies[-10:])
