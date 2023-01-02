@@ -14,34 +14,9 @@ import logging
 logger = logging.getLogger("egsnrc")
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
-MXGE = 2000  # EgsNRC default value
 
 
-def calc_ge_intervals(ap, up):
-    """Define log intervals over the lower and upper cutoff energies for all media
 
-    Parameters
-    ----------
-    up: ndarray[float]
-        Array of upper cutoff energies for the media
-    ap: ndarray[float]
-        Array of lower cutoff energies for the media
-    Returns
-    -------
-    mge:  np.ndarray[int]
-        Max ge for each medium (all set to MXGE)
-    ge0:  np.ndarray[float]
-        1 - ge1 * log(ap)
-    ge1:  np.ndarray[float]
-        MXGE divided into log ratio of up and ap cutoffs
-
-    """
-    n_media = len(up)
-    # mge as array vs medium, but seems to be same for all in orig EGSnrc
-    mge = np.full(n_media, MXGE)
-    ge1 = np.full(n_media, MXGE - 1) / np.log(up / ap)
-    ge0 = 1 - ge1 * np.log(ap)
-    return mge, ge0, ge1
 
 
 def get_xsection_table(filename):
@@ -117,14 +92,14 @@ def egsi_get_data(flag, mge, ge0, ge1, medium):
     # ;COMIN/USEFUL/;
     #
 
-nge,nne(medium),z_sorted,pz_sorted,
-    #                     ge1(medium),ge0(medium)
+    # nge,nne(medium),z_sorted,pz_sorted,
+    #     #                     ge1(medium),ge0(medium)
 
-    iz_old = 0;
-    data = []
-    # for i in range(1, len(medium.elements)+1):
-    for elem in elements:
-        iiz = int(zsorted(i)+0.5);
+    # iz_old = 0
+    # data = []
+    # # for i in range(1, len(medium.elements)+1):
+    # for elem in elements:
+
     #     DO iz=iz_old+1,iiz [
     #         read(iunit,*,err=:user-data-failure:) ndat;
     #         IF( ndat > $MXINPUT ) [
