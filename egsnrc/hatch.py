@@ -9,8 +9,39 @@ Rayleigh (depending on the settings) and does corrections on some of the data.
 
 from pathlib import Path
 import numpy as np
+import logging
+
+logger = logging.getLogger("egsnrc")
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
+MXGE = 2000  # EgsNRC default value
+
+
+def calc_ge_intervals(ap, up):
+    """Define log intervals over the lower and upper cutoff energies for all media
+
+    Parameters
+    ----------
+    up: ndarray[float]
+        Array of upper cutoff energies for the media
+    ap: ndarray[float]
+        Array of lower cutoff energies for the media
+    Returns
+    -------
+    mge:  np.ndarray[int]
+        Max ge for each medium (all set to MXGE)
+    ge0:  np.ndarray[float]
+        1 - ge1 * log(ap)
+    ge1:  np.ndarray[float]
+        MXGE divided into log ratio of up and ap cutoffs
+
+    """
+    n_media = len(up)
+    # mge as array vs medium, but seems to be same for all in orig EGSnrc
+    mge = np.full(n_media, MXGE)
+    ge1 = np.full(n_media, MXGE - 1) / np.log(up / ap)
+    ge0 = 1 - ge1 * np.log(ap)
+    return mge, ge0, ge1
 
 
 def get_xsection_table(filename):
@@ -47,7 +78,9 @@ def get_xsection_table(filename):
 # egsi_get_data copied here for reference on how post-processing is done
 
 
-def egsi_get_data(flag, n, ne, zsorted, pz_sorted, ge1, ge0, data):
+def egsi_get_data(flag, mge, ge0, ge1, medium):
+    """"""
+    # Original: (flag, n, ne, zsorted, pz_sorted, ge1, ge0, data):
     """Get photon cross-section data
 
     Parameters
@@ -72,7 +105,6 @@ def egsi_get_data(flag, n, ne, zsorted, pz_sorted, ge1, ge0, data):
     data : _type_
         _description_
     """
-    # "=========================================================================="
     # implicit none;
     # COMIN/EGS-IO/;
     # $REAL    eth;
@@ -81,81 +113,78 @@ def egsi_get_data(flag, n, ne, zsorted, pz_sorted, ge1, ge0, data):
     # $REAL    etmp($MXINPUT),ftmp($MXINPUT);
     # $REAL    gle,sig,p,e;
     # $INTEGER i,j,k,kk,iz,iz_old,ndat,iiz;
-
+    #
     # ;COMIN/USEFUL/;
+    #
 
-    # "Ali:photonuc. The whole routine is commented out and re-written
-    # "to accommodate reading photonuclear cross sections. A copy of the
-    # "commented original routine is at the bottom.
-    # "
-    # " flag = 3: photonuclear
+nge,nne(medium),z_sorted,pz_sorted,
+    #                     ge1(medium),ge0(medium)
 
-
-# rewind(iunit);
-# iz_old = 0;
-# DO k=1,n [ data(k) = 0; ]
-# DO i=1,ne [
-#     iiz = int(zsorted(i)+0.5);
-#     DO iz=iz_old+1,iiz [
-#         read(iunit,*,err=:user-data-failure:) ndat;
-#         IF( ndat > $MXINPUT ) [
-#             $egs_fatal(*,'Too many input data points. Max. is ',$MXINPUT);
-#         ]
-#         IF( flag = 0 | flag = 3) [
-#             read(iunit,*,err=:user-data-failure:) (etmp(k),ftmp(k),k=1,ndat);
-#         ]
-#         ELSE [
-#             read(iunit,*,err=:user-data-failure:) (etmp(k+1),ftmp(k+1),
-#                 k=1,ndat);
-#             IF( flag = 1 ) [ eth = 2*rm; ] ELSE [ eth = 4*rm; ]
-#             ndat = ndat + 1;
-#             DO k=2,ndat [
-#                 ftmp(k) = ftmp(k) - 3*log(1-eth/exp(etmp(k)));
-#             ]
-#             ftmp(1) = ftmp(2); etmp(1) = log(eth);
-#         ]
-#     ]
-#     iz_old = iiz;
-#     DO k=1,n [
-#         gle = (k - ge0)/ge1; e = exp(gle);
-#         IF( gle < etmp(1) | gle >= etmp(ndat) ) [
-#             IF( flag = 0 ) [
-#                 $egs_fatal(*,'Energy ',exp(gle),
-#                    ' is outside the available data range of ',
-#                    exp(etmp(1)),exp(etmp(ndat)));
-#             ]
-#             ELSEIF (flag = 1 | flag = 2) [
-#                 IF( gle < etmp(1) ) [ sig = 0; ]
-#                 ELSE [ sig = exp(ftmp(ndat)); ]
-#             ]
-#             ELSE [ "photonuclear, zero it before and after
-#              sig = 0;
-#             ]
-#         ] ELSE [
-#             DO kk=1,ndat-1 [
-#                 IF( gle >= etmp(kk) & gle < etmp(kk+1) ) EXIT;
-#             ]
-#             IF( flag ~= 3) ["log/log interpolation"
-#                p = (gle - etmp(kk))/(etmp(kk+1) - etmp(kk));
-#                sig = exp(p*ftmp(kk+1) + (1-p)*ftmp(kk));
-#             ]
-#             ELSE["lin/lin interpolation for photonuc"
-#                p = (e - exp(etmp(kk)))/(exp(etmp(kk+1)) - exp(etmp(kk)));
-#                sig = p*exp(ftmp(kk+1)) + (1-p)*exp(ftmp(kk));
-#             ]
-#         ]
-#         IF( (flag = 1 | flag = 2) & e > eth ) sig = sig*(1-eth/e)**3;
-#         data(k) = data(k) + pz_sorted(i)*sig;
-#     ]
-# ]
-
-# return;
-
-# :user-data-failure:;
-# $egs_fatal(*,'Error while reading user photon cross sections from unit ',
-#      iunit);
-
-# return; end egsi_get_data;
+    iz_old = 0;
+    data = []
+    # for i in range(1, len(medium.elements)+1):
+    for elem in elements:
+        iiz = int(zsorted(i)+0.5);
+    #     DO iz=iz_old+1,iiz [
+    #         read(iunit,*,err=:user-data-failure:) ndat;
+    #         IF( ndat > $MXINPUT ) [
+    #             $egs_fatal(*,'Too many input data points. Max. is ',$MXINPUT);
+    #         ]
+    #         IF( flag = 0 | flag = 3) [
+    #             read(iunit,*,err=:user-data-failure:) (etmp(k),ftmp(k),k=1,ndat);
+    #         ]
+    #         ELSE [
+    #             read(iunit,*,err=:user-data-failure:) (etmp(k+1),ftmp(k+1),
+    #                 k=1,ndat);
+    #             IF( flag = 1 ) [ eth = 2*rm; ] ELSE [ eth = 4*rm; ]
+    #             ndat = ndat + 1;
+    #             DO k=2,ndat [
+    #                 ftmp(k) = ftmp(k) - 3*log(1-eth/exp(etmp(k)));
+    #             ]
+    #             ftmp(1) = ftmp(2); etmp(1) = log(eth);
+    #         ]
+    #     ]
+    #     iz_old = iiz;
+    #     DO k=1,n [
+    #         gle = (k - ge0)/ge1; e = exp(gle);
+    #         IF( gle < etmp(1) | gle >= etmp(ndat) ) [
+    #             IF( flag = 0 ) [
+    #                 $egs_fatal(*,'Energy ',exp(gle),
+    #                    ' is outside the available data range of ',
+    #                    exp(etmp(1)),exp(etmp(ndat)));
+    #             ]
+    #             ELSEIF (flag = 1 | flag = 2) [
+    #                 IF( gle < etmp(1) ) [ sig = 0; ]
+    #                 ELSE [ sig = exp(ftmp(ndat)); ]
+    #             ]
+    #             ELSE [ "photonuclear, zero it before and after
+    #              sig = 0;
+    #             ]
+    #         ] ELSE [
+    #             DO kk=1,ndat-1 [
+    #                 IF( gle >= etmp(kk) & gle < etmp(kk+1) ) EXIT;
+    #             ]
+    #             IF( flag ~= 3) ["log/log interpolation"
+    #                p = (gle - etmp(kk))/(etmp(kk+1) - etmp(kk));
+    #                sig = exp(p*ftmp(kk+1) + (1-p)*ftmp(kk));
+    #             ]
+    #             ELSE["lin/lin interpolation for photonuc"
+    #                p = (e - exp(etmp(kk)))/(exp(etmp(kk+1)) - exp(etmp(kk)));
+    #                sig = p*exp(ftmp(kk+1)) + (1-p)*exp(ftmp(kk));
+    #             ]
+    #         ]
+    #         IF( (flag = 1 | flag = 2) & e > eth ) sig = sig*(1-eth/e)**3;
+    #         data(k) = data(k) + pz_sorted(i)*sig;
+    #     ]
+    # ]
+    #
+    # return;
+    #
+    # :user-data-failure:;
+    # $egs_fatal(*,'Error while reading user photon cross sections from unit ',
+    #      iunit);
+    #
+    # return; end egsi_get_data;
 
 
 def photo_binding_energies(photo_data):
@@ -182,7 +211,7 @@ def photo_binding_energies(photo_data):
     return binding_energies
 
 
-def egs_init_user_photon(prefix):
+def egs_init_user_photon(prefix, ap, up):
     """
     $INTEGER      out;
     ;COMIN/BREMPR,EDGE,EGS-IO,MEDIA,PHOTIN,THRESH,COMPTON-DATA,X-OPTIONS/;
@@ -215,10 +244,10 @@ def egs_init_user_photon(prefix):
             photonuc_file*144;
     """
 
-    print("(Re)-initializing photon cross sections")
-    print(" with files from the series: ", prefix)
+    logger.info("(Re)-initializing photon cross sections")
+    logger.info(" with files from the series: ", prefix)
 
-    # print(' Compton cross sections: ', comp_prefix)
+    # logger.info(' Compton cross sections: ', comp_prefix)
 
     # "Ali:photonuc, 1 block"
     # IF(iphotonuc = 1) [
@@ -292,42 +321,23 @@ def egs_init_user_photon(prefix):
     #             '(MeV)','no Rayleigh','(fraction)','(fraction)','with Rayleigh';
     # ]
     # ]
-    # /* Replace binding energies with the edges in the photo-absorption file */
-    # DO iz=1,100 [
-    #     read(photo_unit,*) ndat;
-    #     read(photo_unit,*) (etmp(k),ftmp(k),k=1,ndat);
-    #     k = 0;
-    #     DO j=ndat,2,-1 [
-    #         IF( etmp(j)-etmp(j-1) < 1e-5 ) [
-    #             k = k+1;
-    #             IF ( k <= $MXSHXSEC )[
-    #             binding_energies(k,iz) = exp(etmp(j));
-    #             ]
-    #             ELSE[
-    #             $egs_fatal('(i3,a,i3,//a)',
-    #                         k,' binding energies read exceeding array size of',
-    #                         $MXSHXSEC,'Increase $MXSHXSEC in egsnrc.macros!');
-    #             ]
-    #             IF( ~eadl_relax & k >= 4 ) EXIT;
-    #         ]
-    #     ]
-    # ]
 
     # Populate the binding energies array based on sudden jumps in photo table
     # binding_energies is 2D array of [z, 1D array of energies]
     photo_data = get_xsection_table(photo_file)
     binding_energies = photo_binding_energies(photo_data)
 
-    return photo_data, binding_energies
 
     # IF (mcdf_pe_xsections)[call egs_read_shellwise_pe();]
 
-    # GE0,GE1,     "used for indexing in logarithmic interpolations"
+    # GE0,GE1  used for indexing in logarithmic interpolations - DM: 'gamma energy'?
+    # DM: nne from get_media_inputs, appears to be number of elements for the medium
+    # DM: from below, need zelem[medium]->list, AP[medium], pz[medium], wa[medium], rho[medium]
+    #
+
+    mge, ge0, ge1 = calc_ge_intervals(ap, up)
     # DO medium = 1,nmed [
 
-    #     mge(medium) = $MXGE; nge = $MXGE;
-    #     ge1(medium) = nge-1; ge1(medium) = ge1(medium)/log(up(medium)/ap(medium));
-    #     ge0(medium) = 1 - ge1(medium)*log(ap(medium));
 
     #     $egs_info('(a,i3,a,$)',' Working on medium ',medium,' ... ');
     #     IF( out = 1 ) [
@@ -340,8 +350,11 @@ def egs_init_user_photon(prefix):
     #         sumZ = sumZ + pz(medium,i)*zelem(medium,i);
     #         sumA = sumA + pz(medium,i)*wa(medium,i);
     #     ]
+
+    # DM: con1, con2 do not appear to be used anywhere in original EGSnrc.
     #     con1 = sumZ*rho(medium)/(sumA*1.6605655);
     #     con2 = rho(medium)/(sumA*1.6605655);
+
     #     call egs_heap_sort(nne(medium),z_sorted,sorted);
     #     DO i=1,nne(medium) [ pz_sorted(i) = pz(medium,sorted(i)); ]
 
@@ -484,6 +497,8 @@ def egs_init_user_photon(prefix):
 
     # :no-user-data-file:;
     # $egs_fatal('(//a,a)','Failed to open data file ',$cstring(tmp_string));
+
+    return photo_data, binding_energies
 
     # # return; end;
 
