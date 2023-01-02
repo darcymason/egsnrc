@@ -109,8 +109,9 @@ class Medium:
 
     def calc_ge0_ge1(self):
         """Define log intervals over the lower and upper cutoff energies"""
-        self.ge1 = self.mge - 1 / log(self.up / self.ap)
+        self.ge1 = (self.mge - 1) / log(self.up / self.ap)
         self.ge0 = 1 - self.ge1 * log(self.ap)
+        print(f"{self.mge=}  {self.ge1=}  {self.ge0=}")
 
     def calc_sigmas(self, interaction, cross_sections):
         data = [0] * self.mge
@@ -126,7 +127,7 @@ class Medium:
                 etmp.insert(0, log(eth))
 
             for k in range(self.mge):
-                gle = (k - 1 - self.ge0) / self.ge1
+                gle = (k + 1 - self.ge0) / self.ge1
                 exp_gle = exp(gle)
                 # Check within bounds
                 if not etmp[0] <= gle < etmp[-1]:  # not within
@@ -141,7 +142,8 @@ class Medium:
                             f"to {exp(etmp[-1])}'"
                         )
                 else:  # within bounds of cross-section data
-                    kk = etmp.searchsorted(gle, side="right")
+                    # searchsorted right:  a[i-1] <= v < a[i]
+                    kk = etmp.searchsorted(gle, side="right") - 1
                     if interaction != Interaction.PHOTONUCLEAR:
                         # log/log interpolation
                         p = (gle - etmp[kk]) / (etmp[kk + 1] - etmp[kk])
@@ -163,6 +165,14 @@ class Medium:
 
         self.sigmas[interaction] = data
 
+    def calc_sigma(self, interaction, energy):
+        gle = log(energy)
+        sigmas = self.sigmas[interaction]
+        fractional_index = (gle - log(self.ap)) * self.ge1
+        index = int(fractional_index)
+        p = fractional_index - index
+        return (1 - p) * sigmas[index] + p * sigmas[index + 1]
+
 
 if __name__ == "__main__":
     from egsnrc.hatch import DATA_DIR, get_xsection_table
@@ -171,7 +181,23 @@ if __name__ == "__main__":
     photo_data = get_xsection_table(DATA_DIR / "xcom_photo.data")
     # element_ta = Element(z=73, pz=1, wa=0)
     element_C = Element(z=6, pz=1, wa=0)
-    medium = Medium("C", [element_C], rho=1, ap=0.01, up=50.0, mge=100)
+    c_en = photo_data[6][0]
+
+    # Try to match the energies of the original cross-section data
+    medium = Medium(
+        "C", [element_C], rho=1, ap=exp(c_en[0]), up=exp(c_en[-1]), mge=len(c_en)
+    )
+    # medium = Medium("C", [element_C], rho=1, ap=0.001, up=50.0, mge=100)
     medium.calc_sigmas(PHOTO, photo_data)
-    print(photo_data[6])
-    print(medium.sigmas[PHOTO])
+    logE, log_sig = photo_data[6]
+    sig = np.exp(log_sig)
+    photo_E = np.exp(logE)
+    sigmas = medium.sigmas[PHOTO]
+    print(medium)
+
+    print("  Log e: ", logE[:3], "...", logE[-3:])
+    print("      e: ", photo_E[:3], "...", photo_E[-3:])
+    print(" sigmas: ", sigmas[:3], "...", sigmas[-3:])
+    print("tbl sig:", sig[:3], "...", sig[-3:])
+    print(f"{len(sig)=}   {len(sigmas)=}")
+
