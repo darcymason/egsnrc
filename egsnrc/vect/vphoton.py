@@ -39,12 +39,11 @@ def photon(fparticles, iparticles, howfar, ausgab):
         iparticles[STATUS,fparticles[ENERGY] < pcut[iparticles[REGION]]] = PCUT_DISCARD
 
         # if wt == 0.0:  particle_outcome = USER_PHOTON_DISCARD
-        wt0_mask = fparticles[WT] == 0
-        iparticles[STATUS, wt0_mask] = USER_PHOTON_DISCARD
+        iparticles[STATUS, fparticles[WT] == 0] = USER_PHOTON_DISCARD
 
-        alive_mask = (iparticles[STATUS] == 0)  # could use ialive[STATUS] if don't add particles
-        falive = fparticles[:, alive_mask]
-        ialive = iparticles[:, alive_mask]
+        alive = (iparticles[STATUS] == 0)  # could use ialive[STATUS] if don't add particles
+        falive = fparticles[:, alive]
+        ialive = iparticles[:, alive]
 
         if falive.size == 0:
             break  # all particles have an outcome, we're done this set
@@ -58,13 +57,12 @@ def photon(fparticles, iparticles, howfar, ausgab):
         dpmfp = -numpy.log(rnno35)
 
         # if medium != 0:
-        non_vac_mask = (ialive[MEDIUM] != 0)
-        non_vac_media = ialive[MEDIUM, non_vac_mask]
-
+        non_vac = (ialive[MEDIUM] != 0)
+        non_vac_mediums = ialive[MEDIUM, non_vac]
         # set interval gle, ge;
         # lgle is integer index into upcoming arrays
         lgle = (
-            ge1[non_vac_media]*gle + ge0[non_vac_media]
+            ge1[non_vac_mediums]*gle + ge0[non_vac_mediums]
         ).astype(numpy.int32)
 
         # xxxx
