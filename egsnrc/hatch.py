@@ -326,7 +326,6 @@ def egs_init_user_photon(prefix, ap, up):
     #         sumA = sumA + pz(medium,i)*wa(medium,i);
     #     ]
 
-    # DM: con1, con2 do not appear to be used anywhere in original EGSnrc.
     #     con1 = sumZ*rho(medium)/(sumA*1.6605655);
     #     con2 = rho(medium)/(sumA*1.6605655);
 

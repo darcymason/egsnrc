@@ -10,7 +10,7 @@ class TestSigma:
         """Simple Medium with one element calculates correct sigmas"""
         PHOTO = Interaction.PHOTOELECTRIC
         photo_data = get_xsection_table(DATA_DIR / "xcom_photo.data")
-        element = Element(z=73, pz=1, wa=0)
+        element = Element(z=73, pz=1)
 
         # Set medium lower E to same as photo_data and num steps to double the input data
         first_energy = exp(photo_data[73][0][0])
@@ -24,8 +24,8 @@ class TestSigma:
         assert sigmas[0] == first_sigma
 
         # Now interpolate more using high-res num steps and different AP than table
-        element = Element(z=6, pz=1, wa=0)
-        medium = Medium("C", [element], rho=1, ap=1.0, up=25.0, mge=10_000)
+        element = Element(z=6, pz=1)
+        medium = Medium("C", [element], rho=1, ap=1.0, up=25.0, mge=5_000)
         medium.calc_sigmas(PHOTO, photo_data)
 
         # photo table for Carbon excerpted here around point of interest
