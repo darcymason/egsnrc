@@ -50,11 +50,12 @@ class Medium:
 
     name: str
     elements: list[Element]
-    rho: float
-    "Medium density"
     ap: float
     "Lower photon cutoff energy"
     up: float
+    rho: float = np.NaN
+    "Medium density"
+    cross_section_prefix: str = "xcom"
     "Upper photon cutoff energy"
     mge: int = MXGE
     "Number of energy intervals for interaction coefficients"
@@ -70,6 +71,13 @@ class Medium:
 
     def __post_init__(self):
         self.sigmas = {}
+        if self.rho is np.NaN:
+            if len(self.elements) == 1:
+                self.rho = self.elements[0].rho
+            else:
+                raise NotImplementedError(
+                    "Must supply a density rho for a multi-element Medium"
+                )
         self.calc_all()
 
     def calc_all(self):
@@ -78,7 +86,8 @@ class Medium:
         self.sumA = sum(element.pz * element.atomic_weight for element in self.elements)
         self.con1 = self.sumZ * self.rho / (self.sumA * 1.6605655)
         self.con2 = self.rho / (self.sumA * 1.6605655)
-
+        self.calc_all_sigmas(self.cross_section_prefix)
+        self.calc_branching_ratios()
 
     def calc_ge0_ge1(self):
         """Define log intervals over the lower and upper cutoff energies"""
@@ -86,7 +95,26 @@ class Medium:
         self.ge0 = 1 - self.ge1 * log(self.ap)
         print(f"{self.mge=}  {self.ge1=}  {self.ge0=}")
 
-    def calc_sigmas(self, interaction, cross_sections):
+    def calc_all_sigmas(self, table_prefix):
+        """Calculate all cross-sections for this medium
+
+        Parameters
+        ----------
+        table_prefix : str
+            Prefix of cross-section data file name, e.g. "xcom"
+        """
+        from egsnrc.hatch import DATA_DIR, get_xsection_table
+        prefix = DATA_DIR / f"{table_prefix}_"
+        photo_data = get_xsection_table(f"{prefix}photo.data")
+        compton_data = get_xsection_table(f"{prefix}compton.data")
+        pair_data = get_xsection_table(f"{prefix}pair.data")
+        # XXX Rayleigh, Triplet, Photonuc
+        self._calc_sigmas(Interaction.PHOTOELECTRIC, photo_data)
+        self._calc_sigmas(Interaction.COMPTON, compton_data)
+        self._calc_sigmas(Interaction.PAIR, pair_data)
+        # XXX Rayleigh, Triplet, Photonuc
+
+    def _calc_sigmas(self, interaction, cross_sections):
         data = [0] * self.mge
         PAIR_OR_TRIPLET = (Interaction.PAIR, Interaction.TRIPLET)
         for element in self.elements:
@@ -97,8 +125,8 @@ class Medium:
             if interaction in PAIR_OR_TRIPLET:
                 eth = 2 * rm if interaction == Interaction.PAIR else 4 * rm
                 ftmp = ftmp - 3 * np.log(1 - eth / np.exp(etmp))
-                ftmp.insert(0, ftmp[0])
-                etmp.insert(0, log(eth))
+                ftmp = np.insert(ftmp, 0, ftmp[0])
+                etmp = np.insert(etmp, 0, log(eth))
 
             for k in range(self.mge):
                 gle = (k + 1 - self.ge0) / self.ge1
@@ -134,7 +162,7 @@ class Medium:
 
                 data[k] += element.pz * sig
 
-        self.sigmas[interaction] = data
+        self.sigmas[interaction] = np.array(data)
 
     def calc_sigma(self, interaction, energy):
         gle = log(energy)
@@ -144,31 +172,95 @@ class Medium:
         p = fractional_index - index
         return (1 - p) * sigmas[index] + p * sigmas[index + 1]
 
+    def calc_branching_ratios(self):
+        list_2_to_mge = np.arange(2, self.mge + 1) # start 2 - used with diffs
+        gle = (list_2_to_mge - self.ge0) / self.ge1
+        #  exp_gle = np.exp(gle)
+        # sig_KN = self.sumZ * egs_KN_sigma0(e)
+        #     if ibcmp[1] > 1:
+        #         if  input_compton_data:
+                #     sig_KN = sig_compton(i)
+                # else:
+                #     #Apply the bound Compton correction to sig_KN"
+                #     if  e <= bc_emin:
+                #         bcf = exp(bc_data[1])
+                #     elif  e < bc_emax:
+                #         aj = 1 + log(e/bc_emin)/bc_dle
+                #         j = int(aj)
+                #         aj = aj - j
+                #         bcf = exp(bc_data[j]*(1-aj) + bc_data[j+1]*aj)
+                #     else:
+                #         bcf = 1
+                #     sig_KN = sig_KN*bcf
+        # XXX for now, assume 'input_compton_data' for toy examples
+        sig_KN = self.sigmas[Interaction.COMPTON]
+        sig_pair = self.sigmas[Interaction.PAIR]
+        sig_photo = self.sigmas[Interaction.PHOTOELECTRIC]
+
+        sig_p  = sig_pair # XXX + sig_triplet
+        sigma  = sig_KN + sig_p + sig_photo
+        gmfp   = 1 / (sigma * self.con2)
+        gbr1   = sig_p / sigma
+        gbr2   = gbr1 + sig_KN / sigma
+        # cohe   = sigma/(sig_rayleigh(i) + sigma)
+        # photonuc = sigma/(sig_photonuc(i) + sigma)
+
+        def arr1_0(arr):
+            tmp1 = np.diff(arr) * self.ge1
+            tmp0 = arr[1:] - tmp1 * gle
+            result1 = np.append(tmp1, tmp1[-1]) # gmfp1(nge,med)=gmfp1(nge-1,med)
+            result0 = np.append(tmp0, tmp0[-1])
+
+            return result1, result0
+
+        self.gmfp1, self.gmfp0 = arr1_0(gmfp)
+        self.gbr11, self.gbr10 = arr1_0(gbr1)
+        self.gbr21, self.gbr20 = arr1_0(gbr2)
+        # XXX repeat for cohe and photonuc
+
+        # if i > 1:
+        #     gmfp1[i-1,medium] = (gmfp - gmfp_old)*ge1[medium]
+        #     gmfp0[i-1,medium] =  gmfp - gmfp1[i-1,medium]*gle
+
+        #     gbr11[i-1,medium] = (gbr1 - gbr1_old)*ge1[medium]
+        #     gbr10[i-1,medium] =  gbr1 - gbr11[i-1,medium]*gle
+
+        #     gbr21[i-1,medium] = (gbr2 - gbr2_old)*ge1[medium]
+        #     gbr20[i-1,medium] =  gbr2 - gbr21[i-1,medium]*gle
+        #     cohe1[i-1,medium] = (cohe - cohe_old)*ge1[medium]
+        #     cohe0[i-1,medium] =  cohe - cohe1[i-1,medium]*gle
+        #     photonuc1[i-1,medium] = (photonuc - photonuc_old)*ge1[medium]
+        #     photonuc0[i-1,medium] =  photonuc - photonuc1[i-1,medium]*gle
+
+        #     gmfp1(nge,medium) = gmfp1(nge-1,medium);
+        #     gmfp0(nge,medium) = gmfp - gmfp1(nge,medium)*gle;
+
+        #     gbr11(nge,medium) = gbr11(nge-1,medium);
+        #     gbr10(nge,medium) = gbr1 - gbr11(nge,medium)*gle;
+
+        #     gbr21(nge,medium) = gbr21(nge-1,medium);
+        #     gbr20(nge,medium) = gbr2 - gbr21(nge,medium)*gle;
+
+        #     cohe1(nge,medium) = cohe1(nge-1,medium);
+        #     cohe0(nge,medium) = cohe - cohe1(nge,medium)*gle;
+        #     photonuc1(nge,medium) = photonuc1(nge-1,medium);
+        #     photonuc0(nge,medium) = photonuc - photonuc1(nge,medium)*gle;
+
 
 if __name__ == "__main__":
     from egsnrc.hatch import DATA_DIR, get_xsection_table
 
-    PHOTO = Interaction.PHOTOELECTRIC
-    photo_data = get_xsection_table(DATA_DIR / "xcom_photo.data")
+    # PHOTO = Interaction.PHOTOELECTRIC
+    # photo_data = get_xsection_table(DATA_DIR / "xcom_photo.data")
     # element_ta = Element(z=73, pz=1, wa=0)
-    element_C = Element(z=6, pz=1, wa=0)
-    c_en = photo_data[6][0]
+    element_C = Element(z=6, pz=1)
+    # c_en = photo_data[6][0]
 
-    # Try to match the energies of the original cross-section data
-    medium = Medium(
-        "C", [element_C], rho=1, ap=exp(c_en[0]), up=exp(c_en[-1]), mge=len(c_en)
-    )
-    # medium = Medium("C", [element_C], rho=1, ap=0.001, up=50.0, mge=100)
-    medium.calc_sigmas(PHOTO, photo_data)
-    logE, log_sig = photo_data[6]
-    sig = np.exp(log_sig)
-    photo_E = np.exp(logE)
-    sigmas = medium.sigmas[PHOTO]
+    # # Try to match the energies of the original cross-section data
+    # medium = Medium(
+    #     "C", [element_C], rho=1, ap=exp(c_en[0]), up=exp(c_en[-1]), mge=len(c_en)
+    # )
+    medium = Medium("C", [element_C], ap=0.001, up=30.0)
+    # sigmas = medium.sigmas[PHOTO]
     print(medium)
-
-    print("  Log e: ", logE[:3], "...", logE[-3:])
-    print("      e: ", photo_E[:3], "...", photo_E[-3:])
-    print(" sigmas: ", sigmas[:3], "...", sigmas[-3:])
-    print("tbl sig:", sig[:3], "...", sig[-3:])
-    print(f"{len(sig)=}   {len(sigmas)=}")
 
