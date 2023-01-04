@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from math import exp, log
+from typing import ClassVar
 from egsnrc.elements import element_data
 
 import numpy as np
@@ -59,15 +60,12 @@ class Medium:
     "Upper photon cutoff energy"
     mge: int = MXGE
     "Number of energy intervals for interaction coefficients"
+    photon_cross_sections: ClassVar[dict] = {}
+    "Raw data from interaction cross-section files -dict[prefix][PHOTOELECTRIC/etc]"
     # Following are calculated on init
     # ge0: float = 0
     # ge1: float = 0
-    # sigmas = {}
-    # sig_photo: float = 0
-    # sig_rayleigh: float = 0
-    # sig_pair: float = 0
-    # sig_triplet: float = 0
-    # sig_photonuc: float = 0
+    # sigmas = {}  - dict with Interaction type key to array of sigmas
 
     def __post_init__(self):
         self.sigmas = {}
@@ -93,7 +91,6 @@ class Medium:
         """Define log intervals over the lower and upper cutoff energies"""
         self.ge1 = (self.mge - 1) / log(self.up / self.ap)
         self.ge0 = 1 - self.ge1 * log(self.ap)
-        print(f"{self.mge=}  {self.ge1=}  {self.ge0=}")
 
     def calc_all_sigmas(self, table_prefix):
         """Calculate all cross-sections for this medium
@@ -105,15 +102,29 @@ class Medium:
         """
         from egsnrc.hatch import DATA_DIR, get_xsection_table
         prefix = DATA_DIR / f"{table_prefix}_"
-        photo_data = get_xsection_table(f"{prefix}photo.data")
-        compton_data = get_xsection_table(f"{prefix}compton.data")
-        pair_data = get_xsection_table(f"{prefix}pair.data")
-        # XXX Rayleigh, Triplet, Photonuc
-        self._calc_sigmas(Interaction.PHOTOELECTRIC, photo_data)
-        self._calc_sigmas(Interaction.COMPTON, compton_data)
-        self._calc_sigmas(Interaction.PAIR, pair_data)
+        intn = Interaction  # Just to shorten lines
+
+        # Read data table files if not stored in the class already
+        if table_prefix not in self.photon_cross_sections:
+            tbls = self.photon_cross_sections[table_prefix] = {}
+            tbls[intn.PHOTOELECTRIC] = get_xsection_table(f"{prefix}photo.data")
+            tbls[intn.COMPTON] = get_xsection_table(f"{prefix}compton.data")
+            tbls[intn.PAIR] = get_xsection_table(f"{prefix}pair.data")
+            # XXX Rayleigh, Triplet, Photonuc
+
+        # Get stored tables
+        tbls = self.photon_cross_sections[table_prefix]
+        photo_data = tbls[intn.PHOTOELECTRIC]
+        compton_data = tbls[intn.COMPTON]
+        pair_data = tbls[intn.PAIR]
         # XXX Rayleigh, Triplet, Photonuc
 
+        self._calc_sigmas(intn.PHOTOELECTRIC, photo_data)
+        self._calc_sigmas(intn.COMPTON, compton_data)
+        self._calc_sigmas(intn.PAIR, pair_data)
+        # XXX Rayleigh, Triplet, Photonuc
+
+    @np.errstate(divide="raise")
     def _calc_sigmas(self, interaction, cross_sections):
         data = [0] * self.mge
         PAIR_OR_TRIPLET = (Interaction.PAIR, Interaction.TRIPLET)
@@ -210,41 +221,12 @@ class Medium:
             tmp0 = arr[1:] - tmp1 * gle
             result1 = np.append(tmp1, tmp1[-1]) # gmfp1(nge,med)=gmfp1(nge-1,med)
             result0 = np.append(tmp0, tmp0[-1])
-
             return result1, result0
 
         self.gmfp1, self.gmfp0 = arr1_0(gmfp)
         self.gbr11, self.gbr10 = arr1_0(gbr1)
         self.gbr21, self.gbr20 = arr1_0(gbr2)
         # XXX repeat for cohe and photonuc
-
-        # if i > 1:
-        #     gmfp1[i-1,medium] = (gmfp - gmfp_old)*ge1[medium]
-        #     gmfp0[i-1,medium] =  gmfp - gmfp1[i-1,medium]*gle
-
-        #     gbr11[i-1,medium] = (gbr1 - gbr1_old)*ge1[medium]
-        #     gbr10[i-1,medium] =  gbr1 - gbr11[i-1,medium]*gle
-
-        #     gbr21[i-1,medium] = (gbr2 - gbr2_old)*ge1[medium]
-        #     gbr20[i-1,medium] =  gbr2 - gbr21[i-1,medium]*gle
-        #     cohe1[i-1,medium] = (cohe - cohe_old)*ge1[medium]
-        #     cohe0[i-1,medium] =  cohe - cohe1[i-1,medium]*gle
-        #     photonuc1[i-1,medium] = (photonuc - photonuc_old)*ge1[medium]
-        #     photonuc0[i-1,medium] =  photonuc - photonuc1[i-1,medium]*gle
-
-        #     gmfp1(nge,medium) = gmfp1(nge-1,medium);
-        #     gmfp0(nge,medium) = gmfp - gmfp1(nge,medium)*gle;
-
-        #     gbr11(nge,medium) = gbr11(nge-1,medium);
-        #     gbr10(nge,medium) = gbr1 - gbr11(nge,medium)*gle;
-
-        #     gbr21(nge,medium) = gbr21(nge-1,medium);
-        #     gbr20(nge,medium) = gbr2 - gbr21(nge,medium)*gle;
-
-        #     cohe1(nge,medium) = cohe1(nge-1,medium);
-        #     cohe0(nge,medium) = cohe - cohe1(nge,medium)*gle;
-        #     photonuc1(nge,medium) = photonuc1(nge-1,medium);
-        #     photonuc0(nge,medium) = photonuc - photonuc1(nge,medium)*gle;
 
 
 if __name__ == "__main__":
@@ -262,5 +244,10 @@ if __name__ == "__main__":
     # )
     medium = Medium("C", [element_C], ap=0.001, up=30.0)
     # sigmas = medium.sigmas[PHOTO]
+    print(medium)
+
+    # medium = Medium("Medium Ca", [Element(20, 1)], ap=0.001, up=2.0)
+    for z in range(1, 100):
+        Medium("test", [Element(z=z, pz=1)], ap=0.001, up=50.0)
     print(medium)
 
