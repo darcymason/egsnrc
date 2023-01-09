@@ -1,5 +1,5 @@
 
-from numpy import random
+import numpy as np
 try:
     import torch
 except ImportError:
@@ -7,12 +7,11 @@ except ImportError:
 
 # Numpy random functions
 def _np_initialize(seed):
-    random.seed(seed)
-    return seed
+    return np.random.default_rng(seed)
 
 
-def _np_floats_0_1(key, num, device=None):
-    return key, random.random(num)
+def _np_floats_0_1(rng, num, device=None):
+    return rng, rng.random(num)
 
 
 # PyTorch random funtions ---------
