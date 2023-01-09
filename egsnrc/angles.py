@@ -32,19 +32,22 @@ def select_azimuthal_angle() -> Tuple[float, float]:
         xphi:float = randomset()
         # logger.debug(f"xphi random: {xphi}")
         xphi  = 2*xphi - 1
-        xphi2:float = xphi*xphi
-        yphi:float = randomset()
-        yphi2:float  = yphi * yphi
+        xphi2: float = xphi*xphi
+        yphi: float = randomset()
+        yphi2: float  = yphi * yphi
         rhophi2 = xphi2 + yphi2
 
     rhophi2 = 1 / rhophi2
     return (xphi2 - yphi2)*rhophi2, 2*xphi*yphi*rhophi2
 
 
-a = b = c = 0.0  # Save for connected calls to uphi. See comments below
+# Save for connected calls to uphi. See comments below
+a: float = 0.0
+b: float = 0.0
+c: float = 0.0
 
 
-def uphi(ientry, lvl):
+def uphi(ientry: int, lvl: int):
     """Uniform phi distribution
 
     Set coordinates for new particle or reset direction cosines of
@@ -167,9 +170,9 @@ def uphi(ientry, lvl):
     sinps2 = a*a + b*b
     # if sinps2 is small, no rotation is needed
     if sinps2 < 1.0e-20:   # small polar angle case
-        u[np_m1] = sinthe*cosphi
-        v[np_m1] = sinthe*sinphi
-        w[np_m1] = c*costhe    # fixed march 2001 from =costhe"
+        u[np_m1] = sinthe * cosphi
+        v[np_m1] = sinthe * sinphi
+        w[np_m1] = c * costhe    # fixed march 2001 from =costhe"
     else:  # large polar angle case
         sinpsi = sqrt(sinps2)
         us = sinthe * cosphi

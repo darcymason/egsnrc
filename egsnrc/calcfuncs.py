@@ -7,7 +7,7 @@ from egsnrc.util import for_E18, fort_hex
 import logging
 logger = logging.getLogger("egsnrc")
 
-def compute_drange(lelec, medium, eke1, eke2, lelke1, elke1, elke2):
+def compute_drange(lelec: int, medium: int, eke1: float, eke2: float, lelke1: int, elke1: float, elke2:float) -> float:
     """Computes path-length traveled going from energy `eke1` to `eke2`
 
     both energies being in the same interpolation bin,
@@ -30,10 +30,10 @@ def compute_drange(lelec, medium, eke1, eke2, lelke1, elke1, elke2):
         path-length traveled going from energy `eke1` to `eke2`
 
     """
-    fedep = 1 - eke2/eke1
+    fedep: float = 1 - eke2/eke1
 
     # evaluate the logarithm of the midpoint energy
-    elktmp = 0.5*(elke1+elke2+0.25*fedep*fedep*(1+fedep*(1+0.875*fedep)))
+    elktmp: float = 0.5*(elke1+elke2+0.25*fedep*fedep*(1+fedep*(1+0.875*fedep)))
 
     # *** -1 for 0-based in Python
     lelktmp = lelke1 - 1 # was = lelke1
@@ -57,9 +57,7 @@ def compute_drange(lelec, medium, eke1, eke2, lelke1, elke1, elke2):
     return fedep*eke1*dedxmid*(1+aux)
 
 
-def calc_tstep_from_demfp(
-    qel,lelec, medium, lelke, demfp, sig, eke, elke, total_de
-):
+def calc_tstep_from_demfp(qel,lelec, medium: int, lelke, demfp, sig, eke, elke, total_de):
     """Calculate path length to the next discrete interaction
 
     Once the sub-threshold processes energy loss to the next discrete
@@ -73,7 +71,7 @@ def calc_tstep_from_demfp(
     # in/out:  compute_tstep, total_tstep,
     # global e_array, epcont.eke, epcont.elke, bounds.vacdst, eke0[], eke1[]
 
-    # print("fn:", ",".join(str(x) for x in (qel,lelec, medium, demfp, sig, eke, elke, total_de)) )
+    # print("fn:", ",".join(str(x) for x in (qel,lelec: int, medium, demfp, sig, eke, elke, total_de)) )
     fedep = total_de
     ekef  = eke - fedep
 
@@ -122,7 +120,7 @@ else:
     point_99 = 0.99
 
 
-def compute_eloss(lelec, medium, step, eke, elke, lelke):
+def compute_eloss(lelec: int, medium: int, step, eke, elke, lelke):
     """"Compute the energy loss due to sub-threshold processes for a path-length `step`.
 
     The energy at the beginning of the step is `eke`, `elke`=log(`eke`),
@@ -168,16 +166,16 @@ def compute_eloss(lelec, medium, step, eke, elke, lelke):
     return de
 
 
-def compute_eloss_g(lelec, medium, step, eke, elke, lelke, range_):
+def compute_eloss_g(lelec: int, medium: int, step: float, eke:float, elke:float, lelke:int, range_:float):
     """A generalized version of `compute_eloss`"""
     # ** 0-based arrays in Python
-    medium_m1 = medium - 1
-    lelke_m1 = lelke - 1
+    medium_m1: int = medium - 1
+    lelke_m1: int = lelke - 1
 
     # logger.debug(f"in compute-eloss-g:{fort_hex([step, eke, elke])}{lelke:4}")
     # Note: range_ep IS 0-based already in first dimn
 
-    qel = 0 if lelec==-1 else 1  # recalc here to not bother passing in both
+    qel: int = 0 if lelec==-1 else 1  # recalc here to not bother passing in both
     tuss = range_ - range_ep[qel,lelke_m1,medium_m1] / rhof
         #  here tuss is the range between the initial energy and the next lower
         #  energy on the interpolation grid
@@ -217,9 +215,9 @@ def compute_eloss_g(lelec, medium, step, eke, elke, lelke, range_):
     return de
 
 
-def calculate_xi(lelec, medium, ekems, rmt2, rmsq, xccl, blccl, step):
+def calculate_xi(lelec: int, medium: int, ekems: float, rmt2:float, rmsq:float, xccl:float, blccl:float, step:float):
     # ** 0-based arrays
-    medium_m1 = medium - 1
+    medium_m1: int = medium - 1
 
     p2 = ekems*(ekems+rmt2)
     beta2 = p2/(p2 + rmsq)
