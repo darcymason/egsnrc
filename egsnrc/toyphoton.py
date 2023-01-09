@@ -1,5 +1,6 @@
 import numpy as np
-
+import torch.random
+import torch
 # =====================================
 # RANDOM functions
 import numpy.random as np_random
@@ -10,6 +11,11 @@ def _np_initialize(seed):
 def _np_floats_0_1(key, num):
     return key, np_random.random(num)
 
+def _torch_initialize(seed):
+    return torch.random.manual_seed(seed)
+
+def _torch_floats_0_1(key, num):
+    return key, torch.rand(num)
 
 
 # ====================================================
@@ -61,7 +67,9 @@ class Particles:
 
         # Return new Particles for GPU - can't modify in-place?
         return self
-
+    def to_gpu(self):
+        self.f_arr = self.f_arr.to("cuda")
+        self.i_arr = self.i_arr.to("cuda")
 
     # Float array properties ---------------------
     @property
@@ -89,7 +97,33 @@ class Particles:
     def status(self):
         return self.i_arr[self.STATUS]
 
+# Set up which path, numpy or jax, etc.
+def set_array_library(library="numpy"):
+    global random_floats_0_1, random_initialize
+    global FLOAT_ARRAY_TYPE, FLOAT_ARRAY_DTYPE
+    global INT_ARRAY_TYPE, INT_ARRAY_DTYPE
+    global ZEROS_FN
 
+    if library == "numpy":
+        random_floats_0_1 = _np_floats_0_1
+        random_initialize = _np_initialize
+        FLOAT_ARRAY_TYPE = np.ndarray
+        FLOAT_ARRAY_DTYPE = np.float32
+
+        INT_ARRAY_TYPE = np.ndarray
+        INT_ARRAY_DTYPE = np.int32
+        ZEROS_FN = np.zeros
+    elif library == "pytorch":
+        random_floats_0_1 = _torch_floats_0_1
+        random_initialize = _torch_initialize
+        FLOAT_ARRAY_TYPE = torch.Tensor
+        FLOAT_ARRAY_DTYPE = torch.float32
+
+        INT_ARRAY_TYPE = torch.Tensor
+        INT_ARRAY_DTYPE = torch.int32
+        ZEROS_FN = torch.zeros
+    else:
+        raise ValueError("Unknown library argument")
 # ======================================
 # PHOTON "transport"
 def toy(particles, key):
@@ -106,19 +140,43 @@ def toy(particles, key):
 # MAIN CODE
 
 # Set up which path, numpy or jax, etc.
-random_floats_0_1 = _np_floats_0_1
-random_initialize = _np_initialize
-FLOAT_ARRAY_TYPE = np.ndarray
-FLOAT_ARRAY_DTYPE = np.float32
+def set_array_library(library="numpy"):
+    global random_floats_0_1, random_initialize
+    global FLOAT_ARRAY_TYPE, FLOAT_ARRAY_DTYPE
+    global INT_ARRAY_TYPE, INT_ARRAY_DTYPE
+    global ZEROS_FN
 
-INT_ARRAY_TYPE = np.ndarray
-INT_ARRAY_DTYPE = np.int32
-ZEROS_FN = np.zeros
+    if library == "numpy":
+        random_floats_0_1 = _np_floats_0_1
+        random_initialize = _np_initialize
+        FLOAT_ARRAY_TYPE = np.ndarray
+        FLOAT_ARRAY_DTYPE = np.float32
 
-def main():
+        INT_ARRAY_TYPE = np.ndarray
+        INT_ARRAY_DTYPE = np.int32
+        ZEROS_FN = np.zeros
+    elif library == "pytorch":
+        random_floats_0_1 = _torch_floats_0_1
+        random_initialize = _torch_initialize
+        FLOAT_ARRAY_TYPE = torch.Tensor
+        FLOAT_ARRAY_DTYPE = torch.float32
+
+        INT_ARRAY_TYPE = torch.Tensor
+        INT_ARRAY_DTYPE = torch.int32
+        ZEROS_FN = torch.zeros
+    else:
+        raise ValueError("Unknown library argument")
+
+def main(num_particles, array_library, gpu_requested=False):
+    have_cuda = torch.cuda.is_available()
+    if gpu_requested and (not have_cuda or array_library != "pytorch"):
+        raise ValueError("GPU not available")
+
+    set_array_library(array_library)
+
     P = Particles  # short-form for accessing indices
     # Set up toy slab geometry like tutor examples
-    num_particles = 10
+
     f_arr = ZEROS_FN(
                 (P.NUM_FLOAT_PARAMS, num_particles) , dtype=FLOAT_ARRAY_DTYPE
             )
@@ -133,10 +191,60 @@ def main():
     f_arr[P.W, :] = 1.0
 
     particles = Particles(f_arr, i_arr)
-    print(particles.f_arr)
-    print(particles.i_arr)
+    if have_cuda:
+        particles.to_gpu()
+
+    # print(particles.f_arr)
+    # print(particles.i_arr)
     z_bound = 100 # cm
 
     while len(particles):
         # print(f"{len(particles)=}")
         particles, key = toy(particles, key)
+
+import timeit
+
+
+num_particles = 10_000
+lib = "numpy"
+gpu = False  # True
+lib = "pytorch"
+
+gpu_msg = f" with GPU" if gpu else "** NO GPU **"
+print(f"Starting run(s) {gpu_msg}...")
+seconds = timeit.timeit("main(num_particles, lib, gpu)", globals=globals(), number=10)
+print(f"Completed run in {seconds} seconds")
+# main(10_000, 'numpy')
+
+
+def setup(num_particles, array_library, gpu_requested=False):
+    have_cuda = torch.cuda.is_available()
+    device = "cuda" if (have_cuda and gpu_requested) else "cpu"
+    if gpu_requested and (not have_cuda or array_library != "pytorch"):
+        raise ValueError("GPU not available")
+
+    set_array_library(array_library)
+
+    P = Particles  # short-form for accessing indices
+    # Set up toy slab geometry like tutor examples
+
+    f_arr = ZEROS_FN(
+                (P.NUM_FLOAT_PARAMS, num_particles) , dtype=FLOAT_ARRAY_DTYPE
+            )
+    i_arr = ZEROS_FN(
+                (P.NUM_INT_PARAMS, num_particles), dtype=INT_ARRAY_DTYPE
+            )
+
+    key = random_initialize(42)
+
+    # Start in region 0, medium 0, status 0 so leave those alone
+    f_arr[P.ENERGY, :] = 100.0
+    f_arr[P.W, :] = 1.0
+
+    particles = Particles(f_arr, i_arr)
+    if have_cuda and gpu_requested:
+        particles.to_gpu()
+
+    # print(particles.f_arr)
+    # print(particles.i_arr)
+    z_bound = 100 # cm
