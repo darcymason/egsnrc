@@ -1,5 +1,19 @@
 from pathlib import Path
 import numpy as np
+# hatch.py
+"""Get physics data for EGSnrc run
+
+Hatch is called before simulation begins.
+For Photons, hatch calls egs_init_user_photon, which in turn
+opens files via egsi_get_data, for compton, photoelectric, pair, triplet,
+Rayleigh (depending on the settings) and does corrections on some of the data.
+"""
+
+from pathlib import Path
+import numpy as np
+import logging
+
+logger = logging.getLogger("egsnrc")
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
@@ -156,10 +170,10 @@ def egs_init_user_photon(prefix,comp_prefix,photonuc_prefix,out):
             photonuc_file*144;
     """
 
-    print('(Re)-initializing photon cross sections')
-    print(' with files from the series: ', prefix)
+    logger.info("(Re)-initializing photon cross sections")
+    logger.info(" with files from the series: ", prefix)
 
-    print(' Compton cross sections: ', comp_prefix)
+    # logger.info(' Compton cross sections: ', comp_prefix)
 
     # "Ali:photonuc, 1 block"
     # IF(iphotonuc = 1) [
@@ -179,10 +193,10 @@ def egs_init_user_photon(prefix,comp_prefix,photonuc_prefix,out):
     pair_file = DATA_DIR / f"{prefix}_pair.data"
     triplet_file = DATA_DIR / f"{prefix}_triplet.data"
     rayleigh_file = DATA_DIR / f"{prefix}_rayleigh.data"
-    if input_compton_data:
-        compton_file = DATA_DIR / f"{prefix}_compton.data"
-    else:
-        compton_file = DATA_DIR / 'compton_sigma.data'
+    # if input_compton_data:
+    compton_file = DATA_DIR / f"{prefix}_compton.data"
+    # else:
+    #     compton_file = DATA_DIR / 'compton_sigma.data'
 
     print(f" Using Compton cross sections from {compton_file}")
 
@@ -233,34 +247,23 @@ def egs_init_user_photon(prefix,comp_prefix,photonuc_prefix,out):
     #             '(MeV)','no Rayleigh','(fraction)','(fraction)','with Rayleigh';
     # ]
     # ]
-    # /* Replace binding energies with the edges in the photo-absorption file */
-    # DO iz=1,100 [
-    #     read(photo_unit,*) ndat;
-    #     read(photo_unit,*) (etmp(k),ftmp(k),k=1,ndat);
-    #     k = 0;
-    #     DO j=ndat,2,-1 [
-    #         IF( etmp(j)-etmp(j-1) < 1e-5 ) [
-    #             k = k+1;
-    #             IF ( k <= $MXSHXSEC )[
-    #             binding_energies(k,iz) = exp(etmp(j));
-    #             ]
-    #             ELSE[
-    #             $egs_fatal('(i3,a,i3,//a)',
-    #                         k,' binding energies read exceeding array size of',
-    #                         $MXSHXSEC,'Increase $MXSHXSEC in egsnrc.macros!');
-    #             ]
-    #             IF( ~eadl_relax & k >= 4 ) EXIT;
-    #         ]
-    #     ]
-    # ]
+
+    # Populate the binding energies array based on sudden jumps in photo table
+    # binding_energies is 2D array of [z, 1D array of energies]
+    photo_data = get_xsection_table(photo_file)
+    binding_energies = photo_binding_energies(photo_data)
+
 
     # IF (mcdf_pe_xsections)[call egs_read_shellwise_pe();]
 
+    # GE0,GE1  used for indexing in logarithmic interpolations - DM: 'gamma energy'?
+    # DM: nne from get_media_inputs, appears to be number of elements for the medium
+    # DM: from below, need zelem[medium]->list, AP[medium], pz[medium], wa[medium], rho[medium]
+    #
+
+    mge, ge0, ge1 = calc_ge_intervals(ap, up)
     # DO medium = 1,nmed [
 
-    #     mge(medium) = $MXGE; nge = $MXGE;
-    #     ge1(medium) = nge-1; ge1(medium) = ge1(medium)/log(up(medium)/ap(medium));
-    #     ge0(medium) = 1 - ge1(medium)*log(ap(medium));
 
     #     $egs_info('(a,i3,a,$)',' Working on medium ',medium,' ... ');
     #     IF( out = 1 ) [
@@ -273,8 +276,10 @@ def egs_init_user_photon(prefix,comp_prefix,photonuc_prefix,out):
     #         sumZ = sumZ + pz(medium,i)*zelem(medium,i);
     #         sumA = sumA + pz(medium,i)*wa(medium,i);
     #     ]
+
     #     con1 = sumZ*rho(medium)/(sumA*1.6605655);
     #     con2 = rho(medium)/(sumA*1.6605655);
+
     #     call egs_heap_sort(nne(medium),z_sorted,sorted);
     #     DO i=1,nne(medium) [ pz_sorted(i) = pz(medium,sorted(i)); ]
 
@@ -418,11 +423,19 @@ def egs_init_user_photon(prefix,comp_prefix,photonuc_prefix,out):
     # :no-user-data-file:;
     # $egs_fatal('(//a,a)','Failed to open data file ',$cstring(tmp_string));
 
+    return photo_data, binding_energies
+
     # # return; end;
+
 
 if __name__ == "__main__":
     # data_filename = DATA_DIR / "xcom_photo.data"
-    data_filename = DATA_DIR / "xcom_pair.data"
-    data = get_xsection_table(data_filename)
-    for i in range(10):
-        print(data[i][0][:8])
+    # data_filename = DATA_DIR / "xcom_pair.data"
+    # data = get_xsection_table(data_filename)
+    # for i in range(10):
+    #     print(data[i][0][:8])
+    photo_data, binding_energies = egs_init_user_photon("xcom")
+    for z in [1, 6, 10, 11, 20, 73, 82, 92]:
+        energy_list = ", ".join(str(x) for x in binding_energies[z])
+        print(f"{z=} Binding energies: {energy_list}")
+    # print(binding_energies[-10:])
