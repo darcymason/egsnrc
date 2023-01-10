@@ -6,7 +6,7 @@ from math import exp, log
 
 
 
-def test_sigmas_photo(self):
+def test_sigmas_photo():
     """Simple Medium with one element calculates correct sigmas"""
     PHOTO = Interaction.PHOTOELECTRIC
     photo_data = get_xsection_table(DATA_DIR / "xcom_photo.data")

@@ -1,0 +1,290 @@
+"******************************************************************"
+"                                                          NRCC    "
+SUBROUTINE COMPT;
+"                                VERSION 1.00  --  12 JAN 1999     "
+"******************************************************************"
+"                                                                  "
+"   Subroutine for sampling incoherent (Compton) scattering        "
+"   If the flag ibcmp(region) is zero, Klein-Nishina is used.      "
+"   Otherwise scattering is modelled in the impulse approximation  "
+"   (see R.Ribberfors and K.F.Berggren, Phys.Rev.A26 (1982) 3325)  "
+"   As the total cross section from PEGS4 is not modified (and thus"
+"   calculated using Klein-Nishina), all rejections lead to an     "
+"   unscattered photon and a zero energy electron.                 "
+"   If a K,L1,L2,L3,M or N vacancy is created, the subsequent      "
+"   atomic relaxation is treated in RELAX. This has as a           "
+"   consequence that more than one particle can be created as a    "
+"   result of an incoherent scattering. The user should therefore  "
+"   check their user codes for possible inconsistencies.           "
+"                                                                  "
+"   I.Kawrakow, January 1999                                       "
+"                                                                  "
+"   I.Kawrakow, March 2008:                                        "
+"      If ibcmp = 2 or 3, the actual bound Compton scattering      "
+"      cross section is used and rejections lead to resampling     "
+"      instead of rejecting the entire interactions as stated above"
+"                                                                  "
+"******************************************************************"
+
+$IMPLICIT-NONE;
+
+$COMIN-COMPT;    "DEFAULT REPLACEMENT PRODUCES THE FOLLOWING:
+                 "COMIN/COMPTON-DATA,DEBUG,STACK,THRESH,UPHIOT,USEFUL,RANDOM/;
+
+$DEFINE-LOCAL-VARIABLES-COMPT;
+$LOGICAL first_time;
+$INTEGER ibcmpl;
+
+NPold = NP;       "Set the old stack counter"
+peig=E(NP);       "PRECISE ENERGY OF INCIDENT GAMMA"
+ko = peig/rm;     "Gamma energy in units of electron rest energy"
+broi = 1 + 2*ko;  "Needed for scattering angle sampling"
+
+$RADC_CHECK;
+
+irl = ir(np); first_time = .true.; ibcmpl = ibcmp(irl);
+
+$egs_info(*,'------ Energy=', peig);
+:resample-compton:;
+IF( ibcmpl > 0 ) [ "User wants to take into account binding effects"
+                   "=>first sample the shell and see whether an    "
+                   "  interaction is possible
+    $egs_info('(a)','* * * IN BINDING EFFECTS * * * *');
+    $RANDOMSET rnno17; rnno17 = 1 + rnno17*n_shell(medium);
+    i = int(rnno17); "rnno17 = rnno17 - i;
+    IF( rnno17 > eno_array(i,medium) ) i = eno_atbin_array(i,medium);
+    j = shell_array(i,medium); "j is the shell number in the data list"
+    Uj = be_array(j);          "Uj is the binding energy in units of rm"
+
+    " Binding energy rejection "
+    IF( ko <= Uj ) [
+        IF( ibcmpl = 1 ) [ goto :INTERACTION-REJECTED:; ]
+        ELSE             [ goto :resample-compton:;     ]
+    ]
+    Jo = Jo_array(j);          "Jo is the Compton profile parameter"
+
+]
+
+" We always sample the scattering angle from Klein-Nishina"
+:RESAMPLE:
+;
+IF( ko > 2 ) [    "At high energies the original EGS4 method is most efficient"
+    IF( first_time ) [
+        broi2 = broi*broi;
+        alph1 = Log(broi);
+        bro   = 1/broi;
+        alph2 = ko*(broi+1)*bro*bro;
+        alpha = alph1+alph2;
+    ]
+    LOOP [
+        $RANDOMSET rnno15; $RANDOMSET rnno16;
+        IF( rnno15*alpha < alph1 ) [ "Use 1/br part"
+            br = Exp(alph1*rnno16)*bro;
+        ]
+        ELSE [  "Use the br part."
+            br = Sqrt(rnno16*broi2 + (1-rnno16))*bro;
+        ]
+        temp = (1-br)/(ko*br); sinthe = Max(0.,temp*(2-temp));
+        aux = 1+br*br;
+        rejf3 = aux - br*sinthe;
+        $RANDOMSET rnno19;
+    ] UNTIL rnno19*aux.le.rejf3;
+]
+ELSE [ "At low energies it is faster to sample br uniformely"
+    IF( first_time ) [
+        bro = 1./broi; bro1 = 1 - bro;
+        rejmax = broi + bro;
+    ]
+    LOOP [
+        $RANDOMSET rnno15; $RANDOMSET rnno16;
+        $egs_info(*,'     rnno15/16  ',rnno15,rnno16);
+
+        br = bro + bro1*rnno15;
+        temp = (1-br)/(ko*br); sinthe = Max(0.,temp*(2-temp));
+        rejf3 = 1 + br*br - br*sinthe;
+    ] UNTIL rnno16*br*rejmax.le.rejf3;
+]
+first_time = .false.;
+
+IF(br < bro | br > 1)  [
+    IF( br < 0.99999/broi | br > 1.00001 ) [
+        $egs_warning(*,' sampled br outside of allowed range! ',ko,1./broi,br);
+    ]
+    goto :RESAMPLE: ;
+]
+
+$RADC_REJECTION;
+
+costhe = 1 - temp;
+IF( ibcmp(irl) = 0 ) [ "User wants to use Klein-Nishina, so we are done"
+    Uj = 0;
+    goto :FINISHED-COMPTON-SAMPLING:;
+]
+
+$egs_info('(a)','DID NOT SKIP to Finished Compton!!');
+" Check for rejection due to the limited range of pzmax "
+br2 = br*br;
+aux = ko*(ko-Uj)*temp;
+aux1 = 2*aux + Uj*Uj;
+pzmax = aux - Uj;
+IF( pzmax < 0 & pzmax*pzmax >= aux1 ) [
+    IF( ibcmpl = 1 ) [ goto :INTERACTION-REJECTED:; ]
+    ELSE             [ goto :resample-compton:; ]
+]
+pzmax = pzmax/sqrt(aux1);
+/*
+pzmax = (aux - Uj)/sqrt(2*aux + Uj*Uj);
+IF( pzmax <= -1 ) [
+    IF( ibcmpl = 1 ) [ goto :INTERACTION-REJECTED:; ]
+    ELSE             [ goto :resample-compton:; ]
+]
+*/
+qc2 = 1 + br*br - 2*br*costhe;
+qc  = sqrt(qc2);
+
+IF( pzmax > 1 ) [
+    pzmax = 1; af = 0; Fmax = 1; fpz = 1;
+    goto :RETRY-PZ:;
+]
+
+aux3 = 1 + 2*Jo*abs(pzmax);
+aux4 = 0.5*(1-aux3*aux3);
+fpz  = 0.5*exp(aux4);
+af   = qc*(1+br*(br-costhe)/qc2);
+
+IF( af < 0 ) [
+    IF( pzmax > 0 ) fpz = 1 - fpz;
+    $RANDOMSET eta_incoh;
+    IF( eta_incoh > fpz ) [
+        IF( ibcmpl = 1 ) [ goto :INTERACTION-REJECTED:; ]
+        ELSE             [ goto :resample-compton:; ]
+    ]
+    af = 0; Fmax = 1; goto :RETRY-PZ:;
+]
+
+IF( pzmax < -0.15 ) [
+    Fmax = 1-af*0.15;
+    fpz1 = fpz*Fmax*Jo;
+]
+ELSE IF( pzmax < 0.15 ) [
+    Fmax = 1 + af*pzmax;
+    aux3 = 1/(1+0.33267252734*aux3);
+            "0.33267252734 is p/sqrt(2), p is the parameter from Eq. 7.1.25"
+            "of Abramowitz and Stegun, needed for approximating Erf        "
+    aux4 = fpz*aux3*(0.3480242+aux3*(-0.0958798+aux3*0.7478556)) +
+           erfJo_array(j);
+    IF( pzmax > 0 ) [
+        "fpz1 = 1 - Fmax*fpz - 0.31332853433*af/Jo_array(j)*aux4;"
+          "missing factor 1/2 in the above found by Cerneliu Costescu"
+          "0.62665706866 is sqrt(Pi/8)"
+        fpz1 = (1 - Fmax*fpz)*Jo - 0.62665706866*af*aux4;
+        fpz = 1 - fpz;
+    ]
+    ELSE [
+        "fpz1 = Fmax*fpz - 0.31332853433*af/Jo_array(j)*aux4;"
+          "missing factor 1/2 in the above found by Cerneliu Costescu"
+          "0.62665706866 is sqrt(Pi/8)"
+        fpz1 = Fmax*fpz*Jo - 0.62665706866*af*aux4;
+    ]
+]
+ELSE [
+    Fmax = 1 + af*0.15;
+    fpz1 = (1 - Fmax*fpz)*Jo;
+    fpz = 1 - fpz;
+]
+$RANDOMSET eta_incoh;
+IF(eta_incoh*Jo > fpz1 ) [
+    IF( ibcmpl = 1 ) [ goto :INTERACTION-REJECTED:; ]
+    ELSE             [ goto :resample-compton:; ]
+]
+
+"At this point, all rejections are handled, now we need to sample pz "
+"between -1 and pzmax using the Compton profile of the selected shell"
+"and F(pz,cos(theta)) as a rejection function                        "
+
+:RETRY-PZ:;
+IF( ibcmpl ~= 2 ) [
+  $RANDOMSET rnno18; rnno18 = rnno18*fpz;
+  IF( rnno18 < 0.5 ) [
+    rnno18 = Max(1e-30,2*rnno18);
+    pz = 0.5*(1-Sqrt(1-2*Log(rnno18)))/Jo;
+  ]
+  ELSE [
+    rnno18 = 2*(1-rnno18);
+    pz = 0.5*(Sqrt(1-2*Log(rnno18))-1)/Jo;
+  ]
+  IF( abs(pz) > 1 ) goto :RETRY-PZ:;
+      "Due to the non-relativistic approximation"
+      "for pz, it has to be between -1 and 1    "
+  IF( pz < 0.15  ) [
+    IF( pz < -0.15 ) [ frej = 1 - af*0.15; ]
+    ELSE             [ frej = 1 + af*pz;   ]
+    $RANDOMSET eta;
+    IF( eta*Fmax > frej ) goto :RETRY-PZ:;
+  ]
+  "If pz > 0.15, F is always 1 => no need for rejection"
+]
+ELSE [ pz = 0; Uj = 0; "i.e., no Doppler broadenning and no binding energy" ]
+
+" Calculate energy of scattered photon "
+pz2 = pz*pz;
+IF( abs(pz) < 0.01 ) [
+    br = br*(1 + pz*(qc + (br2-costhe)*pz));
+]
+ELSE [
+    aux =  1 - pz2*br*costhe; aux1 = 1 - pz2*br2;
+    aux2 = qc2 - br2*pz2*sinthe;
+    IF( aux2 > 1e-10 ) [ br = br/aux1*(aux+pz*Sqrt(aux2)); ]
+]
+Uj = Uj*prm;
+
+:FINISHED-COMPTON-SAMPLING:
+$egs_info(*,'     br, costhe before changes=', br, costhe);
+pesg = br*peig; pese = peig - pesg - Uj + prm;
+sinthe = Sqrt(sinthe);
+call uphi(2,1); e(np) = pesg;
+aux = 1 + br*br - 2*br*costhe;
+IF( aux > 1e-8 ) [
+    costhe = (1-br*costhe)/Sqrt(aux);
+    sinthe = (1-costhe)*(1+costhe);
+    IF( sinthe > 0 ) [ sinthe = -Sqrt(sinthe); ]
+    ELSE [ sinthe = 0; ]
+] ELSE [ costhe = 0; sinthe = -1; ]
+
+$egs_info(*,'     final e, sinthe, costhe', pesg, sinthe, costhe);
+
+
+np = np + 1;
+$CHECK-STACK(np,'COMPT');
+call uphi(3,2);
+e(np) = pese; iq(np) = -1;
+
+IF( ibcmpl = 1 | ibcmpl = 3 ) [
+
+    " Shell vacancy "
+    IF( Uj > 1e-3 ) [
+        edep = pzero;
+
+        call relax(Uj,shn_array(j),iz_array(j));
+        "relax will put all particles with energies above ecut,pcut on the "
+        "stack, the remaining energy will be scored in edep and deposited  "
+        "locally (via the call to ausgab below)                            "
+    ]
+    ELSE [
+        edep = Uj;
+        edep_local = edep;
+        $AUSCALL($SPHOTONA);
+    ]
+    IF( edep > 0 ) [ $AUSCALL($PHOTXAUS); "generates IARG = 4 call" ]
+
+]
+
+" Now play Russian Roulette with resulting electrons if the user asked for it"
+$PLAY RUSSIAN ROULETTE WITH ELECTRONS FROM NPold+1; "TO NP"
+
+return;
+
+:INTERACTION-REJECTED:
+" Create here a zero energy electron if required (check user codes) "
+return;
+end;
