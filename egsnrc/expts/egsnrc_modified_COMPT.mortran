@@ -78,6 +78,7 @@ IF( ko > 2 ) [    "At high energies the original EGS4 method is most efficient"
     ]
     LOOP [
         $RANDOMSET rnno15; $RANDOMSET rnno16;
+
         IF( rnno15*alpha < alph1 ) [ "Use 1/br part"
             br = Exp(alph1*rnno16)*bro;
         ]
@@ -88,6 +89,7 @@ IF( ko > 2 ) [    "At high energies the original EGS4 method is most efficient"
         aux = 1+br*br;
         rejf3 = aux - br*sinthe;
         $RANDOMSET rnno19;
+        $egs_info(*,'     rnno15/16/19  ',rnno15,rnno16,rnno19);
     ] UNTIL rnno19*aux.le.rejf3;
 ]
 ELSE [ "At low energies it is faster to sample br uniformely"

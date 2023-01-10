@@ -1,0 +1,179 @@
+================================================================================
+EGSnrc version 4 for x86_64-unknown-linux-gnu          Tue Jan 10 16:14:43 2023
+================================================================================
+configuration............................................linux
+user code................................................tutor7
+pegs file................................................tutor_data on HEN_HOUSE
+using host...............................................DESKTOP-DNF8ELT
+input file...............................................tutor7_10MeV_Si
+output file(s)...........................................tutor7_10MeV_Si
+================================================================================
+
+***************** Warning: 
+File /home/darcy/git/egsnrc/egsnrc/egs_home/tutor7/egsrun_30063_tutor7_10MeV_Si_DESKTOP-DNF8ELT/tutor7_10MeV_Si.errors
+ is already opened and connected to unit  15
+ Will not try to re-open this file, assuming it has been opened
+ by specifying it in the .io file.
+
+
+
+ Bound Compton start region
+  Setting all to            0
+ Rayleigh start region
+  Setting all to            0
+ Relaxations start region
+  Setting all to            0
+ PE sampling start region
+  Setting all to            1
+
+================================================================================
+
+                   Electron/Photon transport parameter
+
+================================================================================
+
+ Photon cross sections                                      xcom
+ Compton cross sections                                     default
+ Photon transport cutoff(MeV)                                    0.1000E-01
+ Pair angular sampling                                       SIM
+ Pair cross sections                                         BH 
+ Triplet production                                          Off
+ Bound Compton scattering                                    OFF           
+ Radiative Compton corrections                               Off           
+ Rayleigh scattering                                         OFF           
+ Atomic relaxations                                          OFF           
+ Photoelectron angular sampling                              ON            
+
+ Electron transport cutoff(MeV)                               0.7000
+ Bremsstrahlung cross sections                              BH  
+ Bremsstrahlung angular sampling                             KM 
+ Spin effects                                                Off
+ Electron Impact Ionization                                  Off
+ Maxium electron step in cm (SMAX)                               0.1000E+11
+ Maximum fractional energy loss/step (ESTEPE)                0.2500
+ Maximum 1st elastic moment/step (XIMAX)                     0.5000
+ Boundary crossing algorithm                                 EXACT     
+ Skin-depth for boundary crossing (MFP)                      3.000    
+ Electron-step algorithm                                     PRESTA-II 
+
+================================================================================
+
+\f  Start tutor7
+
+ CALL HATCH to get cross-section data
+
+ ===> Photonuclear flag:   0
+-=> DL1-6, first  0.999981E+00 -0.220505E+00  0.506008E-01  0.995682E+00 -0.236684E+00  0.952000E+00
+-=> DL1-6, last  0.100036E+01 -0.170132E+00  0.261124E-01  0.102474E+01 -0.244280E+00  0.952000E+00
+-=> DL1-6, second last  0.100023E+01 -0.187458E+00  0.361386E-01  0.101486E+01 -0.241926E+00  0.952000E+00
+-=> Sample values esig0(1,1) etc.    0.507516E+01    0.172878E+02    0.106919E+02    0.567166E+01    0.100000E+01   -0.311525E+00    0.163909E+01    0.168415E-02
+-=> Sample values esig0(neke,1) etc.    0.150444E+02    0.140816E+02    0.309459E+02    0.308837E+02    0.446654E+00    0.474683E+00    0.982908E+00   -0.278028E+02
+-=> Sample values esig1(1,1) etc.    0.975854E+00    0.694102E+01   -0.237745E+02   -0.273904E+02    0.000000E+00   -0.548705E+00    0.622096E+00    0.739741E-03
+-=> Sample values esig1(neke,1) etc.    0.108345E+01    0.126943E+01    0.230357E+00    0.243082E+00    0.245549E-01    0.191038E-01    0.338752E-02    0.832470E+01
+PHOTIN EBINDA, GE0, GE1    0.183900E-02    0.527600E+02    0.110224E+02
+PHOTIN GMFP0,GBR10,GBR20 first    0.234366E-01    0.000000E+00    0.969798E-01
+PHOTIN GMFP0,GBR10,GBR20 last    0.370913E+01    0.706867E-01    0.100000E+01
+PHOTIN GMFP1,GBR11,GBR21 first    0.478574E-02    0.000000E+00    0.197856E-01
+PHOTIN GMFP1,GBR11,GBR21 last   -0.487550E+00    0.193578E+00    0.000000E+00
+ Rayleigh data available for medium  1 in PEGS4 data set.
+Rayl rco0, rco1    0.200000E+01    0.980000E+02
+Rayl rsct0, rsct1, cohe0, cohe1 first    0.000000E+00    0.273651E+00    0.834918E+00   -0.318053E-01
+Rayl rsct0, rsct1, cohe0, cohe1 last   -0.342077E+05    0.346077E+05    0.100000E+01    0.000000E+00
+
+(Re)-initializing photon cross sections with files from the series: xcom
+
+ Compton cross sections: default
+ Using Compton cross sections from /home/darcy/git/EGSnrc/HEN_HOUSE/data/compton_sigma.data
+ Working on medium   1 ... OK
+
+Reading screened Rutherford MS data ...............  done 
+  
+  Medium            1  sige =   0.60517943328863433       0.59796795924185242       monotone =  T T
+  
+  Initializing tmxs for estepe =   0.25000000000000000       and ximax =   0.50000000000000000     
+  
+Output from subroutine EDGSET:
+==============================
+ Atomic relaxations not requested! 
+
+ Bound Compton scattering not requested! 
+
+ EGSnrc SUCCESSFULLY 'HATCHED' FOR ONE MEDIUM.
+
+ knock-on electrons can be created and any electron followed down to
+                                          0.189 MeV kinetic energy
+   brem photons can be created and any photon followed down to      
+                                          0.010 MeV 
+
+
+ Starting shower simulation ...
+
++ Finished batch  1 out of 10
+ ------ Energy=   10.000000000000000     
+      rnno15/16/19    0.42048686742782593       0.49585634469985962       0.57738614082336426     
+      br, costhe before changes=  0.15544328853911626       0.72236330760030842     
+      final e, sinthe, costhe   1.5544328853911626      -0.12020962198792960       0.99274853149300557     
+ ------ Energy=   1.5544328853911626     
+      rnno15/16/19     7.6826930046081543E-002  0.40864366292953491       0.97492825984954834     
+      rnno15/16/19    0.88091498613357544       0.96854400634765625       0.17157137393951416     
+      br, costhe before changes=  0.98446475270743705       0.99481240523080916     
+      final e, sinthe, costhe   1.5302843861169189      -0.97941079758636818       0.20187741223632250     
++ Finished batch  2 out of 10
++ Finished batch  3 out of 10
++ Finished batch  4 out of 10
++ Finished batch  5 out of 10
+ ------ Energy=   10.000000000000000     
+      rnno15/16/19    0.52135562896728516       0.11907631158828735       0.48996019363403320     
+      br, costhe before changes=   3.8670521268561409E-002 -0.27031741977450796     
+      final e, sinthe, costhe  0.38670521268561409       -3.6820721018798290E-002  0.99932188733343363     
+ ------ Energy=  0.38670521268561409     
+      rnno15/16    0.94912832975387573       0.99772697687149048     
+      rnno15/16    0.41744160652160645        8.0652594566345215E-002
+      br, costhe before changes=  0.64921096145549573       0.28599679089128460     
+      final e, sinthe, costhe  0.25105326292747948      -0.60706369238728175       0.79465317805009739     
+ ------ Energy=  0.25105326292747948     
+      rnno15/16    0.10784226655960083        4.6389222145080566E-002
+      br, costhe before changes=  0.55783654870966037      -0.61335532134259729     
+      final e, sinthe, costhe  0.14004668573376408      -0.31189161040228147       0.95011768921574735     
++ Finished batch  6 out of 10
++ Finished batch  7 out of 10
++ Finished batch  8 out of 10
++ Finished batch  9 out of 10
+ ------ Energy=   10.000000000000000     
+      rnno15/16/19     2.8621673583984375E-002   8.8309347629547119E-002  0.19784265756607056     
+      br, costhe before changes=   3.4517802901394307E-002 -0.42929260065073582     
+      final e, sinthe, costhe  0.34517802901394307       -3.0705584963490413E-002  0.99952847235686582     
+ ------ Energy=   7.3636066316550799E-002
+      rnno15/16    0.81320518255233765       0.62365549802780151     
+      br, costhe before changes=  0.95820920703021717       0.69734370445616700     
+      final e, sinthe, costhe   7.0558756714006632E-002 -0.90042429655691025       0.43501274253749544     
+ ------ Energy=  0.34517802901394307     
+      rnno15/16    0.32891792058944702       0.41770315170288086     
+      br, costhe before changes=  0.61436413854284966        7.0758854413525252E-002
+      final e, sinthe, costhe  0.21206500243906989      -0.53945711368269211       0.84201307739080811     
++ Finished batch 10 out of 10
+
+
+ Finished shower simulation 
+
+
+   Reflected energy fraction:   0.000000 +/-   0.000000
+   Deposited energy fraction:   0.248075 +/-   0.138679
+ Transmitted energy fraction:   0.751925 +/-   0.128230
+-------------------------------------------------------------
+                       total:   1.000000
+
+
+
+
+
+================================================================================
+Finished simulation
+
+  Elapsed time:                    0.1 s (  0.000 h)
+  CPU time:                        0.1 s (  0.000 h)
+  Ratio:                          1.035
+
+
+End of run                                             Tue Jan 10 16:14:43 2023
+================================================================================
