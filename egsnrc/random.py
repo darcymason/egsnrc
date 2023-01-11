@@ -1,4 +1,5 @@
 
+import itertools
 import numpy as np
 try:
     import torch
@@ -26,20 +27,43 @@ def _torch_floats_0_1(key, num, device=None):
 
 # Set up "random" from known sequence -------------
 #    (e.g. to compare with mortran EGSnrc)
-def _seq_initialize(known_list):
-    return SeqGen(known_list)
+def _seq_initialize(known_list, vect=False):
+    return SeqGen(known_list, vect)
 
 def _seq_floats_0_1(rng, num, device=None):
     return rng, rng.random(num)
 
 class SeqGen:
-    def __init__(self, known_list):
-        self.known_list = known_list
+    def __init__(self, known_list, vect=False):
+        if not vect:
+            self.known_list = list(
+                itertools.chain.from_iterable(
+                    itertools.chain.from_iterable(known_list)
+                )
+            )
+        else:
+            # Transpose the list so each "index" in the vector gets its
+            #    proper original random number sequence
+            self.known_list = list(
+                itertools.chain.from_iterable(
+                    itertools.chain.from_iterable(
+                        filter(None, sublist)
+                        for sublist in itertools.zip_longest(*known_list)
+                    )
+                )
+            )
         self.pos = 0
     def random(self, num):
+        shape = False
+        if isinstance(num, tuple):
+            shape = num
+            num = shape[0] * shape[1]
         self.pos += num
-        return self.known_list[self.pos - num: self.pos]
-
+        rands = np.array(self.known_list[self.pos - num: self.pos])
+        if shape:
+            rands.shape = shape
+        print(rands)
+        return rands
 
 
 # Configuration to select between libraries
