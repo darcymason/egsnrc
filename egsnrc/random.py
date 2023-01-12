@@ -13,7 +13,7 @@ def _np_initialize(seed):
 
 def _np_floats_0_1(rng, num, device=None):
     rands = rng.random(num)
-    print("Random floats:", rands)
+    # print("Random floats:", rands)
     return rng, rands
 
 
@@ -31,7 +31,7 @@ def _seq_initialize(known_list, vect=False):
     return SeqGen(known_list, vect)
 
 def _seq_floats_0_1(rng, num, device=None):
-    return rng, rng.random(num)
+    return (rng, *rng.random(num))
 
 class SeqGen:
     def __init__(self, known_list, vect=False):
@@ -61,8 +61,10 @@ class SeqGen:
         self.pos += num
         rands = np.array(self.known_list[self.pos - num: self.pos])
         if shape:
-            rands.shape = shape
-        print(rands)
+            rands.shape = (shape[1], shape[0])
+            # print(rands)
+            return (*(rands[:,i] for i in range(shape[0])),)
+        # rands = rands.transpose()
         return rands
 
 

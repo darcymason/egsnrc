@@ -112,4 +112,15 @@ if __name__ == "__main__":
     #         for deg in range(180):
     #             counts = [f"{x:5}" for x in histo_deg[deg]]
     #             print("\t".join((f"{deg:3}", *counts)))
-    print("Done.")
+
+
+    from time import perf_counter
+
+    num_part = 1_000_000
+    print(f"pycompton: starting {num_part} 'particles'")
+    energy = 1
+    start = perf_counter()
+    for i in range(num_part):
+        py_compton(rng, energy, calc_azimuth=False)
+    end = perf_counter()
+    print(f"Done in {(end - start):.5} seconds")
