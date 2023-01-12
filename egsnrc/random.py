@@ -27,16 +27,17 @@ def _torch_floats_0_1(key, num, device=None):
 
 # Set up "random" from known sequence -------------
 #    (e.g. to compare with mortran EGSnrc)
-def _seq_initialize(known_list, vect=False):
-    return SeqGen(known_list, vect)
+def _seq_initialize(known_list, vect=False, list_type=np.array):
+    return SeqGen(known_list, vect, list_type)
 
 def _seq_floats_0_1(rng, num, device=None):
     return (rng, *rng.random(num))
 
 class SeqGen:
-    def __init__(self, known_list, vect=False):
+    def __init__(self, known_list, vect=False, list_type=np.array):
+        # list_type could be e.g. torch.Tensor
         if not vect:
-            self.known_list = list(
+            self.known_list = list_type(
                 itertools.chain.from_iterable(
                     itertools.chain.from_iterable(known_list)
                 )
@@ -44,13 +45,14 @@ class SeqGen:
         else:
             # Transpose the list so each "index" in the vector gets its
             #    proper original random number sequence
-            self.known_list = list(
+            self.known_list = list_type(list(
                 itertools.chain.from_iterable(
                     itertools.chain.from_iterable(
                         filter(None, sublist)
                         for sublist in itertools.zip_longest(*known_list)
                     )
                 )
+            )
             )
         self.pos = 0
     def random(self, num):
@@ -59,9 +61,9 @@ class SeqGen:
             shape = num
             num = shape[0] * shape[1]
         self.pos += num
-        rands = np.array(self.known_list[self.pos - num: self.pos])
+        rands = self.known_list[self.pos - num: self.pos]
         if shape:
-            rands.shape = (shape[1], shape[0])
+            rands = rands.reshape((shape[1], shape[0]))
             # print(rands)
             return (*(rands[:,i] for i in range(shape[0])),)
         # rands = rands.transpose()

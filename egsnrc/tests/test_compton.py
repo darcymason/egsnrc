@@ -1,9 +1,9 @@
 import pytest
 import numpy as np
-from egsnrc.expts.py.pycompton import py_compton  # XXX later need to switch to live
+from egsnrc.expts.compt.pycompton import py_compton  # XXX later need to switch to live
 
 from egsnrc import random
-from egsnrc.expts.py.pyvect_compton import pyvect_compton
+from egsnrc.expts.compt.pyvect_compton import pyvect_compton
 
 
 class TestAgainstMortran:

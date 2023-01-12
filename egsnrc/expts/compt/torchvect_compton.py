@@ -1,15 +1,15 @@
-import numpy as np
+import torch
 from egsnrc import random
 from egsnrc.constants import RM, TWO_PI
 
 
-def pyvect_compton(rng, energy, calc_azimuth=True):
-    """Subroutine for sampling Compton scattering using numpy vectors
+def torchvect_compton(rng, energy, calc_azimuth=True, request_gpu=False):
+    """Sampling Compton scattering using PyTorch vectors with/without gpu
 
     Params
     ------
     rng:    random generator
-    energy: np.ndarray
+    energy: torch.Tensor
         Array of energies to calculate
     calc_azimith:  bool
         Whether to random sample azimuthal angle.
@@ -29,37 +29,34 @@ def pyvect_compton(rng, energy, calc_azimuth=True):
 
     # Final values passing rejection sampling, for last calcs before return
     # Could instead update energy directly rather than through
-    all_sinthe = np.empty_like(energy)
-    all_temp = np.empty_like(energy)
-    all_br = np.empty_like(energy)
+    all_sinthe = torch.empty_like(energy)
+    all_temp = torch.empty_like(energy)
+    all_br = torch.empty_like(energy)
 
     # ko > 2: At high energies the original EGS4 method is most efficient
     ko_gt2_mask = ko > 2
-    i_notdone = ko_gt2_mask.nonzero()[0]  # indices we still need to process
+    i_notdone = ko_gt2_mask.nonzero(as_tuple=True)[0]  # indices we still need to process
     if len(i_notdone):
-        broi2 = np.square(broi, where=ko_gt2_mask)
-        alph1 = np.log(broi, where=ko_gt2_mask)
+        broi2 = torch.square(broi, where=ko_gt2_mask)
+        alph1 = torch.log(broi, where=ko_gt2_mask)
         # alph2 = ko * (broi+1) * bro * bro # not used again, just inline below
-        alpha = alph1 + np.where(ko_gt2_mask, ko * (broi + 1) * bro * bro, 0)
+        alpha = alph1 + torch.where(ko_gt2_mask, ko * (broi + 1) * bro * bro, 0)
         while len(i_notdone):
-            _, rnno15, rnno16, rnno19 = random.floats_0_1(rng, (3, len(i_notdone)))
-            print(f"{rnno15=}")
-            print(f"{rnno16=}")
-            print(f"{rnno19=}")
+            _, (rnno15, rnno16, rnno19) = random.floats_0_1(rng, (3, len(i_notdone)))
             alph1_notdone = alph1[i_notdone]
             bro_notdone = bro[i_notdone]
             br_condn = rnno15 * alpha[i_notdone] < alph1_notdone
             # Use either 1/br part or br part depending on condition
-            br = np.where(
+            br = torch.where(
                 br_condn,
-                np.exp(alph1_notdone * rnno16, where=br_condn) * bro_notdone, # 1/br part
-                np.sqrt(rnno16 * broi2[i_notdone] + (1 - rnno16), where=~br_condn) * bro_notdone
+                torch.exp(alph1_notdone * rnno16, where=br_condn) * bro_notdone, # 1/br part
+                torch.sqrt(rnno16 * broi2[i_notdone] + (1 - rnno16), where=~br_condn) * bro_notdone
             )
             # rejection sampling
             temp = (1 - br) / (ko[i_notdone] * br)
             sinthe = temp * (2 - temp)
             sinthe.clip(min=0.0, out=sinthe)
-            aux = 1 + np.square(br)
+            aux = 1 + torch.square(br)
             rejf3 = aux - br * sinthe
             pass_rej = rnno19 * aux <= rejf3
             newlydone_mask = pass_rej & (br < 1) & (br > bro_notdone)
@@ -77,7 +74,7 @@ def pyvect_compton(rng, energy, calc_azimuth=True):
 
     # ko <= 2: At low energies it is faster to sample br uniformly
     ko_le2_mask = ~ko_gt2_mask
-    i_notdone = ko_le2_mask.nonzero()[0]  # indices still need to process
+    i_notdone = ko_le2_mask.nonzero(as_tuple=True)[0] # indices still need to process
     if len(i_notdone):
         # Don't use where clause as these are fast
         bro1 = 1 - bro
@@ -85,13 +82,13 @@ def pyvect_compton(rng, energy, calc_azimuth=True):
 
         # Set all of the current ones as 'not done'
         while len(i_notdone):
-            _, rnno15, rnno16 = random.floats_0_1(rng, (2, len(i_notdone)))
+            _, (rnno15, rnno16) = random.floats_0_1(rng, (2, len(i_notdone)))
             bro_notdone = bro[i_notdone]
             br = bro_notdone + bro1[i_notdone] * rnno15
             temp = (1 - br) / (ko[i_notdone] * br)
             sinthe = temp * (2 - temp)
-            sinthe.clip(min=0.0, out=sinthe)
-            rejf3 = 1 + np.square(br) - br * sinthe
+            sinthe = sinthe.clip(min=0.0)
+            rejf3 = 1 + torch.square(br) - br * sinthe
             pass_rej = rnno16 * br * rejmax[i_notdone] <= rejf3
             newlydone_mask = pass_rej & (br < 1) & (br > bro_notdone)
 
@@ -112,14 +109,14 @@ def pyvect_compton(rng, energy, calc_azimuth=True):
     # $RADC_REJECTION
 
     result_costhe = 1 - all_temp
-    result_sinthe = np.sqrt(all_sinthe)
+    result_sinthe = torch.sqrt(all_sinthe)
     result_energy = energy * all_br
     # Random sample the azimuth
     if calc_azimuth:
         _, (azimuth_ran,) = random.floats_0_1(rng, len(energy))
         phi = TWO_PI * azimuth_ran
-        sinphi = np.sin(phi)
-        cosphi = np.cos(phi)
+        sinphi = torch.sin(phi)
+        cosphi = torch.cos(phi)
     else:
         sinphi = cosphi = 99
     # aux = 1 + br*br - 2*br*costhe
@@ -134,8 +131,9 @@ def pyvect_compton(rng, energy, calc_azimuth=True):
     return result_energy, result_sinthe, result_costhe, sinphi, cosphi
 
 
-if __name__ == "__main__":
-    if True:
+def main(want_gpu):
+    import pytest
+    if False:
         random.set_array_library("sequence")
         rand_sequence = ([
             [
@@ -173,7 +171,7 @@ if __name__ == "__main__":
                 [0.62973368167877197, 0.13346099853515625],
             ],
         ])
-        energies = np.ones(9)
+        energies = torch.ones(9)
         result_e_costhe = [  # NOTE this is "costhe before changes" i.e. before UPHI etc.
             (0.81141922919270071, 0.88123946893996008),
             (0.64820104040175874, 0.72266489438445403),
@@ -186,25 +184,37 @@ if __name__ == "__main__":
             (0.70508445157959732, 0.78626455389275030),
         ]
 
-        rng = random.initialize(rand_sequence, vect=True)
-        result = pyvect_compton(rng, energies, calc_azimuth=False)
+        want_gpu = False
+        on_gpu = torch.cuda.is_available() and want_gpu
+        rng = random.initialize(rand_sequence, vect=True, list_type=torch.Tensor)
+        if on_gpu:
+            rng.to_gpu()
+        result = torchvect_compton(rng, energies, calc_azimuth=False)
         energy, _, costhe = result[:3]
 
         import pytest
         for e, cos, (expect_e, expect_cos) in zip(energy, costhe, result_e_costhe):
-            assert e == expect_e
-            assert cos == expect_cos
+            assert e == pytest.approx(expect_e)
+            assert cos == pytest.approx(expect_cos)
         print("Assertions passed")
     else:
-        from timeit import timeit
-        random.set_array_library("numpy")
+        on_gpu = torch.cuda.is_available() and want_gpu
+        random.set_array_library("pytorch")
         rng = random.initialize(42)
-        _, energies = random.floats_0_1(rng, 1_000_000)
-        energies = np.array(energies) + 0.001
+        device = "cuda" if on_gpu else "cpu"
+        _, energies = random.floats_0_1(rng, 1_000_000, device)
+        energies += 0.001  # just to avoid 0 energy
 
         from time import perf_counter
+        if on_gpu:
+            torch.cuda.synchronize()
         start = perf_counter()
-        print(f"PyVECTcompton: Starting {len(energies)} 'particles'")
-        pyvect_compton(rng, energies, calc_azimuth=False)
+        print(f"TORCHvectcompton: Starting {len(energies):_} 'particles'")
+        torchvect_compton(rng, energies, calc_azimuth=False)
+        if on_gpu:
+            torch.cuda.synchronize()
         end = perf_counter()
         print(f"Done in {(end - start):.5} seconds")
+
+if __name__ == "__main__":
+    main(want_gpu=False)
