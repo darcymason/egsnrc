@@ -42,7 +42,7 @@ def pyvect_compton(rng, energy, calc_azimuth=True):
         # alph2 = ko * (broi+1) * bro * bro # not used again, just inline below
         alpha = alph1 + np.where(ko_gt2_mask, ko * (broi + 1) * bro * bro, 0)
         while len(i_notdone):
-            _, rnno15, rnno16, rnno19 = random.floats_0_1(rng, (3, len(i_notdone)))
+            _, (rnno15, rnno16, rnno19) = random.floats_0_1(rng, (3, len(i_notdone)))
             alph1_notdone = alph1[i_notdone]
             bro_notdone = bro[i_notdone]
             br_condn = rnno15 * alpha[i_notdone] < alph1_notdone
@@ -82,7 +82,7 @@ def pyvect_compton(rng, energy, calc_azimuth=True):
 
         # Set all of the current ones as 'not done'
         while len(i_notdone):
-            _, rnno15, rnno16 = random.floats_0_1(rng, (2, len(i_notdone)))
+            _, (rnno15, rnno16) = random.floats_0_1(rng, (2, len(i_notdone)))
             bro_notdone = bro[i_notdone]
             br = bro_notdone + bro1[i_notdone] * rnno15
             temp = (1 - br) / (ko[i_notdone] * br)
@@ -132,7 +132,7 @@ def pyvect_compton(rng, energy, calc_azimuth=True):
 
 
 if __name__ == "__main__":
-    if True:
+    if False:
         random.set_array_library("sequence")
         rand_sequence = ([
             [
@@ -196,7 +196,7 @@ if __name__ == "__main__":
         from timeit import timeit
         random.set_array_library("numpy")
         rng = random.initialize(42)
-        _, energies = random.floats_0_1(rng, 1_000_000)
+        _, energies = random.floats_0_1(rng, 100_000)
         energies = np.array(energies) + 0.001
 
         from time import perf_counter
