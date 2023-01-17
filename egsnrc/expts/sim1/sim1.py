@@ -181,6 +181,8 @@ if __name__ == "__main__":
             dev_out = cuda.to_device(out)
 
         # Run
+        if not DEBUGGING_ON_CPU:
+            cuda.synchronize()
         start = perf_counter()
         if not DEBUGGING_ON_CPU:
             particle_kernel.forall(len(fparticles))(
@@ -190,6 +192,8 @@ if __name__ == "__main__":
             random_f32 = lambda r,i: np.random.random(1)
             for i in range(NUM_PHOTONS):
                 particle_kernel.py_func(i, None, iparticles, fparticles, out)
+        if not DEBUGGING_ON_CPU:
+            cuda.synchronize()
         end = perf_counter()
 
         times.append(end - start)
