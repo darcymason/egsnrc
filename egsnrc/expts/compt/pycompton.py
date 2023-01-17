@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
     from time import perf_counter
 
-    num_part = 1_000_000
+    num_part = 100_000
     print(f"pycompton: starting {num_part} 'particles'")
     energy = 1
     start = perf_counter()
