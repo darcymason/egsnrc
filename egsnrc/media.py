@@ -8,8 +8,7 @@ from egsnrc.elements import element_data
 
 import numpy as np
 
-# from egsnrc.commons import rm
-rm = 0.51099896430969238  # XXX need to put in global constants
+from egsnrc.constants import RM
 
 
 MXGE = 2000  # EgsNRC default value; Number of energy intervals for sigma calcs
@@ -134,7 +133,7 @@ class Medium:
             # For pair or triplet, insert an extra data point for threshold energy
             # and change cross-sections (because ...?)
             if interaction in PAIR_OR_TRIPLET:
-                eth = 2 * rm if interaction == Interaction.PAIR else 4 * rm
+                eth = 2 * RM if interaction == Interaction.PAIR else 4 * RM
                 ftmp = ftmp - 3 * np.log(1 - eth / np.exp(etmp))
                 ftmp = np.insert(ftmp, 0, ftmp[0])
                 etmp = np.insert(etmp, 0, log(eth))
