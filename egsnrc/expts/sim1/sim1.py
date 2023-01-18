@@ -37,6 +37,7 @@ SCORE_nCOMPTON, SCORE_nPHOTO, SCORE_eCOMPTON, SCORE_ePHOTO, \
     SCORE_nLost, SCORE_eLost = np.arange(6, dtype=np.int32)
 
 Particle = namedtuple("Particle", ("status", "region", "energy", "z"))
+# type below not currently used
 ParticleType = NamedTuple((int32, int32, float32, float32), Particle)
 
 
@@ -83,7 +84,7 @@ def scoring(gid, p1, p2, out):
 
 # Kernel
 @cuda.jit
-def particle_kernel(rng_states, iparticles, fparticles, p, p2, out):
+def particle_kernel(rng_states, iparticles, fparticles, out):
     """Main particle simulation loop"""
 
     if not DEBUGGING_ON_CPU:
@@ -187,12 +188,12 @@ if __name__ == "__main__":
         start = perf_counter()
         if not DEBUGGING_ON_CPU:
             # Try to force typing
-            p = Particle(int32(0), int32(0), float32(1), float32(0))
-            p2 = p
-            print(f"{type(iparticles[0, 0])=}")
-            print(f"{type(fparticles[0, 0])=}")
+            # p = Particle(int32(0), int32(0), float32(1), float32(0))
+            # p2 = p
+            # print(f"{type(iparticles[0, 0])=}")
+            # print(f"{type(fparticles[0, 0])=}")
             particle_kernel.forall(len(fparticles))(
-                dev_rng_states, dev_iparticles, dev_fparticles, p, p2, dev_out
+                dev_rng_states, dev_iparticles, dev_fparticles, dev_out
             )
         else:
             random_f32 = lambda r,i: np.random.random(1)
