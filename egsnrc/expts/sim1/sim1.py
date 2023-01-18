@@ -5,7 +5,11 @@ import numba as nb
 
 from numba.cuda.random import create_xoroshiro128p_states
 from numba.cuda.random import xoroshiro128p_uniform_float32 as random_f32
+from numba import int32, float32
+from numba.core.types import NamedTuple
+
 from collections import namedtuple
+
 
 import logging
 
@@ -18,6 +22,22 @@ except ImportError:
 
 numba_logger = logging.getLogger('numba')
 numba_logger.setLevel(logging.WARNING)
+
+
+particle_iattrs = "status region".split()
+particle_fattrs = "energy z".split()
+
+
+STATUS, REGION = np.arange(2, dtype=np.int32)
+ENERGY, Z = np.arange(2, dtype=np.int32)
+
+# Current particle Interaction
+STEPPING, COMPTON, PHOTO = np.arange(3, dtype=np.int32)
+SCORE_nCOMPTON, SCORE_nPHOTO, SCORE_eCOMPTON, SCORE_ePHOTO, \
+    SCORE_nLost, SCORE_eLost = np.arange(6, dtype=np.int32)
+
+Particle = namedtuple("Particle", ("status", "region", "energy", "z"))
+ParticleType = NamedTuple((int32, int32, float32, float32), Particle)
 
 
 def cuda_details():
@@ -44,99 +64,74 @@ def cuda_details():
     return attrs
 
 
-# Try to bundle attributes for easier use
-# Note: in future should be able to combine all in one numba jitclass
-#      (currently available only on CPU)
-
-from numba import int32
-# from typing import NamedTuple
-
-# class iParticle(NamedTuple):
-#     status: int32
-#     region: int32
-
-
-STATUS, REGION = range(2)
-ENERGY, Z = range(2)
-
-# Current particle Interaction
-STEPPING, COMPTON, PHOTO = range(3)
-SCORE_nCOMPTON, SCORE_nPHOTO, SCORE_eCOMPTON, SCORE_ePHOTO, SCORE_nLost, SCORE_eLost = range(6)
-
-particle_iattrs = "status region".split()
-particle_fattrs = "energy z".split()
-iParticle = namedtuple("iParticle", particle_iattrs)
-# iParticleType = NamedTuple((int32, int32), iParticle)
-
-fParticle = namedtuple("fParticle", particle_fattrs)
 
 # XXX dummy interaction probabilities
 # compton_prob = cuda.to_device(np.array([0.8, 0.5], dtype=np.float32))
 
 @cuda.jit(device=True)  # "Device function"
-def scoring(gid, status1, region1, energy1, status2, region2, energy2, out):
+def scoring(gid, p1, p2, out):
     # Note, if don't track by gid, then need "atomic" operations to handle multi-thread
-    if status1 == COMPTON:
-        out[gid, region2, SCORE_nCOMPTON] += 1.0
-        out[gid, region2, SCORE_eCOMPTON] += energy1 - energy2
-    elif status1 == PHOTO:
-        out[gid, region2, SCORE_nPHOTO] += 1.0
-        out[gid, region2, SCORE_ePHOTO] += energy1 - energy2
-    elif region2 == NUM_REGIONS:  # lost to geometry (0-based region index)
-        out[gid, region2, SCORE_nLost] += 1.0
-        out[gid, region2, SCORE_eLost] += energy1
+    if p1.status == COMPTON:
+        out[gid, p2.region, SCORE_nCOMPTON] += 1.0
+        out[gid, p2.region, SCORE_eCOMPTON] += p1.energy - p2.energy
+    elif p1.status == PHOTO:
+        out[gid, p2.region, SCORE_nPHOTO] += 1.0
+        out[gid, p2.region, SCORE_ePHOTO] += p1.energy - p2.energy
+    elif p2.region == NUM_REGIONS:  # lost to geometry (0-based region index)
+        out[gid, p2.region, SCORE_nLost] += 1.0
+        out[gid, p2.region, SCORE_eLost] += p1.energy
 
-
-@cuda.jit  # Kernel
-def particle_kernel(rng_states, iparticles, fparticles, out):
+# Kernel
+@cuda.jit
+def particle_kernel(rng_states, iparticles, fparticles, p, p2, out):
     """Main particle simulation loop"""
 
     if not DEBUGGING_ON_CPU:
-        gid = cuda.grid(1)
+        gid = cuda.grid(1)  # grid index - unique in entire grid
     if gid > len(fparticles):   # needed when have more GPU threads than particles
         return
 
-    # oi = iparticles[gid]
-    # of = fparticles[gid]
-    # pi = iParticle(int32(oi[0]), int32(oi[1]))
-    # pf = fParticle(of[0], of[1])
+    # Pack array info into a Particle namedtuple, for convenience
+    # Note tuples are not mutable, so e.g. `status`` updates must stand outside
+    oi = iparticles[gid]
+    of = fparticles[gid]
+    p = Particle(oi[STATUS], oi[REGION], of[ENERGY], of[Z])
 
-    status = iparticles[gid, STATUS]
-    region = iparticles[gid, REGION]
-    energy = fparticles[gid, ENERGY]
-    z = fparticles[gid, Z]
+    status = p.status  # see note above
 
     while status >= 0:  # Negative numbers for particle no longer tracked
         # Take a step
-        status2 = STEPPING
+        status2 = nb.int32(STEPPING)
         distance = random_f32(rng_states, gid)
 
         # Call "howfar"
-        z2 = z + distance
-        region2 = 1 if z2 >= 2.0 else 0
-        if z2 >= 4:
+        z2 = float32(p.z + distance)
+        region2 = int32(1) if z2 >= 2.0 else int32(0)
+        if z2 >= 4.0:
             region2 = NUM_REGIONS # outside geometry (0-based counting)
-            status2 = -1  # particle has left the geometry
+            status2 = int32(-1)  # particle has left the geometry
 
         if status2 >= 0:
             rand = random_f32(rng_states, gid)
             if (region2 == 0 and rand < 0.8) or (region2 == 1 and rand < 0.5):
                 # "Compton"
                 status = COMPTON
-                energy2 = energy * 0.8
+                energy2 = float32(p.energy * 0.8)
                 if energy2 < 0.001:  # PCUT
-                    energy2 = 0
-                    status2 = -2
+                    energy2 = float32(0)
+                    status2 = int32(-2)
             else:  # "photoelectric"
                 status = PHOTO
-                energy2 = 0
-                status2 = -3
+                energy2 = float32(0)
+                status2 = int32(-3)
 
-        # pi2 = iParticle(status, region)
-        # pf2 = fParticle(energy, z)
-        scoring(gid, status, region, energy, status2, region2, energy2, out)
-        status, region = status2, region2
-        energy, z = energy2, z2
+        p2 = Particle(status2, region2, energy2, z2)
+        # p = p._replace(status=status)  # replace doesn't work in Cuda
+        p = Particle(status, p.region, p.energy, p.z)
+        scoring(gid, p, p2, out)  # probs don't need gid, can get with cuda.grid(1)
+        # New particle info becomes current for next loop
+        p = p2
+        status = p.status  # need mutable status
 
 
 if __name__ == "__main__":
@@ -152,27 +147,33 @@ if __name__ == "__main__":
     # THREADS_PER_BLOCK = 5
     # BLOCKS = 2
     if len(sys.argv) > 1:
-        NUM_PHOTONS = int(sys.argv[1])
-    NUM_REGIONS = 2
+        num_photons = int(sys.argv[1])
+    else:
+        num_photons = 20  # for testing
+    NUM_REGIONS = int32(2)
 
     Py_major, Py_minor = sys.version_info.major, sys.version_info.minor
     print(f"Starting run with Numba {nb.__version__}, Python {Py_major}.{Py_minor}")
-    print(f"Running {NUM_PHOTONS:,} particles")
+    print(f"Running {num_photons:,} particles")
     print(cuda_details())
+    if DEBUGGING_ON_CPU:
+        print("**** NOTE: DEBUGGING_ON_CPU is on  ****")
+
     # print(f"{BLOCKS=}   {THREADS_PER_BLOCK=}")
 
     if not DEBUGGING_ON_CPU:
-        rng_states = create_xoroshiro128p_states(NUM_PHOTONS, seed=1)
+        rng_states = create_xoroshiro128p_states(num_photons, seed=1)
         dev_rng_states = cuda.to_device(rng_states)
     times = []
     for run in range(3):
-        energies_np = np.random.random(NUM_PHOTONS).astype(np.float32) + 0.511 # catch both ko>2 and <2
-        fparticles = np.zeros((NUM_PHOTONS, len(particle_fattrs)))
-        iparticles = np.zeros((NUM_PHOTONS, len(particle_iattrs)), dtype=np.int32)
+        energies_np = np.random.random(num_photons) + 0.511 # catch both ko>2 and <2
+        energies_np = energies_np.astype(np.float32)
+        fparticles = np.zeros((num_photons, len(particle_fattrs)), dtype=np.float32)
+        iparticles = np.zeros((num_photons, len(particle_iattrs)), dtype=np.int32)
         fparticles[:, ENERGY] = energies_np
         out = np.zeros(
             # 3 regions: 0, 1, and  2=escaped the geometry (just use eCompt)
-            (NUM_PHOTONS, NUM_REGIONS + 1,  6),  # 6 for (nCompt, nPhoto, eCompt, ePhoto, nLost, eLost)
+            (num_photons, NUM_REGIONS + 1,  6),  # 6 for (nCompt, nPhoto, eCompt, ePhoto, nLost, eLost)
             dtype=np.float32
         )
         if not DEBUGGING_ON_CPU:
@@ -185,12 +186,17 @@ if __name__ == "__main__":
             cuda.synchronize()
         start = perf_counter()
         if not DEBUGGING_ON_CPU:
+            # Try to force typing
+            p = Particle(int32(0), int32(0), float32(1), float32(0))
+            p2 = p
+            print(f"{type(iparticles[0, 0])=}")
+            print(f"{type(fparticles[0, 0])=}")
             particle_kernel.forall(len(fparticles))(
-                dev_rng_states, dev_iparticles, dev_fparticles, dev_out
+                dev_rng_states, dev_iparticles, dev_fparticles, p, p2, dev_out
             )
         else:
             random_f32 = lambda r,i: np.random.random(1)
-            for i in range(NUM_PHOTONS):
+            for i in range(num_photons):
                 particle_kernel.py_func(i, None, iparticles, fparticles, out)
         if not DEBUGGING_ON_CPU:
             cuda.synchronize()
