@@ -172,7 +172,7 @@ def photon_kernel(
             p, dpmfp, gle, regions, howfar
         )
 
-        # ausgab(gid, p, mod_p, iscore, fscore) # if want to track change of position, region
+        ausgab(gid, status, p, mod_p, iscore, fscore) # if want to track change of position, region
         p = mod_p
 
         if status != INTERACTION_READY:
