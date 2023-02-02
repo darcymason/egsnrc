@@ -4,113 +4,304 @@ import numpy as np
 from numba import cuda
 import numba as nb
 
-from numba.cuda.random import create_xoroshiro128p_states
-from numba.cuda.random import xoroshiro128p_uniform_float32 as random_f32
 from numba import int32, float32
 from numba.core.types import NamedTuple
 
 import logging
+from egsnrc.compton import compton
 
-from egsnrc.particles import Particle, STATUS, REGION, ENERGY, Z
+from egsnrc.config import device_jit, on_gpu
+from egsnrc.constants import REST_MASS
+from egsnrc.params import VACDST, EPSGMFP
+from egsnrc.particles import replace_region_xyz
 from egsnrc.particles import STEPPING, COMPTON, PHOTO
-from egsnrc.particles import GEOMETRY_DISCARD, PCUT_DISCARD, PHOTO_DISCARD
-
-try:
-    from cuda.cuda import CUdevice_attribute, cuDeviceGetAttribute, cuDeviceGetName, cuInit
-    have_cuda_python = True
-except ImportError:
-    have_cuda_python = False
+from egsnrc.particles import (
+    INTERACTION_READY, GEOMETRY_DISCARD, PCUT_DISCARD, PHOTO_DISCARD, USER_PHOTON_DISCARD
+)
+from egsnrc.particles import set_particle
+from egsnrc.media import GBR_PAIR, GBR_COMPTON
+from egsnrc.photo import photo
+from egsnrc import random
 
 numba_logger = logging.getLogger('numba')
 numba_logger.setLevel(logging.WARNING)
 
 
+@device_jit
+def transport_photon(p, dpmfp, gle, regions, howfar):
+    """Traverse regions as necessary according to the mfp
 
-def cuda_details():
-    if not have_cuda_python:
-        return (
-            "** GPU details not available\n"
-            "In Colab, use `!pip install cuda-python` to see GPU specs\n"
-        )
+    Returns
+    -------
+    mod_p  Particle
+        Copy of p but with new position and region, if applicable
+    dpmfp   Float
+        The remaining mfp
+    status  int
+        Flags for reason we have finished.
+        E.g. INTERACTION_READY, or various ...DISCARD options
+    """
+    mod_p = p  # dummy in case of discards before mod_p created
 
-    # Initialize CUDA Driver API
-    (err,) = cuInit(0)
+    status = p.status
+    # :PNEWMEDIUM:
+    while status >= 0:  # Here each time we change medium during photon transport
+        region= p.region
+        medium = region.medium
+        if medium.number != 0:
+            # set interval gle, ge;
+            lgle = nb.int32(medium.ge[1] * gle + medium.ge[0]) # Set pwlf interval
+            # evaluate gmfpr0 using gmfp(gle)
+            gmfpr0 = medium.gmfp[1, lgle] * gle + medium.gmfp[0, lgle]
 
-    # Get attributes
-    err, DEVICE_NAME = cuDeviceGetName(128, 0)
-    DEVICE_NAME = DEVICE_NAME.decode("ascii").replace("\x00", "")
+        # :PTRANS:
+        # Get region and medium index
 
-    attrs = {'DEVICE_NAME': DEVICE_NAME.strip()}
-    attr_names = "MAX_THREADS_PER_BLOCK MAX_BLOCK_DIM_X MAX_GRID_DIM_X MULTIPROCESSOR_COUNT".split()
-    for attr in attr_names:
-        err, attrs[attr] =  cuDeviceGetAttribute(
-        getattr(CUdevice_attribute, f"CU_DEVICE_ATTRIBUTE_{attr}"), 0
-    )
+        while True:  # photon transport loop
+            if medium.number == 0:
+                tstep = VACDST
+            else:
+                rhof = p.region.rho / medium.rho  # density ratio scaling template
+                gmfp = gmfpr0 / rhof
+                # XXX RAYLEIGH_CORRECTION; -----
+                # XXX PHOTONUC_CORRECTION; -----
+                tstep = gmfp * dpmfp
 
-    return attrs
+            # Set default values for flags sent back from user
+            # tustep = ustep
+            ustep, new_region, discard = howfar(p, regions, tstep)  # HOWFAR-----
 
+            # Now check for user discard request
+            if discard > 0:
+                # user requested immediate discard
+                status = USER_PHOTON_DISCARD
+                break
 
+            x = p.x + p.u * ustep
+            y = p.y + p.v * ustep
+            z = p.z + p.w * ustep
 
-# Example of scoring function (ausgab) - replace with user one
-@cuda.jit(device=True)  # "Device function"
-def scoring(gid, p1, p2, out):
-    # Note, if don't track by gid, then need "atomic" operations to handle multi-thread
-    if p1.status == COMPTON:
-        out[gid, p2.region, SCORE_nCOMPTON] += 1.0
-        out[gid, p2.region, SCORE_eCOMPTON] += p1.energy - p2.energy
-    elif p1.status == PHOTO:
-        out[gid, p2.region, SCORE_nPHOTO] += 1.0
-        out[gid, p2.region, SCORE_ePHOTO] += p1.energy - p2.energy
-    elif p2.region == NUM_REGIONS:  # lost to geometry (0-based region index)
-        out[gid, p2.region, SCORE_nLost] += 1.0
-        out[gid, p2.region, SCORE_eLost] += p1.energy
+            # if iausfl[TRANAUSB-1+1] != 0:
+            #     ausgab(TRANAUSB)
 
+            # Transport the photon
+            mod_p = replace_region_xyz(p, new_region, x, y, z)
+            new_medium = new_region.medium
+            # Deduct from distance to nearest boundary
+            # dnear[np_m1] -= ustep
+            if medium.number != 0:
+                dpmfp = max(0., dpmfp - ustep / gmfp) # deduct mfp's
+
+            if new_region != p.region:
+                # REGION CHANGE
+                medium = new_region.medium
+                # XXX --- Inline replace: $ photon_region_change; -----
+
+            # After transport call to user
+            # if iausfl[TRANAUSA-1+1] != 0:
+            #     ausgab(TRANAUSA)
+
+            if mod_p.energy <= region.pcut:
+                status = PCUT_DISCARD
+                break
+
+            # Now check for deferred discard request. May have been set
+            # by either howfar, or one of the transport ausgab calls
+            if discard < 0:
+                status  = USER_PHOTON_DISCARD
+                break
+
+            if new_medium != p.region.medium:
+                break  # exit :PTRANS: loop to medium loop
+
+            if dpmfp <= EPSGMFP and new_medium.number != 0:
+                # Time for an interaction
+                status = INTERACTION_READY
+                break  # EXIT :PTRANS: then :PNEWMEDIUM:
+
+            p = mod_p
+            # end :PTRANS: loop
+            # --------------------------
+        p = mod_p  # need to 'repeat' this in case break out of inner loop
+
+    return mod_p, status, dpmfp, lgle
+
+non_gpu_index = None
 
 # Kernel
 @cuda.jit
-def photon_kernel(rng_states, iparticles, fparticles, regions, howfar, ausgab, out):
+def photon_kernel(
+    rng_states, iparticles, fparticles, regions, media, howfar, ausgab, iscore, fscore
+):
     """Main photon particle simulation kernel - implicitly called on each gpu thread"""
 
-    gid = cuda.grid(1)  # grid index - unique in entire grid
+    # Get unique grid index
+    gid = cuda.grid(1) if on_gpu else non_gpu_index  # Global for testing only
     if gid > len(fparticles):   # needed when have more GPU threads than particles
         return
 
-    # Pack array info into a Particle namedtuple, for convenience
-    # Note tuples are not mutable, so e.g. `status`` updates must stand outside
-    oi = iparticles[gid]
-    of = fparticles[gid]
-    p = Particle(oi[STATUS], oi[REGION], of[ENERGY], of[Z])
+    # Pack array info into a Particle namedtuple
+    p = set_particle(gid, regions, iparticles, fparticles)
 
-    status = p.status  # see note above, need mutable
-    while status >= 0:  # Negative numbers for particle no longer tracked
-        # Take a step
-        status2 = nb.int32(STEPPING)
-        distance = random_f32(rng_states, gid)
+    # Note Particle tuples are not mutable, so put `status` into mutable variable
+    status = p.status
 
-        region, discard = howfar(p, regions)
+    if p.energy <= p.region.pcut:
+        status = PCUT_DISCARD
 
-        # Are interacting
-        if status2 >= 0:
-            rand = random_f32(rng_states, gid)
-            if (region2 == 0 and rand < 0.8) or (region2 == 1 and rand < 0.5):
-                # "Compton"
-                status = COMPTON
-                energy2 = float32(p.energy * 0.8)
-                if energy2 < 0.001:  # PCUT
-                    energy2 = float32(0)
-                    status2 = PCUT_DISCARD
-            else:  # "photoelectric"
-                status = PHOTO_DISCARD
-                energy2 = float32(0)
-                status2 = int32(-3)
+    # :PNEWENERGY:
+    # Follow the photon through all its interactions
+    while status >= 0:  # Negative status for particle no longer tracked
+        if p.w == 0.0:  # User photon discard
+            status = USER_PHOTON_DISCARD
+            break
 
-        p2 = Particle(status2, region2, energy2, z2)
-        # p = p._replace(status=status)  # replace doesn't work in Cuda
-        p = Particle(status, p.region, p.energy, p.z)
-        ausgab(gid, p, p2, out)  # probs don't need gid, can get with cuda.grid(1)
-        # New particle info becomes current for next loop
-        p = p2
-        status = p.status  # need mutable status
+        if p.energy <= p.region.pcut:
+            status = PCUT_DISCARD
+            break
+
+        gle = log(p.energy)  # gamma log energy
+
+        # Sample number of mfp to transport before interacting
+        rnno35 = random.random_float32(rng_states, gid)
+        if rnno35 == 0.0:
+            rnno35 = 1.0e-30
+        dpmfp = -log(rnno35)
+
+        mod_p, status, dpmfp, lgle = transport_photon(
+            p, dpmfp, gle, regions, howfar
+        )
+
+        # ausgab(gid, p, mod_p, iscore, fscore) # if want to track change of position, region
+        p = mod_p
+
+        if status != INTERACTION_READY:
+            break  # go to discard sections
+
+        # It is finally time to interact.
+        # The following allows one to introduce rayleigh scattering
+        # XXX  --- Inline replace: $ RAYLEIGH_SCATTERING; -----
+        # XXX --- Inline replace: $ PHOTONUCLEAR; -----
+
+        # This random number determines which interaction
+        rnno36 = random.random_float32(rng_states, gid)
+
+        medium = mod_p.region.medium
+        # Original Mortran
+        # Evaluate gbr1 using gbr1(gle)
+        #    GBR1 = PAIR / (PAIR + COMPTON + PHOTO) = PAIR / GTOTAL
+
+        med_gbr = medium.gbr[GBR_PAIR, :, lgle]
+        gbr_pair = med_gbr[1] * gle + med_gbr[0]
+        if rnno36 <= gbr_pair and p.energy > 2.0 * REST_MASS:
+            # status = PAIR
+            # mod_p = pair(rng_states, p)
+            continue  # XXX for now skip pair
+            # IT WAS A PAIR PRODUCTION
+            # if iausfl[PAIRAUSB-1+1] != 0:
+            #     ausgab(PAIRAUSB, ...)
+            # p3, ...  = pair()
+            # if particle_selection_pair:
+            #     particle_selection_pair()
+
+            # if iausfl[PAIRAUSA-1+1] != 0:
+            #     ausgab(PAIRAUSA, ...)
+
+            # if iq[np_m1] != 0:
+            #     break  # EXIT :PNEWENERGY:
+            # else:  # this may happen if pair electrons killed via Russian Roul
+            #     # :PAIR_ELECTRONS_KILLED:
+            #     # If here, then gamma is lowest energy particle.
+            #     peig = e[np_m1]
+            #     eig = peig
+            #     if eig < pcut[irl_m1]:
+            #         particle_outcome = PCUT_DISCARD
+            #         break
+            #     continue  # repeat PNEWENERGY loop
+
+        #     GBR2 = (PAIR + COMPTON) / GTOTAL
+        # evaluate gbr2 using gbr2(gle)
+        med_gbr = medium.gbr[GBR_COMPTON, :, lgle]
+        gbr_compt = med_gbr[1] * gle + med_gbr[0]
+        if rnno36 < gbr_compt:
+            status = COMPTON
+            mod_p = compton(rng_states, gid, p)
+            # It was a compton
+            # if iausfl[COMPAUSB+1-1] != 0:
+            #     ausgab(COMPAUSB)
+            # egsfortran.compt()
+            # if particle-selection-compt:
+            #     particle-selection-compt()
+            # if iausfl[COMPAUSA+1-1] != 0:
+            #     ausgab(COMPAUSA)
+            # if iq[np_m1] != 0:  # Not photon
+            #     break  # XXX EXIT:PNEWENERGY:
+        else:
+            # if iausfl[PHOTOAUSB+1-1] != 0: ...
+            mod_p = photo(rng_states, gid, p)  # egsfortran.photo()
+            status = PHOTO
+            # if particle_selection_photo:...
+            # if np == 0 or np < npold:
+            #     return ircode
+            # The above may happen if Russian Roulette is on....
+            # if iausfl[PHOTOAUSA+1-1] != 0:
+            #     ausgab(PHOTOAUSA)
+        # End of photo electric block
+
+        # Interaction done, looping back for next step
+        ausgab(gid, status, p, mod_p, iscore, fscore)
+        p = mod_p
+        # end :PNEWENERGY: LOOP ---------
+
+    # ---------------------------------------------
+    # Photon cutoff energy discard section
+    # ---------------------------------------------
+
+    p = mod_p
+
+
+    # if status == PCUT_DISCARD:
+    #     if p.medium > 0:
+    #         if eig > ap[medium_m1]:
+    #             idr = EGSCUTAUS
+    #         else:
+    #             idr = PEGSCUTAUS
+    #     else:
+    #         idr = EGSCUTAUS
+
+    #     epcont.edep = peig  # get energy deposition for user
+    #     # inline replace $ PHOTON-TRACK-END
+    #     if iausfl[idr-1+1] != 0:
+    #         ausgab(idr)
+    #     # --- end inline replace
+    #     ircode = 2
+    #     stack.np -= 1
+    #     return ircode
+
+    # ---------------------------------------------
+    # User requested photon discard section
+    # ---------------------------------------------
+    # elif particle_outcome == USER_PHOTON_DISCARD:
+    #     epcont.edep = peig
+    #     if iausfl[USERDAUS-1+1] != 0:
+    #         ausgab(USERDAUS)
+    #     ircode = 2
+    #     stack.np -= 1
+    #     return ircode
+    # else:
+    #     raise ValueError(f"Unhandled particle outcome ({particle_outcome})")
+
+
+
+        # --------------- My original toy photon tracking ------------------------
+
+        # mod_p = Particle(status2, region2, energy2, z2)
+        # # p = p._replace(status=status)  # replace doesn't work in Cuda
+        # p = Particle(status, p.region, p.energy, p.z)
+        # ausgab(gid, p, mod_p, out)  # probs don't need gid, can get with cuda.grid(1)
+        # # New particle info becomes current for next loop
+        # p = mod_p
+        # status = p.status  # need mutable status
 
 def init(random_seed, num_particles):
     rng_states = create_xoroshiro128p_states(
@@ -168,12 +359,12 @@ def run(particles, scoring_out, on_gpu=True):
             pass
             # Try to force typing
             # p = Particle(int32(0), int32(0), float32(1), float32(0))
-            # p2 = p
+            # mod_p = p
             # print(f"{type(iparticles[0, 0])=}")
             # print(f"{type(fparticles[0, 0])=}")
 
         else:
-            random_f32 = lambda r,i: np.random.random(1)
+            random.random_float32 = lambda r,i: np.random.random(1)
             for i in range(num_photons):
                 particle_kernel.py_func(i, None, iparticles, fparticles, out)
         if not debug_on_cpu:

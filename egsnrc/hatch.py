@@ -41,7 +41,7 @@ def get_xsection_table(filename):
         # z_data = np.loadtxt(lines, skiprows=i_line, max_rows=data_lines)
         z_data = z_data.reshape((-1, 2)).transpose()
         data.append(z_data)
-        print(f"Count {count}, len(data): {len(z_data)}")
+        # print(f"Count {count}, len(data): {len(z_data)}")
         i_line += data_lines
 
     return data

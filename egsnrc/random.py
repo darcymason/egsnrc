@@ -1,37 +1,28 @@
 
 import itertools
 import numpy as np
-try:
-    import torch
-except ImportError:
-    pass
+import numba
 
-# Numpy random functions
+from numba.cuda.random import create_xoroshiro128p_states
+from numba.cuda.random import xoroshiro128p_uniform_float32 as cuda_random_f32
+
+
 def _np_initialize(seed):
     return np.random.default_rng(seed)
 
-
-def _np_floats_0_1(rng, num, device=None):
-    rands = rng.random(num)
-    # print("Random floats:", rands)
-    return rng, rands
-
-
-# PyTorch random funtions ---------
-def _torch_initialize(seed):
-    return torch.random.manual_seed(seed)
-
-
-def _torch_floats_0_1(key, num, device=None):
-    return key, torch.rand(num, device=device)
+def _np_float32(rng, i):
+    return rng.random()
 
 # Set up "random" from known sequence -------------
 #    (e.g. to compare with mortran EGSnrc)
 def _seq_initialize(known_list, vect=False, list_type=np.array):
     return SeqGen(known_list, vect, list_type)
 
-def _seq_floats_0_1(rng, num, device=None):
+def _seq_float32(rng, num, device=None):
     return (rng, *rng.random(num))
+
+def _cuda_initialize(seed, num_particles):
+    return numba.cuda.to_device(create_xoroshiro128p_states(num_particles, seed))
 
 class SeqGen:
     def __init__(self, known_list, vect=False, list_type=np.array):
@@ -72,16 +63,17 @@ class SeqGen:
 
 # Configuration to select between libraries
 def set_array_library(lib: str):
-    global floats_0_1, initialize
+    global random_float32
+    global initialize
 
     if lib == "numpy":
-        floats_0_1 = _np_floats_0_1  # Later switch depending on using gpu arrays
+        random_float32 = _np_float32  # Later switch depending on using gpu arrays
         initialize = _np_initialize
-    elif lib == "pytorch":
-        floats_0_1 = _torch_floats_0_1
-        initialize = _torch_initialize
     elif lib == "sequence":
-        floats_0_1 = _seq_floats_0_1
+        random_float32 = _seq_float32
         initialize = _seq_initialize
+    elif lib == "cuda":
+        initialize = _cuda_initialize
+        random_float32 = cuda_random_f32
     else:
         raise NotImplementedError("Array library not currently handled")

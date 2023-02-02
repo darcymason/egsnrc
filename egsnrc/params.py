@@ -1,65 +1,7 @@
-import numpy
+import numpy as np
 
-MXSTACK = 40  # must be same as when f2py egsfortan created
+EPSGMFP = np.float32(1.0E-8)  # smallest gamma mfp value
+SMALL_POLAR_ANGLE_THRESHOLD = np.float32(1.0E-20)
+VACDST = np.float32(1e8)  # vacuum distance
 
-EPSEMFP: numpy.float64 = 1.E-8  # smallest electron mfp value
-EPSGMFP: numpy.float64 = 1.E-8  # smallest gamma mfp value
-RANDOMIZE_TUSTEP: bool = False
-PRESTA_II: numpy.int32 = 0
-EM_MACROS_ACTIVE: bool = False
-TRANAUSB: numpy.int32 = 0
-TRANAUSA: numpy.int32 = 5
-MOLLAUSB: numpy.int32 = 8
-MOLLAUSA: numpy.int32 = 9
-BHABAUSB: numpy.int32 = 10
-BHABAUSA: numpy.int32 = 11
-ANNIHFAUSB: numpy.int32 = 12
-ANNIHFAUSA: numpy.int32 = 13
-PAIRAUSB: numpy.int32 = 15  # before pair() call
-PAIRAUSA: numpy.int32 = 16  # after pair() call
-COMPAUSB: numpy.int32 = 17  # before compt() call
-COMPAUSA: numpy.int32 = 18  # after compt() call
-PHOTOAUSB: numpy.int32 = 19  # before photo() call
-PHOTOAUSA: numpy.int32 = 20  # after photo() call
-UPHIAUSB: numpy.int32 = 21
-UPHIAUSA: numpy.int32 = 22
-BREMAUSB: numpy.int32 = 6
-BREMAUSA: numpy.int32 = 7
-EGSCUTAUS: numpy.int32 = 1
-PEGSCUTAUS: numpy.int32 = 2
-ANNIHRAUSB: numpy.int32 = 28
-ANNIHRAUSA: numpy.int32 = 14
-USERDAUS: numpy.int32 = 3
-EIIB: numpy.int32 = 31  # Before EII
-EIIA: numpy.int32 = 32  # After EII
-
-
-EM_MACROS_ACTIVE = False
-
-# XXX extra AUSFL flags for debugging - DLM 2021-02
-RANDOMNUM = 40
-PRESTAIIA = 41
-PRESTAIA = 42
-TUSTEPB = 43
-HOWFARB = 44
-HOWFARA = 45
-XYZAUSB = 46
-XYZAUSA = 47
-UVWAUSB = 48
-UVWAUSA = 49
-
-# for EII-Data
-MAX_EII_SHELLS = 40  # Maximum number of shells participating
-                     # in EII in a simulation
-N_EII_BINS = 250  # Number of bins for EII x-section interpolations
-MAX_EII_BINS = N_EII_BINS * MAX_EII_SHELLS
-
-# Common block EDGE
-MXELEMENT = 100  #  Number of elements
-MXSHXSEC = 30  #  Number of shells available
-MXSHELL = 6  #  Number of shells treated
-MXINTER = 5  #  $MXSHELL-1
-MXTRANS = 39  #  Number of possible transitions
-MXEDGE = 16  #  max. number of edges above 1 keV
-# PHOTOUNIT = i_photo_relax  #  unit number for photo_relax.data
-# PHOCSUNIT = i_photo_cs  #  unit number for photo_cs.data
+MXGE = 2000  # Number of energy intervals for sigma calcs
