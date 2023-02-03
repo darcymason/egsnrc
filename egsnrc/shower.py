@@ -1,6 +1,6 @@
 
 from egsnrc.photon import photon_kernel
-from egsnrc import photon  # To set index in CPU mode
+from egsnrc import photon  # To set index in CPU mode and howfar, ausgab
 from egsnrc.config import on_gpu
 from egsnrc import random
 from egsnrc.media import Vacuum
@@ -36,12 +36,32 @@ def cuda_details():
 def shower(
     seed, num_particles, source, regions, media, howfar, ausgab, iscore, fscore
 ):
+    """Start the Monte Carlo simulation
+
+    Parameters
+    ----------
+    seed : int
+        Random number generator seed
+    num_particles : int
+        Number of photons to launch
+    source : Source subclass
+        A radition Source class with `generate` method
+    regions : tuple
+        Tuple of _Region namedtuples
+    media : tuple
+        Tuple of _Medium namedtuples
+    iscore : array of num_particles int32's
+        Output array for ausgab to track integer values, e.g. counting interactions
+    fscore : array of num_particles float32's
+        Output array for ausgab to track float values, e.g. energy deposited
+
+    """
     # Initialize random numbers
     if on_gpu:
         random.set_array_library("cuda")
     else:
         random.set_array_library("numpy")
-    rng_states = random.initialize(seed)
+    rng_states = random.initialize(seed, num_particles)
 
     # Convert regions from Python classes to tuples needed to pass to kernel
 
@@ -57,16 +77,20 @@ def shower(
         media = tuple(media)
 
     if regions[0].number != 0:
-        regions = (tuple(), *regions)
+        regions = (tuple(), *regions)  # XXX need a proper Region here
 
     if not isinstance(regions, tuple):
         regions = tuple(regions)
+
+    # Configure callbacks:
+    photon.howfar = howfar
+    photon.ausgab = ausgab
 
     if on_gpu:
         photon_kernel.forall(num_particles)(
             rng_states,
             iparticles, fparticles,
-            regions, media, howfar, ausgab, iscore, fscore
+            regions, media, iscore, fscore
         )
     else:
         for i in range(num_particles):
@@ -74,5 +98,5 @@ def shower(
             photon_kernel.py_func(
                 rng_states,
                 iparticles, fparticles,
-                regions, media, howfar, ausgab, iscore, fscore
+                regions, ausgab, iscore, fscore
             )

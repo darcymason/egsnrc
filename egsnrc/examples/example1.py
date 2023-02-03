@@ -1,6 +1,9 @@
 # example1.py
 """Define a slab geometry with photon tracking only
 """
+# import os
+# os.environ['NUMBA_ENABLE_CUDASIM'] = '1'  # XXX temp for testing GPU running on CPU
+
 import numba as nb
 from numba import cuda
 import numpy as np
@@ -10,11 +13,13 @@ from egsnrc.particles import (
     Particle, particle_iattrs, particle_fattrs, ENERGY, W, REGION, PhotonSource
 )
 from egsnrc.config import device_jit
-from egsnrc.media import make_medium, Vacuum
+from egsnrc.media import Medium, Vacuum
 from egsnrc.regions import Region
 from egsnrc.shower import shower
 
+
 NO_DISCARD, DISCARD = np.arange(2, dtype=np.int32)
+
 
 SCORE_nCOMPTON, SCORE_nPHOTO, SCORE_nLOST = np.arange(3, dtype=np.int32)
 SCORE_eCOMPTON, SCORE_ePHOTO, SCORE_eLOST = np.arange(3, dtype=np.int32)
@@ -36,6 +41,7 @@ def ausgab(gid, status, p1, p2, iscore, fscore):
         fscore[gid, region_number, SCORE_eLOST] += p1.energy
 
 
+@device_jit
 def howfar(p, regions, ustep):  # -> step, region, discard_flag (>0 to discard)
     """Given particle and proposed step distance, return actual step and region
 
@@ -128,8 +134,8 @@ if __name__ == "__main__":
             sys.exit(-1)
 
     # Set up the media and the regions
-    Ta = make_medium(1, "Ta")
-    Si = make_medium(2, "Si")
+    Ta = Medium(1, "Ta")
+    Si = Medium(2, "Si")
     media = [Ta, Si]
 
     regions = [
@@ -144,7 +150,7 @@ if __name__ == "__main__":
     # First one is dummy because of 0-based indexing and region 0 being outside geom
     boundaries = np.array([-1.0e8, 0.0, 2.0, 4.0], dtype=np.float32)
 
-    # Set up particles with random energies between 0.511 and 1.511, (Compton ko>2, <2)
+    # Set up particles with random range of energies
     # starting at (0, 0, 0) at edge of Region 1, traveling in z direction
     source = PhotonSource(
         energy=(0.511, 1.0), region=regions[1],

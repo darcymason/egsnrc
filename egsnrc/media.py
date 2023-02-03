@@ -18,14 +18,14 @@ from egsnrc.constants import REST_MASS
 GBR_PAIR, GBR_COMPTON = np.arange(2, dtype=np.int32)
 
 # Internal _Medium object for gpu calls, due to limitations of types that can be passed
-Medium = namedtuple("_Medium", "number formula name rho gmfp ge gbr")
+_Medium = namedtuple("_Medium", "number rho gmfp ge gbr")  # formula name
 
 
-Vacuum = Medium(
-    np.int32(0), "Vacuum", "", np.float32(0.0),
-    np.array([], dtype=np.float32),
-    np.array([], dtype=np.float32),
-    np.array([], dtype=np.float32),
+Vacuum = _Medium(
+    np.int32(0), np.float32(0.0),  # "Vacuum", "Vacuum",
+    np.empty((0,0), dtype=np.float32),
+    np.empty(0, dtype=np.float32),
+    np.empty((0,0,0), dtype=np.float32),
 )
 
 
@@ -60,7 +60,7 @@ Interaction = Enum(
 )
 
 
-def make_medium(
+def Medium(
     number, formula, name=None, rho=None, ap=0.001, up=50.0, mge=MXGE,
     table_prefix="xcom"
 ):
@@ -101,7 +101,7 @@ def make_medium(
         for element, proportions in zip(elements, proportions)
     )
     con1 = sumZ * rho / (sumA * 1.6605655)  # con1 never used?
-    con2 = rho / (sumA * 1.6605655)
+    con2 = np.float32(rho / (sumA * 1.6605655))
 
     # Calculate all cross-sections for this medium on regularized log lookup
     # First get physical data tables
@@ -161,13 +161,18 @@ def make_medium(
         result0 = np.append(tmp0, tmp0[-1])
         return np.stack((result0, result1))
 
-    gmfp = arr0_1(gmfp)
-    gbr1 = arr0_1(gbr1)
-    gbr2 = arr0_1(gbr2)
+    gmfp = arr0_1(gmfp).astype(np.float32)
+    gbr1 = arr0_1(gbr1).astype(np.float32)
+    gbr2 = arr0_1(gbr2).astype(np.float32)
     gbr = np.stack((gbr1, gbr2))  # pair, compton, ...
     # XXX repeat for cohe and photonuc
 
-    return Medium(number, name, formula, rho, gmfp, ge, gbr)
+    return _Medium(
+        np.int32(number),
+        # name, formula,
+        np.float32(rho),
+        gmfp, ge, gbr
+    )
 
 
 @np.errstate(divide="raise")
@@ -219,7 +224,7 @@ def _calc_sigmas(interaction, cross_sections, elements, proportions, ge0, ge1, m
 
             data[k] += proportion * sig
 
-    return np.array(data)
+    return np.array(data, dtype=np.float32)
 
 # def calc_sigma(sigmas, interaction, energy, ap, ge1):
 #     gle = log(energy)

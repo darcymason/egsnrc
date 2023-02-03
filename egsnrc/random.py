@@ -4,10 +4,10 @@ import numpy as np
 import numba
 
 from numba.cuda.random import create_xoroshiro128p_states
-from numba.cuda.random import xoroshiro128p_uniform_float32 as cuda_random_f32
+from numba.cuda.random import xoroshiro128p_uniform_float32
 
 
-def _np_initialize(seed):
+def _np_initialize(seed, num_particles=None):
     return np.random.default_rng(seed)
 
 def _np_float32(rng, i):
@@ -74,6 +74,6 @@ def set_array_library(lib: str):
         initialize = _seq_initialize
     elif lib == "cuda":
         initialize = _cuda_initialize
-        random_float32 = cuda_random_f32
+        random_float32 = xoroshiro128p_uniform_float32
     else:
-        raise NotImplementedError("Array library not currently handled")
+        raise NotImplementedError(f"Array library '{lib}' not currently handled")

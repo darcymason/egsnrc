@@ -1,7 +1,14 @@
+import os
 from numba import cuda
 from logging import getLogger
 
 logger = getLogger("egsnrc")
+
+try:
+    cudasim_env = os.environ['NUMBA_ENABLE_CUDASIM']
+except KeyError:
+    cudasim_env = 0
+on_cuda_sim = bool(int(cudasim_env))
 
 
 def cuda_device_jit(func):
@@ -21,9 +28,13 @@ def use_gpu(want_gpu=True):
     if not want_gpu:
         return
 
-    if cuda.is_available():
+
+    if cuda.is_available() or on_cuda_sim:
         device_jit = cuda_device_jit
         on_gpu = True
+        if on_cuda_sim:
+            logger.info("** Numba CUDA Simulator is in use **")
+
     else:
         logger.info("GPU not available, continuing with CPU only")
 

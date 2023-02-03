@@ -77,9 +77,9 @@ def transport_photon(p, dpmfp, gle, regions, howfar):
                 status = USER_PHOTON_DISCARD
                 break
 
-            x = p.x + p.u * ustep
-            y = p.y + p.v * ustep
-            z = p.z + p.w * ustep
+            x = np.float32(p.x + p.u * ustep)
+            y = np.float32(p.y + p.v * ustep)
+            z = np.float32(p.z + p.w * ustep)
 
             # if iausfl[TRANAUSB-1+1] != 0:
             #     ausgab(TRANAUSB)
@@ -92,7 +92,7 @@ def transport_photon(p, dpmfp, gle, regions, howfar):
             if medium.number != 0:
                 dpmfp = max(0., dpmfp - ustep / gmfp) # deduct mfp's
 
-            if new_region != p.region:
+            if new_region.number != p.region.number:
                 # REGION CHANGE
                 medium = new_region.medium
                 # XXX --- Inline replace: $ photon_region_change; -----
@@ -111,7 +111,7 @@ def transport_photon(p, dpmfp, gle, regions, howfar):
                 status  = USER_PHOTON_DISCARD
                 break
 
-            if new_medium != p.region.medium:
+            if new_medium.number != p.region.medium.number:
                 break  # exit :PTRANS: loop to medium loop
 
             if dpmfp <= EPSGMFP and new_medium.number != 0:
@@ -131,9 +131,15 @@ non_gpu_index = None
 # Kernel
 @cuda.jit
 def photon_kernel(
-    rng_states, iparticles, fparticles, regions, media, howfar, ausgab, iscore, fscore
+    rng_states, iparticles, fparticles, regions, media, iscore, fscore
 ):
-    """Main photon particle simulation kernel - implicitly called on each gpu thread"""
+    """Main photon particle simulation kernel - implicitly called on each gpu thread
+
+    Note
+    ----
+        The calling routine must set `egsnrc.photon.howfar` and `egsnrc.photon.ausgab`
+        before calling this routine.
+    """
 
     # Get unique grid index
     gid = cuda.grid(1) if on_gpu else non_gpu_index  # Global for testing only

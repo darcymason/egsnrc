@@ -5,15 +5,16 @@ from dataclasses import dataclass
 from collections import namedtuple
 import numpy as np
 from egsnrc.config import device_jit
-from egsnrc.media import Medium
+from egsnrc.media import _Medium
 from numba import cuda
+import numpy as np
 
 
 MEDIUM, IRAYL, IPHOTONUCR = np.arange(3, dtype=np.int32)
 PCUT, RHO = np.arange(2, dtype=np.float32)
 
 
-Region = namedtuple("Region", ("number medium pcut rho"))  # irayl iphotonucr
+_Region = namedtuple("Region", ("number medium pcut rho"))  # irayl iphotonucr
 
 # @dataclass
 # class Region:
@@ -40,3 +41,9 @@ Region = namedtuple("Region", ("number medium pcut rho"))  # irayl iphotonucr
 
 #     return Region(oi[MEDIUM], of[PCUT], of[RHO])  # oi[IRAYL], oi[IPHOTONUCR],
 
+def Region(number, medium, pcut=0.001, rho=None):
+    if not isinstance(medium, _Medium):
+        raise TypeError("medium must be a Medium named tuple")
+    if rho is None:
+        rho = medium.rho
+    return _Region(np.int32(number), medium, np.float32(pcut), np.float32(rho))
