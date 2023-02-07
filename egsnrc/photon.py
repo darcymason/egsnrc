@@ -21,7 +21,7 @@ from egsnrc.particles import (
 from egsnrc.particles import set_particle
 from egsnrc.media import GBR_PAIR, GBR_COMPTON
 from egsnrc.photo import photo
-from egsnrc import random
+from egsnrc import egsrandom
 
 numba_logger = logging.getLogger('numba')
 numba_logger.setLevel(logging.WARNING)
@@ -169,7 +169,7 @@ def photon_kernel(
         gle = log(p.energy)  # gamma log energy
 
         # Sample number of mfp to transport before interacting
-        rnno35 = random.random_float32(rng_states, gid)
+        rnno35 = egsrandom.random_kfloat(rng_states, gid)
         if rnno35 == 0.0:
             rnno35 = 1.0e-30
         dpmfp = -log(rnno35)
@@ -190,7 +190,7 @@ def photon_kernel(
         # XXX --- Inline replace: $ PHOTONUCLEAR; -----
 
         # This random number determines which interaction
-        rnno36 = random.random_float32(rng_states, gid)
+        rnno36 = egsrandom.random_kfloat(rng_states, gid)
 
         medium = mod_p.region.medium
         # Original Mortran
@@ -370,7 +370,7 @@ def run(particles, scoring_out, on_gpu=True):
             # print(f"{type(fparticles[0, 0])=}")
 
         else:
-            random.random_float32 = lambda r,i: np.random.random(1)
+            egsrandom.random_kfloat = lambda r,i: np.random.random(1)
             for i in range(num_photons):
                 particle_kernel.py_func(i, None, iparticles, fparticles, out)
         if not debug_on_cpu:

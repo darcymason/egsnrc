@@ -1,13 +1,13 @@
 # angles.py
 from math import sqrt, sin, cos
-from egsnrc import random
+from egsnrc.egsrandom import random_kfloat
 from egsnrc.constants import TWO_PI
 from egsnrc.params import SMALL_POLAR_ANGLE_THRESHOLD
 from egsnrc.particles import replace_e_uvw
 from egsnrc.config import device_jit
 
 @device_jit
-def uphi(rng_states, gid, p, costhe, sinthe):
+def uphi(rng_states, gid, p, sinthe, costhe):
     """Uniform phi distribution
 
     Returns
@@ -16,7 +16,7 @@ def uphi(rng_states, gid, p, costhe, sinthe):
     """
     # unlike original Mortran calculate directly.
     # should be fast enough on todays computers
-    phi = TWO_PI * random.random_float32(rng_states, gid)
+    phi = TWO_PI * random_kfloat(rng_states, gid)
 
     sinps2 = p.u * p.u + p.v * p.v
     # Small polar angle case

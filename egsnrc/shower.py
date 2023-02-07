@@ -14,7 +14,7 @@ except ImportError:
 from egsnrc.photon import photon_kernel
 from egsnrc import photon  # To set index in CPU mode and howfar, ausgab
 from egsnrc.config import on_gpu
-from egsnrc import random
+from egsnrc import egsrandom
 from egsnrc.media import Vacuum
 
 logger = logging.getLogger("egsnrc")
@@ -75,10 +75,10 @@ def shower(
     """
     # Initialize random numbers
     if on_gpu:
-        random.set_array_library("cuda")
+        egsrandom.set_array_library("cuda")
     else:
-        random.set_array_library("numpy")
-    rng_states = random.initialize(seed, num_particles)
+        egsrandom.set_array_library("numpy")
+    rng_states = egsrandom.initialize(seed, num_particles)
 
     if not num_batches:
         num_batches = 2 if on_gpu else 1

@@ -1,10 +1,10 @@
 import numpy
 
 from egsnrc.vect import *  # XXX eventually do selective import
-from egsnrc import random
+from egsnrc import egsrandom
 
 def toy(particles, key):
-    key, ran_floats = random.floats_0_1(key, len(particles.energy))
+    key, ran_floats = egsrandom.floats_0_1(key, len(particles.energy))
     energy = particles.energy - 5.0 * ran_floats
     status_mask = energy <= 0
     particles = particles.cut(status_mask)

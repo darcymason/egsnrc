@@ -13,6 +13,7 @@ on_cuda_sim = bool(int(cudasim_env))
 
 
 # Define bit-width for all int's and floats in the GPU kernels
+# NOTE: need to set egsrandom routines to same bits
 KINT = np.int32
 KFLOAT = np.float32
 

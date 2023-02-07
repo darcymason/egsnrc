@@ -1,19 +1,19 @@
 from math import log, exp, sqrt, sin, cos
-from egsnrc import random
+from egsnrc.egsrandom import random_kfloat
 from egsnrc.angles import uphi
 from egsnrc.constants import REST_MASS, TWO_PI
 from egsnrc.particles import replace_e_uvw
-from egsnrc.config import device_jit
+from egsnrc import config
 from numba import cuda
 
 
-@device_jit
+@config.device_jit
 def compton(rng_states, gid, p):
     """Return a modified particle from Compton interaction
 
     Returns
     -------
-    p   Particle
+    mod_p   Particle
         The modified particle (new energy, direction cosines)
     """
     # TODO: do not use bound, always K-N
@@ -32,9 +32,9 @@ def compton(rng_states, gid, p):
         # Set up fake True for first pass through loop
         rnno19 = aux = br = 1; rejf3 = 0.0
         while rnno19 * aux > rejf3 or not (bro < br < 1):  # rejection sampling loop
-            rnno15 = random.random_float32(rng_states, gid)
-            rnno16 = random.random_float32(rng_states, gid)
-            rnno19 = random.random_float32(rng_states, gid)
+            rnno15 = random_kfloat(rng_states, gid)
+            rnno16 = random_kfloat(rng_states, gid)
+            rnno19 = random_kfloat(rng_states, gid)
             if rnno15 * alpha < alph1:  # Use 1/br part
                 br = exp(alph1 * rnno16) * bro
             else:  # Use the br part
@@ -56,8 +56,8 @@ def compton(rng_states, gid, p):
         # Set up fake True for first pass through loop
         rnno16 = br = 1.0; rejf3 = 0.0
         while rnno16 * br * rejmax > rejf3 or not (bro < br < 1):
-            rnno15 = random.random_float32(rng_states, gid)
-            rnno16 = random.random_float32(rng_states, gid)
+            rnno15 = random_kfloat(rng_states, gid)
+            rnno16 = random_kfloat(rng_states, gid)
             br = bro + bro1 * rnno15
             temp = (1 - br) / (ko * br)
             sinthe = max(0., temp*(2-temp))
