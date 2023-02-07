@@ -24,7 +24,7 @@ def get_xsection_table(filename):
         lines = f.readlines()
 
     i_line = 0
-    data = []
+    data = {}
     for z in range(1, 101):
         count = int(lines[i_line])
         i_line += 1
@@ -40,7 +40,7 @@ def get_xsection_table(filename):
         #     z_data.append(float(x) for x in lines[i_line+i].strip().split())
         # z_data = np.loadtxt(lines, skiprows=i_line, max_rows=data_lines)
         z_data = z_data.reshape((-1, 2)).transpose()
-        data.append(z_data)
+        data[z] = z_data
         # print(f"Count {count}, len(data): {len(z_data)}")
         i_line += data_lines
 

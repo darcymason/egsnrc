@@ -35,8 +35,6 @@ Interaction = Enum(
 )
 
 
-
-
 @dataclass
 class Medium:
     """Contain information for a specific physical medium"""
@@ -59,7 +57,6 @@ class Medium:
     # sigmas = {}  - dict with Interaction type key to array of sigmas
 
     def __post_init__(self):
-        self.sigmas = {}
         if self.rho is np.NaN:
             if len(self.elements) == 1:
                 self.rho = self.elements[0].rho
@@ -76,7 +73,7 @@ class Medium:
         symbols = [self.formula]
         self.elements = [element_data[symbol] for symbol in symbols]
         self.proportions = [1]
-        self.sigmas = {}
+
         if self.rho is None:
             if len(self.elements) == 1:
                 rho = self.elements[0].density
@@ -86,9 +83,9 @@ class Medium:
                 )
 
         # Define log intervals over the lower and upper cutoff energies"""
-        ge1 = (self.mge - 1) / log(self.up / self.ap)
-        ge0 = 1 - ge1 * log(self.ap)
-        self.ge = np.array((ge0, ge1), KFLOAT) # "Kernelize" here, user can inspect
+        self.ge1 = (self.mge - 1) / log(self.up / self.ap)
+        self.ge0 = 1 - self.ge1 * log(self.ap)
+        self.ge = np.array((self.ge0, self.ge1), KFLOAT) # "Kernelize" here, user can inspect
 
         # The following (except con2) aren't used at the moment?
         sumZ = sum(
@@ -99,8 +96,8 @@ class Medium:
             proportions * element.atomic_weight
             for element, proportions in zip(self.elements, self.proportions)
         )
-        con1 = sumZ * rho / (sumA * 1.6605655)  # con1 never used?
-        con2 = np.float32(rho / (sumA * 1.6605655))
+        # con1 = sumZ * rho / (sumA * 1.6605655)  # con1 never used?
+        con2 = np.float32(self.rho / (sumA * 1.6605655))
 
         # Calculate all cross-sections for this medium on regularized log lookup
         # First get physical data tables
@@ -111,18 +108,19 @@ class Medium:
         pair_data = get_xsection_table(f"{prefix}pair.data")
         # XXX Rayleigh, Triplet, Photonuc
 
-        sigmas = {}
+        self.sigmas = {}
         for interaction, data in (
             (intn.PHOTOELECTRIC, photo_data), (intn.COMPTON, compton_data),
             (intn.PAIR, pair_data)
         ):  # XXX add Rayleigh, Triplet, Photonuc
-            sigmas[interaction] = _calc_sigmas(
-                interaction, data, self.elements, self.proportions, ge0, ge1, self.mge
+            self.sigmas[interaction] = _calc_sigmas(
+                interaction, data, self.elements, self.proportions,
+                self.ge0, self.ge1, self.mge
             )
 
         # Calculate branching ratios
         list_2_to_mge = np.arange(2, self.mge + 1) # start 2 - used with diffs
-        gle = (list_2_to_mge - ge0) / ge1
+        gle = (list_2_to_mge - self.ge0) / self.ge1
         #  exp_gle = np.exp(gle)
         # sig_KN = sumZ * egs_KN_sigma0(e)
         #     if ibcmp[1] > 1:
@@ -141,9 +139,9 @@ class Medium:
                 #         bcf = 1
                 #     sig_KN = sig_KN*bcf
         # XXX for now, assume 'input_compton_data'
-        sig_KN = sigmas[Interaction.COMPTON]
-        sig_pair = sigmas[Interaction.PAIR]
-        sig_photo = sigmas[Interaction.PHOTOELECTRIC]
+        sig_KN = self.sigmas[Interaction.COMPTON]
+        sig_pair = self.sigmas[Interaction.PAIR]
+        sig_photo = self.sigmas[Interaction.PHOTOELECTRIC]
 
         sig_p  = sig_pair # XXX + sig_triplet
         sigma  = sig_KN + sig_p + sig_photo
@@ -154,7 +152,7 @@ class Medium:
         # photonuc = sigma/(sig_photonuc(i) + sigma)
 
         def arr0_1(arr):
-            tmp1 = np.diff(arr) * ge1
+            tmp1 = np.diff(arr) * self.ge1
             tmp0 = arr[1:] - tmp1 * gle
             result1 = np.append(tmp1, tmp1[-1]) # gmfp1(nge,med)=gmfp1(nge-1,med)
             result0 = np.append(tmp0, tmp0[-1])
@@ -174,6 +172,15 @@ class Medium:
             KFLOAT(self.rho),
             self.gmfp, self.ge, self.gbr
         )
+
+    # Not used except in test suite
+    def calc_sigma(self, interaction, energy):
+        gle = log(energy)
+        sigmas = self.sigmas[interaction]
+        fractional_index = (gle - log(self.ap)) * self.ge1
+        index = int(fractional_index)
+        p = fractional_index - index
+        return (1 - p) * sigmas[index] + p * sigmas[index + 1]
 
 
 @np.errstate(divide="raise")
@@ -227,35 +234,4 @@ def _calc_sigmas(interaction, cross_sections, elements, proportions, ge0, ge1, m
 
     return np.array(data, dtype=np.float32)
 
-# def calc_sigma(sigmas, interaction, energy, self.ap, ge1):
-#     gle = log(energy)
-#     sigmas = sigmas[interaction]
-#     fractional_index = (gle - log(self.ap)) * ge1
-#     index = int(fractional_index)
-#     p = fractional_index - index
-#     return (1 - p) * sigmas[index] + p * sigmas[index + 1]
-
-
-
-if __name__ == "__main__":
-    from egsnrc.hatch import DATA_DIR, get_xsection_table
-
-    # PHOTO = Interaction.PHOTOELECTRIC
-    # photo_data = get_xsection_table(DATA_DIR / "xcom_photo.data")
-    # element_ta = Element(z=73, pz=1, wa=0)
-    element_C = Element(z=6, pz=1)
-    # c_en = photo_data[6][0]
-
-    # # Try to match the energies of the original cross-section data
-    # medium = Medium(
-    #     "C", [element_C], rho=1, ap=exp(c_en[0]), up=exp(c_en[-1]), mge=len(c_en)
-    # )
-    medium = Medium("C", [element_C], ap=0.001, up=30.0)
-    # sigmas = medium.sigmas[PHOTO]
-    print(medium)
-
-    # medium = Medium("Medium Ca", [Element(20, 1)], ap=0.001, up=2.0)
-    for z in range(1, 100):
-        Medium("test", [Element(z=z, pz=1)], ap=0.001, up=50.0)
-    print(medium)
 
