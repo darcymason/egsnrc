@@ -78,48 +78,11 @@ def howfar(p, regions, ustep):  # -> step, region, discard_flag (>0 to discard)
     return tval, regions[region_num + region_change], NO_DISCARD
 
 
-def test_gpu():
-    iparticles = np.zeros((5, 2), dtype=np.int32)
-    # set regions
-    iparticles[:, 1] = [1, 1, 1, 2, 2]
-    fparticles = np.zeros((5, 7), dtype=np.float32)
-    fparticles[:, 3] = [0.5, 1.5, 1.75, 2.2, 3.8]  # z values
-    fparticles[:, -1] = [1, -1, 0, -0.8, -0.5] # w values
-    usteps = np.array([5, 3, 2, 1, 8], dtype=np.float32)
-    fout = np.zeros(len(fparticles), dtype=np.float32)
-    iout = np.zeros((len(iparticles), 2), dtype=np.int32)
-    test_kernel.forall(len(iparticles))(
-        usteps, iparticles, fparticles, iout, fout
-    )
-    cuda.synchronize()
-    print(iout)
-    print(fout)
-    # [[2 0]
-    #  [0 0]
-    #  [1 0]
-    #  [1 0]
-    #  [1 0]]
-    # [1.5        1.5        2.         0.25000006 3.6       ]
-
-# Dummy kernel just for testing howfar
-@cuda.jit
-def test_kernel(usteps, iparticles, fparticles, iout, fout):
-    i = cuda.grid(1)
-    if i > len(iparticles):
-        return
-    ip = iparticles[i]
-    fp = fparticles[i]
-    p = Particle(ip[0], ip[1], fp[0], fp[1], fp[2], fp[3], fp[4], fp[5], fp[6])
-    step, region, discard = howfar(p, usteps[i])
-    ffscore[i] = step
-    ifscore[i, 0] = region
-    ifscore[i, 1] = discard
-
-
 usage = """
-python example1.py [num_particles]
+python example1.py [num_particles] [num_batches]
 
-if optional num_particles is not specified, it defaults to 50 for testing.
+If optional num_particles is not specified, it defaults to 50 for testing.
+If num_batches is not specified, it defaults to 1 on CPU or 2 on GPU (to separate compile time)
 """
 
 if __name__ == "__main__":
@@ -129,9 +92,16 @@ if __name__ == "__main__":
         try:
             num_particles = int(sys.argv[1])
         except ValueError:
-            print("Optional command-line argument must be an integer")
+            print("Optional num_particles command-line argument must be an integer")
             print(usage)
             sys.exit(-1)
+    if len(sys.argv) > 2:
+        try:
+            num_batches = int(sys.argv[2])
+        except ValueError:
+            print("Optional num_batches command-line argument must be an integer")
+            print(usage)
+
 
     # Set up the media and the regions
     Ta = Medium(1, "Ta")
@@ -155,7 +125,7 @@ if __name__ == "__main__":
     source = PhotonSource(
         energy=(0.511, 1.0), region=regions[1],
         position=(0, 0, 0), direction=(0, 0, 1),
-        store_particles=True
+        store_particles=True  # for debugging with small num_particles
     )
     # Initialize Scoring
     NUM_REGIONS = 4

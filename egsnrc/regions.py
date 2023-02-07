@@ -4,8 +4,8 @@
 from dataclasses import dataclass
 from collections import namedtuple
 import numpy as np
-from egsnrc.config import device_jit
-from egsnrc.media import _Medium
+from egsnrc.config import KINT, KFLOAT
+from egsnrc.media import Medium, _Medium, Vacuum
 from numba import cuda
 import numpy as np
 
@@ -41,9 +41,23 @@ _Region = namedtuple("Region", ("number medium pcut rho"))  # irayl iphotonucr
 
 #     return Region(oi[MEDIUM], of[PCUT], of[RHO])  # oi[IRAYL], oi[IPHOTONUCR],
 
-def Region(number, medium, pcut=0.001, rho=None):
-    if not isinstance(medium, _Medium):
-        raise TypeError("medium must be a Medium named tuple")
-    if rho is None:
-        rho = medium.rho
-    return _Region(np.int32(number), medium, np.float32(pcut), np.float32(rho))
+@dataclass
+class Region:
+    number: int
+    medium: Medium
+    pcut: float=0.001
+    rho: float=None
+
+    def __post_init__(self):
+        if not isinstance(self.medium, (Medium, _Medium)):
+            raise TypeError("medium must be a Medium named tuple")
+        if self.rho is None:
+            self.rho = self.medium.rho
+
+    def kernelize(self):
+        return _Region(
+            KINT(self.number),
+            self.medium if self.medium==Vacuum else self.medium.kernelize(),
+            KFLOAT(self.pcut),
+            KFLOAT(self.rho)
+        )

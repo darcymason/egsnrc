@@ -1,5 +1,6 @@
 import os
 from numba import cuda
+import numpy as np
 from logging import getLogger
 
 logger = getLogger("egsnrc")
@@ -9,6 +10,11 @@ try:
 except KeyError:
     cudasim_env = 0
 on_cuda_sim = bool(int(cudasim_env))
+
+
+# Define bit-width for all int's and floats in the GPU kernels
+KINT = np.int32
+KFLOAT = np.float32
 
 
 def cuda_device_jit(func):
