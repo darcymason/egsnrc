@@ -52,7 +52,7 @@ def transport_photon(p, dpmfp, gle, regions, howfar):
             # set interval gle, ge;
             lgle = nb.int32(medium.ge[1] * gle + medium.ge[0]) # Set pwlf interval
             # evaluate gmfpr0 using gmfp(gle)
-            gmfpr0 = medium.gmfp[1, lgle] * gle + medium.gmfp[0, lgle]
+            gmfpr0 = medium.gmfp01[1, lgle] * gle + medium.gmfp01[0, lgle]
 
         # :PTRANS:
         # Get region and medium index
@@ -197,7 +197,7 @@ def photon_kernel(
         # Evaluate gbr1 using gbr1(gle)
         #    GBR1 = PAIR / (PAIR + COMPTON + PHOTO) = PAIR / GTOTAL
 
-        med_gbr = medium.gbr[GBR_PAIR, :, lgle]
+        med_gbr = medium.gbr12[GBR_PAIR, :, lgle]
         gbr_pair = med_gbr[1] * gle + med_gbr[0]
         if rnno36 <= gbr_pair and p.energy > 2.0 * REST_MASS:
             # status = PAIR
@@ -227,7 +227,7 @@ def photon_kernel(
 
         #     GBR2 = (PAIR + COMPTON) / GTOTAL
         # evaluate gbr2 using gbr2(gle)
-        med_gbr = medium.gbr[GBR_COMPTON, :, lgle]
+        med_gbr = medium.gbr12[GBR_COMPTON, :, lgle]
         gbr_compt = med_gbr[1] * gle + med_gbr[0]
         if rnno36 < gbr_compt:
             status = COMPTON
