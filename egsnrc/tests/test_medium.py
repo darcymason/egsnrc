@@ -33,9 +33,10 @@ def test_sigmas_photo():
 
     assert medium.calc_sigma(PHOTO, test_E) == pytest.approx(expect_sigma)
 
-def test_sigmas_vs_mortran1():
-    """Test some calculated cross-section and branching ratios vs known values"""
-    # Si data produced by modified tutor7.mortran with
+def test_gmfp_and_gbr_vs_mortran():
+    """Calculated gmfp's and branching ratios match known values from mortran"""
+    # Si data produced by modified tutor7.mortran in
+    # egsnrc/egsnrc/egs_home/samp_mfp_br
     # PARAMETERS $MXGE=20, which was output to gen_sigmas_sample_Si.xsections,
     # by modified subroutine `egs_init_user_photon` of egsnrc.mortran
     # outputs modified to give for i=1 to nge:
