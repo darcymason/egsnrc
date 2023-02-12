@@ -51,7 +51,7 @@ def howfar(p, regions, ustep):  # -> step, region, discard_flag (>0 to discard)
     # Slab geometry with "z" going to right:
     # Region 0       |     Region 1    |    Region 2      |    Region 3
     #   vacuum       |                 |                  |    vacuum
-    #                |     Medium0     |     Medium1      |
+    #                |     Medium1     |     Medium2      |
     #         photon |->               |                  |
     #                |                 |                  |
     #               z=0              2 cm               4 cm
