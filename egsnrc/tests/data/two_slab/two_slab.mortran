@@ -109,7 +109,7 @@ $RNG-INITIALIZATION;
 "deferred STEP 3   HATCH-CALL                                         "
 "---------------------------------------------------------------------"
 
-;OUTPUT;('\f  Start tutor7'//' CALL HATCH to get cross-section data'/);
+;OUTPUT;('\f  Start two_slab'//' CALL HATCH to get cross-section data'/);
 CALL HATCH;
 ;OUTPUT AE(1)-PRM, AP(1);
 (/' knock-on electrons can be created and any electron followed down to'
@@ -216,6 +216,10 @@ IF( ipulse = 1 ) [ "Output pulse height distributions "
         write(1,*);
     ]
 ]
+
+;OUTPUT;('Region num Compton num Photo');
+OUTPUT 2,compt_count(2),photo_count(2); (I8,I8,I8)
+OUTPUT 3,compt_count(3),photo_count(3); (I8,I8,I8)
 
 call egs_finish;
 end;
