@@ -18,7 +18,7 @@ from egsnrc.constants import REST_MASS
 GBR_PAIR, GBR_COMPTON = np.arange(2, dtype=np.int32)
 
 # Internal _Medium object for gpu calls, due to limitations of types that can be passed
-_Medium = namedtuple("_Medium", "number rho gmfp ge gbr")  # formula name
+_Medium = namedtuple("_Medium", "number rho gmfp01 ge gbr12")  # formula name
 
 
 Vacuum = _Medium(
@@ -202,7 +202,7 @@ class Medium:
             KINT(self.number),
             # name, formula,
             KFLOAT(self.rho),
-            self.gmfp, self.ge, self.gbr
+            self.gmfp01, self.ge, self.gbr12
         )
 
     # Not used except in test suite

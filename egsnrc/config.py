@@ -35,7 +35,6 @@ def use_gpu(want_gpu=True):
     if not want_gpu:
         return
 
-
     if cuda.is_available() or on_cuda_sim:
         device_jit = cuda_device_jit
         on_gpu = True

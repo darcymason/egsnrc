@@ -11,7 +11,7 @@ from numba.cuda.random import xoroshiro128p_uniform_float32
 def _np_initialize(seed, num_particles=None):
     return np.random.default_rng(seed)
 
-def _np_float32(rng, i):
+def _np_float32(rng, _):
     return rng.random()
 
 # Set up "random" from known sequence -------------
