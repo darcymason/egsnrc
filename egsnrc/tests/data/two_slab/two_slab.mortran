@@ -26,18 +26,20 @@ REPLACE {$CALL-HOWNEAR(#);} WITH {
 
 "Define a common for scoring"
 REPLACE {$MXEBIN} WITH {200}
+
 REPLACE {;COMIN/SCORE/;} WITH {;
   common/score/ sc_array($MXREG),sc_array2($MXREG),
                 sc_tmp($MXREG),sc_last($MXREG),
                 sc_pulse_height($MXEBIN,$MXREG), "for pulse height dstn"
-                icase,ipulse,de_pulse;
+                icase,ipulse,de_pulse,
+                compt_count($MXREG),photo_count($MXREG);
                 "It is always a good idea to score in double precision!"
   real*8        sc_array, "for scoring energy deposited in all regions"
                 sc_array2,"for scoring energy squared on a history-by-"
                           "history basis"
                 sc_pulse_height, "for pulse height dstn"
                 sc_tmp,de_pulse;
-  $INTEGER      sc_last,icase,ipulse;
+  $INTEGER      sc_last,icase,ipulse, compt_count, photo_count;
 };
 
 "Define a common for holding the source information"
@@ -71,11 +73,12 @@ REPLACE {$USER-RANGE-DISCARD;} WITH {;
 " Step 1a: begin of executable code and variable declarations         "
 "---------------------------------------------------------------------"
 
-program two_slab;
+"program two_slab;"
 
 $IMPLICIT-NONE;         "$IMPLICIT-NONE is by default implicit none"
 
 ;COMIN/THRESH,          "for threshold energies"
+       EPCONT,          "**DLM: for IAUSFL"
        USEFUL,          "to get electron rest energy"
        GEOM,            "number of regions"
        SOURCE,          "source parameter input in routine inputs"
@@ -254,6 +257,7 @@ $IMPLICIT-NONE;
        "                                             "
        GEOM,
        SCORE,
+       EPCONT,
        SOURCE,
        USER
       /;
@@ -425,6 +429,9 @@ dunit = 1;  "i.e. we work in cm"
 "STEP 5  INITIALIZATION-FOR-AUSGAB                                    "
 "---------------------------------------------------------------------"
 
+IAUSFL(18) = 1;
+IAUSFL(20) = 1;  "call ausgab pre Compton, pre Photoelectric"
+
 "Set all scoring arrays to zero. This could be avoided if"
 "the compiler being used has a `initialize to zero' option"
 "It is a good coding habit to not rely on variables being"
@@ -435,6 +442,11 @@ DO i=1,$MXREG [
     sc_last(i) = 1;
     DO j=1,$MXEBIN [ sc_pulse_height(j,i) = 0; ]
 ]
+
+DO i=1,$MXREG [
+    /compt_count(i),photo_count(i)/ = 0;
+]
+
 
 "Check whether user asks for pulse height dstn. scoring"
 ival                   = ival + 1;
@@ -633,8 +645,8 @@ real*8   aux;
        STACK    "to get the region number"
       /;
 
+irl = ir(np);
 IF( iarg < 5 ) [ "energy is being deposited"
-    irl = ir(np);
     IF( icase = sc_last(irl) ) [ "still the same shower that deposited energy"
                                  "last time in this region"
         sc_tmp(irl) = sc_tmp(irl) + edep;
@@ -654,7 +666,12 @@ IF( iarg < 5 ) [ "energy is being deposited"
         ]
     ]
 ]
-
+IF( iarg = 17 ) [ "Compton about to occur"
+    compt_count(irl) += 1;
+]
+ELSE IF( iarg = 19 ) [ "Photoelectric about to occur
+    photo_count(irl) += 1;
+]
 return;
 end;
 
