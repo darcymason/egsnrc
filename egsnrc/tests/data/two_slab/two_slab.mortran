@@ -7,6 +7,8 @@
 "---------------------------------------------------------------------"
 "STEP 1:  USER-OVERRIDE-OF-EGSnrc-MACROS                              "
 "---------------------------------------------------------------------"
+REPLACE {VERBOSE} WITH {.false.}  "For detailed outputs of random #s etc."
+
 REPLACE {$MXMED} WITH {2}   "up to 10 media in the problem(default 10)"
 REPLACE {$MXREG} WITH {4} "up to 102 geometric regions (default 2000)"
 REPLACE {$MXSTACK} WITH {500}"less than 50 particles on stack at once"
@@ -32,14 +34,16 @@ REPLACE {;COMIN/SCORE/;} WITH {;
                 sc_tmp($MXREG),sc_last($MXREG),
                 sc_pulse_height($MXEBIN,$MXREG), "for pulse height dstn"
                 icase,ipulse,de_pulse,
-                compt_count($MXREG),photo_count($MXREG);
+                compt_count($MXREG),photo_count($MXREG),
+                compt_indirect($MXREG), photo_indirect($MXREG);
                 "It is always a good idea to score in double precision!"
   real*8        sc_array, "for scoring energy deposited in all regions"
                 sc_array2,"for scoring energy squared on a history-by-"
                           "history basis"
                 sc_pulse_height, "for pulse height dstn"
                 sc_tmp,de_pulse;
-  $INTEGER      sc_last,icase,ipulse, compt_count, photo_count;
+  $INTEGER      sc_last,icase,ipulse, compt_count, photo_count,
+                compt_indirect, photo_indirect;
 };
 
 "Define a common for holding the source information"
@@ -79,6 +83,7 @@ $IMPLICIT-NONE;         "$IMPLICIT-NONE is by default implicit none"
 
 ;COMIN/THRESH,          "for threshold energies"
        EPCONT,          "**DLM: for IAUSFL"
+       MISC,           "**DLM: for med"
        USEFUL,          "to get electron rest energy"
        GEOM,            "number of regions"
        SOURCE,          "source parameter input in routine inputs"
@@ -101,6 +106,7 @@ real*8   aux,aux2,total,anorm,sum,sum2;
 " are done in subroutine inputs                                       "
 "---------------------------------------------------------------------"
 
+IF( VERBOSE ) [OUTPUT;('VERBOSE mode turned on, setting 30 histories')]
 call egs_init;
 call inputs;
 $RNG-INITIALIZATION;
@@ -130,6 +136,7 @@ call isumry(1);
 "initiate the shower ncase times"
 ;OUTPUT;(//' Starting shower simulation ...'/);
 nbatch = 10; nperbatch = ncase/nbatch;
+IF(VERBOSE) [nbatch=1; ncase=3000;nperbatch=3000;]
 IF(nperbatch = 0) nperbatch = 1;
       "Note that nbatch and nperbatch are not used for statistical analysis"
       "They are merely for printing information about the progress of the"
@@ -139,6 +146,9 @@ DO icase=1,ncase [ "Note the use of icase as the shower counter"
                    "icase is in common/score/ and is used for"
                    "shower-by-shower scoring"
 
+  IF(VERBOSE) [
+    " OUTPUT icase;('Case:',i5) "
+  ]
   call shower(iqin,ein,xin,yin,zin,uin,vin,win,irin,wtin);
   ibatch = icase/nperbatch;
   IF( ibatch*nperbatch = icase ) [
@@ -217,10 +227,11 @@ IF( ipulse = 1 ) [ "Output pulse height distributions "
     ]
 ]
 
-;OUTPUT;('Region num Compton num Photo');
-OUTPUT 2,compt_count(2),photo_count(2); (I8,I8,I8)
-OUTPUT 3,compt_count(3),photo_count(3); (I8,I8,I8)
-
+;OUTPUT;('Region num Medium# Compton num Photo Compt Indirect Photo Indirect');
+do i=1,4 [
+    OUTPUT i,med(i),compt_count(i),photo_count(i),
+    compt_indirect(i), photo_indirect(i); (6I8)
+]
 call egs_finish;
 end;
 
@@ -449,6 +460,7 @@ DO i=1,$MXREG [
 
 DO i=1,$MXREG [
     /compt_count(i),photo_count(i)/ = 0;
+    /compt_indirect(i),photo_indirect(i)/ = 0;
 ]
 
 
@@ -671,10 +683,12 @@ IF( iarg < 5 ) [ "energy is being deposited"
     ]
 ]
 IF( iarg = 17 ) [ "Compton about to occur"
-    compt_count(irl) += 1;
+    IF ( E(NP) = 1.0 ) [compt_count(irl) += 1;]
+    ELSE [compt_indirect(irl) += 1;]
 ]
 ELSE IF( iarg = 19 ) [ "Photoelectric about to occur
-    photo_count(irl) += 1;
+    IF ( E(NP) = 1.0 ) [photo_count(irl) += 1;]
+    ELSE [photo_indirect(irl) += 1;]
 ]
 return;
 end;

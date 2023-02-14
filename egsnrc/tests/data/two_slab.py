@@ -26,7 +26,7 @@ from egsnrc.shower import shower
 NO_DISCARD, DISCARD = np.arange(2, dtype=np.int32)
 
 
-SCORE_nCOMPTON, SCORE_nPHOTO, SCORE_nLOST = np.arange(3, dtype=np.int32)
+SCORE_nCOMPTON, SCORE_nPHOTO, SCORE_nLOST, SCORE_nCOMPTINDIRECT, SCORE_nPHOTOINDIRECT = np.arange(5, dtype=np.int32)
 SCORE_eCOMPTON, SCORE_ePHOTO, SCORE_eLOST = np.arange(3, dtype=np.int32)
 
 
@@ -36,16 +36,23 @@ def ausgab(gid, status, p1, p2, iscore, fscore):
     # Note, if don't track by gid, then need "atomic" operations to handle multi-thread
     region_number = p2.region.number
     if status == COMPTON:
-        iscore[gid, region_number, SCORE_nCOMPTON] += 1
+        if p1.energy == 1:
+            iscore[gid, region_number, SCORE_nCOMPTON] += 1
+        else:
+            iscore[gid, region_number, SCORE_nCOMPTINDIRECT] += 1
         fscore[gid, region_number, SCORE_eCOMPTON] += p1.energy - p2.energy
     elif status == PHOTO:
-        iscore[gid, region_number, SCORE_nPHOTO] += 1
+        if p1.energy == 1:
+            iscore[gid, region_number, SCORE_nPHOTO] += 1
+        else:
+            iscore[gid, region_number, SCORE_nPHOTOINDIRECT] += 1
         fscore[gid, region_number, SCORE_ePHOTO] += p1.energy - p2.energy
     elif region_number not in (1, 2):  # lost to geometry
         iscore[gid, region_number, SCORE_nLOST] += 1
         fscore[gid, region_number, SCORE_eLOST] += p1.energy
 
 
+@device_jit
 @device_jit
 def howfar(p, regions, ustep):  # -> step, region, discard_flag (>0 to discard)
     """Given particle and proposed step distance, return actual step and region
@@ -92,7 +99,7 @@ If num_batches is not specified, it defaults to 1 on CPU or 2 on GPU (to separat
 
 if __name__ == "__main__":
     import sys
-    num_particles = 100_000
+    num_particles = 200_000
     if len(sys.argv) > 1:
         try:
             num_particles = int(sys.argv[1])
@@ -109,8 +116,9 @@ if __name__ == "__main__":
 
 
     # Set up the media and the regions
-    Ta = Medium(1, "Ta")
-    Si = Medium(2, "Si")
+    # Match rho and sumA from Mortran run
+    Ta = Medium(1, "Ta", rho=16.6, sumA=180.948)
+    Si = Medium(2, "Si", rho=2.4, sumA=28.088)
     media = [Ta, Si]
 
     regions = [
@@ -138,7 +146,7 @@ if __name__ == "__main__":
 
     # Initialize Scoring arrays
     iscore = np.zeros(
-        (num_particles, NUM_REGIONS,  3),  # (nCompt, nPhoto, nLost)
+        (num_particles, NUM_REGIONS,  5),  # (nCompt, nPhoto, nLost, nComptIndirect, nPhotoIndirect)
         dtype=np.int32
     )
     fscore = np.zeros(
@@ -165,6 +173,7 @@ if __name__ == "__main__":
         print("Photo  : ", sum(fscore[:,r,SCORE_ePHOTO]))
     sum_compt = np.sum(fscore[:, :, SCORE_eCOMPTON])
     sum_photo = np.sum(fscore[:, :, SCORE_ePHOTO])
+
     sum_lost = np.sum(fscore[:, :, SCORE_eLOST])
     print(f"Sums:  Compt: {sum_compt}, Photo {sum_photo}, Lost {sum_lost}")
     print("Energy in :", source.total_energy)
@@ -177,5 +186,7 @@ if __name__ == "__main__":
     for r in range(1,3):
         n_compt = sum(iscore[:,r,SCORE_nCOMPTON])
         n_photo = sum(iscore[:,r,SCORE_nPHOTO])
-        print(f"{r}\t{n_compt}\t{n_photo}")
+        n_compt_ind = sum(iscore[:,r,SCORE_nCOMPTINDIRECT])
+        n_photo_ind = sum(iscore[:,r,SCORE_nPHOTOINDIRECT])
+        print(f"{r}\t{n_compt}\t{n_photo}\t{n_compt_ind}\t{n_photo_ind}")
 

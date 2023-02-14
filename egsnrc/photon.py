@@ -10,7 +10,7 @@ from numba.core.types import NamedTuple
 import logging
 from egsnrc.compton import compton
 
-from egsnrc.config import device_jit, on_gpu
+from egsnrc.config import KINT, device_jit, on_gpu
 from egsnrc.constants import REST_MASS
 from egsnrc.params import VACDST, EPSGMFP
 from egsnrc.particles import replace_region_xyz
@@ -50,7 +50,7 @@ def transport_photon(p, dpmfp, gle, regions, howfar):
         medium = region.medium
         if medium.number != 0:
             # set interval gle, ge;
-            lgle = nb.int32(medium.ge[1] * gle + medium.ge[0]) # Set pwlf interval
+            lgle = KINT(medium.ge[1] * gle + medium.ge[0]) # Set pwlf interval
             # evaluate gmfpr0 using gmfp(gle)
             gmfpr0 = medium.gmfp01[1, lgle] * gle + medium.gmfp01[0, lgle]
 
@@ -174,6 +174,7 @@ def photon_kernel(
             rnno35 = 1.0e-30
         dpmfp = -log(rnno35)
 
+        # print(f"{gle=} {rnno35=} {dpmfp=}")
         mod_p, status, dpmfp, lgle = transport_photon(
             p, dpmfp, gle, regions, howfar
         )

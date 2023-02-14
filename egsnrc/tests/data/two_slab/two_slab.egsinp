@@ -67,9 +67,13 @@
  Method of input=     groups
  Z of front face=     0
  number of slabs=     2
- slab thickness=      2.0
+ slab thickness=      0.2
 
  media=  TA,SI
+
+ SET MEDIUM 2
+ START REGION 3
+ STOP REGION 3
 
  :Stop Geometrical Inputs:
  #########################
@@ -89,7 +93,7 @@
  Incident Charge=         0
  Incident Kinetic Energy= 1
  Incident Angle=          0
- Number of Histories=     10000
+ Number of Histories=     200000
 
  :Stop Source Input:
  -------------------
