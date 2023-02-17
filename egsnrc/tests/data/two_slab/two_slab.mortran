@@ -12,6 +12,7 @@ REPLACE {VERBOSE} WITH {.false.}  "For detailed outputs of random #s etc."
 REPLACE {$MXMED} WITH {2}   "up to 10 media in the problem(default 10)"
 REPLACE {$MXREG} WITH {4} "up to 102 geometric regions (default 2000)"
 REPLACE {$MXSTACK} WITH {500}"less than 50 particles on stack at once"
+REPLACE {$CALL-USER-ELECTRON} WITH {wt(np)=0; np=np-1; RETURN;}
 
 
 "Define a common to pass information to the geometry routines      "

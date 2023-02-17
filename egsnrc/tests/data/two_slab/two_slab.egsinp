@@ -93,7 +93,7 @@
  Incident Charge=         0
  Incident Kinetic Energy= 1
  Incident Angle=          0
- Number of Histories=     200000
+ Number of Histories=     10000000
 
  :Stop Source Input:
  -------------------
