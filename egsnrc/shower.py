@@ -16,6 +16,7 @@ from egsnrc import photon  # To set index in CPU mode and howfar, ausgab
 from egsnrc.config import on_gpu
 from egsnrc import egsrandom
 from egsnrc.media import Vacuum
+from egsnrc.util import CUDATimer
 
 logger = logging.getLogger("egsnrc")
 
@@ -50,7 +51,6 @@ def cuda_details():
 
 def shower(
     seed, num_particles, source, regions, media, howfar, ausgab, iscore, fscore,
-    num_batches=None
 ):
     """Start the Monte Carlo simulation
 
@@ -70,8 +70,6 @@ def shower(
         Output array for ausgab to track integer values, e.g. counting interactions
     fscore : array of num_particles float32's
         Output array for ausgab to track float values, e.g. energy deposited
-    num_batches: int
-        If not specified, is 1 for CPU and 2 for GPU (to see effect of compile time)
     """
     # Initialize random numbers
     if on_gpu:
@@ -80,13 +78,19 @@ def shower(
         egsrandom.set_array_library("numpy")
     rng_states = egsrandom.initialize(seed, num_particles)
 
-    if not num_batches:
-        num_batches = 2 if on_gpu else 1
-
-    # Convert regions from Python classes to tuples needed to pass to kernel
 
     iparticles, fparticles = source.generate(num_particles)
+    device = "cuda" if on_gpu else "cpu"
+    if device == "cuda":
+        print("Pre-copying arrays to device - not included in timing")
+        iparticles = cuda.to_device(iparticles)
+        fparticles = cuda.to_device(fparticles)
+        iscore = cuda.to_device(iscore)
+        fscore = cuda.to_device(fscore)
+        rng_states = cuda.to_device(rng_states)
 
+
+    # Convert regions from Python classes to tuples needed to pass to kernel
     # Add vaccuum as medium 0 if not already there
     # XXX currently assumes media and regions are in medium/region # consecutive order
     # XXX also duplicates memory via Media kernelize - in Media and in Region.medium
@@ -116,31 +120,34 @@ def shower(
     logger.info(f"Running {num_particles:,} particles")
     logger.info(cuda_details())
 
-    times = []
-    for i in range(num_batches):
-        if on_gpu:
-            cuda.synchronize()
-            start = perf_counter()
+    if on_gpu:
+        cuda.synchronize()
+        start = perf_counter()
+        with CUDATimer() as cudatimer:  # CUDATimes(stream)
             photon_kernel.forall(num_particles)(
                 rng_states,
                 iparticles, fparticles,
                 regions, media, iscore, fscore
             )
-            cuda.synchronize()
-            end = perf_counter()
-        else:
-            start = perf_counter()
-            for i in range(num_particles):
-                photon.non_gpu_index = i
-                photon_kernel.py_func(
-                    rng_states,
-                    iparticles, fparticles,
-                    regions, ausgab, iscore, fscore
-                )
-            end = perf_counter()
+        print(f"Elapsed time by events {cudatimer.elapsed:.2f} ms")
+        cuda.synchronize()
+        end = perf_counter()
+    else:
+        start = perf_counter()
+        for i in range(num_particles):
+            photon.non_gpu_index = i
+            photon_kernel.py_func(
+                rng_states,
+                iparticles, fparticles,
+                regions, ausgab, iscore, fscore
+            )
+        end = perf_counter()
 
-        times.append(end - start)
+    shower_time = end - start
 
-    logger.info(f" times:")
-    times_str = ", ".join(f"{time_:>8.5} " for time_ in times)
-    logger.info(f"Completed {num_batches} run(s) in {times_str} seconds")
+    logger.info(f"Elapsed time (Python perf_counter): {shower_time:>8.5} seconds")
+
+    if device == "cuda":
+        iscore = iscore.copy_to_host()
+        fscore = fscore.copy_to_host()
+    return iscore, fscore

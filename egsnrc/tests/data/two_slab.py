@@ -8,11 +8,15 @@ import numba as nb
 from numba import cuda
 import numpy as np
 
-from egsnrc.config import device_jit
+from egsnrc.config import KFLOAT, KINT, device_jit
 from egsnrc import egsrandom
 if not cuda.is_available():
     print("***** LOCAL ONLY in two_slab")
     egsrandom.set_array_library("numpy")
+else:
+    egsrandom.set_array_library("cuda")
+
+
 from egsnrc.photon import COMPTON, PHOTO
 from egsnrc.particles import (
     Particle, particle_iattrs, particle_fattrs, ENERGY, W, REGION, PhotonSource
@@ -52,7 +56,6 @@ def ausgab(gid, status, p1, p2, iscore, fscore):
         fscore[gid, region_number, SCORE_eLOST] += p1.energy
 
 
-@device_jit
 @device_jit
 def howfar(p, regions, ustep):  # -> step, region, discard_flag (>0 to discard)
     """Given particle and proposed step distance, return actual step and region
@@ -99,7 +102,8 @@ If num_batches is not specified, it defaults to 1 on CPU or 2 on GPU (to separat
 
 if __name__ == "__main__":
     import sys
-    num_particles = 200_000
+    num_particles = 200
+    num_batches = 8
     if len(sys.argv) > 1:
         try:
             num_particles = int(sys.argv[1])
@@ -145,18 +149,21 @@ if __name__ == "__main__":
     NUM_REGIONS = 4
 
     # Initialize Scoring arrays
+    # Because our ausgab stores by particle interaction, we can just call all particles,
+    # and divide into batches after the fact for stats
     iscore = np.zeros(
-        (num_particles, NUM_REGIONS,  5),  # (nCompt, nPhoto, nLost, nComptIndirect, nPhotoIndirect)
-        dtype=np.int32
+        (num_particles*num_batches, NUM_REGIONS,  5),  # (nCompt, nPhoto, nLost, nComptIndirect, nPhotoIndirect)
+        dtype=KINT
     )
     fscore = np.zeros(
-        (num_particles, NUM_REGIONS,  3),  # (eCompt, ePhoto, eLost)
-        dtype=np.float32
+        (num_particles*num_batches, NUM_REGIONS,  3),  # (eCompt, ePhoto, eLost)
+        dtype=KFLOAT
     )
 
     # Start the simulation
-    shower(
-        42, num_particles, source, regions, media, howfar, ausgab, iscore, fscore
+    iscore, fscore = shower(
+        42, num_particles*num_batches, source, regions, media, howfar,
+        ausgab, iscore, fscore
     )
 
 
@@ -166,27 +173,48 @@ if __name__ == "__main__":
         print("Scoring - Particles/Region")
         print("nCompt     nPhoto     eCompt     ePhoto     nLost      eLost")
         print(fscore)
-    for r in range(1, 3):
-        print("Energy Total by Region")
-        print(f"Region {r}----")
-        print("Compton: ", sum(fscore[:,r,SCORE_eCOMPTON]))
-        print("Photo  : ", sum(fscore[:,r,SCORE_ePHOTO]))
-    sum_compt = np.sum(fscore[:, :, SCORE_eCOMPTON])
-    sum_photo = np.sum(fscore[:, :, SCORE_ePHOTO])
+    # for r in range(1, 3):
+    #     print("Energy Total by Region")
+    #     print(f"Region {r}----")
+    #     print("Compton: ", sum(fscore[:,r,SCORE_eCOMPTON]))
+    #     print("Photo  : ", sum(fscore[:,r,SCORE_ePHOTO]))
+    # sum_compt = np.sum(fscore[:, :, SCORE_eCOMPTON])
+    # sum_photo = np.sum(fscore[:, :, SCORE_ePHOTO])
 
-    sum_lost = np.sum(fscore[:, :, SCORE_eLOST])
-    print(f"Sums:  Compt: {sum_compt}, Photo {sum_photo}, Lost {sum_lost}")
-    print("Energy in :", source.total_energy)
-    print("Energy out:", sum((sum_compt, sum_photo, sum_lost)))
+    # sum_lost = np.sum(fscore[:, :, SCORE_eLOST])
+    # print(f"Sums:  Compt: {sum_compt}, Photo {sum_photo}, Lost {sum_lost}")
+    # print("Energy in :", source.total_energy)
+    # print("Energy out:", sum((sum_compt, sum_photo, sum_lost)))
 
     print("--------------------------------------------")
-    print("Counts by Region")
+    print(f"Counts by Region and divided into {num_batches} batches")
     print("----------------")
     print("Region\tCompton\tPhoto")
-    for r in range(1,3):
-        n_compt = sum(iscore[:,r,SCORE_nCOMPTON])
-        n_photo = sum(iscore[:,r,SCORE_nPHOTO])
-        n_compt_ind = sum(iscore[:,r,SCORE_nCOMPTINDIRECT])
-        n_photo_ind = sum(iscore[:,r,SCORE_nPHOTOINDIRECT])
-        print(f"{r}\t{n_compt}\t{n_photo}\t{n_compt_ind}\t{n_photo_ind}")
 
+    ncompts_reg = [None]
+    nphotos_reg = [None]  # 0th is blank
+    # XXX ncomps_ind, nphotos_ind
+    for r in range(1,3):
+        ncompts = []
+        nphotos = []
+        for i_batch in range(num_batches):
+            i1 = i_batch * num_particles
+            i2 = i1 + num_particles
+            n_compt = sum(iscore[i1:i2, r, SCORE_nCOMPTON])
+            n_photo = sum(iscore[i1:i2, r, SCORE_nPHOTO])
+            n_compt_ind = sum(iscore[i1:i2, r, SCORE_nCOMPTINDIRECT])
+            n_photo_ind = sum(iscore[i1:i2, r, SCORE_nPHOTOINDIRECT])
+            print(f"{r}\t{n_compt}\t{n_photo}\t{n_compt_ind}\t{n_photo_ind}")
+            ncompts.append(n_compt)
+            nphotos.append(n_photo)
+        ncompts_reg.append(ncompts)
+        nphotos_reg.append(nphotos)
+
+    print("\nMeans and std devs")
+    print("-------------------")
+    print("Region\tCompton\tPhoto")
+    for r in range(1,3):
+        print(
+            f"{r}\t{np.mean(ncompts_reg[r])} +/- {np.std(ncompts_reg[r])}"
+            f"""\t{np.mean(nphotos_reg[r])} +- {np.std(nphotos_reg[r])}"""
+        )

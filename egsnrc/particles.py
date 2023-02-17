@@ -3,6 +3,7 @@
 
 from collections import namedtuple
 import numpy as np
+from numba import cuda
 from egsnrc.config import device_jit
 from egsnrc.params import EPSGMFP, VACDST
 
@@ -81,7 +82,7 @@ class PhotonSource:
             self.iparticles = np.empty((0, len(particle_iattrs)), dtype=np.int32)
             self.fparticles = np.empty((0, len(particle_fattrs)), dtype=np.float32)
 
-    def generate(self, num_particles):
+    def generate(self, num_particles, device="cpu"):
         # Start with zeros, then fill in
         iparticles = np.zeros(
             (num_particles, len(particle_iattrs)), dtype=np.int32
@@ -110,7 +111,11 @@ class PhotonSource:
         if self.store_particles:
             self.fparticles = np.vstack((self.fparticles, fparticles))
             self.iparticles = np.vstack((self.iparticles, iparticles))
-        return iparticles, fparticles
+
+        if device == "cuda":
+            return cuda.to_device(iparticles), cuda.to_device(fparticles)
+        else:
+            return iparticles, fparticles
 
 
 if __name__ == "__main__":

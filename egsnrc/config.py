@@ -1,5 +1,6 @@
 import os
 from numba import cuda
+import numba as nb
 import numpy as np
 from logging import getLogger
 
@@ -30,7 +31,7 @@ def use_gpu(want_gpu=True):
     global device_jit
     global on_gpu
 
-    device_jit = no_jit
+    device_jit = no_jit  # nb.njit   # no_jit
     on_gpu = False
     if not want_gpu:
         return

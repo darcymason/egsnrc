@@ -5080,7 +5080,7 @@ NPold = NP;      "Set the old stack counter"
 PEIG=E(NP); irl = ir(np);
 
 "*** DLM"
-OUTPUT PEIG,irl; ('-- Photo-electric, energy ',F12.8,' Region ',I3,' --')
+"OUTPUT PEIG,irl; ('-- Photo-electric, energy ',F12.8,' Region ',I3,' --')"
 IF( peig < edge_energies(2,1) ) [
     IF( n_warning < 100 ) [
         n_warning = n_warning + 1;
