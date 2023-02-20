@@ -150,170 +150,162 @@ def photon_kernel(
     if gid >= num_particles:
         return
 
-    # Pack array info into a Particle namedtuple
-    p = get_source_particle(rng_states, gid, regions)
-    # p = set_particle(gid, regions, iparticles, fparticles)
+    # CUDA Grid-Stride loop to reuse this thread
+    threads_per_grid = cuda.blockDim.x * cuda.gridDim.x
+    for i_arr in range(gid, num_particles, threads_per_grid):
+        # Get the next particle from the source
+        p = get_source_particle(rng_states, gid, regions)
+        # p = set_particle(gid, regions, iparticles, fparticles)
 
-    # Note Particle tuples are not mutable, so put `status` into mutable variable
-    status = p.status
-
-    if p.energy <= p.region.pcut:
-        status = PCUT_DISCARD
-
-    # :PNEWENERGY:
-    # Follow the photon through all its interactions
-    while status >= 0:  # Negative status for particle no longer tracked
-        if p.w == 0.0:  # User photon discard
-            status = USER_PHOTON_DISCARD
-            break
+        # Note Particle tuples are not mutable, so put `status` into mutable variable
+        status = p.status
 
         if p.energy <= p.region.pcut:
             status = PCUT_DISCARD
-            break
 
-        gle = log(p.energy)  # gamma log energy
+        # :PNEWENERGY:
+        # Follow the photon through all its interactions
+        while status >= 0:  # Negative status for particle no longer tracked
+            if p.w == 0.0:  # User photon discard
+                status = USER_PHOTON_DISCARD
+                break
 
-        # Sample number of mfp to transport before interacting
-        rnno35 = egsrandom.random_kfloat(rng_states, gid)
-        if rnno35 == 0.0:
-            rnno35 = 1.0e-30
-        dpmfp = -log(rnno35)
+            if p.energy <= p.region.pcut:
+                status = PCUT_DISCARD
+                break
 
-        # print(f"{gle=} {rnno35=} {dpmfp=}")
-        mod_p, status, dpmfp, lgle = transport_photon(
-            p, dpmfp, gle, regions, howfar
-        )
+            gle = log(p.energy)  # gamma log energy
 
-        ausgab(gid, status, p, mod_p, iscore, fscore) # if want to track change of position, region
+            # Sample number of mfp to transport before interacting
+            rnno35 = egsrandom.random_kfloat(rng_states, gid)
+            if rnno35 == 0.0:
+                rnno35 = 1.0e-30
+            dpmfp = -log(rnno35)
+
+            # print(f"{gle=} {rnno35=} {dpmfp=}")
+            mod_p, status, dpmfp, lgle = transport_photon(
+                p, dpmfp, gle, regions, howfar
+            )
+
+            ausgab(i_arr, status, p, mod_p, iscore, fscore) # if want to track change of position, region
+            p = mod_p
+
+            if status != INTERACTION_READY:
+                break  # go to discard sections
+
+            # It is finally time to interact.
+            # The following allows one to introduce rayleigh scattering
+            # XXX  --- Inline replace: $ RAYLEIGH_SCATTERING; -----
+            # XXX --- Inline replace: $ PHOTONUCLEAR; -----
+
+            # This random number determines which interaction
+            rnno36 = egsrandom.random_kfloat(rng_states, gid)
+
+            medium = mod_p.region.medium
+            # Original Mortran
+            # Evaluate gbr1 using gbr1(gle)
+            #    GBR1 = PAIR / (PAIR + COMPTON + PHOTO) = PAIR / GTOTAL
+
+            med_gbr = medium.gbr12[GBR_PAIR, :, lgle]
+            gbr_pair = med_gbr[1] * gle + med_gbr[0]
+            if rnno36 <= gbr_pair and p.energy > 2.0 * REST_MASS:
+                # status = PAIR
+                # mod_p = pair(rng_states, p)
+                continue  # XXX for now skip pair
+                # IT WAS A PAIR PRODUCTION
+                # if iausfl[PAIRAUSB-1+1] != 0:
+                #     ausgab(PAIRAUSB, ...)
+                # p3, ...  = pair()
+                # if particle_selection_pair:
+                #     particle_selection_pair()
+
+                # if iausfl[PAIRAUSA-1+1] != 0:
+                #     ausgab(PAIRAUSA, ...)
+
+                # if iq[np_m1] != 0:
+                #     break  # EXIT :PNEWENERGY:
+                # else:  # this may happen if pair electrons killed via Russian Roul
+                #     # :PAIR_ELECTRONS_KILLED:
+                #     # If here, then gamma is lowest energy particle.
+                #     peig = e[np_m1]
+                #     eig = peig
+                #     if eig < pcut[irl_m1]:
+                #         particle_outcome = PCUT_DISCARD
+                #         break
+                #     continue  # repeat PNEWENERGY loop
+
+            #     GBR2 = (PAIR + COMPTON) / GTOTAL
+            # evaluate gbr2 using gbr2(gle)
+            med_gbr = medium.gbr12[GBR_COMPTON, :, lgle]
+            gbr_compt = med_gbr[1] * gle + med_gbr[0]
+            if rnno36 < gbr_compt:
+                status = COMPTON
+                mod_p = compton(rng_states, gid, p)
+                # It was a compton
+                # if iausfl[COMPAUSB+1-1] != 0:
+                #     ausgab(COMPAUSB)
+                # egsfortran.compt()
+                # if particle-selection-compt:
+                #     particle-selection-compt()
+                # if iausfl[COMPAUSA+1-1] != 0:
+                #     ausgab(COMPAUSA)
+                # if iq[np_m1] != 0:  # Not photon
+                #     break  # XXX EXIT:PNEWENERGY:
+            else:
+                # if iausfl[PHOTOAUSB+1-1] != 0: ...
+                mod_p = photo(rng_states, gid, p)  # egsfortran.photo()
+                status = PHOTO
+                # if particle_selection_photo:...
+                # if np == 0 or np < npold:
+                #     return ircode
+                # The above may happen if Russian Roulette is on....
+                # if iausfl[PHOTOAUSA+1-1] != 0:
+                #     ausgab(PHOTOAUSA)
+            # End of photo electric block
+
+            # Interaction done, looping back for next step
+            ausgab(gid, status, p, mod_p, iscore, fscore)
+            p = mod_p
+            # end :PNEWENERGY: LOOP ---------
+
+        # ---------------------------------------------
+        # Photon cutoff energy discard section
+        # ---------------------------------------------
+
         p = mod_p
 
-        if status != INTERACTION_READY:
-            break  # go to discard sections
 
-        # It is finally time to interact.
-        # The following allows one to introduce rayleigh scattering
-        # XXX  --- Inline replace: $ RAYLEIGH_SCATTERING; -----
-        # XXX --- Inline replace: $ PHOTONUCLEAR; -----
+        # if status == PCUT_DISCARD:
+        #     if p.medium > 0:
+        #         if eig > ap[medium_m1]:
+        #             idr = EGSCUTAUS
+        #         else:
+        #             idr = PEGSCUTAUS
+        #     else:
+        #         idr = EGSCUTAUS
 
-        # This random number determines which interaction
-        rnno36 = egsrandom.random_kfloat(rng_states, gid)
+        #     epcont.edep = peig  # get energy deposition for user
+        #     # inline replace $ PHOTON-TRACK-END
+        #     if iausfl[idr-1+1] != 0:
+        #         ausgab(idr)
+        #     # --- end inline replace
+        #     ircode = 2
+        #     stack.np -= 1
+        #     return ircode
 
-        medium = mod_p.region.medium
-        # Original Mortran
-        # Evaluate gbr1 using gbr1(gle)
-        #    GBR1 = PAIR / (PAIR + COMPTON + PHOTO) = PAIR / GTOTAL
+        # ---------------------------------------------
+        # User requested photon discard section
+        # ---------------------------------------------
+        # elif particle_outcome == USER_PHOTON_DISCARD:
+        #     epcont.edep = peig
+        #     if iausfl[USERDAUS-1+1] != 0:
+        #         ausgab(USERDAUS)
+        #     ircode = 2
+        #     stack.np -= 1
+        #     return ircode
+        # else:
+        #     raise ValueError(f"Unhandled particle outcome ({particle_outcome})")
 
-        med_gbr = medium.gbr12[GBR_PAIR, :, lgle]
-        gbr_pair = med_gbr[1] * gle + med_gbr[0]
-        if rnno36 <= gbr_pair and p.energy > 2.0 * REST_MASS:
-            # status = PAIR
-            # mod_p = pair(rng_states, p)
-            continue  # XXX for now skip pair
-            # IT WAS A PAIR PRODUCTION
-            # if iausfl[PAIRAUSB-1+1] != 0:
-            #     ausgab(PAIRAUSB, ...)
-            # p3, ...  = pair()
-            # if particle_selection_pair:
-            #     particle_selection_pair()
-
-            # if iausfl[PAIRAUSA-1+1] != 0:
-            #     ausgab(PAIRAUSA, ...)
-
-            # if iq[np_m1] != 0:
-            #     break  # EXIT :PNEWENERGY:
-            # else:  # this may happen if pair electrons killed via Russian Roul
-            #     # :PAIR_ELECTRONS_KILLED:
-            #     # If here, then gamma is lowest energy particle.
-            #     peig = e[np_m1]
-            #     eig = peig
-            #     if eig < pcut[irl_m1]:
-            #         particle_outcome = PCUT_DISCARD
-            #         break
-            #     continue  # repeat PNEWENERGY loop
-
-        #     GBR2 = (PAIR + COMPTON) / GTOTAL
-        # evaluate gbr2 using gbr2(gle)
-        med_gbr = medium.gbr12[GBR_COMPTON, :, lgle]
-        gbr_compt = med_gbr[1] * gle + med_gbr[0]
-        if rnno36 < gbr_compt:
-            status = COMPTON
-            mod_p = compton(rng_states, gid, p)
-            # It was a compton
-            # if iausfl[COMPAUSB+1-1] != 0:
-            #     ausgab(COMPAUSB)
-            # egsfortran.compt()
-            # if particle-selection-compt:
-            #     particle-selection-compt()
-            # if iausfl[COMPAUSA+1-1] != 0:
-            #     ausgab(COMPAUSA)
-            # if iq[np_m1] != 0:  # Not photon
-            #     break  # XXX EXIT:PNEWENERGY:
-        else:
-            # if iausfl[PHOTOAUSB+1-1] != 0: ...
-            mod_p = photo(rng_states, gid, p)  # egsfortran.photo()
-            status = PHOTO
-            # if particle_selection_photo:...
-            # if np == 0 or np < npold:
-            #     return ircode
-            # The above may happen if Russian Roulette is on....
-            # if iausfl[PHOTOAUSA+1-1] != 0:
-            #     ausgab(PHOTOAUSA)
-        # End of photo electric block
-
-        # Interaction done, looping back for next step
-        ausgab(gid, status, p, mod_p, iscore, fscore)
-        p = mod_p
-        # end :PNEWENERGY: LOOP ---------
-
-    # ---------------------------------------------
-    # Photon cutoff energy discard section
-    # ---------------------------------------------
-
-    p = mod_p
-
-
-    # if status == PCUT_DISCARD:
-    #     if p.medium > 0:
-    #         if eig > ap[medium_m1]:
-    #             idr = EGSCUTAUS
-    #         else:
-    #             idr = PEGSCUTAUS
-    #     else:
-    #         idr = EGSCUTAUS
-
-    #     epcont.edep = peig  # get energy deposition for user
-    #     # inline replace $ PHOTON-TRACK-END
-    #     if iausfl[idr-1+1] != 0:
-    #         ausgab(idr)
-    #     # --- end inline replace
-    #     ircode = 2
-    #     stack.np -= 1
-    #     return ircode
-
-    # ---------------------------------------------
-    # User requested photon discard section
-    # ---------------------------------------------
-    # elif particle_outcome == USER_PHOTON_DISCARD:
-    #     epcont.edep = peig
-    #     if iausfl[USERDAUS-1+1] != 0:
-    #         ausgab(USERDAUS)
-    #     ircode = 2
-    #     stack.np -= 1
-    #     return ircode
-    # else:
-    #     raise ValueError(f"Unhandled particle outcome ({particle_outcome})")
-
-
-
-        # --------------- My original toy photon tracking ------------------------
-
-        # mod_p = Particle(status2, region2, energy2, z2)
-        # # p = p._replace(status=status)  # replace doesn't work in Cuda
-        # p = Particle(status, p.region, p.energy, p.z)
-        # ausgab(gid, p, mod_p, out)  # probs don't need gid, can get with cuda.grid(1)
-        # # New particle info becomes current for next loop
-        # p = mod_p
-        # status = p.status  # need mutable status
 
 def init(random_seed, num_particles):
     rng_states = create_xoroshiro128p_states(

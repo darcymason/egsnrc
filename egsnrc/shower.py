@@ -49,6 +49,10 @@ def cuda_details():
     return attrs
 
 
+threads_per_block = 512  # 1024
+# blocks_per_grid = 16*40
+
+
 def shower(
     seed, num_particles, get_source_particle, regions, media, howfar, ausgab, iscore, fscore,
 ):
@@ -88,8 +92,8 @@ def shower(
         iscore = cuda.to_device(iscore)
         fscore = cuda.to_device(fscore)
         rng_states = cuda.to_device(rng_states)
-
-
+        blocks_per_grid = (num_particles // threads_per_block) + 1
+        print(f"{threads_per_block=}  {blocks_per_grid=}")
     # Convert regions from Python classes to tuples needed to pass to kernel
     # Add vaccuum as medium 0 if not already there
     # XXX currently assumes media and regions are in medium/region # consecutive order
@@ -125,7 +129,7 @@ def shower(
         cuda.synchronize()
         start = perf_counter()
         with CUDATimer() as cudatimer:  # CUDATimes(stream)
-            photon_kernel.forall(num_particles)(
+            photon_kernel[blocks_per_grid, threads_per_block](
                 rng_states,
                 num_particles, # XXX temp
                 # iparticles, fparticles,
