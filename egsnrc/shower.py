@@ -50,7 +50,7 @@ def cuda_details():
 
 
 def shower(
-    seed, num_particles, source, regions, media, howfar, ausgab, iscore, fscore,
+    seed, num_particles, get_source_particle, regions, media, howfar, ausgab, iscore, fscore,
 ):
     """Start the Monte Carlo simulation
 
@@ -79,12 +79,12 @@ def shower(
     rng_states = egsrandom.initialize(seed, num_particles)
 
 
-    iparticles, fparticles = source.generate(num_particles)
+    # iparticles, fparticles = source.generate(num_particles)
     device = "cuda" if on_gpu else "cpu"
     if device == "cuda":
         print("Pre-copying arrays to device - not included in timing")
-        iparticles = cuda.to_device(iparticles)
-        fparticles = cuda.to_device(fparticles)
+        # iparticles = cuda.to_device(iparticles)
+        # fparticles = cuda.to_device(fparticles)
         iscore = cuda.to_device(iscore)
         fscore = cuda.to_device(fscore)
         rng_states = cuda.to_device(rng_states)
@@ -115,6 +115,7 @@ def shower(
     # Configure callbacks:
     photon.howfar = howfar
     photon.ausgab = ausgab
+    photon.get_source_particle = get_source_particle
     Py_major, Py_minor = sys.version_info.major, sys.version_info.minor
     logger.info(f"Starting `shower` with Numba {nb.__version__}, Python {Py_major}.{Py_minor}")
     logger.info(f"Running {num_particles:,} particles")
@@ -126,7 +127,8 @@ def shower(
         with CUDATimer() as cudatimer:  # CUDATimes(stream)
             photon_kernel.forall(num_particles)(
                 rng_states,
-                iparticles, fparticles,
+                num_particles, # XXX temp
+                # iparticles, fparticles,
                 regions, media, iscore, fscore
             )
         print(f"Elapsed time by events {cudatimer.elapsed:.2f} ms")
@@ -138,7 +140,8 @@ def shower(
             photon.non_gpu_index = i
             photon_kernel.py_func(
                 rng_states,
-                iparticles, fparticles,
+                num_particles,
+                # iparticles, fparticles,
                 regions, ausgab, iscore, fscore
             )
         end = perf_counter()

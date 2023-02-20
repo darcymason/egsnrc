@@ -131,7 +131,10 @@ non_gpu_index = None
 # Kernel
 @cuda.jit
 def photon_kernel(
-    rng_states, iparticles, fparticles, regions, media, iscore, fscore
+    rng_states,
+    num_particles, # XXX temp
+    # iparticles, fparticles,
+    regions, media, iscore, fscore
 ):
     """Main photon particle simulation kernel - implicitly called on each gpu thread
 
@@ -143,11 +146,13 @@ def photon_kernel(
 
     # Get unique grid index
     gid = cuda.grid(1) if on_gpu else non_gpu_index  # Global for testing only
-    if gid > len(fparticles):   # needed when have more GPU threads than particles
+    # if gid > len(fparticles):   # needed when have more GPU threads than particles
+    if gid >= num_particles:
         return
 
     # Pack array info into a Particle namedtuple
-    p = set_particle(gid, regions, iparticles, fparticles)
+    p = get_source_particle(rng_states, gid, regions)
+    # p = set_particle(gid, regions, iparticles, fparticles)
 
     # Note Particle tuples are not mutable, so put `status` into mutable variable
     status = p.status
