@@ -53,6 +53,7 @@
 REPLACE {$MXMED} WITH {5}   "up to 10 media in the problem(default 10)"
 REPLACE {$MXREG} WITH {102} "up to 102 geometric regions (default 2000)"
 REPLACE {$MXSTACK} WITH {50}"less than 50 particles on stack at once"
+PARAMETER $MXGE=20;  "XXX temp to test sigma calcs"
 
 
 "Define a common to pass information to the geometry routines      "

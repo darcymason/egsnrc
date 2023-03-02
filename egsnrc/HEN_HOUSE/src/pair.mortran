@@ -1,0 +1,200 @@
+"******************************************************************"
+"                               National Research Council of Canada"
+SUBROUTINE PAIR;
+"                                                                  "
+"******************************************************************"
+"   For a photon energy below 2.1 MeV, the energies of the pair    "
+"   particles are uniformly distributed in the allowed range via   "
+"   the default replacement for $SELECT-LOW-ENERGY-PAIR-PRODICTION;"
+"   If the user has a better approach, modify this macro.          "
+"   For a photon energy between 2.1 and 50 MeV the Bethe-Heitler   "
+"   cross section is employed, above 50 MeV the Coulomb-corrected  "
+"   Bethe-Heitler is used.                                         "
+"   Modified from its original version to make compatible with the "
+"   changes made in BREMS.                                         "
+"                                                                  "
+"   I. Kawrakow                                                    "
+"******************************************************************"
+
+$IMPLICIT-NONE;
+
+$COMIN-PAIR;     "DEFAULT REPLACEMENT PRODUCES THE FOLLOWING:
+                 "COMIN/DEBUG,BREMPR,EGS-VARIANCE-REDUCTION,STACK,"
+                                 "THRESH,UPHIOT,USEFUL,RANDOM/;"
+
+$DEFINE-LOCAL-VARIABLES-PAIR;
+
+$DEFINE-VARIABLES-FOR-SET-PAIR-ANGLE;
+
+$REAL    k,xx,abin,rbin,alias_sample1;
+$INTEGER ibin, iq1, iq2, iprdst_use;
+$LOGICAL do_nrc_pair;
+$INTEGER itrip;
+$REAL    ftrip;
+
+NPold = NP;      "Set the old stack counter"
+
+IF( i_play_RR = 1 ) [ " The user wants to play Russian Roulette. For pair "
+                      " it is much more efficient to do it BEFORE the "
+                      " actual sampling "
+    i_survived_RR = 0;  "flag they all survive inititally"
+    IF( prob_RR <= 0 ) [
+        IF( n_RR_warning < $MAX-RR-WARNING ) [
+          n_RR_warning = n_RR_warning + 1;
+          $egs_warning('(a,g14.6)',
+                      'Attempt to play Russian Roulette with prob_RR<0! ');
+        ]
+    ]
+    ELSE [
+        $RANDOMSET rnno_RR;
+        IF( rnno_RR > prob_RR ) [  "The pair was killed "
+            i_survived_RR =2; "flag both particles eliminated"
+            IF( np > 1 ) [ np = np-1; ]
+            ELSE [ " We have just one photon left on the stack. In order to  "
+                   " get a proper exit from PHOTO, we have to leave at least "
+                   " one particle on the stack                               "
+                wt(np) = 0; e(np) = 0;
+            ]
+            return;
+        ]
+        ELSE [ "The pair survived, increase the weight"
+            wt(np) = wt(np)/prob_RR;
+        ]
+    ]
+]
+
+$CHECK-STACK(np+1,'PAIR');
+PEIG=E(NP); "PRECISE ENERGY OF INCIDENT GAMMA"
+EIG=PEIG;   "ENERGY OF INCIDENT GAMMA"
+do_nrc_pair = .false.;
+
+IF( itriplet > 0 & eig > 4*rm ) [
+    itrip = dli_triplet*gle + bli_triplet;
+    ftrip = a_triplet(itrip,medium)*gle + b_triplet(itrip,medium);
+    $RANDOMSET rnno34;
+    IF( rnno34 < ftrip ) [  " Triplet production "
+        call sample_triplet;
+        return;
+    ]
+]
+
+IF( pair_nrc = 1 ) [  "Sample from the NRC pair cross section data base"
+                      "(privided the energy is within the available range)"
+    k = eig/rm;
+    IF( k < nrcp_emax ) [
+        do_nrc_pair = .true.;
+        IF( k <= nrcp_emin ) [ ibin = 1; ]
+        ELSE [
+            abin = 1 + log((k-2)/(nrcp_emin-2))*nrcp_dlei;
+            ibin = abin; abin = abin - ibin;
+            $RANDOMSET rbin;
+            IF( rbin < abin ) ibin = ibin + 1;
+        ]
+        xx = alias_sample1($NRC-PAIR-NX-1,nrcp_xdata,
+                nrcp_fdata(1,ibin,medium),nrcp_wdata(1,ibin,medium),
+                nrcp_idata(1,ibin,medium));
+           " The above returns the energy fraction of the positron "
+        IF( xx > 0.5 ) [
+            pese1 = prm*(1 + xx*(k-2)); iq1 = 1;
+            pese2 = peig - pese1; iq2 = -1;
+        ]
+        ELSE [
+            pese2 = prm*(1 + xx*(k-2)); iq2 = 1;
+            pese1 = peig - pese2; iq1 = -1;
+        ]
+    ]
+]
+
+
+IF( ~do_nrc_pair ) [
+IF (EIG.LE.2.1) [
+    "   BELOW 2.1,USE APPROXIMATION"
+    $SELECT-LOW-ENERGY-PAIR-PRODICTION;
+]
+ELSE[   "ABOVE 2.1, MUST SAMPLE"
+
+    "   DECIDE WHETHER TO USE BETHE-HEITLER or BH
+    "   COULOMB CORRECTED
+
+    IF (EIG.LT.50.) [ "Use BH without Coulomb correction"
+
+        L = 5;
+        L1 = L + 1;
+
+        "Find the actual rejection maximum for this photon energy"
+        delta = 4*delcm(medium)/eig;
+        IF( delta < 1 ) [
+           Amax = dl1(l,medium)+delta*(dl2(l,medium)+delta*dl3(l,medium));
+           Bmax = dl1(l1,medium)+delta*(dl2(l1,medium)+delta*dl3(l1,medium));
+        ]
+        ELSE [
+           aux2 = log(delta+dl6(l,medium));
+           Amax = dl4(l,medium)+dl5(l,medium)*aux2;
+           Bmax = dl4(l1,medium)+dl5(l1,medium)*aux2;
+        ]
+        "and then calculate the probability for sampling from (br-1/2)**2"
+        aux1 = 1 - rmt2/eig; aux1 = aux1*aux1;
+        aux1 = aux1*Amax/3; aux1 = aux1/(Bmax+aux1);
+    ]
+    ELSE [
+        "Use BH Coulomb-corrected"
+        L = 7;
+        "The absolute maxima are close to the actual maxima at high energies"
+        "=>use the absolute maxima to save time"
+        Amax = dl1(l,medium); Bmax = dl1(l+1,medium);
+        aux1 = bpar(2,medium)*(1-bpar(1,medium)*rm/eig);
+    ]
+
+    del0 = eig*delcm(medium);
+    Eavail = eig - rmt2;
+
+    LOOP [
+
+        $RANDOMSET RNNO30; $RANDOMSET RNNO31; $RANDOMSET RNNO34;
+        IF( rnno30 > aux1 ) [ "use the uniform part"
+            br = 0.5*rnno31;  rejmax = Bmax; l1 = l+1;
+        ]
+        ELSE [  "use the (br-1/2)**2 part of the distribution"
+            $RANDOMSET rnno32; $RANDOMSET rnno33;
+            br = 0.5*(1-max(rnno31,rnno32,rnno33));
+            rejmax = Amax; l1 = l;
+        ]
+        Eminus = br*Eavail + rm;
+        Eplus  = eig - Eminus;
+        delta = del0/(Eminus*Eplus);
+        IF( delta < 1 ) [
+           rejf = dl1(l1,medium)+delta*(dl2(l1,medium)+delta*dl3(l1,medium));
+        ]
+        ELSE [
+          rejf = dl4(l1,medium)+dl5(l1,medium)*log(delta+dl6(l1,medium));
+        ]
+
+    ] UNTIL ( rnno34*rejmax <= rejf );
+
+    pese2 = Eminus; pese1 = peig - pese2;
+    $RANDOMSET RNNO34;
+    IF( rnno34 < 0.5 ) [ iq1 = -1; iq2 = 1; ] ELSE [ iq1 = 1; iq2 = -1; ]
+
+]
+]
+
+"   ENERGY GOING TO LOWER SECONDARY HAS NOW BEEN DETERMINED"
+ESE2=PESE2;
+E(NP)=PESE1; E(NP+1)=PESE2;
+"   THIS AVERAGE ANGLE OF EMISSION FOR BOTH PAIR PRODUCTION AND"
+"   BREMSSTRAHLUNG IS MUCH SMALLER THAN THE AVERAGE ANGLE OF"
+"   MULTIPLE SCATTERING FOR DELTA T TRANSPORT=0.01 R.L."
+"   THE INITIAL AND FINAL MOMENTA ARE COPLANAR "
+"   SET UP A NEW 'ELECTRON'  "
+$SET-PAIR-ANGLE;
+" DEFAULT FOR $SET-PAIR-ANGLE; is to select the angle from the leading term"
+" of the angular distribution "
+CALL UPHI(1,1);
+"   SET UP A NEW 'ELECTRON' "
+NP=NP+1;
+SINTHE=-SINTHE;
+CALL UPHI(3,2);
+
+IQ(NP)=iq2; IQ(NP-1)=iq1;
+RETURN;
+"END OF SUBROUTINE PAIR"    END;

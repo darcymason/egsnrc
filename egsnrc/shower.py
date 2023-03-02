@@ -1,127 +1,160 @@
-from egsnrc import egsfortran
-from .commons import *
-from .angles import uphi
-from .electr import electr
-from .photon import photon
+import sys
+from time import perf_counter
+from numba import cuda
+import numba as nb
+import logging
 
-import numpy
+try:
+    from cuda.cuda import CUdevice_attribute, cuDeviceGetAttribute, cuDeviceGetName, cuInit
+    have_cuda_python = True
+except ImportError:
+    have_cuda_python = False
 
-def shower(iqi, ei, xi, yi, zi, ui, vi, wi, iri, wti, callbacks):
-    """Track a particle and others created during its simulation
+
+from egsnrc.photon import photon_kernel
+from egsnrc import photon  # To set index in CPU mode and howfar, ausgab
+from egsnrc.config import on_gpu
+from egsnrc import egsrandom
+from egsnrc.media import Vacuum
+from egsnrc.util import CUDATimer
+
+logger = logging.getLogger("egsnrc")
+
+
+def cuda_details():
+    try:
+        from cuda.cuda import (
+            CUdevice_attribute, cuDeviceGetAttribute, cuDeviceGetName, cuInit
+        )
+    except ImportError:
+        return (
+            "** GPU details not available\n"
+            "In Colab, use `!pip install cuda-python` to see GPU specs\n"
+        )
+
+    # Initialize CUDA Driver API
+    (err,) = cuInit(0)
+
+    # Get attributes
+    err, DEVICE_NAME = cuDeviceGetName(128, 0)
+    DEVICE_NAME = DEVICE_NAME.decode("ascii").replace("\x00", "")
+
+    attrs = {'DEVICE_NAME': DEVICE_NAME.strip()}
+    attr_names = "MAX_THREADS_PER_BLOCK MAX_BLOCK_DIM_X MAX_GRID_DIM_X MULTIPROCESSOR_COUNT".split()
+    for attr in attr_names:
+        err, attrs[attr] =  cuDeviceGetAttribute(
+        getattr(CUdevice_attribute, f"CU_DEVICE_ATTRIBUTE_{attr}"), 0
+    )
+
+    return attrs
+
+
+threads_per_block = 512  # 1024
+# blocks_per_grid = 16*40
+
+
+def shower(
+    seed, num_particles, get_source_particle, regions, media, howfar, ausgab, iscore, fscore,
+):
+    """Start the Monte Carlo simulation
 
     Parameters
     ----------
-    iqi: int
-        initial particle charge
-    ei: float
-        initial shower energy
-    xi, yi, zi:  (float, float, float)
-        initial co-ordinates
-    ui, vi, wi: (float, float, float)
-        initial direction cosines
-    iri: int
-        initial region number
-    wti: float
-        initial weight
-    callbacks: dict
-        Callback functions for `hownear`, `howfar` and `ausgab`
-
+    seed : int
+        Random number generator seed
+    num_particles : int
+        Number of photons to launch
+    source : Source subclass
+        A radition Source class with `generate` method
+    regions : tuple
+        Tuple of _Region namedtuples
+    media : tuple
+        Tuple of _Medium namedtuples
+    iscore : array of num_particles int32's
+        Output array for ausgab to track integer values, e.g. counting interactions
+    fscore : array of num_particles float32's
+        Output array for ausgab to track float values, e.g. energy deposited
     """
-
-    hownear = callbacks['hownear']
-    howfar = callbacks['howfar']
-    ausgab = callbacks['ausgab']
-    egsfortran.ausgab = ausgab  # for functions still in egsfortran to call
-
-    # msg = ", ".join(
-    #     f"{x}={locals()[x]}"
-    #     for x in "iqi,ei,xi,yi,zi,ui,vi,wi,iri,wti".split(",")
-    # )
-    # logger.info(f"Called shower with {msg}")
-    ircode = numpy.array(0)  # meed rank-0 array for output var in f2py
-
-    # $ comin_shower # DEFAULT REPLACEMENT PRODUCES THE FOLLOWING:
-                    # COMIN/DEBUG,STACK,UPHIOT,RANDOM/
-    # # Local variables
-    # DOUBLE PRECISION
-    # deg,    energy for pi-zero option
-    # dpgl,   angle factor for pi-zero option
-    # dei,    incident energy for pi-zero option
-    # dpi,    intermediate factor for pi-zero option
-    # dcsth,  random number for pi-zero option
-    # dcosth, cos(theta) for pi-zero option
-    # pi0msq  pi-zero mass squared (in MeV**2)
-
-    # real*8
-    # dneari, initial distance to closest boundary
-    # csth,  random number for pi-zero option
-
-    # integer*4
-    # ircode  status returned by ELECTR or PHOTON
-
-    pi0msq = 1.8215416  # PI-ZERO MASS (MEV) SQUARED
-
-    stack.np=1
-    stack.npold = stack.np # Set the old stack counter
-    dneari=0.0
-    iq[0]=iqi
-    e[0]=ei
-    u[0]=ui
-    v[0]=vi
-    w[0]=wi
-
-    # TRANSFER PROPERTIES TO [0] FROM I  # ** 0-based, is to [1] in Mortran
-    x[0]=xi
-    y[0]=yi
-    z[0]=zi
-    ir[0]=iri
-    wt[0]=wti
-    dnear[0]=dneari
-    latch[0]=latchi
-
-    if iqi == 2:
-        # PI-ZERO OPTION
-        # if EI <= PI0MSQ) [OUTPUT EI;    corrected Oct 24 1995 e-mail Hideo H
-        #                   noted by      Dr.  Muroyama at Nagoya University
-        raise NotImplementedError("egsnrc Python not tested for PI-ZERO")
-        # if ei**2 <= pi0msq:
-        #     msg = (
-        #         ' Stopped in subroutine SHOWER---PI-ZERO option invoked'
-        #         f' but the total energy was too small (EI={ei} MeV)'
-        #     )
-        #     raise ValueError(msg)
-
-        # csth = randomset()
-        # dcsth=csth; dei=ei; dpi=dsqrt(dei*dei-pi0msq)
-        # deg=dei+dpi*dcsth; dpgl=dpi+dei*dcsth; dcosth=dpgl/deg
-        # uphiot.costhe=dcosth
-        # uphiot.sinthe=dsqrt(1.0-dcosth*dcosth)
-        # iq[0]=0
-        # e[0]=deg/2.
-        # uphi(2,1)
-        # stack.np=2
-        # deg=dei-dpi*dcsth
-        # dpgl=dpi-dei*dcsth
-        # dcosth=dpgl/deg
-        # uphiot.costhe=dcosth
-        # uphiot.sinthe=-sqrt(1.0-dcosth*dcosth)
-        # iq[2-1]=0
-        # e[2-1]=deg/2.
-        # uphi(3,2)
+    # Initialize random numbers
+    if on_gpu:
+        egsrandom.set_array_library("cuda")
+    else:
+        egsrandom.set_array_library("numpy")
+    rng_states = egsrandom.initialize(seed, num_particles)
 
 
-    while np > 0:
-        #  DEFAULT FOR $ KERMA-INSERT; IS ; (NULL)
-        if  iq[np-1] == 0:  # np-1 for ** 0-based in Python
-            egsfortran.photon(ircode, howfar)  # ircode = photon(howfar, ausgab)
-        else:
-            # Note, callbacks have to be passed as extra parameters
-            # even if not in the mortran call arguments,
-            # unless intent(callback,hide) is used in f2py comments,
-            # in which case, need to set `egsfortran.hownear = hownear`
-            # egsfortran.electr(ircode, howfar) #, hownear,
-            #     calc_tstep_from_demfp,
-            #     compute_eloss, compute_eloss_g
-            # )
-            ircode = electr(hownear, howfar, ausgab)
-        # egsfortran.flushoutput()
+    # iparticles, fparticles = source.generate(num_particles)
+    device = "cuda" if on_gpu else "cpu"
+    if device == "cuda":
+        print("Pre-copying arrays to device - not included in timing")
+        # iparticles = cuda.to_device(iparticles)
+        # fparticles = cuda.to_device(fparticles)
+        iscore = cuda.to_device(iscore)
+        fscore = cuda.to_device(fscore)
+        rng_states = cuda.to_device(rng_states)
+        blocks_per_grid = (num_particles // threads_per_block) + 1
+        print(f"{threads_per_block=}  {blocks_per_grid=}")
+    # Convert regions from Python classes to tuples needed to pass to kernel
+    # Add vaccuum as medium 0 if not already there
+    # XXX currently assumes media and regions are in medium/region # consecutive order
+    # XXX also duplicates memory via Media kernelize - in Media and in Region.medium
+    # insert vacuum as medium 0 if not already there
+
+    # Convert Media types to be kernel compatible
+    media = [medium.kernelize() for medium in media]
+    if media[0].number != 0:
+        media = (Vacuum, *media)
+
+    if not isinstance(media, tuple):  # necessary for current Numba kernels
+        media = tuple(media)
+
+    # Convert Region types to be kernel compatible
+    regions = [region.kernelize() for region in regions]
+    if regions[0].number != 0:
+        regions = (tuple(), *regions)  # XXX need a proper Region here
+
+    if not isinstance(regions, tuple):
+        regions = tuple(regions)
+
+    # Configure callbacks:
+    photon.howfar = howfar
+    photon.ausgab = ausgab
+    photon.get_source_particle = get_source_particle
+    Py_major, Py_minor = sys.version_info.major, sys.version_info.minor
+    logger.info(f"Starting `shower` with Numba {nb.__version__}, Python {Py_major}.{Py_minor}")
+    logger.info(f"Running {num_particles:,} particles")
+    logger.info(cuda_details())
+
+    if on_gpu:
+        cuda.synchronize()
+        start = perf_counter()
+        with CUDATimer() as cudatimer:  # CUDATimes(stream)
+            photon_kernel[blocks_per_grid, threads_per_block](
+                rng_states,
+                num_particles, # XXX temp
+                # iparticles, fparticles,
+                regions, media, iscore, fscore
+            )
+        print(f"Elapsed time by events {cudatimer.elapsed:.2f} ms")
+        cuda.synchronize()
+        end = perf_counter()
+    else:
+        start = perf_counter()
+        for i in range(num_particles):
+            photon.non_gpu_index = i
+            photon_kernel.py_func(
+                rng_states,
+                num_particles,
+                # iparticles, fparticles,
+                regions, ausgab, iscore, fscore
+            )
+        end = perf_counter()
+
+    shower_time = end - start
+
+    logger.info(f"Elapsed time (Python perf_counter): {shower_time:>8.5} seconds")
+
+    if device == "cuda":
+        iscore = iscore.copy_to_host()
+        fscore = fscore.copy_to_host()
+    return iscore, fscore

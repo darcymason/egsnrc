@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 from egsnrc.particles import Particles
-from egsnrc import random
+from egsnrc import egsrandom
 
 
 def setup(num_particles, array_library, want_gpu=False):
@@ -32,8 +32,8 @@ def setup(num_particles, array_library, want_gpu=False):
     else:
         raise NotImplementedError("Unknown array library")
 
-    random.set_array_library(array_library)
-    key = random.initialize(42)
+    egsrandom.set_array_library(array_library)
+    key = egsrandom.initialize(42)
 
     particles = Particles(f_arr, i_arr, array_library=array_library)  # device?
 
@@ -49,10 +49,10 @@ def run(particles, key, device):
     while particles.any_alive():
         gle = particles.log_energy()
         # Sample number of mfp to transport before interacting
-        rnno35 = random.float_0_1(len(particles), device)
+        rnno35 = egsrandom.float_0_1(len(particles), device)
         rnno35[rnno35==0] += 1.0e-30  # could use `numpy.clip` but not quite same as old code
         dpmfp = torch.log(rnno35)
-        key, ran_floats = random.floats_0_1(key, len(particles.energy), device)
+        key, ran_floats = egsrandom.floats_0_1(key, len(particles.energy), device)
         particles.f_arr[Particles.ENERGY] -= 20.0 * ran_floats
 
 

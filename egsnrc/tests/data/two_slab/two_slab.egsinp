@@ -37,7 +37,7 @@
  ##############################
  :Start MC Transport Parameter:
 
- Global ECUT=                    0.700
+ Global ECUT=                    1.00
  Global PCUT=                    0.010
  Global SMAX=                    1e10
  Bound Compton scattering=       Off   # Can be Off, On in Regions,
@@ -56,6 +56,7 @@
  Boundary crossing algorithm=    exact    # Can be PRESTA
  Electron-step algorithm=        default  # Can be PRESTA
  Spin effects=                   Off      # Can be off
+ Photon cross-sections output=   On
 
  :Stop MC Transport Parameter:
  #############################
@@ -65,10 +66,14 @@
 
  Method of input=     groups
  Z of front face=     0
- number of slabs=     3
- slab thickness=      4.0
+ number of slabs=     2
+ slab thickness=      0.2
 
- media=  SI
+ media=  TA,SI
+
+ SET MEDIUM 2
+ START REGION 3
+ STOP REGION 3
 
  :Stop Geometrical Inputs:
  #########################
@@ -86,9 +91,9 @@
  --------------------
 
  Incident Charge=         0
- Incident Kinetic Energy= 10
+ Incident Kinetic Energy= 1
  Incident Angle=          0
- Number of Histories=     10
+ Number of Histories=     10000000
 
  :Stop Source Input:
  -------------------

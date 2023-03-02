@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 from egsnrc.particles import Particles
-from egsnrc import random
+from egsnrc import egsrandom
 
 
 def setup(num_particles, array_library, want_gpu=False):
@@ -32,8 +32,8 @@ def setup(num_particles, array_library, want_gpu=False):
     else:
         raise NotImplementedError("Unknown array library")
 
-    random.set_array_library(array_library)
-    key = random.initialize(42)
+    egsrandom.set_array_library(array_library)
+    key = egsrandom.initialize(42)
 
     particles = Particles(f_arr, i_arr, array_library=array_library)  # device?
 
@@ -49,7 +49,7 @@ def run(particles, key, device):
     # f_arr[P.W, :] = 1.0
 
     while particles.any_alive():
-        key, ran_floats = random.floats_0_1(key, len(particles.energy), device=device)
+        key, ran_floats = egsrandom.floats_0_1(key, len(particles.energy), device=device)
         particles.energy -= 20.0 * ran_floats
 
 

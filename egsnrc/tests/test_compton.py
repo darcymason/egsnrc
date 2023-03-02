@@ -1,47 +1,35 @@
 import pytest
 import numpy as np
-from egsnrc.expts.compt.pycompton import py_compton  # XXX later need to switch to live
 
-from egsnrc import random
-from egsnrc.expts.compt.pyvect_compton import pyvect_compton
+
+from egsnrc import egsrandom
+from egsnrc import config
+from egsnrc.particles import Particle
+config.use_gpu(False)
+egsrandom.set_array_library("sequence")
+
+from egsnrc.compton import compton
 
 
 class TestAgainstMortran:
-    rand_sequence_1MeV = [  # Note can't be numpy array because irreg lengths
-        [
-            [0.22987532615661621, 0.78682494163513184],
-            [0.76323693990707397, 0.19077306985855103]
-        ],
-        [
-            [0.55831658840179443,  4.9074590206146240E-002]
-        ],
-        [
-            [0.55832588672637939, 0.29218196868896484]
-        ],
-        [
-            [0.65860986709594727,  4.0171027183532715E-002]
-        ],
-        [
-            [1.7512619495391846E-002,  0.44601458311080933]
-        ],
-        [
-            [0.91792672872543335, 0.54524618387222290],
-            [0.28818345069885254,  3.5068333148956299E-002]
-        ],
-        [
-            [0.13349604606628418, 0.85515218973159790],
-            [0.54984831809997559,  5.7695209980010986E-002],
-        ],
-        [
-            [0.49270433187484741, 0.94706720113754272],
-            [0.84880810976028442, 0.67912405729293823],
-            [0.30815130472183228, 0.37652158737182617],
-            [0.96473675966262817, 0.67000657320022583],
-            [0.96202033758163452, 0.26576608419418335],
-        ],
-        [
-            [0.62973368167877197, 0.13346099853515625],
-        ],
+    rand_sequence_1MeV = [
+        0.22987532615661621, 0.78682494163513184,
+        0.76323693990707397, 0.19077306985855103,
+        0.55831658840179443,  4.9074590206146240E-002,
+        0.55832588672637939, 0.29218196868896484,
+        0.65860986709594727,  4.0171027183532715E-002,
+        1.7512619495391846E-002,  0.44601458311080933,
+        0.91792672872543335, 0.54524618387222290,
+        0.28818345069885254,  3.5068333148956299E-002,
+        0.13349604606628418, 0.85515218973159790,
+        0.54984831809997559,  5.7695209980010986E-002,
+        0.49270433187484741, 0.94706720113754272,
+        0.84880810976028442, 0.67912405729293823,
+        0.30815130472183228, 0.37652158737182617,
+        0.96473675966262817, 0.67000657320022583,
+        0.96202033758163452, 0.26576608419418335,
+        0.62973368167877197, 0.13346099853515625,
+        0.111,  # Dummy last one for last uphi in test_compton
     ]
 
     energies_1MeV = np.ones(9)
@@ -73,70 +61,45 @@ class TestAgainstMortran:
         (7.0558756714006632E-002, 0.69734370445616700),
         (0.21206500243906989, 7.0758854413525252E-002),
     ]
-    rand_sequence_10MeV = [  # Here ko>2 and <= handled separately, so need to divide that way
-        [  # ko>2 rnno15, 16, 19 1st iteration
-            [0.42048686742782593, 0.49585634469985962, 0.57738614082336426],
-            [7.6826930046081543E-002,  0.40864366292953491,      0.97492825984954834],
-            [0.52135562896728516,       0.11907631158828735,       0.48996019363403320],
-            [2.8621673583984375E-002,   8.8309347629547119E-002,  0.19784265756607056]
-        ],
-        [  # ko>2 2nd iter (one particle)
-            [0.88091498613357544, 0.96854400634765625, 0.17157137393951416]
-        ],
-        [ # ko<=2 all rnnos 1st iter
-            [0.94912832975387573, 0.99772697687149048],
-            [0.10784226655960083, 4.6389222145080566E-002],
-            [0.81320518255233765, 0.62365549802780151],
-            [0.32891792058944702, 0.41770315170288086],
-        ],
-        [ # ko<=2 2nd iter (one particle)
-            [0.41744160652160645, 8.0652594566345215E-002]
-        ],
+    # Here ko>2 and <= handled separately if vectorized code, so need to divide that way
+    rand_sequence_10MeV = [
+        0.42048686742782593, 0.49585634469985962, 0.57738614082336426,
+        7.6826930046081543E-002,  0.40864366292953491,      0.97492825984954834,
+        0.88091498613357544,      0.96854400634765625,      0.17157137393951416,
+        0.52135562896728516,      0.11907631158828735,      0.48996019363403320,
+        0.94912832975387573,      0.99772697687149048,
+        0.41744160652160645,      8.0652594566345215E-002,
+        0.10784226655960083,      4.6389222145080566E-002,
+        2.8621673583984375E-002,  8.8309347629547119E-002,  0.19784265756607056,
+        0.81320518255233765,      0.62365549802780151,
+        0.32891792058944702,      0.41770315170288086,
+        0.111, # dummy one for last uphi not captured in original mortran
     ]
-
-    def test_pycompton_1MeV(self):
+    def test_compton_1MeV(self):
         """Test known outputs from modified 1 MeV photon tutor7 (mortran)"""
         # NOTE: have to not do random azimuth angle in the test compton code to
         #    avoid consuming randoms not captured in tutor7. Pass argument to func.
-        random.set_array_library("sequence")
+        egsrandom.set_array_library("sequence")
 
-        rng = random.initialize(self.rand_sequence_1MeV)
+        rng = egsrandom.initialize(self.rand_sequence_1MeV)
         for e_in, e_costhe in zip(self.energies_1MeV, self.result_e_costhe_1MeV):
-            result = py_compton(rng, e_in, calc_azimuth=False)
-            energy, _, costhe = result[:3]
-            assert (energy, costhe) == pytest.approx(e_costhe)
+            p = Particle(0, 1, e_in, 0, 0, 0, 0, 0, 1)
+            mod_p = compton(rng, 0, p)
+            rng.pos -= 1  # revert the extra random used in uphi compared with reference
+            # because sinpsi2=0 and p.w==1, then mod_p.w will just be costhe after uphi
+            assert (mod_p.energy, mod_p.w) == pytest.approx(e_costhe)
 
-    def test_pycompton_10MeV(self):
+    def test_compton_10MeV(self):
         """Test known outputs from modified 10 MeV photon tutor7 (mortran)"""
         # Set up list of known randoms from original tutor7 run
-        random.set_array_library("sequence")
-        rng = random.initialize(self.rand_sequence_10MeV)
+        egsrandom.set_array_library("sequence")
+        rng = egsrandom.initialize(self.rand_sequence_10MeV)
 
         for e_in, e_costhe in zip(self.energies_10MeV, self.result_e_costhe_10MeV):
-            result = py_compton(rng, e_in, calc_azimuth=False)
-            energy, _, costhe = result[:3]
-            assert (energy, costhe) == pytest.approx(e_costhe)
+            p = Particle(0, 1, e_in, 0, 0, 0, 0, 0, 1)
+            mod_p = compton(rng, 0, p)
+            rng.pos -= 1  # revert the extra random used in uphi compared with reference
 
-    def test_pyvect_compton_1MeV(self):
-        """Test numpy vect results with modified 1 MeV photon tutor7 (mortran)"""
-        # NOTE: have to not do random azimuth angle in the test compton code to
-        #    avoid consuming randoms not captured in tutor7. Pass argument to func.
-        random.set_array_library("sequence")
-        rng = random.initialize(self.rand_sequence_1MeV, vect=True)
-        result = pyvect_compton(rng, self.energies_1MeV, calc_azimuth=False)
-        all_e_in, _, all_costhe = result[:3]
-        zip_got_expected = zip(all_e_in, all_costhe, self.result_e_costhe_1MeV)
-        for got_e, got_costhe, expected in zip_got_expected:
-            assert (got_e, got_costhe) == expected
+            print(e_costhe)
+            assert (mod_p.energy, mod_p.w) == pytest.approx(e_costhe)
 
-    def test_pyvect_compton_10MeV(self):
-        """Test numpy vect results with modified 10 MeV photon tutor7 (mortran)"""
-        # NOTE: have to not do random azimuth angle in the test compton code to
-        #    avoid consuming randoms not captured in tutor7. Pass argument to func.
-        random.set_array_library("sequence")
-        rng = random.initialize(self.rand_sequence_10MeV, vect=False) # NOTE: False
-        result = pyvect_compton(rng, self.energies_10MeV, calc_azimuth=False)
-        all_e_in, _, all_costhe = result[:3]
-        zip_got_expected = zip(all_e_in, all_costhe, self.result_e_costhe_10MeV)
-        for got_e, got_costhe, expected in zip_got_expected:
-            assert (got_e, got_costhe) == expected

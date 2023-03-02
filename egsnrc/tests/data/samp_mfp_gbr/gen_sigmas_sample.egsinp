@@ -38,7 +38,7 @@
  :Start MC Transport Parameter:
 
  Global ECUT=                    0.700
- Global PCUT=                    0.010
+ Global PCUT=                    0.015
  Global SMAX=                    1e10
  Bound Compton scattering=       Off   # Can be Off, On in Regions,
                                       # Off in regions
@@ -56,6 +56,7 @@
  Boundary crossing algorithm=    exact    # Can be PRESTA
  Electron-step algorithm=        default  # Can be PRESTA
  Spin effects=                   Off      # Can be off
+ Photon cross-sections output=   On
 
  :Stop MC Transport Parameter:
  #############################
@@ -88,7 +89,7 @@
  Incident Charge=         0
  Incident Kinetic Energy= 1
  Incident Angle=          0
- Number of Histories=     20
+ Number of Histories=     10
 
  :Stop Source Input:
  -------------------

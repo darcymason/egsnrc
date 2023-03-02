@@ -1,24 +1,25 @@
 from math import log, exp, sqrt, sin, cos
-# from egsnrc import random
-from egsnrc.constants import RM, TWO_PI
-import numpy as np
+from egsnrc.egsrandom import random_kfloat
+from egsnrc.angles import uphi
+from egsnrc.constants import REST_MASS, TWO_PI
+from egsnrc.particles import replace_e_uvw
+from egsnrc import config
 from numba import cuda
-import numba as nb
-import random as pyrandom
 
-import logging
 
-numba_logger = logging.getLogger('numba')
-numba_logger.setLevel(logging.WARNING)
+@config.device_jit
+def compton(rng_states, gid, p):
+    """Return a modified particle from Compton interaction
 
-@nb.jit(debug=False, nopython=True)
-def numba_compton_jit(energy):
-    """Subroutine for sampling incoherent (Compton) scattering"""
-    # calc_azimith False used in test_compton only
+    Returns
+    -------
+    mod_p   Particle
+        The modified particle (new energy, direction cosines)
+    """
     # TODO: do not use bound, always K-N
     # TODO: no e- created yet
 
-    ko = energy / RM  # Gamma energy in units of electron rest energy
+    ko = p.energy / REST_MASS  # Gamma energy in units of electron rest energy
     broi = 1 + 2 * ko  # Needed for scattering angle sampling
 
     if ko > 2:  # At high energies the original EGS4 method is most efficient
@@ -31,9 +32,9 @@ def numba_compton_jit(energy):
         # Set up fake True for first pass through loop
         rnno19 = aux = br = 1; rejf3 = 0.0
         while rnno19 * aux > rejf3 or not (bro < br < 1):  # rejection sampling loop
-            rnno15 = pyrandom.random()
-            rnno16 = pyrandom.random()
-            rnno19 = pyrandom.random()
+            rnno15 = random_kfloat(rng_states, gid)
+            rnno16 = random_kfloat(rng_states, gid)
+            rnno19 = random_kfloat(rng_states, gid)
             if rnno15 * alpha < alph1:  # Use 1/br part
                 br = exp(alph1 * rnno16) * bro
             else:  # Use the br part
@@ -55,8 +56,8 @@ def numba_compton_jit(energy):
         # Set up fake True for first pass through loop
         rnno16 = br = 1.0; rejf3 = 0.0
         while rnno16 * br * rejmax > rejf3 or not (bro < br < 1):
-            rnno15 = pyrandom.random()
-            rnno16 = pyrandom.random()
+            rnno15 = random_kfloat(rng_states, gid)
+            rnno16 = random_kfloat(rng_states, gid)
             br = bro + bro1 * rnno15
             temp = (1 - br) / (ko * br)
             sinthe = max(0., temp*(2-temp))
@@ -68,15 +69,11 @@ def numba_compton_jit(energy):
 
     costhe = 1 - temp
     sinthe = sqrt(sinthe)
-    energy *= br
+    energy = p.energy * br
+
     # Random sample the azimuth
-    # if calc_azimuth:
-    #     _, (azimuth_ran,) = random.floats_0_1(rng, 1)
-    #     phi = TWO_PI * azimuth_ran
-    #     sinphi = sin(phi)
-    #     cosphi = cos(phi)
-    # else:
-    sinphi = cosphi = 99  # XXX temp
+    u, v, w = uphi(rng_states, gid, p, sinthe, costhe)
+
     # aux = 1 + br*br - 2*br*costhe
     # if aux > 1e-8:
     #     costhe = (1-br*costhe)/sqrt(aux)
@@ -86,27 +83,4 @@ def numba_compton_jit(energy):
     #     costhe = 0
     #     sinthe = -1
 
-    return energy, sinthe, costhe, sinphi, cosphi
-
-i32 = nb.int32
-# nb.jit("i32(i32)->i32", nopython=True)
-def xxx_numba(n):
-    return sum((i + i**2 + sqrt(i**2) for i in range(n)))
-
-
-if __name__ == "__main__":
-    from time import perf_counter
-    # random.set_array_library("numpy")
-    pyrandom.seed(42)
-    energies = [pyrandom.random() for i in range(100_000)]
-    energies = np.array(energies) + 0.001
-    times = []
-    for run in range(3):
-        from time import perf_counter
-        start = perf_counter()
-        for energy in energies:
-            numba_compton_jit(energy)
-        end = perf_counter()
-        times.append(end - start)
-    print("----------------------")
-    print("Times:", ', '.join(f"{time_:>8.5} " for time_ in times), "seconds")
+    return replace_e_uvw(p, energy, u, v, w)

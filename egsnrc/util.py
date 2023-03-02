@@ -1,5 +1,5 @@
 # util.py
-
+from numba import cuda
 
 def float_from_fort_hex(hex_str):
     return float.fromhex(py_hex_from_fort_hex(hex_str))
@@ -81,3 +81,25 @@ def for_E18(values):
 # print([f"{x:.18e}" for x in vals])
 # print(for_E18(vals))
 
+
+# from https://towardsdatascience.com/cuda-by-numba-examples-7652412af1ee
+# Use like:
+# with CUDATimer(stream) as cudatimer:
+#    kernel_func[blocks_per_grid, threads_per_block, stream](dev_a, dev_a_reduce)
+# print(f"Elapsed time {cudatimer.elapsed:.2f} ms")
+class CUDATimer:
+    def __init__(self, stream=0):
+        self.stream = stream
+        self.event = None  # in ms
+
+    def __enter__(self):
+        self.event_beg = cuda.event()
+        self.event_end = cuda.event()
+        self.event_beg.record(stream=self.stream)
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.event_end.record(stream=self.stream)
+        self.event_end.wait(stream=self.stream)
+        self.event_end.synchronize()
+        self.elapsed = self.event_beg.elapsed_time(self.event_end)
