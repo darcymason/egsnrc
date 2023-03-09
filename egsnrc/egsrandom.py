@@ -23,7 +23,7 @@ def _seq_float32(rng, num=1, device=None):
     return rng.random()
 
 def _cuda_initialize(seed, num_particles):
-    return numba.cuda.to_device(create_xoroshiro128p_states(num_particles, seed))
+    return create_xoroshiro128p_states(num_particles, seed)
 
 class SeqGen:
     def __init__(self, known_list):

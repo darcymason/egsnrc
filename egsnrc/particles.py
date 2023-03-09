@@ -43,30 +43,21 @@ def set_particle(i, regions, iparticles, fparticles):
 
 @device_jit
 def replace_e_uvw(p, energy, u, v, w):
-    """Return a Particle like `p` but with uvw replaced"""
+    """Return a Particle like `p` but with ernergy, u, v, w replaced"""
     return Particle(
         p.status, p.region, np.float32(energy), p.x, p.y, p.z,
         np.float32(u), np.float32(v), np.float32(w)
     )
 
+
 @device_jit
 def replace_region_xyz(p, region, x, y, z):
-    """Return a Particle like `p` but with x,y,z replaced"""
+    """Return a Particle like `p` but with region, x, y, z replaced"""
     return Particle(
         p.status, region, p.energy,
         np.float32(x), np.float32(y), np.float32(z), p.u, p.v, p.w
     )
 
-
-@cuda.jit
-def uniform_energies(rng_states, num_particles): #, out):
-    """Fill in the output array with random [0, 1) energies"""
-    # Get unique grid index
-    gid = cuda.grid(1)
-    if gid >= num_particles:
-        return
-    # out[gid] = egsrandom.random_kfloat(rng_states, gid)
-    egsrandom.random_kfloat(rng_states, gid)
 
 class PhotonSource:
     """Convenience class to define a photon source

@@ -11,7 +11,6 @@ import numpy as np
 import sys
 from egsnrc.config import KFLOAT, KINT
 from egsnrc import egsrandom
-from egsnrc.particles import uniform_energies
 from egsnrc.util import CUDATimer
 
 import logging
@@ -20,33 +19,53 @@ numba_logger = logging.getLogger('numba')
 numba_logger.setLevel(logging.WARNING)
 
 
+@cuda.jit
+def random_test(rng_states, num_particles, out):
+    """Fill in the output array with random [0, 1) energies"""
+    # Get unique grid index
+    gid = cuda.grid(1)
+
+    if gid >= num_particles:
+        return
+
+    # CUDA Grid-Stride loop to reuse this thread
+    threads_per_grid = cuda.blockDim.x * cuda.gridDim.x
+    for i_arr in range(gid, num_particles, threads_per_grid):
+        egsrandom.random_kfloat(rng_states, gid)
+
+    # Use last random so loop is not optimized away ... (?)
+    out[gid] = egsrandom.random_kfloat(rng_states, gid)
+
+
 seed = 1
-def run(num_particles, num_batches):
+def run(num_particles, blocks_per_grid, threads_per_block):
+    print("\n-------------------------------")
+    print(f"Run with {num_particles=:,} {blocks_per_grid=}  {threads_per_block=}\n")
     if not cuda.is_available():
         print("***** This script requires CUDA gpu  ****")
         sys.exit(-1)
 
     egsrandom.set_array_library("cuda")
-    rng_states = egsrandom.initialize(seed, num_particles)
+    rng_states = egsrandom.initialize(seed, num_blocks * threads_per_block)
 
     print("Without storing the random numbers...")
     cuda.synchronize()
-    # XXX out = cuda.device_array(num_particles, dtype=KFLOAT)
+    out = cuda.device_array(num_blocks * threads_per_block, dtype=KFLOAT)
     # out = cuda.device_array(10, dtype=KFLOAT)  # XXX just a dummy array for now
 
     # Do a short run to jit the function so not included in the timing
     print("Initial short run to jit the function...")
     start = perf_counter()
-    uniform_energies.forall(KINT(100))(
-        rng_states, num_particles, # out
+    random_test[1, threads_per_block](
+        rng_states, num_particles, out
     )
     end = perf_counter()
     print(f"Jit time (Python perf_counter): {(end - start):>8.5} seconds")
-    print("Done jit.")
+    print("Done jit.\n")
     start = perf_counter()
     with CUDATimer() as cudatimer:  # CUDATimes(stream)
-        uniform_energies.forall(KINT(num_particles))(
-            rng_states, num_particles #, out
+        random_test[num_blocks, threads_per_block](
+            rng_states, num_particles, out
         )
     cuda.synchronize()
     print(f"Elapsed time by events {cudatimer.elapsed:.2f} ms")
@@ -56,20 +75,22 @@ def run(num_particles, num_batches):
 
 if __name__ == "__main__":
     import sys
-    num_particles = 200
-    num_batches = 8
-    if len(sys.argv) > 1:
-        try:
-            num_particles = int(sys.argv[1])
-        except ValueError:
-            print("Optional num_particles command-line argument must be an integer")
-            print(usage)
-            sys.exit(-1)
-    if len(sys.argv) > 2:
-        try:
-            num_batches = int(sys.argv[2])
-        except ValueError:
-            print("Optional num_batches command-line argument must be an integer")
-            print(usage)
+    from math import ceil
 
-    run(num_particles, num_batches)
+    num_particles = 2**20
+    num_blocks = 512
+    threads_per_block = 512
+
+    # Int args could be num_particles, num_blocks, threads_per_block
+
+    int_args = [int(x) for x in sys.argv[1:]] if len(sys.argv) > 1 else None
+
+    if int_args:
+        num_particles = int_args[0]
+    try:
+        num_blocks = int_args[1]
+        threads_per_block = int_args[2]
+    except:
+        pass
+
+    run(num_particles, num_blocks, threads_per_block)
