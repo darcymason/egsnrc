@@ -6,6 +6,7 @@ import numpy as np
 from numba import cuda
 from egsnrc.config import device_jit
 from egsnrc.params import EPSGMFP, VACDST
+from egsnrc import egsrandom
 
 
 # Constants to use for `status`
@@ -56,6 +57,16 @@ def replace_region_xyz(p, region, x, y, z):
         np.float32(x), np.float32(y), np.float32(z), p.u, p.v, p.w
     )
 
+
+@cuda.jit
+def uniform_energies(rng_states, num_particles): #, out):
+    """Fill in the output array with random [0, 1) energies"""
+    # Get unique grid index
+    gid = cuda.grid(1)
+    if gid >= num_particles:
+        return
+    # out[gid] = egsrandom.random_kfloat(rng_states, gid)
+    egsrandom.random_kfloat(rng_states, gid)
 
 class PhotonSource:
     """Convenience class to define a photon source
