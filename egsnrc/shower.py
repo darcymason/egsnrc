@@ -16,37 +16,9 @@ from egsnrc import photon  # To set index in CPU mode and howfar, ausgab
 from egsnrc.config import on_gpu
 from egsnrc import egsrandom
 from egsnrc.media import Vacuum
-from egsnrc.util import CUDATimer
+from egsnrc.util import CUDATimer, cuda_details
 
 logger = logging.getLogger("egsnrc")
-
-
-def cuda_details():
-    try:
-        from cuda.cuda import (
-            CUdevice_attribute, cuDeviceGetAttribute, cuDeviceGetName, cuInit
-        )
-    except ImportError:
-        return (
-            "** GPU details not available\n"
-            "In Colab, use `!pip install cuda-python` to see GPU specs\n"
-        )
-
-    # Initialize CUDA Driver API
-    (err,) = cuInit(0)
-
-    # Get attributes
-    err, DEVICE_NAME = cuDeviceGetName(128, 0)
-    DEVICE_NAME = DEVICE_NAME.decode("ascii").replace("\x00", "")
-
-    attrs = {'DEVICE_NAME': DEVICE_NAME.strip()}
-    attr_names = "MAX_THREADS_PER_BLOCK MAX_BLOCK_DIM_X MAX_GRID_DIM_X MULTIPROCESSOR_COUNT".split()
-    for attr in attr_names:
-        err, attrs[attr] =  cuDeviceGetAttribute(
-        getattr(CUdevice_attribute, f"CU_DEVICE_ATTRIBUTE_{attr}"), 0
-    )
-
-    return attrs
 
 
 threads_per_block = 512  # 1024

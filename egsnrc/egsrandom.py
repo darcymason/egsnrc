@@ -5,11 +5,16 @@ import numba
 
 # NOTE: if change from 32-bit floats, need to change xoroshiro here
 from numba.cuda.random import create_xoroshiro128p_states
-from numba.cuda.random import xoroshiro128p_uniform_float32
+from numba.cuda.random import (
+    xoroshiro128p_uniform_float32,
+    xoroshiro128p_uniform_float64
+)
+from egsnrc import config
 
 
 def _np_initialize(seed, num_particles=None):
     return np.random.default_rng(seed)
+
 
 def _np_float32(rng, _):
     return rng.random()
@@ -49,6 +54,9 @@ def set_array_library(lib: str):
         initialize = _seq_initialize
     elif lib == "cuda":
         initialize = _cuda_initialize
-        random_kfloat = xoroshiro128p_uniform_float32
+        if config.KFLOAT is np.float32:
+            random_kfloat = xoroshiro128p_uniform_float32
+        else:
+            random_kfloat = xoroshiro128p_uniform_float64
     else:
         raise NotImplementedError(f"Array library '{lib}' not currently handled")

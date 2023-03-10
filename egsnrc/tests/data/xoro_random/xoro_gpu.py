@@ -1,8 +1,16 @@
-# example1.py
-"""Define a slab geometry with photon tracking only
+# xoro_gpu.py
+"""Test random number generation
 """
-# import os
-# os.environ['NUMBA_ENABLE_CUDASIM'] = '1'  # XXX temp for testing GPU running on CPU
+import numpy as np
+import sys
+from egsnrc import config
+if int(sys.argv[-1]) == 64:
+    config.KFLOAT = np.float64
+    config.KINT = np.int64
+else:
+    config.KFLOAT = np.float32
+    config.KINT = np.int32
+
 
 from time import perf_counter
 import numba as nb
@@ -11,7 +19,7 @@ import numpy as np
 import sys
 from egsnrc.config import KFLOAT, KINT
 from egsnrc import egsrandom
-from egsnrc.util import CUDATimer
+from egsnrc.util import CUDATimer, cuda_details
 
 import logging
 
@@ -25,22 +33,25 @@ def random_test(rng_states, num_particles, out):
     # Get unique grid index
     gid = cuda.grid(1)
 
-    if gid >= num_particles:
-        return
+    # Don't need this check here because implicit in grid_stride loop
+    # if gid >= num_particles:
+    #     return
+
+    threads_per_grid = cuda.blockDim.x * cuda.gridDim.x
+    # if gid==0:
+    #     print("threads_per_grid=", threads_per_grid)
 
     # CUDA Grid-Stride loop to reuse this thread
-    threads_per_grid = cuda.blockDim.x * cuda.gridDim.x
     for i_arr in range(gid, num_particles, threads_per_grid):
         egsrandom.random_kfloat(rng_states, gid)
 
     # Use last random so loop is not optimized away ... (?)
-    out[gid] = egsrandom.random_kfloat(rng_states, gid)
+    if cuda.threadIdx.x == 0:
+        out[cuda.blockIdx.x] = egsrandom.random_kfloat(rng_states, gid)
 
 
 seed = 1
 def run(num_particles, blocks_per_grid, threads_per_block):
-    print("\n-------------------------------")
-    print(f"Run with {num_particles=:,} {blocks_per_grid=}  {threads_per_block=}\n")
     if not cuda.is_available():
         print("***** This script requires CUDA gpu  ****")
         sys.exit(-1)
@@ -48,29 +59,46 @@ def run(num_particles, blocks_per_grid, threads_per_block):
     egsrandom.set_array_library("cuda")
     rng_states = egsrandom.initialize(seed, num_blocks * threads_per_block)
 
-    print("Without storing the random numbers...")
     cuda.synchronize()
-    out = cuda.device_array(num_blocks * threads_per_block, dtype=KFLOAT)
+    out = cuda.device_array(num_blocks, dtype=KFLOAT)
     # out = cuda.device_array(10, dtype=KFLOAT)  # XXX just a dummy array for now
 
     # Do a short run to jit the function so not included in the timing
-    print("Initial short run to jit the function...")
+    print("\n=============================")
     start = perf_counter()
-    random_test[1, threads_per_block](
-        rng_states, num_particles, out
+    random_test[1, 10](
+        rng_states, 10, out
     )
+    cuda.synchronize()
     end = perf_counter()
-    print(f"Jit time (Python perf_counter): {(end - start):>8.5} seconds")
-    print("Done jit.\n")
-    start = perf_counter()
+
+    print(f"Initial short run to jit the function...{(end - start):>8.5} seconds")
+    bits = 32 if KFLOAT is np.float32 else 64
+
+    print("\n-------------------------------------------------------------")
+    print(cuda_details())
+    print(f"{bits}-bits run with {num_particles=:,} {blocks_per_grid=}  {threads_per_block=}")
+    start2 = perf_counter()
     with CUDATimer() as cudatimer:  # CUDATimes(stream)
         random_test[num_blocks, threads_per_block](
             rng_states, num_particles, out
         )
-    cuda.synchronize()
-    print(f"Elapsed time by events {cudatimer.elapsed:.2f} ms")
-    elapsed_time = perf_counter() - start
-    print(f"Elapsed time (Python perf_counter): {elapsed_time:>8.5} seconds")
+    # cuda.synchronize()
+    cuda_elapsed = cudatimer.elapsed
+    end2 = perf_counter()
+    elapsed_time = end2 - start2
+    print(
+        f"Elapsed time in ms: CUDA events: {cuda_elapsed:.2f};   "
+        f"Python perf_counter {elapsed_time * 1000:.1f}"
+    )
+    print("\n-------------------------------------------------------------")
+    print("\n Sample of random numbers out")
+    out = out.copy_to_host()
+    print(out[:30])
+    print(out.dtype)
+    print("First number, to show the precision:", out[0])
+
+
 
 
 if __name__ == "__main__":
