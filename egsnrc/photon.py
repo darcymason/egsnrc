@@ -312,7 +312,7 @@ def init(random_seed, num_particles):
         num_particles,
         seed=random_seed
     )
-    return cuda.to_device(rng_states)
+    return rng_states
 
 
 def run(particles, scoring_out, on_gpu=True):

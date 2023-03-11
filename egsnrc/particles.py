@@ -6,6 +6,7 @@ import numpy as np
 from numba import cuda
 from egsnrc.config import device_jit
 from egsnrc.params import EPSGMFP, VACDST
+from egsnrc import egsrandom
 
 
 # Constants to use for `status`
@@ -42,15 +43,16 @@ def set_particle(i, regions, iparticles, fparticles):
 
 @device_jit
 def replace_e_uvw(p, energy, u, v, w):
-    """Return a Particle like `p` but with uvw replaced"""
+    """Return a Particle like `p` but with ernergy, u, v, w replaced"""
     return Particle(
         p.status, p.region, np.float32(energy), p.x, p.y, p.z,
         np.float32(u), np.float32(v), np.float32(w)
     )
 
+
 @device_jit
 def replace_region_xyz(p, region, x, y, z):
-    """Return a Particle like `p` but with x,y,z replaced"""
+    """Return a Particle like `p` but with region, x, y, z replaced"""
     return Particle(
         p.status, region, p.energy,
         np.float32(x), np.float32(y), np.float32(z), p.u, p.v, p.w
