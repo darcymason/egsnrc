@@ -3,6 +3,7 @@
 """
 #  From pegs_page.cpp 2023-01-03
 
+from math import log
 from typing import NamedTuple
 
 
@@ -128,3 +129,31 @@ element_data_by_z = {
     v.atomic_number: Zdata(k, v.atomic_weight, v.mean_excitation_energy, v.density)
     for k, v in element_data.items()
 }
+
+
+FINE = 137.03604
+# Data for ALRAD and ALRADP for element z <= 4
+# taken from Table B.2 in Y.Tsai Rev.Mod.Phys. 46,815(1974)
+ALRAD = (05.31, 4.79, 4.74, 4.71)
+ALRADP = (6.144, 5.621, 5.805, 5.924)
+A1440 = 1194.0
+A183 = 184.15
+
+
+def fcoulc(Z):
+    """Coulomb correction term in pair production and bremsstrahlung crosssections."""
+    asq = Z / FINE
+    asq = asq * asq
+    return asq * (
+        1.0 / (1.0 + asq) + 0.20206 + asq * (
+            -0.0369 + asq * (0.0083 + asq * (-0.002))
+        )
+    )
+
+def xsif(Z):
+    """Function to account for brem and pair prodn in the field of atomic electrons."""
+    if Z <= 4:
+        iZ = int(Z) - 1  # -1 in Python for indexing
+        return ALRADP(iZ) / (ALRAD(iZ) - fcoulc(Z))
+    else:
+        return log(A1440 * Z**(-0.666667)) / (log(A183 * Z**(-0.33333)) - fcoulc(Z))
