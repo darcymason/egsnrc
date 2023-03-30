@@ -141,7 +141,7 @@ A183 = 184.15
 
 
 def fcoulc(Z):
-    """Coulomb correction term in pair production and bremsstrahlung crosssections."""
+    """Coulomb correction term in pair production and bremsstrahlung cross-sections."""
     asq = Z / FINE
     asq = asq * asq
     return asq * (
