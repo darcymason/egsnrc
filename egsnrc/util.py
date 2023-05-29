@@ -7,8 +7,9 @@ def cuda_details():
         from cuda.cuda import (
             CUdevice_attribute, cuDeviceGetAttribute, cuDeviceGetName, cuInit
         )
-    except ImportError:
+    except ImportError as e:
         return (
+            f"{str(e)}\n"
             "** GPU details not available\n"
             "In Colab, use `!pip install cuda-python` to see GPU specs\n"
         )
