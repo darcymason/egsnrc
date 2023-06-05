@@ -23,13 +23,8 @@ def select_low_energy_pair_production(rng_states, gid, energy):
     energy_e1 = energy - energy_e2
 
     rnno34 = egsrandom.random_kfloat(rng_states, gid)
-    if rnno34 < 0.5:
-        charge_e1 = -1
-        charge_e2 = 1
-    else:
-        charge_e1 = 1
-        charge_e2 = -1
-    return energy_e1, energy_e2, charge_e1, charge_e2
+    charge_e1 = -1 if rnno34 < 0.5 else 1
+    return energy_e1, energy_e2, charge_e1, -charge_e1
 
 
 @devicejit
@@ -174,6 +169,9 @@ def set_pair_angle(eig):
 def pair(rng_states, gid, p):
     """Pair / Triplet production
 
+    For a photon energy below 2.1 MeV, the energies of the pair
+    particles are uniformly distributed in the allowed range.
+
     For a photon energy between 2.1 and 50 MeV the Bethe-Heitler
     cross section is employed, above 50 MeV the Coulomb-corrected
     Bethe-Heitler is used.
@@ -265,11 +263,11 @@ def pair(rng_states, gid, p):
                     Bmax = medium.dl1[l1]+delta*(medium.dl2[l1]+delta*medium.dl3[l1])
                 else:
                     aux2 = log(delta+medium.dl6[l])
-                    Amax = medium.dl4[l]+dl5(l,medium)*aux2
-                    Bmax = medium.dl4[l1]+dl5(l1,medium)*aux2
+                    Amax = medium.dl4[l]+medium.dl5[l]*aux2
+                    Bmax = medium.dl4[l1]+medium.dl5[l1]*aux2
 
                 # and then calculate the probability for sampling from (br-1/2)**2
-                aux1 = 1 - 2 * REST_MASS / eig
+                aux1 = 1 - 2 * REST_MASS / p.energy
                 aux1 = aux1*aux1
                 aux1 = aux1*Amax/3
                 aux1 = aux1/(Bmax+aux1)
@@ -278,59 +276,60 @@ def pair(rng_states, gid, p):
                 L = 7
                 # The absolute maxima are close to the actual maxima at high energies
                 # =>use the absolute maxima to save time
+                # bpar: Prob. for the 12*(BR-1/2)**2 part in PAIR, eq. (2.7.105)
                 Amax = medium.dl1[l]
                 Bmax = medium.dl1[l+1]
-                aux1 = bpar(2,medium)*(1-bpar(1,medium)*REST_MASS/eig)
+                aux1 = medium.bpar[2] * (1 - medium.bpar[1] * REST_MASS / p.energy)
 
-        del0 = eig * delcm[medium]
-        Eavail = eig - 2 * REST_MASS
+            del0 = p.energy * medium.delcm
+            Eavail = p.energy - 2 * REST_MASS
 
-        while True:
-            rnno30 = egsrandom.random_kfloat(rng_states, gid)
-            rnno31 = egsrandom.random_kfloat(rng_states, gid)
+            while True:
+                rnno30 = egsrandom.random_kfloat(rng_states, gid)
+                rnno31 = egsrandom.random_kfloat(rng_states, gid)
+                rnno34 = egsrandom.random_kfloat(rng_states, gid)
+                if rnno30 > aux1:  # use the uniform part
+                    br = 0.5 * rnno31
+                    rejmax = Bmax
+                    l1 = l+1
+                else:  # use the (br-1/2)**2 part of the distribution
+                    rnno32 = egsrandom.random_kfloat(rng_states, gid)
+                    rnno33 = egsrandom.random_kfloat(rng_states, gid)
+                    br = 0.5 * (1 - max([rnno31, rnno32, rnno33]))
+                    rejmax = Amax
+                    l1 = l
+
+                Eminus = br * Eavail + REST_MASS
+                Eplus  = p.energy - Eminus
+                delta = del0 / (Eminus * Eplus)
+                if delta < 1:
+                    rejf = medium.dl1[l1] + delta * (medium.dl2[l1] + delta * medium.dl3[l1])
+                else:
+                    rejf = medium.dl4[l1] + medium.dl5[l1] * log(delta + medium.dl6[l1])
+
+                if rnno34 * rejmax <= rejf:
+                    break
+
+            energy_e2 = Eminus
+            energy_e1 = peig - energy_e2
             rnno34 = egsrandom.random_kfloat(rng_states, gid)
-            if rnno30 > aux1:  # use the uniform part
-                br = 0.5*rnno31
-                rejmax = Bmax
-                l1 = l+1
-            else:  # use the (br-1/2)**2 part of the distribution
-                rnno32 = egsrandom.random_kfloat(rng_states, gid)
-                rnno33 = egsrandom.random_kfloat(rng_states, gid)
-                br = 0.5 * (1 - max([rnno31, rnno32, rnno33])
-                rejmax = Amax
-                l1 = l
-
-            Eminus = br * Eavail + REST_MASS
-            Eplus  = eig - Eminus
-            delta = del0 / (Eminus * Eplus)
-            if delta < 1:
-                rejf = medium.dl1[l1] + delta * (medium.dl2[l1] + delta * medium.dl3[l1])
+            if rnno34 < 0.5:
+                charge_e1 = -1
+                charge_e2 = 1
             else:
-                rejf = medium.dl4[l1] + medium.dl5[l1] * log(delta + medium.dl6[l1])
-
-            if rnno34 * rejmax <= rejf:
-                break
-
-        energy_e2 = Eminus
-        energy_e1 = peig - energy_e2
-        rnno34 = egsrandom.random_kfloat(rng_states, gid)
-        if rnno34 < 0.5:
-            charge_e1 = -1
-            charge_e2 = 1
-        else:
-            charge_e1 = 1
-            charge_e2 = -1
+                charge_e1 = 1
+                charge_e2 = -1
 
 
-    #    ENERGY GOING TO LOWER SECONDARY HAS NOW BEEN DETERMINED
-    ESE2=energy_e2
+    # Energy going to lower secondary has now been determined
+    ESE2 = energy_e2
     e[np]=energy_e1
     E(NP+1)=energy_e2
-    #    THIS AVERAGE ANGLE OF EMISSION FOR BOTH PAIR PRODUCTION AND
-    #    BREMSSTRAHLUNG IS MUCH SMALLER THAN THE AVERAGE ANGLE OF
-    #    MULTIPLE SCATTERING FOR DELTA T TRANSPORT=0.01 R.L.
-    #    THE INITIAL AND FINAL MOMENTA ARE COPLANAR
-    #    SET UP A NEW 'ELECTRON'
+    #    This average angle of emission for both pair production and
+    #    bremsstrahlung is much smaller than the average angle of
+    #    multiple scattering for delta T transport=0.01 R.L.
+    #    the initial and final momenta are coplanar
+    #    set up a new 'electron'
     # --- Inline replace: $ SET_PAIR_ANGLE; -----
     charge_e1, charge_e2, costhe, sinthe ??, ......?? = set_pair_angle(eig, ...?)
 
