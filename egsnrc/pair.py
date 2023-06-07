@@ -175,6 +175,11 @@ def pair(rng_states, gid, p):
     For a photon energy between 2.1 and 50 MeV the Bethe-Heitler
     cross section is employed, above 50 MeV the Coulomb-corrected
     Bethe-Heitler is used.
+
+    Reference:  NRC report PIRS-701 (2021-04), sections 2.2.1.iv and 2.2.1.v
+
+    Here we code only for the default IPRDST=1, 
+    leading order term for angular slection
     """
 
     medium = p.region.medium

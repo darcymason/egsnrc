@@ -310,6 +310,11 @@ class Medium:
         bpar[2] = dl[1, 7] / (3 * dl[1, 8] + dl[1, 7])
         bpar[1] = 12 * dl[1, 8] / (3 * dl[1, 8] + dl[1, 7])
 
+        # Store arrays in the medium
+        self.dl = dl
+        self.bpar = bpar
+
+        # DELCM = 136*m*exp(Zg), eq. (2.7.51)
 
 @np.errstate(divide="raise")
 def _calc_sigmas(interaction, cross_sections, elements, proportions, ge0, ge1, mge):
