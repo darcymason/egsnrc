@@ -25,7 +25,7 @@ dependencies = [
 dynamic = ["version", "description"]  
 keywords = ["Monte Carlo", "Python", "Radiation Transport", "Simulation"]
 
-license = {file = "LICENCE"}
+license = {file = "LICENSE"}
 name = "egsnrc"
 readme = "README.md"
 requires-python = ">=3.10"
