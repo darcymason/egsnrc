@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import os
 from egsnrc import egsfortran
@@ -14,10 +13,7 @@ from math import log  # for calculate_tstep_...
 # Get all common blocks
 from egsnrc.commons import *
 
-from egsnrc.calcfuncs import (
-    calc_tstep_from_demfp,
-    compute_eloss, compute_eloss_g
-)
+from egsnrc.calcfuncs import calc_tstep_from_demfp, compute_eloss, compute_eloss_g
 
 
 init_done = False  # run init() only once, else crashes (unknown reason)
@@ -34,16 +30,16 @@ iwatch = score.iwatch
 escore = score.escore
 
 
-logger = logging.getLogger('egsnrc')  # XXX later `egsnrc`
+logger = logging.getLogger("egsnrc")  # XXX later `egsnrc`
 
 HEN_HOUSE = Path(os.environ["HEN_HOUSE"])
 
 # Define paths based on current location
 # this python file should be in the user code directory under egs_home
 #  - e.g. in tutor1, tutor2, etc.
-HERE  = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent
 EGS_HOME = HERE.parent
-EGS_CONFIG = os.environ['EGS_CONFIG']
+EGS_CONFIG = os.environ["EGS_CONFIG"]
 USER_CODE = HERE.name
 PEGS_FILE = "tutor_data"
 
@@ -68,25 +64,27 @@ def ausgab(iarg, **kwargs):
     if iwatch > 0:
         # egsfortran.flush_output()
         watch.watch(iarg, iwatch, **kwargs)  # handles printouts of data
-                             # iwatch is passed in score
+        # iwatch is passed in score
 
     if iarg <= 4:
-        irl = ir[np-1] # pick up current region number  ** 0-based
+        irl = ir[np - 1]  # pick up current region number  ** 0-based
         msg = " AUSGAB irl,edep"
         # logger.debug(f"{msg:<35}:{irl:3}{fort_hex(edep)}")
-        escore[irl-1] += edep
+        escore[irl - 1] += edep
 
 
 def print_info():
     print("egsfortran values", flush=True)
     print("-----------------", flush=True)
-    for name in ('egs_home', 'user_code', 'pegs_file'):
+    for name in ("egs_home", "user_code", "pegs_file"):
         print(f"{name}: ", getattr(egsfortran.egs_io, name), flush=True)
     print("\nEnvironment", flush=True)
     print("-----------", flush=True)
     print(f"HEN_HOUSE={str(HEN_HOUSE)}", flush=True)
     print(f"EGS_HOME={str(EGS_HOME)}", flush=True)
     print(f"EGS_CONFIG={str(EGS_CONFIG)}", flush=True)
+
+
 # ---------------------------------------------------------------------
 # STEP 1:  USER-OVERRIDE-OF-EGSnrc-MACROS
 # ---------------------------------------------------------------------
@@ -109,6 +107,7 @@ def print_info():
 # ---------------------------------------------------------------------
 
 # paths are done below so are set after egs_check_arguments
+
 
 # --------------------------------------------------------------------
 # egsfortran.egs_init()
@@ -134,7 +133,6 @@ def init(iwatch=1, high_prec=False):
         egsfortran.egs_io.pegs_file = f"{PEGS_FILE:<256}"
         egsfortran.egs_io.user_code = f"{USER_CODE:<64}"
 
-
         print("\n---After setting pegs_file and user_code --", flush=True)
         print_info()
 
@@ -143,13 +141,15 @@ def init(iwatch=1, high_prec=False):
 
     # Gotta be a better way, but for now this works.
     #  Blanking the third line because "NAI" is the default value in this array (??)
-    # media is defined as $TYPE, with media[24,1]. $TYPE is macro'd to CHARACTER*4 for F77
+    # media is defined as $TYPE, with media[24,1].
+    # $TYPE is macro'd to CHARACTER*4 for F77
     #
     # f2py message explains it:
-    #  character*4 media(24,1) is considered as "character media(24,1,4)"; "intent(c)" is forced
-    media[0,0] = b'T   '
-    media[1,0] = b'A   '
-    media[2,0] = b'    '
+    #  character*4 media(24,1) is considered as "character media(24,1,4)";
+    # "intent(c)" is forced
+    media[0, 0] = b"T   "
+    media[1, 0] = b"A   "
+    media[2, 0] = b"    "
     # print(media)
 
     # vacuum in regions 1 and 3, TA in region 2
@@ -157,32 +157,31 @@ def init(iwatch=1, high_prec=False):
     med[1] = 1
 
     # Note take 1 off indices for f2py 0-based in Python
-    ecut[2-1]=1.5;  #    terminate electron histories at 1.5 MeV in the plate#
-    pcut[2-1]=0.1;  #    terminate   photon histories at 0.1 MeV in the plate#
+    ecut[2 - 1] = 1.5  #    terminate electron histories at 1.5 MeV in the plate#
+    pcut[2 - 1] = 0.1  #    terminate   photon histories at 0.1 MeV in the plate#
     #                only needed for region 2 since no transport elsewhere#
     #                ECUT is total energy = 0.989   MeV kinetic energy
-
 
     # ---------------------------------------------------------------------
     # STEP 3   HATCH-CALL
     # ---------------------------------------------------------------------
 
     if not init_done:
-        logger.info('  Start tutor1\n\n CALL HATCH to get cross-section data\n')
+        logger.info("  Start tutor1\n\n CALL HATCH to get cross-section data\n")
         egsfortran.hatch()  #     pick up cross section data for TA
         #                data file must be assigned to unit 12
 
         egsfortran.flush_output()  # gfortran only - else doesn't print all lines
 
         logger.info(
-            '\n knock-on electrons can be created and any electron followed down to\n'
+            "\n knock-on electrons can be created and any electron followed down to\n"
             "                                       "
-            f'{ae[0]-prm:8.3} MeV kinetic energy\n'
-            ' brem photons can be created and any photon followed down to      \n'
+            f"{ae[0]-prm:8.3} MeV kinetic energy\n"
+            " brem photons can be created and any photon followed down to      \n"
             "                                       "
-            f'{ap[0]:8.3f} MeV'
+            f"{ap[0]:8.3f} MeV"
             # Compton events can create electrons and photons below these cutoffs
-        )# OUTPUT AE(1)-PRM, AP(1);
+        )  # OUTPUT AE(1)-PRM, AP(1);
 
     # ---------------------------------------------------------------------
     # STEP 4  INITIALIZATION-FOR-HOWFAR and HOWNEAR
@@ -191,9 +190,9 @@ def init(iwatch=1, high_prec=False):
     # Here mimic that exact single precision number to get identical results
     # Even before end of history one, a min(tustep, tperp (from hownear)) is
     # different between Python and Fortran without this.
-    point1_single_prec = float.fromhex('0x1.99999a0000000p-4')
+    point1_single_prec = float.fromhex("0x1.99999a0000000p-4")
     # OR, change tutor4.mortran to 0.1D0 and then compare with 0.1 below
-    geom.zbound=0.1  # point1_single_prec  #      plate is 1 mm thick
+    geom.zbound = 0.1  # point1_single_prec  #      plate is 1 mm thick
 
     # ---------------------------------------------------------------------
     # STEP 5  INITIALIZATION-FOR-AUSGAB
@@ -206,14 +205,14 @@ def init(iwatch=1, high_prec=False):
 
     watch.high_prec = high_prec  # if True, show more decimal places
     score.iwatch = iwatch  # This determines the type and amount of output
-                    # =1 => print info about each interaction
-                    # =2 => print info about same + each electron step
-                    # =4 => create a file to be displayed by EGS_Windows
-                    #  Note that these files can be huge
-                    # IWATCH 1 and 2 outputs to unit 6, 4 to unit 13
+    # =1 => print info about each interaction
+    # =2 => print info about same + each electron step
+    # =4 => create a file to be displayed by EGS_Windows
+    #  Note that these files can be huge
+    # IWATCH 1 and 2 outputs to unit 6, 4 to unit 13
 
     egsfortran.flush_output()
-    watch.watch(-99, iwatch)   # Initializes calls to AUSGAB for WATCH
+    watch.watch(-99, iwatch)  # Initializes calls to AUSGAB for WATCH
     egsfortran.flush_output()  # if change above to egsfortran.watch(...)
     # ---------------------------------------------------------------------
     # STEP 6   DETERMINATION-OF-INICIDENT-PARTICLE-PARAMETERS
@@ -231,12 +230,13 @@ def main(iqin=-1, iwatch=1, high_prec=False, ncase=10):
     # et_control.exact_bca = False
     # et_control.spin_effects = True
     # iqin=-1  #                incident charge - electrons
-    ein=20.0 + prm
-    ei=20.0  #    20 MeV kinetic energy"
+    ein = 20.0 + prm
+    ei = 20.0  #    20 MeV kinetic energy"
     xin = yin = zin = 0.0  #      incident at origin
-    uin = vin = 0.0; win=1.0  #  moving along Z axis
-    irin=2  #                 starts in region 2, could be 1
-    wtin=1.0  #               weight = 1 since no variance reduction used
+    uin = vin = 0.0
+    win = 1.0  #  moving along Z axis
+    irin = 2  #                 starts in region 2, could be 1
+    wtin = 1.0  #               weight = 1 since no variance reduction used
     # ---------------------------------------------------------------------
     # STEP 7   SHOWER-CALL
     # ---------------------------------------------------------------------
@@ -245,18 +245,19 @@ def main(iqin=-1, iwatch=1, high_prec=False, ncase=10):
     # INITIATE THE SHOWER NCASE TIMES
     #  ncase=10 # now from function call parameter
 
-    callbacks = {'hownear': hownear, 'howfar': howfar, 'ausgab': ausgab}
+    callbacks = {"hownear": hownear, "howfar": howfar, "ausgab": ausgab}
 
     for i in range(ncase):
         if (iwatch != 0) and (iwatch != 4):
             logger.debug(
-            "\n INITIAL SHOWER VALUES             :"
-            f"    1{ei:9.3f}{iqin:4}{irin:4}"
-            f"{xin:8.3f}{yin:8.3f}{zin:8.3f}"
-            f"{uin:7.3f}{vin:7.3f}{win:7.3f}"  # should be 8.3 like x,y,z but get extra spaces
-            f"{latchi:10}{wtin:10.3E}",
+                "\n INITIAL SHOWER VALUES             :"
+                f"    1{ei:9.3f}{iqin:4}{irin:4}"
+                f"{xin:8.3f}{yin:8.3f}{zin:8.3f}"
+                # below should be 8.3 like x,y,z but get extra spaces
+                f"{uin:7.3f}{vin:7.3f}{win:7.3f}"
+                f"{latchi:10}{wtin:10.3E}",
             )
-        shower(iqin,ein,xin,yin,zin,uin,vin,win,irin,wtin, callbacks)
+        shower(iqin, ein, xin, yin, zin, uin, vin, win, irin, wtin, callbacks)
 
         # egsfortran.flush_output()
         watch.watch(-1, iwatch)  # print a message that this history is over
@@ -267,30 +268,32 @@ def main(iqin=-1, iwatch=1, high_prec=False, ncase=10):
     # -----------------------------------------------------------------
 
     # normalize to % of total input energy
-    anorm = 100. / ((ein + iqin*prm) * ncase)
+    anorm = 100.0 / ((ein + iqin * prm) * ncase)
     total = sum(escore)
 
     msgs = (
         " Fraction of energy reflected from plate=",
-        ' Fraction of energy deposited in plate=',
-        ' Fraction of energy transmitted through plate=',
+        " Fraction of energy deposited in plate=",
+        " Fraction of energy transmitted through plate=",
     )
     logger.info("\n")
     for i in range(3):
         logger.info(f"{msgs[i]:<49}{escore[i]*anorm:15.8f}%")
 
-    logger.info(" "*49 + "-"*11)
+    logger.info(" " * 49 + "-" * 11)
 
-    msg = ' Total fraction of energy accounted for='
-    logger.info(f'{msg:<49}{total*anorm:15.8f}%\n\n\n')
+    msg = " Total fraction of energy accounted for="
+    logger.info(f"{msg:<49}{total*anorm:15.8f}%\n\n\n")
 
-        # -----------------------------------------------------------------
+    # -----------------------------------------------------------------
     # STEP 9   finish run
     # -----------------------------------------------------------------
     egsfortran.egs_finish()
 
     # Expected hatch report for medium (line for pure Mortran/Fortran tutor1)
-    # Medium            1  sige =    1.7946410123827996        1.7870816572288755       monotone =  T T
+    # Medium            1
+    # sige =    1.7946410123827996        1.7870816572288755
+    # monotone =  T T
 
 # *********************************************************************
 #
@@ -350,7 +353,7 @@ def howfar():
         return
 
     # Not region 3 or 2, must be 1, region with source
-    if w[np_m1] >  0.0:  # this must be a source particle on z=0 boundary
+    if w[np_m1] > 0.0:  # this must be a source particle on z=0 boundary
         epcont.ustep = 0.0
         epcont.irnew = 2
         # logger.info("howfar region 1 going to 2")
@@ -383,18 +386,18 @@ def hownear(x, y, z, irl):
     # print(f"In Python hownear, with pos = ({x}, {y}, {z}), irl={irl}")
 
     if irl == 2:  # We are in the Ta plate - check the geometry
-        return min(z, (zbound - z) )  # 'terp'
+        return min(z, (zbound - z))  # 'terp'
 
     # else in region 1 or 3, can't return anything sensible
-    raise ValueError(f'Called hownear in region {irl}')
-
+    raise ValueError(f"Called hownear in region {irl}")
 
 
 if __name__ == "__main__":
     import sys
     import cProfile as profile
     import pstats
-    HERE  = Path(__file__).resolve().parent
+
+    HERE = Path(__file__).resolve().parent
     TEST_DATA = HERE.parent.parent / "tests" / "data"
 
     high_prec = False

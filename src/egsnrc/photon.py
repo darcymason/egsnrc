@@ -16,14 +16,18 @@ from egsnrc.params import VACDST, EPSGMFP
 from egsnrc.particles import replace_region_xyz
 from egsnrc.particles import STEPPING, COMPTON, PHOTO
 from egsnrc.particles import (
-    INTERACTION_READY, GEOMETRY_DISCARD, PCUT_DISCARD, PHOTO_DISCARD, USER_PHOTON_DISCARD
+    INTERACTION_READY,
+    GEOMETRY_DISCARD,
+    PCUT_DISCARD,
+    PHOTO_DISCARD,
+    USER_PHOTON_DISCARD,
 )
 from egsnrc.particles import set_particle
 from egsnrc.media import GBR_PAIR, GBR_COMPTON
 from egsnrc.photo import photo
 from egsnrc import egsrandom
 
-numba_logger = logging.getLogger('numba')
+numba_logger = logging.getLogger("numba")
 numba_logger.setLevel(logging.WARNING)
 
 
@@ -46,11 +50,11 @@ def transport_photon(p, dpmfp, gle, regions, howfar):
     status = p.status
     # :PNEWMEDIUM:
     while status >= 0:  # Here each time we change medium during photon transport
-        region= p.region
+        region = p.region
         medium = region.medium
         if medium.number != 0:
             # set interval gle, ge;
-            lgle = KINT(medium.ge[1] * gle + medium.ge[0]) # Set pwlf interval
+            lgle = KINT(medium.ge[1] * gle + medium.ge[0])  # Set pwlf interval
             # evaluate gmfpr0 using gmfp(gle)
             gmfpr0 = medium.gmfp01[1, lgle] * gle + medium.gmfp01[0, lgle]
 
@@ -90,7 +94,7 @@ def transport_photon(p, dpmfp, gle, regions, howfar):
             # Deduct from distance to nearest boundary
             # dnear[np_m1] -= ustep
             if medium.number != 0:
-                dpmfp = max(0., dpmfp - ustep / gmfp) # deduct mfp's
+                dpmfp = max(0.0, dpmfp - ustep / gmfp)  # deduct mfp's
 
             if new_region.number != p.region.number:
                 # REGION CHANGE
@@ -108,7 +112,7 @@ def transport_photon(p, dpmfp, gle, regions, howfar):
             # Now check for deferred discard request. May have been set
             # by either howfar, or one of the transport ausgab calls
             if discard < 0:
-                status  = USER_PHOTON_DISCARD
+                status = USER_PHOTON_DISCARD
                 break
 
             if new_medium.number != p.region.medium.number:
@@ -126,15 +130,20 @@ def transport_photon(p, dpmfp, gle, regions, howfar):
 
     return mod_p, status, dpmfp, lgle
 
+
 non_gpu_index = None
+
 
 # Kernel
 @cuda.jit
 def photon_kernel(
     rng_states,
-    num_particles, # XXX temp
+    num_particles,  # XXX temp
     # iparticles, fparticles,
-    regions, media, iscore, fscore
+    regions,
+    media,
+    iscore,
+    fscore,
 ):
     """Main photon particle simulation kernel - implicitly called on each gpu thread
 
@@ -187,7 +196,9 @@ def photon_kernel(
                 p, dpmfp, gle, regions, howfar
             )
 
-            ausgab(i_arr, status, p, mod_p, iscore, fscore) # if want to track change of position, region
+            ausgab(
+                i_arr, status, p, mod_p, iscore, fscore
+            )  # if want to track change of position, region
             p = mod_p
 
             if status != INTERACTION_READY:
@@ -274,7 +285,6 @@ def photon_kernel(
 
         p = mod_p
 
-
         # if status == PCUT_DISCARD:
         #     if p.medium > 0:
         #         if eig > ap[medium_m1]:
@@ -308,10 +318,7 @@ def photon_kernel(
 
 
 def init(random_seed, num_particles):
-    rng_states = create_xoroshiro128p_states(
-        num_particles,
-        seed=random_seed
-    )
+    rng_states = create_xoroshiro128p_states(num_particles, seed=random_seed)
     return cuda.to_device(rng_states)
 
 
@@ -333,22 +340,25 @@ def run(particles, scoring_out, on_gpu=True):
     debug_on_cpu = False  # True
     from time import perf_counter
 
-
     particle_kernel.forall(len(fparticles))(
         dev_rng_states, dev_iparticles, dev_fparticles, dev_out
     )
 
     times = []
     for run in range(3):
-        energies_np = np.random.random(num_photons) + 0.511 # catch both ko>2 and <2
+        energies_np = np.random.random(num_photons) + 0.511  # catch both ko>2 and <2
         energies_np = energies_np.astype(np.float32)
         fparticles = np.zeros((num_photons, len(particle_fattrs)), dtype=np.float32)
         iparticles = np.zeros((num_photons, len(particle_iattrs)), dtype=np.int32)
         fparticles[:, ENERGY] = energies_np
         out = np.zeros(
             # 3 regions: 0, 1, and  2=escaped the geometry (just use eCompt)
-            (num_photons, NUM_REGIONS + 1,  6),  # 6 for (nCompt, nPhoto, eCompt, ePhoto, nLost, eLost)
-            dtype=np.float32
+            (
+                num_photons,
+                NUM_REGIONS + 1,
+                6,
+            ),  # 6 for (nCompt, nPhoto, eCompt, ePhoto, nLost, eLost)
+            dtype=np.float32,
         )
         if not debug_on_cpu:
             dev_fparticles = cuda.to_device(fparticles)
@@ -368,7 +378,7 @@ def run(particles, scoring_out, on_gpu=True):
             # print(f"{type(fparticles[0, 0])=}")
 
         else:
-            egsrandom.random_kfloat = lambda r,i: np.random.random(1)
+            egsrandom.random_kfloat = lambda r, i: np.random.random(1)
             for i in range(num_photons):
                 particle_kernel.py_func(i, None, iparticles, fparticles, out)
         if not debug_on_cpu:
@@ -378,7 +388,7 @@ def run(particles, scoring_out, on_gpu=True):
         times.append(end - start)
 
     print("----------------------")
-    print("Times:", ', '.join(f"{time_:>8.5} " for time_ in times), "seconds")
+    print("Times:", ", ".join(f"{time_:>8.5} " for time_ in times), "seconds")
     if not debug_on_cpu:
         out = dev_out.copy_to_host()
     if len(out) < 50:
@@ -388,8 +398,8 @@ def run(particles, scoring_out, on_gpu=True):
     for r in range(2):
         print("Energy Total by Region")
         print(f"Region {r}----")
-        print("Compton: ", sum(out[:,r,SCORE_eCOMPTON]))
-        print("Photo  : ", sum(out[:,r,SCORE_ePHOTO]))
+        print("Compton: ", sum(out[:, r, SCORE_eCOMPTON]))
+        print("Photo  : ", sum(out[:, r, SCORE_ePHOTO]))
     sum_compt = np.sum(out[:, :, SCORE_eCOMPTON])
     sum_photo = np.sum(out[:, :, SCORE_ePHOTO])
     sum_lost = np.sum(out[:, :, SCORE_eLost])

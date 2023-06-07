@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger("egsnrc")
 
 from egsnrc.commons import *
@@ -15,8 +16,26 @@ _3X = "   "
 _6X = "      "
 _7X = "       "
 header = "".join(
-    ("\n\n"," "*38,' NP',_3X,'ENERGY  Q REGION    X',_7X,
-    'Y',_7X,'Z',_6X,'U',_6X,'V',_6X,'W',_6X,'LATCH',_2X,'WEIGHT\n'
+    (
+        "\n\n",
+        " " * 38,
+        " NP",
+        _3X,
+        "ENERGY  Q REGION    X",
+        _7X,
+        "Y",
+        _7X,
+        "Z",
+        _6X,
+        "U",
+        _6X,
+        "V",
+        _6X,
+        "W",
+        _6X,
+        "LATCH",
+        _2X,
+        "WEIGHT\n",
     )
 )
 
@@ -24,31 +43,31 @@ high_prec = False
 
 # Simple iargs that just print a message and current state
 arg_messages = {
-    1: ' Discard  AE,AP<E<ECUT',
-    2: ' Discard  E<AE,AP',
-    3: ' Discard -user request',
-    6: ' bremsstrahlung  about to occur',
-    8: ' Moller   about to occur',
-    10: ' Bhabba   about to occur',
-    12: ' Positron about to decay in flight',
-    15: ' Pair production about to occur',
-    17: ' Compton  about to occur',
-    19: ' Photoelectric about to occur',
-    24: ' Rayleigh scattering occured',
-    25: 'Fluorescent X-ray created',
-    26: 'Coster-Kronig e- created',
-    27: 'Auger electron created',
-    28: ' Positron will annihilate at rest',
+    1: " Discard  AE,AP<E<ECUT",
+    2: " Discard  E<AE,AP",
+    3: " Discard -user request",
+    6: " bremsstrahlung  about to occur",
+    8: " Moller   about to occur",
+    10: " Bhabba   about to occur",
+    12: " Positron about to decay in flight",
+    15: " Pair production about to occur",
+    17: " Compton  about to occur",
+    19: " Photoelectric about to occur",
+    24: " Rayleigh scattering occured",
+    25: "Fluorescent X-ray created",
+    26: "Coster-Kronig e- created",
+    27: "Auger electron created",
+    28: " Positron will annihilate at rest",
 }
 
 
 interaction_rejected_iargs = (9, 11, 13, 14, 16, 18)
-rejected_message = '           Interaction rejected'
+rejected_message = "           Interaction rejected"
 second_message = {
-    9: '          Resulting electrons',
-    11:'          Resulting e- or e+',
-    13:'          Resulting photons',
-    14: ' Positron annihilates at rest',
+    9: "          Resulting electrons",
+    11: "          Resulting e- or e+",
+    13: "          Resulting photons",
+    14: " Positron annihilates at rest",
 }
 
 
@@ -129,7 +148,9 @@ def watch(iarg, iwatch, **kwargs):
 
     global icount, jhstry, graph_unit
 
-    ku = 13; kr = 0; ka = 1  # graph file params
+    ku = 13
+    kr = 0
+    ka = 1  # graph file params
     if iarg == -99:
         # Initialize flags so we will get calls thru AUSGAB
         iausfl[:] = 1
@@ -144,12 +165,12 @@ def watch(iarg, iwatch, **kwargs):
             # WRITE(graph_unit,:GRAPHICS_FORMAT:) 0,0,0,0.0,0.0,0.0,0.0,jhstry
             # jhstry += 1
         else:
-            log_it(f" END OF HISTORY{jhstry:8}   " + "*"*40 + "\n")
+            log_it(f" END OF HISTORY{jhstry:8}   " + "*" * 40 + "\n")
             jhstry += 1
             icount += 2
             return
 
-    if iwatch != 4 and (icount >= 50 or icount == 0 or iarg == -99) :
+    if iwatch != 4 and (icount >= 50 or icount == 0 or iarg == -99):
         # PRINT HEADER
         icount = 1
         # log_it(header) # comment out to better align diffs with original
@@ -165,7 +186,7 @@ def watch(iarg, iwatch, **kwargs):
         return
 
     if iwatch == 4:
-        return # none of the rest needed for graphics output
+        return  # none of the rest needed for graphics output
 
     np_m1 = np - 1  # ** 0-based arrays
     npold_m1 = npold - 1
@@ -176,8 +197,8 @@ def watch(iarg, iwatch, **kwargs):
     if iarg == 0:
         if iwatch == 2:
             icount += 1
-            log_it(std_data('          STEP ABOUT TO OCCUR', np_m1, ke))
-            msg = '    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP'
+            log_it(std_data("          STEP ABOUT TO OCCUR", np_m1, ke))
+            msg = "    USTEP,TUSTEP,VSTEP,TVSTEP,EDEP"
             log_it(
                 f"{msg:<35}:    {ustep:13.4E}{tustep:13.4E}{vstep:13.4E}"
                 f"{tvstep:13.4E}{edep:13.4E}"
@@ -189,7 +210,7 @@ def watch(iarg, iwatch, **kwargs):
         icount += 1
         log_it(std_data(arg_messages[iarg], np_m1, ke))
     elif iarg == 4:
-        msg = '         Local energy deposition'
+        msg = "         Local energy deposition"
         # icount += 1  # not done in original EGSnrc, but should be?
         log_it(f"{msg:<35}:{edep:12.5f} MeV in region {ir[np_m1]:6}")
     elif iarg == 7:
@@ -197,25 +218,25 @@ def watch(iarg, iwatch, **kwargs):
             for ip_m1 in range(npold_m1, np):
                 if iq[ip_m1] == -1:
                     ke = e[ip_m1] - rm
-                    msg = '         Resulting electron'
+                    msg = "         Resulting electron"
                 else:
                     ke = e[ip_m1]
-                    msg = '         Resulting photon'
+                    msg = "         Resulting photon"
                 icount += 1
                 log_it(std_data(msg, ip_m1, ke))
         else:  # splitting case--e- is always at NPold
             ke = e[npold_m1] - rm
             icount += 1
-            log_it(std_data('          Resulting electron', npold_m1, ke))
-            for ip_m1 in range(npold+1-1, np):  # 0-based
-                ke= e[ip_m1]
+            log_it(std_data("          Resulting electron", npold_m1, ke))
+            for ip_m1 in range(npold + 1 - 1, np):  # 0-based
+                ke = e[ip_m1]
                 # print label info for first one only"
-                msg = '          Split photons' if ip_m1 == npold else ""
+                msg = "          Split photons" if ip_m1 == npold else ""
                 icount += 1
                 log_it(std_data(msg, ip_m1, ke))
     elif iarg in interaction_rejected_iargs:
         msg = rejected_message
-        if np == npold and (i_survived_rr == 0 if iarg in (16,18) else True):
+        if np == npold and (i_survived_rr == 0 if iarg in (16, 18) else True):
             icount += 1
             log_it(std_data(msg, np_m1, ke))
         elif iarg in (9, 11, 13, 14):
@@ -227,73 +248,69 @@ def watch(iarg, iwatch, **kwargs):
         elif iarg == 16:  # pair production
             if np == npold and i_survived_rr > 0:  # we have cleared the stack
                 log_it(
-                    f'          Russian Roulette eliminated {i_survived_rr:2}'
-                    f' particle(s) with probability {prob_rr:8.5f}'
+                    f"          Russian Roulette eliminated {i_survived_rr:2}"
+                    f" particle(s) with probability {prob_rr:8.5f}"
                 )
                 icount += 1
-                log_it(std_data('Now on top of stack', np_m1, ke))
+                log_it(std_data("Now on top of stack", np_m1, ke))
             else:
-                for ip_m1 in range(npold-1,np):
+                for ip_m1 in range(npold - 1, np):
                     ke = e[ip_m1] - abs(iq[ip_m1]) * rm
-                    msg = '          Resulting pair' if ip_m1 == npold-1 else ""
+                    msg = "          Resulting pair" if ip_m1 == npold - 1 else ""
                     icount += 1
                     log_it(std_data(msg, ip_m1, ke))
         elif iarg == 18:
             if np > npold:  # have not cleared the stack with rus rou
-                for ip_m1 in range(npold-1,npold+1):
+                for ip_m1 in range(npold - 1, npold + 1):
                     ke = e[ip_m1] - abs(iq[ip_m1]) * rm
-                    msg = '          compton ' + (
-                        'electron created' if iq[ip_m1] != 0
-                        else 'scattered photon'
+                    msg = "          compton " + (
+                        "electron created" if iq[ip_m1] != 0 else "scattered photon"
                     )
                     icount += 1
                     log_it(std_data(msg, ip_m1, ke))
 
-            if(i_survived_rr > 0):  # whether the stack has been cleared or not
+            if i_survived_rr > 0:  # whether the stack has been cleared or not
                 log_it(
-                    f'          Russian Roulette eliminated {i_survived_rr:2}'
-                    f' particle(s) with probability {prob_rr:8.5f}'
+                    f"          Russian Roulette eliminated {i_survived_rr:2}"
+                    f" particle(s) with probability {prob_rr:8.5f}"
                 )
                 icount += 1
-                log_it(std_data('Now on top of stack', np_m1, ke))
+                log_it(std_data("Now on top of stack", np_m1, ke))
 
         else:
             # XXX defensive in case of log errors, and `else` above should work
             raise ValueError("Should only have been iarg 16 or 18")
     elif iarg == 20:
         if npold == np and iq[np_m1] == 0 and i_survived_rr == 0:
-            msg = (
-                '          Photon energy below N-shell\n'
-                '          Photon discarded'
-            )
+            msg = "          Photon energy below N-shell\n" "          Photon discarded"
             icount += 1
             log_it(std_data(msg, np_m1, ke))
         elif iq[npold_m1] == -1 and i_survived_rr == 0:
-            ke= e[npold_m1] - rm
-            msg = '         Resulting photoelectron'
+            ke = e[npold_m1] - rm
+            msg = "         Resulting photoelectron"
             icount += 1
             log_it(std_data(msg, npold_m1, ke))
         elif i_survived_rr > 0:  # done some russian roulette
-            if np == npold-1 or iq[npold_m1] != -1:
+            if np == npold - 1 or iq[npold_m1] != -1:
                 if i_survived_rr > 1:  # eliminated more than the photoelectron
                     log_it(
-                        f'          Russian Roulette eliminated {i_survived_rr - 1:2}'
-                        f' particle(s) with probability {prob_rr:8.5f}'
+                        f"          Russian Roulette eliminated {i_survived_rr - 1:2}"
+                        f" particle(s) with probability {prob_rr:8.5f}"
                     )
                 log_it(
-                    f'          Russian Roulette eliminated resulting photoelectron'
-                    f' with probability {prob_rr:8.5f}'
+                    f"          Russian Roulette eliminated resulting photoelectron"
+                    f" with probability {prob_rr:8.5f}"
                 )
             else:  # NPold could hold the photoelectron
                 ke = e[npold_m1] - rm
-                msg = '         Resulting photoelectron?'
+                msg = "         Resulting photoelectron?"
                 icount += 1
                 log_it(std_data(msg, npold_m1, ke))
                 log_it(
-                    f'          Russian Roulette eliminated {i_survived_rr:2}'
-                    f' particle(s) with probability {prob_rr:8.5f}'
+                    f"          Russian Roulette eliminated {i_survived_rr:2}"
+                    f" particle(s) with probability {prob_rr:8.5f}"
                 )
-            msg = '         Now on top of stack'
+            msg = "         Now on top of stack"
             icount += 1
             log_it(std_data(msg, np_m1, ke))
 
@@ -301,10 +318,10 @@ def watch(iarg, iwatch, **kwargs):
         return
 
     if iarg <= 3:
-        N = np-1
+        N = np - 1
         N_m1 = N - 1
         ke = e[N_m1] - abs(iq[N_m1]) * rm
-        msg = '         Now on top of stack'
+        msg = "         Now on top of stack"
         icount += 1
         log_it(std_data(msg, N_m1, ke))
 
@@ -313,33 +330,29 @@ def watch(iarg, iwatch, **kwargs):
 
 
 extra_messages = {
-    PRESTAIA: '      After msdist_pi call',
-    PRESTAIIA:'      After msdist_pii call',
-    TUSTEPB: 'tustep vs tperp, skin_depth',
-    HOWFARB: '      Before HOWFAR',
-    HOWFARA: '      After HOWFAR',
+    PRESTAIA: "      After msdist_pi call",
+    PRESTAIIA: "      After msdist_pii call",
+    TUSTEPB: "tustep vs tperp, skin_depth",
+    HOWFARB: "      Before HOWFAR",
+    HOWFARA: "      After HOWFAR",
 }
+
 
 def watch_extra(iarg, iwatch, **kwargs):
     """Custom added flags for tracing in very fine detail"""
     # (used for Python conversion from Mortran code)
 
-    if iwatch !=2:
+    if iwatch != 2:
         return  # these are only for detailed step info
     np_m1 = np - 1
     ke = e[np_m1]
     if iq[np_m1] != 0:
         ke -= prm
 
-    msg = kwargs['msg'] if 'msg' in kwargs else extra_messages[iarg]
+    msg = kwargs["msg"] if "msg" in kwargs else extra_messages[iarg]
 
     if kwargs:
-        data = ", ".join(
-            f"{kw}={val}"
-            for kw,val in kwargs.items()
-            if kw != "msg"
-        )
+        data = ", ".join(f"{kw}={val}" for kw, val in kwargs.items() if kw != "msg")
         log_it(f"{msg:<35}: {data}")
     else:
-        log_it(std_data(msg, np-1, ke))
-
+        log_it(std_data(msg, np - 1, ke))

@@ -55,8 +55,8 @@ def egs_KN_sigma0(e_arr):
         else:
             # c1 = 1./(ko*ko); c2 = 1. - 2*(1+ko)*c1; c3 = (1+2*ko)*c1
             # eps2 = 1; eps1 = 1./(1+2*ko)
-            # egs_KN_sigma0 = (c1*(1./eps1-1./eps2)+c2*log(eps2/eps1)+eps2*(c3+0.5*eps2)-
-            #     eps1*(c3+0.5*eps1))/e*con
+            # egs_KN_sigma0 = (c1*(1./eps1-1./eps2) + c2*log(eps2/eps1)
+            # + eps2*(c3+0.5*eps2)- eps1*(c3+0.5*eps1))/e*con
             c1 = 1.0 / (ko * ko)
             c2 = 1.0 - 2 * (1 + ko) * c1
             c3 = (1 + 2 * ko) * c1
@@ -102,7 +102,7 @@ class Medium:
     def __post_init__(self):
         if self.name is None:
             self.name = self.formula
-        if not self.formula in element_data:
+        if self.formula not in element_data:
             raise NotImplementedError("Currently only accept single chemical elements")
             # XXX can add library like chemparse, chemformula, or chempy to give us
             #    the proportions
@@ -315,6 +315,7 @@ class Medium:
         self.bpar = bpar
 
         # DELCM = 136*m*exp(Zg), eq. (2.7.51)
+
 
 @np.errstate(divide="raise")
 def _calc_sigmas(interaction, cross_sections, elements, proportions, ge0, ge1, mge):

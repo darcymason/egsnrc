@@ -11,8 +11,14 @@ from egsnrc.params import EPSGMFP, VACDST
 # Constants to use for `status`
 STEPPING, COMPTON, PHOTO = np.arange(3, dtype=np.int32)
 # Negative ones for reason particle complete
-INTERACTION_READY, GEOMETRY_DISCARD, PCUT_DISCARD, USER_PHOTON_DISCARD, \
-    PHOTO_DISCARD, NO_DISCARD = np.arange(-5, 1, dtype=np.int32)
+(
+    INTERACTION_READY,
+    GEOMETRY_DISCARD,
+    PCUT_DISCARD,
+    USER_PHOTON_DISCARD,
+    PHOTO_DISCARD,
+    NO_DISCARD,
+) = np.arange(-5, 1, dtype=np.int32)
 
 
 # Particle attributes
@@ -23,6 +29,7 @@ STATUS, REGION = np.arange(2, dtype=np.int32)
 ENERGY, X, Y, Z, U, V, W = np.arange(7, dtype=np.int32)
 
 Particle = namedtuple("Particle", "status region energy x y z u v w")
+
 
 # Functions to manage particles here, because with namedtuples it is a little
 #  trickier to remember order, and this allows all changes in one place
@@ -36,24 +43,47 @@ def set_particle(i, regions, iparticles, fparticles):
     oi = iparticles[i]
     of = fparticles[i]
     return Particle(
-        oi[STATUS], regions[oi[REGION]],
-        of[ENERGY], of[X], of[Y], of[Z], of[U], of[V], of[W])
+        oi[STATUS],
+        regions[oi[REGION]],
+        of[ENERGY],
+        of[X],
+        of[Y],
+        of[Z],
+        of[U],
+        of[V],
+        of[W],
+    )
 
 
 @device_jit
 def replace_e_uvw(p, energy, u, v, w):
     """Return a Particle like `p` but with uvw replaced"""
     return Particle(
-        p.status, p.region, np.float32(energy), p.x, p.y, p.z,
-        np.float32(u), np.float32(v), np.float32(w)
+        p.status,
+        p.region,
+        np.float32(energy),
+        p.x,
+        p.y,
+        p.z,
+        np.float32(u),
+        np.float32(v),
+        np.float32(w),
     )
+
 
 @device_jit
 def replace_region_xyz(p, region, x, y, z):
     """Return a Particle like `p` but with x,y,z replaced"""
     return Particle(
-        p.status, region, p.energy,
-        np.float32(x), np.float32(y), np.float32(z), p.u, p.v, p.w
+        p.status,
+        region,
+        p.energy,
+        np.float32(x),
+        np.float32(y),
+        np.float32(z),
+        p.u,
+        p.v,
+        p.w,
     )
 
 
@@ -65,6 +95,7 @@ class PhotonSource:
 
     Internally, supplies the types needed to pass to the GPU kernel
     """
+
     # Could easily add more to this class,
     # e.g. uniform direction with a `direction=None` default
     #  and line sources, etc. with multi-dimensional `position`
@@ -84,19 +115,17 @@ class PhotonSource:
 
     def generate(self, num_particles, device="cpu"):
         # Start with zeros, then fill in
-        iparticles = np.zeros(
-            (num_particles, len(particle_iattrs)), dtype=np.int32
-        )
-        fparticles = np.zeros(
-            (num_particles, len(particle_fattrs)), dtype=np.float32
-        )
+        iparticles = np.zeros((num_particles, len(particle_iattrs)), dtype=np.int32)
+        fparticles = np.zeros((num_particles, len(particle_fattrs)), dtype=np.float32)
 
         energy = self.energy
         # Set requested energies
         if isinstance(energy, (tuple, list)):
             # XXX need to make into proper GPU kernel for generating random energies
-            np.random.seed(42) # XXX
-            energies = np.random.random(num_particles)*(energy[1] - energy[0]) + energy[0]
+            np.random.seed(42)  # XXX
+            energies = (
+                np.random.random(num_particles) * (energy[1] - energy[0]) + energy[0]
+            )
             energies = energies.astype(np.float32)
             fparticles[:, ENERGY] = energies
         else:
@@ -105,8 +134,8 @@ class PhotonSource:
         self.total_energy += sum(fparticles[:, ENERGY])
         # Set region and position, direction
         iparticles[:, REGION] = self.region.number
-        fparticles[:, X: X + 3] = self.position
-        fparticles[:, U: U + 3] = self.direction
+        fparticles[:, X : X + 3] = self.position
+        fparticles[:, U : U + 3] = self.direction
 
         if self.store_particles:
             self.fparticles = np.vstack((self.fparticles, fparticles))

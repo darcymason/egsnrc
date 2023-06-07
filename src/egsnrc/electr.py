@@ -9,11 +9,11 @@ from .brems import brems
 from .moller import moller
 
 import logging
-logger = logging.getLogger('egsnrc')
+
+logger = logging.getLogger("egsnrc")
 
 # EMPTY CALLBACKS ----
 call_user_electron = None
-
 
 
 electron_track_end = None
@@ -39,14 +39,14 @@ start_new_particle = None
 
 # Define ebrems as is used in several places
 def ebrems(ausgab):
-    if iausfl[BREMAUSB-1+1] != 0:  # ** 0-based
+    if iausfl[BREMAUSB - 1 + 1] != 0:  # ** 0-based
         ausgab(BREMAUSB)
     brems()  # egsfortran.brems()
 
     if particle_selection_brems:
         particle_selection_brems()
 
-    if iausfl[BREMAUSA-1+1] != 0:  # ** 0-based
+    if iausfl[BREMAUSA - 1 + 1] != 0:  # ** 0-based
         ausgab(BREMAUSA)
 
 
@@ -100,7 +100,6 @@ def electr(hownear, howfar, ausgab) -> int:
         medium_m1 = medium - 1
     # End inline replace: $ start_new_particle; ----
 
-
     # ************************************************************************
     while True:  # :NEWELECTRON: LOOP
         # Go once through this loop for each 'new' electron whose charge and
@@ -114,8 +113,8 @@ def electr(hownear, howfar, ausgab) -> int:
         # has both as real*8
         # "ENERGY PRECISION" is 'DOUBLE PRECISION' which appears to be real*8
         # eie is $REAL, also defined as real*8
-        peie  = e[np_m1]  # precise energy of incident electron (double precision)
-        eie   = peie  # energy incident electron (conversion to single)
+        peie = e[np_m1]  # precise energy of incident electron (double precision)
+        eie = peie  # energy incident electron (conversion to single)
         # eie   = numpy.array(peie, dtype=numpy.float32) # convert to single precision
 
         if eie <= ecut[irl_m1]:
@@ -132,9 +131,8 @@ def electr(hownear, howfar, ausgab) -> int:
 
         # Follow the one particle  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         particle_outcome, lelke, eie, peie = tstep_ustep(
-            lelec, medium, irl,
-            eie, peie,
-            hownear, howfar, ausgab)
+            lelec, medium, irl, eie, peie, hownear, howfar, ausgab
+        )
         # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
         if particle_outcome == LAMBDA_WARNING:
             ircode = lelke
@@ -153,7 +151,7 @@ def electr(hownear, howfar, ausgab) -> int:
                 ebr1 = evaluate_ebrem_fraction()
             else:
                 # EVALUATE ebr1 USING ebr1(elke)
-                ebr1 = ebr11[lelke_m1, medium_m1]*elke+ ebr10[lelke_m1, medium_m1]
+                ebr1 = ebr11[lelke_m1, medium_m1] * elke + ebr10[lelke_m1, medium_m1]
             # End inline replace: $ EVALUATE_EBREM_FRACTION; ----
 
             rnno24 = randomset()
@@ -161,7 +159,7 @@ def electr(hownear, howfar, ausgab) -> int:
             if rnno24 <= ebr1:
                 # It was bremsstrahlung
                 ebrems(ausgab)
-                np_m1 = np - 1 # if new particle
+                np_m1 = np - 1  # if new particle
                 if iq[np_m1] != 0:
                     continue  # new-electron loop
                 return ircode  # Photon was selected, return to shower
@@ -174,24 +172,24 @@ def electr(hownear, howfar, ausgab) -> int:
                 # (thmoll = lower Moller threshold)
                 # Not enough energy for Moller, so
                 # force it to be a bremsstrahlung---provided ok kinematically.
-                if ebr1 <= 0: # Brems not allowed either.
+                if ebr1 <= 0:  # Brems not allowed either.
                     continue  #  NEW-ELECTRON loop
                 # It was bremsstrahlung
                 ebrems(ausgab)
-                np_m1 = np - 1 # if new particle
+                np_m1 = np - 1  # if new particle
                 if iq[np_m1] != 0:
                     continue  # new-electron loop
                 return ircode  # Photon was selected, return to shower
 
-            if iausfl[MOLLAUSB-1+1] != 0:  # ** 0-based
+            if iausfl[MOLLAUSB - 1 + 1] != 0:  # ** 0-based
                 ausgab(MOLLAUSB)
             moller()  # egsfortran.moller()
             if particle_selection_moller:
                 particle_selection_moller()
 
-            if iausfl[MOLLAUSA-1+1] != 0:  # ** 0-based
+            if iausfl[MOLLAUSA - 1 + 1] != 0:  # ** 0-based
                 ausgab(MOLLAUSA)
-            np_m1 = np - 1 # if new particle
+            np_m1 = np - 1  # if new particle
             if iq[np_m1] == 0:
                 return ircode
 
@@ -203,7 +201,7 @@ def electr(hownear, howfar, ausgab) -> int:
             pbr1 = evaluate_pbrem_fraction()
         else:
             # EVALUATE pbr1 USING pbr1(elke)
-            pbr1 = pbr11[lelke_m1, medium_m1]*elke+ pbr10[lelke_m1, medium_m1]
+            pbr1 = pbr11[lelke_m1, medium_m1] * elke + pbr10[lelke_m1, medium_m1]
         # End inline replace: $ EVALUATE_PBREM_FRACTION; ----
 
         rnno25 = randomset()
@@ -211,7 +209,7 @@ def electr(hownear, howfar, ausgab) -> int:
         if rnno25 < pbr1:
             # It was bremsstrahlung
             ebrems(ausgab)
-            np_m1 = np - 1 # if new particle
+            np_m1 = np - 1  # if new particle
             if iq[np_m1] != 0:
                 continue  # new-electron loop
             return ircode  # Photon was selected, return to shower
@@ -223,30 +221,30 @@ def electr(hownear, howfar, ausgab) -> int:
             prb2 = evaluate_bhabha_fraction()
         else:
             # EVALUATE pbr2 USING pbr2(elke)
-            pbr2 = pbr21[lelke_m1, medium_m1]*elke+ pbr20[lelke_m1, medium_m1]
+            pbr2 = pbr21[lelke_m1, medium_m1] * elke + pbr20[lelke_m1, medium_m1]
         # End inline replace: $ EVALUATE_BHABHA_FRACTION; ----
 
         if rnno25 < pbr2:
             # It is bhabha
-            if iausfl[BHABAUSB-1+1] != 0:  # ** 0-based
+            if iausfl[BHABAUSB - 1 + 1] != 0:  # ** 0-based
                 ausgab(BHABAUSB)
             bhabha()  # egsfortran.bhabha()
             if particle_selection_bhabha:
                 particle_selection_bhabha()
-            if iausfl[BHABAUSA-1+1] != 0:  # ** 0-based
+            if iausfl[BHABAUSA - 1 + 1] != 0:  # ** 0-based
                 ausgab(BHABAUSA)
-            np_m1 = np - 1 # if case of new particle
+            np_m1 = np - 1  # if case of new particle
             if iq[np_m1] == 0:
                 return ircode
         else:
             # It is in-flight annihilation
-            if iausfl[ANNIHFAUSB-1+1] != 0:  # ** 0-based
+            if iausfl[ANNIHFAUSB - 1 + 1] != 0:  # ** 0-based
                 ausgab(ANNIHFAUSB)
             annih()  # egsfortran.annih()
             if particle_selection_annih:
                 particle_selection_annih()
             np_m1 = np - 1  # changing particles
-            if iausfl[ANNIHFAUSA-1+1] != 0:  # ** 0-based
+            if iausfl[ANNIHFAUSA - 1 + 1] != 0:  # ** 0-based
                 ausgab(ANNIHFAUSA)
 
             return ircode  # EXIT NEW-ELECTRON loop, return to shower
@@ -266,11 +264,11 @@ def electr(hownear, howfar, ausgab) -> int:
         epcont.idisc = abs(idisc)
 
         if lelec < 0 or idisc == 99:
-            epcont.edep =  e[np_m1] - prm
+            epcont.edep = e[np_m1] - prm
         else:
-            epcont.edep =  e[np_m1] + prm
+            epcont.edep = e[np_m1] + prm
 
-        if iausfl[USERDAUS-1+1] != 0:  # ** 0-based
+        if iausfl[USERDAUS - 1 + 1] != 0:  # ** 0-based
             ausgab(USERDAUS)
 
         if idisc != 99:
@@ -291,18 +289,18 @@ def electr(hownear, howfar, ausgab) -> int:
                     epcont.edep = peie - prm
             else:
                 idr = PEGSCUTAUS
-                epcont.edep =  e[np_m1] - prm
+                epcont.edep = e[np_m1] - prm
         else:
             idr = EGSCUTAUS
-            epcont.edep =  e[np_m1] - prm
+            epcont.edep = e[np_m1] - prm
 
         # Define electron_track_end if you wish to modify the
         # treatment of track ends
         if electron_track_end:
             electron_track_end()
         else:
-            iarg=idr
-            if iausfl[iarg-1+1] != 0:  # ** 0-based
+            iarg = idr
+            if iausfl[iarg - 1 + 1] != 0:  # ** 0-based
                 ausgab(iarg)
 
     # in Mortran code, above two flags fall through into positron_annihilation
@@ -311,17 +309,17 @@ def electr(hownear, howfar, ausgab) -> int:
     if lelec > 0:  # positron_annihilation:  # NRCC extension 86/9/12
         # It's a positron. Produce annihilation gammas if edep < peie
         if edep < peie:
-            if iausfl[ANNIHRAUSB-1+1] != 0:  # ** 0-based
+            if iausfl[ANNIHRAUSB - 1 + 1] != 0:  # ** 0-based
                 ausgab(ANNIHRAUSB)
             egsfortran.annih_at_rest()
             if particle_selection_annihrest:
                 particle_selection_annihrest()
 
-            if iausfl[ANNIHRAUSA-1+1] != 0:  # ** 0-based
+            if iausfl[ANNIHRAUSA - 1 + 1] != 0:  # ** 0-based
                 ausgab(ANNIHRAUSA)
             # Now discard the positron and take normal return to follow
             # the annihilation gammas.
-            return ircode # i.e., return to shower
+            return ircode  # i.e., return to shower
 
     # Final clean-up for any paths not exited some other way
     stack.np -= 1

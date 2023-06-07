@@ -82,7 +82,8 @@ usage = """
 python example1.py [num_particles] [num_batches]
 
 If optional num_particles is not specified, it defaults to 50 for testing.
-If num_batches is not specified, it defaults to 1 on CPU or 2 on GPU (to separate compile time)
+If num_batches is not specified, it defaults to 1 on CPU, 2 on GPU
+   (to separate compile time)
 """
 
 if __name__ == "__main__":

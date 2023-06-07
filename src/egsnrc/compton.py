@@ -30,7 +30,8 @@ def compton(rng_states, gid, p):
         alpha = alph1 + ko * (broi+1) * bro * bro
 
         # Set up fake True for first pass through loop
-        rnno19 = aux = br = 1; rejf3 = 0.0
+        rnno19 = aux = br = 1
+        rejf3 = 0.0
         while rnno19 * aux > rejf3 or not (bro < br < 1):  # rejection sampling loop
             rnno15 = random_kfloat(rng_states, gid)
             rnno16 = random_kfloat(rng_states, gid)
@@ -54,7 +55,8 @@ def compton(rng_states, gid, p):
         rejmax = broi + bro
 
         # Set up fake True for first pass through loop
-        rnno16 = br = 1.0; rejf3 = 0.0
+        rnno16 = br = 1.0
+        rejf3 = 0.0
         while rnno16 * br * rejmax > rejf3 or not (bro < br < 1):
             rnno15 = random_kfloat(rng_states, gid)
             rnno16 = random_kfloat(rng_states, gid)

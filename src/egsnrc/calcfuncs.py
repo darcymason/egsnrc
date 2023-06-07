@@ -85,7 +85,9 @@ def calc_tstep_from_demfp(
     # in/out:  compute_tstep, total_tstep,
     # global e_array, epcont.eke, epcont.elke, bounds.vacdst, eke0[], eke1[]
 
-    # print("fn:", ",".join(str(x) for x in (qel,lelec: int, medium, demfp, sig, eke, elke, total_de)) )
+    # print("fn:", ",".join(
+    #     str(x) for x in (qel,lelec: int, medium, demfp, sig, eke, elke, total_de))
+    # )
     fedep = total_de
     ekef = eke - fedep
 
@@ -102,7 +104,7 @@ def calc_tstep_from_demfp(
         )  # XXX note fortran had implicit real->int conversion
         if lelkef == lelke:
             #  initial and final energy are in the same interpolation bin
-            # --- Inline replace: $ COMPUTE_DRANGE(eke,ekef,lelke,elke,elkef,tstep); -----
+            # --- Inline replace: $ COMPUTE_DRANGE(eke,ekef,lelke,elke,elkef,tstep); --
             tstep = compute_drange(lelec, medium, eke, ekef, lelke, elke, elkef)
         else:
             #  initial and final energy are in different interpolation bins,
@@ -110,11 +112,11 @@ def calc_tstep_from_demfp(
             #  and add the pre-calculated range from E(lelkef+1) to E(lelke)
             ekei = e_array[lelke - 1, medium_m1]
             elkei = (lelke - eke0[medium_m1]) / eke1[medium_m1]
-            # --- Inline replace: $ COMPUTE_DRANGE(eke,ekei,lelke,elke,elkei,tuss); -----
+            # --- Inline replace: $ COMPUTE_DRANGE(eke,ekei,lelke,elke,elkei,tuss); --
             tuss = compute_drange(lelec, medium, eke, ekei, lelke, elke, elkei)
             ekei = e_array[lelkef + 1 - 1, medium_m1]  # 0-based -1
             elkei = (lelkef + 1 - eke0[medium_m1]) / eke1[medium_m1]
-            # --- Inline replace: $ COMPUTE_DRANGE(ekei,ekef,lelkef,elkei,elkef,tstep); -----
+            # --- Inline replace: $ COMPUTE_DRANGE(ekei,ekef,lelkef,elkei,elkef,tstep)
             tstep = compute_drange(lelec, medium, ekei, ekef, lelkef, elkei, elkef)
             # Note: range_ep IS 0-based already in first dimn
             tstep = (
@@ -141,7 +143,7 @@ else:
 
 
 def compute_eloss(lelec: int, medium: int, step, eke, elke, lelke):
-    """ "Compute the energy loss due to sub-threshold processes for a path-length `step`.
+    """Compute the energy loss due to sub-threshold processes for a path-length `step`.
 
     The energy at the beginning of the step is `eke`, `elke`=log(`eke`),
     `lelke` is the interpolation index.

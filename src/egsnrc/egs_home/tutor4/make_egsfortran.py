@@ -9,7 +9,7 @@ import contextlib
 # Add a config var for PY_EGS, for modified EGSnrc mortan codes.
 # You will also have to modify the .make file for modified
 # versions of mortran file stored in this repo (point to PY_EGS location).
-HERE  = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent
 USER_CODE = "tutor4"
 CONF = "_linux"
 USER_CODE_FORTRAN = f"{USER_CODE}{CONF}.f"
@@ -19,7 +19,7 @@ PY_EGS = str(HERE.parent.parent / "HEN_HOUSE" / "src") + "/"
 LIB_NAME = "egsfortran"
 F2PY_OPTIONS = "--quiet --debug"
 
-os.environ['PY_EGS'] = PY_EGS
+os.environ["PY_EGS"] = PY_EGS
 print(f"Set environment variable PY_EGS to {PY_EGS}")
 
 
@@ -56,7 +56,6 @@ with working_dir(HERE):
     #     with open(USER_CODE_FORTRAN, 'w') as f_out:
     #         f_out.write('      subroutine testxxx\n' + code)
 
-
     print(f"Running f2py on {USER_CODE_FORTRAN}")
     proc = subprocess.run(
         # Now use interface file, had to edit to get Python ausgab
@@ -65,7 +64,10 @@ with working_dir(HERE):
         # Likely will be fixed in patch numpy release, or at least will
         # work if create one Fortran function called from many
         # (see also https://github.com/numpy/numpy/issues/18341)
-        f"python3.9 -m numpy.f2py {F2PY_OPTIONS} -c {LIB_NAME}.pyf {USER_CODE_FORTRAN}".split(),
+        (
+            f"python3.9 -m numpy.f2py {F2PY_OPTIONS} -c {LIB_NAME}.pyf"
+            f" {USER_CODE_FORTRAN}"
+        ).split(),
         # capture_output=True, encoding="utf8"
     )
     if proc.returncode != 0:

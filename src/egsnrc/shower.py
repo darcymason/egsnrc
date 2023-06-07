@@ -5,7 +5,13 @@ import numba as nb
 import logging
 
 try:
-    from cuda.cuda import CUdevice_attribute, cuDeviceGetAttribute, cuDeviceGetName, cuInit
+    from cuda.cuda import (
+        CUdevice_attribute,
+        cuDeviceGetAttribute,
+        cuDeviceGetName,
+        cuInit,
+    )
+
     have_cuda_python = True
 except ImportError:
     have_cuda_python = False
@@ -24,7 +30,10 @@ logger = logging.getLogger("egsnrc")
 def cuda_details():
     try:
         from cuda.cuda import (
-            CUdevice_attribute, cuDeviceGetAttribute, cuDeviceGetName, cuInit
+            CUdevice_attribute,
+            cuDeviceGetAttribute,
+            cuDeviceGetName,
+            cuInit,
         )
     except ImportError:
         return (
@@ -39,12 +48,17 @@ def cuda_details():
     err, DEVICE_NAME = cuDeviceGetName(128, 0)
     DEVICE_NAME = DEVICE_NAME.decode("ascii").replace("\x00", "")
 
-    attrs = {'DEVICE_NAME': DEVICE_NAME.strip()}
-    attr_names = "MAX_THREADS_PER_BLOCK MAX_BLOCK_DIM_X MAX_GRID_DIM_X MULTIPROCESSOR_COUNT".split()
+    attrs = {"DEVICE_NAME": DEVICE_NAME.strip()}
+    attr_names = [
+        "MAX_THREADS_PER_BLOCK",
+        "MAX_BLOCK_DIM_X",
+        "MAX_GRID_DIM_X",
+        "MULTIPROCESSOR_COUNT"
+    ]
     for attr in attr_names:
-        err, attrs[attr] =  cuDeviceGetAttribute(
-        getattr(CUdevice_attribute, f"CU_DEVICE_ATTRIBUTE_{attr}"), 0
-    )
+        err, attrs[attr] = cuDeviceGetAttribute(
+            getattr(CUdevice_attribute, f"CU_DEVICE_ATTRIBUTE_{attr}"), 0
+        )
 
     return attrs
 
@@ -54,7 +68,15 @@ threads_per_block = 512  # 1024
 
 
 def shower(
-    seed, num_particles, get_source_particle, regions, media, howfar, ausgab, iscore, fscore,
+    seed,
+    num_particles,
+    get_source_particle,
+    regions,
+    media,
+    howfar,
+    ausgab,
+    iscore,
+    fscore,
 ):
     """Start the Monte Carlo simulation
 
@@ -81,7 +103,6 @@ def shower(
     else:
         egsrandom.set_array_library("numpy")
     rng_states = egsrandom.initialize(seed, num_particles)
-
 
     # iparticles, fparticles = source.generate(num_particles)
     device = "cuda" if on_gpu else "cpu"
@@ -121,7 +142,9 @@ def shower(
     photon.ausgab = ausgab
     photon.get_source_particle = get_source_particle
     Py_major, Py_minor = sys.version_info.major, sys.version_info.minor
-    logger.info(f"Starting `shower` with Numba {nb.__version__}, Python {Py_major}.{Py_minor}")
+    logger.info(
+        f"Starting `shower` with Numba {nb.__version__}, Python {Py_major}.{Py_minor}"
+    )
     logger.info(f"Running {num_particles:,} particles")
     logger.info(cuda_details())
 
@@ -131,9 +154,12 @@ def shower(
         with CUDATimer() as cudatimer:  # CUDATimes(stream)
             photon_kernel[blocks_per_grid, threads_per_block](
                 rng_states,
-                num_particles, # XXX temp
+                num_particles,  # XXX temp
                 # iparticles, fparticles,
-                regions, media, iscore, fscore
+                regions,
+                media,
+                iscore,
+                fscore,
             )
         print(f"Elapsed time by events {cudatimer.elapsed:.2f} ms")
         cuda.synchronize()
@@ -146,7 +172,10 @@ def shower(
                 rng_states,
                 num_particles,
                 # iparticles, fparticles,
-                regions, ausgab, iscore, fscore
+                regions,
+                ausgab,
+                iscore,
+                fscore,
             )
         end = perf_counter()
 
