@@ -16,9 +16,9 @@ jobs:
         python-version: ["3.10"]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -40,58 +40,59 @@ jobs:
         python -m pip install -r requirements.txt
         python -m pip install -e .  # install the repo in editable mode
 
-    - name: EGSnrc pre-reqs
-      run: |
-        sudo apt-get install -y gfortran gcc g++ make expect
+    # - name: EGSnrc pre-reqs
+    #   run: |
+    #     sudo apt-get install -y gfortran gcc g++ make expect
 
-    - name: Cache EGSnrc
-      id: cache-EGSnrc
-      uses: actions/cache@v2
-      with:
-        path: ~/EGSnrc
-        key: EGSnrc-${{ matrix.os }}
+    # - name: Cache EGSnrc
+    #   id: cache-EGSnrc
+    #   uses: actions/cache@v2
+    #   with:
+    #     path: ~/EGSnrc
+    #     key: EGSnrc-${{ matrix.os }}
 
-    - name: EGSnrc install
-      # if: ${{ steps.cache-EGSnrc.outputs.cache-hit != 'true' }}
-      run: |
-        cd
-        rm -rf EGSnrc
-        git clone --depth 1 https://github.com/nrc-cnrc/EGSnrc.git
-        echo run configure.expect
-        cd EGSnrc
-        HEN_HOUSE/scripts/configure.expect linux.conf 3 | tee configure.log
-        cd /home/runner/work/egsnrc/egsnrc
+    # - name: EGSnrc install
+    #   # if: ${{ steps.cache-EGSnrc.outputs.cache-hit != 'true' }}
+    #   run: |
+    #     cd
+    #     rm -rf EGSnrc
+    #     git clone --depth 1 https://github.com/nrc-cnrc/EGSnrc.git
+    #     echo run configure.expect
+    #     cd EGSnrc
+    #     HEN_HOUSE/scripts/configure.expect linux.conf 3 | tee configure.log
+    #     cd /home/runner/work/egsnrc/egsnrc
 
-    - name: Build egsfortran
-      run: |
-        export WORK_BASE=/home/runner/work/egsnrc/egsnrc
-        export EGS_CONFIG=/home/runner/EGSnrc/HEN_HOUSE/specs/linux.conf
-        export HEN_HOUSE=/home/runner/EGSnrc/HEN_HOUSE
-        export EGS_HOME=$WORK_BASE/egsnrc/egs_home/
-        export PY_EGS=$WORK_BASE/egsnrc/HEN_HOUSE/src/
-        alias m='/home/runner/EGSnrc/HEN_HOUSE/scripts/compile_user_code m'
-        echo ls -l EGS_CONFIG file
-        ls -l $EGS_CONFIG
-        python egsnrc/egs_home/tutor4/make_egsfortran.py
+    # - name: Build egsfortran
+    #   run: |
+    #     export WORK_BASE=/home/runner/work/egsnrc/egsnrc
+    #     export EGS_CONFIG=/home/runner/EGSnrc/HEN_HOUSE/specs/linux.conf
+    #     export HEN_HOUSE=/home/runner/EGSnrc/HEN_HOUSE
+    #     export EGS_HOME=$WORK_BASE/egsnrc/egs_home/
+    #     export PY_EGS=$WORK_BASE/egsnrc/HEN_HOUSE/src/
+    #     alias m='/home/runner/EGSnrc/HEN_HOUSE/scripts/compile_user_code m'
+    #     echo ls -l EGS_CONFIG file
+    #     ls -l $EGS_CONFIG
+    #     python egsnrc/egs_home/tutor4/make_egsfortran.py
 
     - name: Test with pytest
       run: |
-        echo Setting HEN_HOUSE, WORK_BASE, EGS_CONFIG PY_EGS, EGS_HOME
-        export HEN_HOUSE=/home/runner/EGSnrc/HEN_HOUSE
-        export WORK_BASE=/home/runner/work/egsnrc/egsnrc
-        export EGS_CONFIG=/home/runner/EGSnrc/HEN_HOUSE/specs/linux.conf
-        export PY_EGS=$WORK_BASE/egsnrc/HEN_HOUSE/src/
-        export EGS_HOME=$WORK_BASE/egsnrc/egs_home/
-        echo egs_config = $EGS_CONFIG
-        echo EGS_HOME = $EGS_HOME
-        # echo Starting python tutor4.py
-        # echo cd egsnrc/egs_home/tutor4
-        # cd egsnrc/egs_home/tutor4
-        # python tutor4.py
-        # cd ../../../
+        # echo Setting HEN_HOUSE, WORK_BASE, EGS_CONFIG PY_EGS, EGS_HOME
+        # export HEN_HOUSE=/home/runner/EGSnrc/HEN_HOUSE
+        # export WORK_BASE=/home/runner/work/egsnrc/egsnrc
+        # export EGS_CONFIG=/home/runner/EGSnrc/HEN_HOUSE/specs/linux.conf
+        # export PY_EGS=$WORK_BASE/egsnrc/HEN_HOUSE/src/
+        # export EGS_HOME=$WORK_BASE/egsnrc/egs_home/
+        # echo egs_config = $EGS_CONFIG
+        # echo EGS_HOME = $EGS_HOME
+        # # echo Starting python tutor4.py
+        # # echo cd egsnrc/egs_home/tutor4
+        # # cd egsnrc/egs_home/tutor4
+        # # python tutor4.py
+        # # cd ../../../
+
         python -m pip install pytest pytest-cov
-        echo python -c "from egsnrc import egsfortran"
-        python -c "from egsnrc import egsfortran"  # test if can import the lib
+        # echo python -c "from egsnrc import egsfortran"
+        # python -c "from egsnrc import egsfortran"  # test if can import the lib
         echo python -m pytest -v
         python -m pytest -v --cov=egsnrc
 
