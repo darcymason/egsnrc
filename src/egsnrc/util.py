@@ -1,6 +1,36 @@
 # util.py
 from numba import cuda
 
+
+def cuda_details():
+    try:
+        from cuda.cuda import (
+            CUdevice_attribute, cuDeviceGetAttribute, cuDeviceGetName, cuInit
+        )
+    except ImportError as e:
+        return (
+            f"{str(e)}\n"
+            "** GPU details not available\n"
+            "In Colab, use `!pip install cuda-python` to see GPU specs\n"
+        )
+
+    # Initialize CUDA Driver API
+    (err,) = cuInit(0)
+
+    # Get attributes
+    err, DEVICE_NAME = cuDeviceGetName(128, 0)
+    DEVICE_NAME = DEVICE_NAME.decode("ascii").replace("\x00", "")
+
+    attrs = {'DEVICE_NAME': DEVICE_NAME.strip()}
+    attr_names = "MAX_THREADS_PER_BLOCK MAX_GRID_DIM_X MULTIPROCESSOR_COUNT".split()
+    for attr in attr_names:
+        err, attrs[attr] =  cuDeviceGetAttribute(
+        getattr(CUdevice_attribute, f"CU_DEVICE_ATTRIBUTE_{attr}"), 0
+    )
+
+    return attrs
+
+
 def float_from_fort_hex(hex_str):
     return float.fromhex(py_hex_from_fort_hex(hex_str))
 
