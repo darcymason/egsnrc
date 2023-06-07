@@ -10,7 +10,7 @@ from numba.core.types import NamedTuple
 import logging
 from egsnrc.compton import compton
 
-from egsnrc.config import KINT, device_jit, on_gpu
+from egsnrc.config import KINT, evice_jit, on_gpu
 from egsnrc.constants import REST_MASS
 from egsnrc.params import VACDST, EPSGMFP
 from egsnrc.particles import replace_region_xyz
@@ -31,7 +31,7 @@ numba_logger = logging.getLogger("numba")
 numba_logger.setLevel(logging.WARNING)
 
 
-@device_jit
+@config.device_jit
 def transport_photon(p, dpmfp, gle, regions, howfar):
     """Traverse regions as necessary according to the mfp
 

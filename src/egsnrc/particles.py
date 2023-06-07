@@ -4,7 +4,7 @@
 from collections import namedtuple
 import numpy as np
 from numba import cuda
-from egsnrc.config import device_jit
+from egsnrc import config
 from egsnrc.params import EPSGMFP, VACDST
 
 
@@ -34,7 +34,7 @@ Particle = namedtuple("Particle", "status region energy x y z u v w")
 # Functions to manage particles here, because with namedtuples it is a little
 #  trickier to remember order, and this allows all changes in one place
 #  if attributes are later added to the namedtuple
-@device_jit
+@config.device_jit
 def set_particle(i, regions, iparticles, fparticles):
     """Return a Particle for the given array-based info
 
@@ -55,7 +55,7 @@ def set_particle(i, regions, iparticles, fparticles):
     )
 
 
-@device_jit
+@config.device_jit
 def replace_e_uvw(p, energy, u, v, w):
     """Return a Particle like `p` but with uvw replaced"""
     return Particle(
@@ -71,7 +71,7 @@ def replace_e_uvw(p, energy, u, v, w):
     )
 
 
-@device_jit
+@config.device_jit
 def replace_region_xyz(p, region, x, y, z):
     """Return a Particle like `p` but with x,y,z replaced"""
     return Particle(

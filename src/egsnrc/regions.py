@@ -30,7 +30,7 @@ _Region = namedtuple("Region", ("number medium pcut rho"))  # irayl iphotonucr
 #     )
 
 
-# @device_jit
+# @config.device_jit
 # def set_region(i, iregions, fregions):
 #     """Return a Region namedtuple for the given array-based info
 

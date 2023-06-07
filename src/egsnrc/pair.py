@@ -1,4 +1,4 @@
-from egsnrc.config import device_jit
+from egsnrc import config
 from egsnrc.constants import REST_MASS
 import egsrandom
 
@@ -12,7 +12,7 @@ set_pair_angle = None
 set_pair_rejection_function = None
 
 
-@device_jit
+@config.device_jit
 def select_low_energy_pair_production(rng_states, gid, energy):
     # IK introduced this because uniform energy distribution
     # is probably a better approximation than a zero energy 'electron'

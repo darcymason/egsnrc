@@ -1,9 +1,10 @@
+from egsnrc import config
 from math import log, exp, sqrt, sin, cos
 from egsnrc.egsrandom import random_kfloat
 from egsnrc.angles import uphi
 from egsnrc.constants import REST_MASS, TWO_PI
 from egsnrc.particles import replace_e_uvw
-from egsnrc import config
+
 from numba import cuda
 
 

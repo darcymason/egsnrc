@@ -12,7 +12,7 @@ from egsnrc.photon import COMPTON, PHOTO
 from egsnrc.particles import (
     Particle, particle_iattrs, particle_fattrs, ENERGY, W, REGION, PhotonSource
 )
-from egsnrc.config import device_jit
+from egsnrc import config
 from egsnrc.media import Medium, Vacuum
 from egsnrc.regions import Region
 from egsnrc.shower import shower
@@ -26,7 +26,7 @@ SCORE_eCOMPTON, SCORE_ePHOTO, SCORE_eLOST = np.arange(3, dtype=np.int32)
 
 
 # Example of scoring function (ausgab)
-@device_jit
+@config.device_jit
 def ausgab(gid, status, p1, p2, iscore, fscore):
     # Note, if don't track by gid, then need "atomic" operations to handle multi-thread
     region_number = p2.region.number
@@ -41,7 +41,7 @@ def ausgab(gid, status, p1, p2, iscore, fscore):
         fscore[gid, region_number, SCORE_eLOST] += p1.energy
 
 
-@device_jit
+@config.device_jit
 def howfar(p, regions, ustep):  # -> step, region, discard_flag (>0 to discard)
     """Given particle and proposed step distance, return actual step and region
 

@@ -2,10 +2,12 @@ import pytest
 import numpy as np
 
 
-from egsnrc import egsrandom
 from egsnrc import config
-from egsnrc.particles import Particle
 config.use_gpu(False)
+
+from egsnrc import egsrandom
+from egsnrc.particles import Particle
+
 egsrandom.set_array_library("sequence")
 
 from egsnrc.compton import compton

@@ -8,7 +8,8 @@ import numba as nb
 from numba import cuda
 import numpy as np
 
-from egsnrc.config import KFLOAT, KINT, device_jit
+from egsnrc.config import KFLOAT, KINT
+from egsnrc import config
 from egsnrc import egsrandom
 if not cuda.is_available():
     print("***** LOCAL ONLY in two_slab")
@@ -34,7 +35,7 @@ SCORE_nCOMPTON, SCORE_nPHOTO, SCORE_nLOST, SCORE_nCOMPTINDIRECT, SCORE_nPHOTOIND
 SCORE_eCOMPTON, SCORE_ePHOTO, SCORE_eLOST = np.arange(3, dtype=np.int32)
 
 
-@device_jit
+@config.device_jit
 def get_source_particle(rng_states, gid, regions):
     return Particle(
         KINT(0), regions[1], KFLOAT(1.0),
@@ -43,7 +44,7 @@ def get_source_particle(rng_states, gid, regions):
     )
 
 # Example of scoring function (ausgab)
-@device_jit
+@config.device_jit
 def ausgab(gid, status, p1, p2, iscore, fscore):
     # Note, if don't track by gid, then need "atomic" operations to handle multi-thread
     # return
@@ -65,7 +66,7 @@ def ausgab(gid, status, p1, p2, iscore, fscore):
         fscore[gid, region_number, SCORE_eLOST] += p1.energy
 
 
-@device_jit
+@config.device_jit
 def howfar(p, regions, ustep):  # -> step, region, discard_flag (>0 to discard)
     """Given particle and proposed step distance, return actual step and region
 

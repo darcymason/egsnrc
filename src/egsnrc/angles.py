@@ -3,10 +3,9 @@ from math import sqrt, sin, cos
 from egsnrc.egsrandom import random_kfloat
 from egsnrc.constants import TWO_PI
 from egsnrc.params import SMALL_POLAR_ANGLE_THRESHOLD
-from egsnrc.particles import replace_e_uvw
-from egsnrc.config import device_jit
+from egsnrc import config
 
-@device_jit
+@config.device_jit
 def uphi(rng_states, gid, p, sinthe, costhe):
     """Uniform phi distribution
 

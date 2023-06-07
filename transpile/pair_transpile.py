@@ -1,5 +1,5 @@
 
-from egsnrc.config import device_jit
+from egsnrc import config
 
 import logging
 logger = logging.getLogger("egsnrc")
@@ -10,7 +10,7 @@ set_pair_angle = None
 set_pair_rejection_function = None
 
 
-@device_jit
+@config.device_jit
 def select_low_energy_pair_production(peig):
 #   $RANDOMSET RNNO30; $RANDOMSET rnno34;
 #   PESE2 = PRM + 0.5*RNNO30*(PEIG-2*PRM); PESE1 = PEIG - PESE2;

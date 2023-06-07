@@ -167,7 +167,7 @@ def egs_init_user_photon(prefix, comp_prefix, photonuc_prefix, out):
     """
 
     logger.info("(Re)-initializing photon cross sections")
-    logger.info(" with files from the series: ", prefix)
+    logger.info(f" with files from the series: {prefix}")
 
     # logger.info(' Compton cross sections: ', comp_prefix)
 

@@ -1,10 +1,10 @@
-from egsnrc.config import device_jit
+from egsnrc import config
 from egsnrc.particles import replace_e_uvw
 
 
 # XXX photo() is a placeholder for now, obviously trivial for photons,
 # but will need for electron later
-@device_jit
+@config.device_jit
 def photo(gid, rng_states, p):
     """Return a modified particle from photoelectric interaction
 
