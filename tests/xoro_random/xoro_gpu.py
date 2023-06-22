@@ -76,7 +76,10 @@ def run(num_particles, blocks_per_grid, threads_per_block):
 
     print("\n-------------------------------------------------------------")
     print(cuda_details())
-    print(f"{bits}-bits run with {num_particles=:,} {blocks_per_grid=}  {threads_per_block=}")
+    print(
+        f"{bits}-bits run with {num_particles=:,} {blocks_per_grid=}  "
+        f"{threads_per_block=}"
+    )
     start2 = perf_counter()
     with CUDATimer() as cudatimer:  # CUDATimes(stream)
         random_test[num_blocks, threads_per_block](
@@ -116,7 +119,7 @@ if __name__ == "__main__":
     try:
         num_blocks = int_args[1]
         threads_per_block = int_args[2]
-    except:
+    except Exception:
         pass
 
     run(num_particles, num_blocks, threads_per_block)

@@ -42,6 +42,7 @@ homepage = "https://github.com/darcymason/egsnrc"
 repository = "https://github.com/darcymason/egsnrc"
 
 [tool.ruff]
+exclude = ["transpile"]
 select = [
     "C9",
     "E",
