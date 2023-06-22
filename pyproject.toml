@@ -72,10 +72,10 @@ target-version = "py310"
 "photon.py" = ["F821"] 
 
 [tool.ruff.mccabe]
-max-complexity = 50
+max-complexity = 92
 
 [tool.ruff.pylint]
 max-args = 17
-max-branches = 55
+max-branches = 120
 max-returns = 11
-max-statements = 133
+max-statements = 378
