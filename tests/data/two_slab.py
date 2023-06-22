@@ -4,13 +4,13 @@
 # import os
 # os.environ['NUMBA_ENABLE_CUDASIM'] = '1'  # XXX temp for testing GPU running on CPU
 
-import numba as nb
 from numba import cuda
 import numpy as np
 
 from egsnrc.config import KFLOAT, KINT
 from egsnrc import config
 from egsnrc import egsrandom
+
 if not cuda.is_available():
     print("***** LOCAL ONLY in two_slab")
     egsrandom.set_array_library("numpy")
@@ -19,9 +19,7 @@ else:
 
 
 from egsnrc.photon import COMPTON, PHOTO
-from egsnrc.particles import (
-    Particle, particle_iattrs, particle_fattrs, ENERGY, W, REGION, PhotonSource
-)
+from egsnrc.particles import Particle
 
 from egsnrc.media import Medium, Vacuum
 from egsnrc.regions import Region
@@ -31,17 +29,30 @@ from egsnrc.shower import shower
 NO_DISCARD, DISCARD = np.arange(2, dtype=np.int32)
 
 
-SCORE_nCOMPTON, SCORE_nPHOTO, SCORE_nLOST, SCORE_nCOMPTINDIRECT, SCORE_nPHOTOINDIRECT = np.arange(5, dtype=np.int32)
+(
+    SCORE_nCOMPTON,
+    SCORE_nPHOTO,
+    SCORE_nLOST,
+    SCORE_nCOMPTINDIRECT,
+    SCORE_nPHOTOINDIRECT,
+) = np.arange(5, dtype=np.int32)
 SCORE_eCOMPTON, SCORE_ePHOTO, SCORE_eLOST = np.arange(3, dtype=np.int32)
 
 
 @config.device_jit
 def get_source_particle(rng_states, gid, regions):
     return Particle(
-        KINT(0), regions[1], KFLOAT(1.0),
-        KFLOAT(0), KFLOAT(0), KFLOAT(0),
-        KFLOAT(0), KFLOAT(0), KFLOAT(1),
+        KINT(0),
+        regions[1],
+        KFLOAT(1.0),
+        KFLOAT(0),
+        KFLOAT(0),
+        KFLOAT(0),
+        KFLOAT(0),
+        KFLOAT(0),
+        KFLOAT(1),
     )
+
 
 # Example of scoring function (ausgab)
 @config.device_jit
@@ -107,7 +118,8 @@ usage = """
 python example1.py [num_particles] [num_batches]
 
 If optional num_particles is not specified, it defaults to 50 for testing.
-If num_batches is not specified, it defaults to 1 on CPU or 2 on GPU (to separate compile time)
+If num_batches is not specified, it defaults to 1 on CPU or 2 on GPU
+(to separate compile time)
 """
 
 
@@ -126,14 +138,13 @@ def run(num_particles, num_batches):
         Region(0, Vacuum, 0.001, 0),
         Region(1, Ta, 0.001, Ta.rho),
         Region(2, Si, 0.001, Si.rho),
-        Region(3, Vacuum, 0.001, 0)
+        Region(3, Vacuum, 0.001, 0),
     ]
-
 
     # Boundaries of slabs (cm)
     # First one is dummy because of 0-based indexing and region 0 being outside geom
     # XXX boundaries = np.array([-1.0e8, 0.0, 2.0, 4.0], dtype=np.float32)
-    boundaries = np.array([-1.0e8, 0.0, .2, .4], dtype=np.float32)
+    boundaries = np.array([-1.0e8, 0.0, 0.2, 0.4], dtype=np.float32)
 
     # Set up particles with random range of energies
     # starting at (0, 0, 0) at edge of Region 1, traveling in z direction
@@ -142,7 +153,6 @@ def run(num_particles, num_batches):
     #         KFLOAT(0), KFLOAT(0), KFLOAT(0),
     #         KFLOAT(0), KFLOAT(0), KFLOAT(1),
     #     )
-
 
     # source = PhotonSource(
     #     energy=1.0, region=regions[1],
@@ -156,20 +166,30 @@ def run(num_particles, num_batches):
     # Because our ausgab stores by particle interaction, we can just call all particles,
     # and divide into batches after the fact for stats
     iscore = np.zeros(
-        (num_particles*num_batches, NUM_REGIONS,  5),  # (nCompt, nPhoto, nLost, nComptIndirect, nPhotoIndirect)
-        dtype=KINT
+        (
+            num_particles * num_batches,
+            NUM_REGIONS,
+            5,
+        ),  # (nCompt, nPhoto, nLost, nComptIndirect, nPhotoIndirect)
+        dtype=KINT,
     )
     fscore = np.zeros(
-        (num_particles*num_batches, NUM_REGIONS,  3),  # (eCompt, ePhoto, eLost)
-        dtype=KFLOAT
+        (num_particles * num_batches, NUM_REGIONS, 3),  # (eCompt, ePhoto, eLost)
+        dtype=KFLOAT,
     )
 
     # Start the simulation
     iscore, fscore = shower(
-        42, num_particles*num_batches, get_source_particle, regions, media, howfar,
-        ausgab, iscore, fscore
+        42,
+        num_particles * num_batches,
+        get_source_particle,
+        regions,
+        media,
+        howfar,
+        ausgab,
+        iscore,
+        fscore,
     )
-
 
     # if len(fscore) < 51:
     #     print("fparticle energies")
@@ -200,7 +220,7 @@ def run(num_particles, num_batches):
     ncompts_ind_reg = [None]
     nphotos_ind_reg = [None]
     # XXX ncomps_ind, nphotos_ind
-    for r in range(1,3):
+    for r in range(1, 3):
         ncompts = []
         nphotos = []
         ncompts_ind = []
@@ -225,12 +245,14 @@ def run(num_particles, num_batches):
     print("\nMeans and std devs")
     print("-------------------")
     print("Region\tCompton\t\tPhoto\t\tComptInd\t\tPhotoInd")
-    for r in range(1,3):
+    for r in range(1, 3):
         print(
             f"{r}\t{np.mean(ncompts_reg[r]):5.1f} +/- {np.std(ncompts_reg[r]):5.1f}"
             f"""\t{np.mean(nphotos_reg[r]):5.1f} +- {np.std(nphotos_reg[r]):5.1f}"""
-            f"{r}\t{np.mean(ncompts_ind_reg[r]):5.1f} +/- {np.std(ncompts_ind_reg[r]):5.1f}"
-            f"""\t{np.mean(nphotos_ind_reg[r]):5.1f} +- {np.std(nphotos_ind_reg[r]):5.1f}"""
+            f"{r}\t{np.mean(ncompts_ind_reg[r]):5.1f} "
+            f"+/- {np.std(ncompts_ind_reg[r]):5.1f}"
+            f"""\t{np.mean(nphotos_ind_reg[r]):5.1f} "
+            f"+- {np.std(nphotos_ind_reg[r]):5.1f}"""
         )
 
     return ncompts_reg, nphotos_reg, ncompts_ind_reg, nphotos_ind_reg
@@ -238,6 +260,7 @@ def run(num_particles, num_batches):
 
 if __name__ == "__main__":
     import sys
+
     num_particles = 200
     num_batches = 8
     if len(sys.argv) > 1:

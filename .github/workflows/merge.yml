@@ -1,0 +1,22 @@
+name: merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  PR:
+    strategy:
+      matrix:
+        # Run tests not done in PR workflow
+        os: [ubuntu, macos]
+        python-version: ["3.11"]
+        include:
+          - os: windows
+            python-version: "3.10"
+            
+    uses: ./.github/workflows/tests.yml
+    with: 
+      os: ${{ matrix.os }}
+      python-version:  ${{ matrix.python-version }}

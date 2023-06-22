@@ -27,6 +27,7 @@
 #     binding_energies = photo_binding_energies(photo_data)
 #     for Z, known_energies_str in known_binding_energies.items():
 #         known_energies = sorted(
-#             float(x) / 1_000_000 for x in known_energies_str.split() if float(x) >= 1000
+#             float(x) / 1_000_000 for x in known_energies_str.split()
+#             if float(x) >= 1000
 #         )
 #         assert binding_energies[Z] == pytest.approx(known_energies, abs=0.00001)

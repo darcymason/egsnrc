@@ -6,7 +6,6 @@ from collections import namedtuple
 import numpy as np
 from egsnrc.config import KINT, KFLOAT
 from egsnrc.media import Medium, _Medium, Vacuum
-from numba import cuda
 import numpy as np
 
 

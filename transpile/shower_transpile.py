@@ -1,8 +1,6 @@
 from egsnrc import egsfortran
 from .commons import *
-from .angles import uphi
 from .electr import electr
-from .photon import photon
 
 import numpy
 
@@ -59,7 +57,6 @@ def shower(iqi, ei, xi, yi, zi, ui, vi, wi, iri, wti, callbacks):
     # integer*4
     # ircode  status returned by ELECTR or PHOTON
 
-    pi0msq = 1.8215416  # PI-ZERO MASS (MEV) SQUARED
 
     stack.np=1
     stack.npold = stack.np # Set the old stack counter

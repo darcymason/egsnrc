@@ -4,13 +4,11 @@
 # import os
 # os.environ['NUMBA_ENABLE_CUDASIM'] = '1'  # XXX temp for testing GPU running on CPU
 
-import numba as nb
-from numba import cuda
 import numpy as np
 
 from egsnrc.photon import COMPTON, PHOTO
 from egsnrc.particles import (
-    Particle, particle_iattrs, particle_fattrs, ENERGY, W, REGION, PhotonSource
+    ENERGY, PhotonSource
 )
 from egsnrc import config
 from egsnrc.media import Medium, Vacuum

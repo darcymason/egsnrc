@@ -1,8 +1,6 @@
 from math import log
 from egsnrc.commons import *
 from egsnrc import config
-import numpy
-from egsnrc.util import for_E18, fort_hex
 
 import logging
 

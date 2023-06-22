@@ -13,11 +13,10 @@ else:
 
 
 from time import perf_counter
-import numba as nb
 from numba import cuda
 import numpy as np
 import sys
-from egsnrc.config import KFLOAT, KINT
+from egsnrc.config import KFLOAT
 from egsnrc import egsrandom
 from egsnrc.util import CUDATimer, cuda_details
 
@@ -77,7 +76,10 @@ def run(num_particles, blocks_per_grid, threads_per_block):
 
     print("\n-------------------------------------------------------------")
     print(cuda_details())
-    print(f"{bits}-bits run with {num_particles=:,} {blocks_per_grid=}  {threads_per_block=}")
+    print(
+        f"{bits}-bits run with {num_particles=:,} {blocks_per_grid=}  "
+        f"{threads_per_block=}"
+    )
     start2 = perf_counter()
     with CUDATimer() as cudatimer:  # CUDATimes(stream)
         random_test[num_blocks, threads_per_block](
@@ -103,7 +105,6 @@ def run(num_particles, blocks_per_grid, threads_per_block):
 
 if __name__ == "__main__":
     import sys
-    from math import ceil
 
     num_particles = 2**20
     num_blocks = 512
@@ -118,7 +119,7 @@ if __name__ == "__main__":
     try:
         num_blocks = int_args[1]
         threads_per_block = int_args[2]
-    except:
+    except Exception:
         pass
 
     run(num_particles, num_blocks, threads_per_block)

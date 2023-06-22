@@ -22,13 +22,16 @@ dependencies = [
     "Numba>=0.57,<1"  # in turn requires numpy
 ]
 # Get __version__ and description (docstring) from __init__.py
-dynamic = ["version", "description"]  
+
+description = "EGSnrc Radiation Transport code in Python with GPU"
 keywords = ["Monte Carlo", "Python", "Radiation Transport", "Simulation"]
 
 license = {file = "LICENSE"}
 name = "egsnrc"
 readme = "README.md"
 requires-python = ">=3.10,<4"
+version = "0.1.0.dev0"
+
 
 [project.optional-dependencies]
 
@@ -39,6 +42,7 @@ homepage = "https://github.com/darcymason/egsnrc"
 repository = "https://github.com/darcymason/egsnrc"
 
 [tool.ruff]
+exclude = ["transpile"]
 select = [
     "C9",
     "E",
@@ -67,12 +71,14 @@ target-version = "py310"
 [tool.ruff.per-file-ignores]
 # ignore undefined variable due to Numba globals added to module at runtime
 "photon.py" = ["F821"] 
+# ignored pair while developing it
+"pair.py" = ["F821", "E741"]
 
 [tool.ruff.mccabe]
-max-complexity = 50
+max-complexity = 92
 
 [tool.ruff.pylint]
 max-args = 17
-max-branches = 55
+max-branches = 120
 max-returns = 11
-max-statements = 133
+max-statements = 378

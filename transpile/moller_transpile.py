@@ -110,7 +110,7 @@ def moller():
     extrae = eie - thmoll[medium_m1]
     e02 = e0*e0
     # betai2 = e02 / (e02 - 1.0) # BLIF 96/2/1 -- not needed for moller fix-up
-    ep0 = te[medium_m1] / ekin
+    te[medium_m1] / ekin
     # g1 = (1. - 2.*ep0)*betai2 # BLIF 96/2/1 -- not needed for moller fix-up
     g2 = t0*t0 / e02
     g3 = (2.*t0 + 1.) / e02
@@ -142,8 +142,6 @@ def moller():
     pekse2 = br*ekin  # precise kinetic energy of secondary electron #2
     pese1 = peie - pekse2  # precise energy of secondary electron #1
     pese2 = pekse2 + prm  # precise energy of secondary electron #2
-    ese1 = pese1  # energy of secondary electron 1
-    ese2 = pese2  # energy of secondary electron 2
     e[np_m1] = pese1
 
     if np + 1 > MXSTACK:

@@ -4,12 +4,10 @@ from collections import namedtuple
 from dataclasses import dataclass
 from enum import Enum
 from math import exp, log
-from typing import ClassVar
 from egsnrc.config import KINT, KFLOAT
 from egsnrc.hatch import DATA_DIR, get_xsection_table
 from egsnrc.elements import element_data, fcoulc, xsif
 from egsnrc.params import MXGE
-import numba as nb
 import numpy as np
 
 from egsnrc.constants import REST_MASS

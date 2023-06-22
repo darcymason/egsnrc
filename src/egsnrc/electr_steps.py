@@ -74,7 +74,8 @@ def tstep_ustep(
     # ustep  = projected transport distance in the
     #          direction of motion at the start of the step
 
-    global costhe, sinthe, ierust
+    global ierust  # previously also had costhe, sinthe -- still needed?
+
 
     next_tstep = False  # flag for jumping out of ustep to top of tstep loop
 
@@ -297,7 +298,10 @@ def tstep_ustep(
                 # --- Inline replace: $ CALL_HOWNEAR(tperp); -----
                 tperp = hownear(x[np_m1], y[np_m1], z[np_m1], irl)
                 # End inline replace: $ CALL_HOWNEAR(tperp); ----
-                # logger.debug(f'tperp={tperp} = hownear({x[np_m1]}, {y[np_m1]}, {z[np_m1]}, {irl})')
+                # logger.debug(
+                #     f"tperp={tperp} = "
+                #     f"hownear({x[np_m1]}, {y[np_m1]}, {z[np_m1]}, {irl})'
+                # )
                 dnear[np_m1] = tperp
 
                 # --- Inline replace: $ RANGE_DISCARD; -----
@@ -328,7 +332,7 @@ def tstep_ustep(
                 if set_skindepth:
                     skindepth = set_skindepth(eke, elke)
                 else:
-                    # --- Inline replace: $ CALCULATE_ELASTIC_SCATTERING_MFP(ssmfp,eke,elke); -----
+                    # Inline replace: CALCULATE_ELASTIC_SCATTERING_MFP(ssmfp,eke,elke);
                     if calculate_elastic_scattering_mfp:
                         ssmfp = calculate_elastic_scattering_mfp(ssmfp, eke, elke)
                     else:
@@ -361,7 +365,7 @@ def tstep_ustep(
                                 * ms_corr
                             )
                         ssmfp = beta2 / blccl
-                    # End inline replace: $ CALCULATE_ELASTIC_SCATTERING_MFP(ssmfp,eke,elke); ----
+                    # End replace: $ CALCULATE_ELASTIC_SCATTERING_MFP(ssmfp,eke,elke);
                     skindepth = skindepth_for_bca * ssmfp
                 # End inline replace: $ SET_SKINDEPTH(eke,elke); ----
 
@@ -427,11 +431,11 @@ def tstep_ustep(
                     callmsdist = True  # Remember that msdist has been called
 
                     # Fourth order technique for de
-                    # --- Inline replace: $ COMPUTE_ELOSS_G(tustep,eke,elke,lelke,de); -----
+                    # --- Inline replace: $ COMPUTE_ELOSS_G(tustep,eke,elke,lelke,de);
                     de = compute_eloss_g(
                         lelec, medium, tustep, eke, elke, lelke, range_
                     )
-                    # End inline replace: $ COMPUTE_ELOSS_G(tustep,eke,elke,lelke,de); ----
+                    # End inline replace: $ COMPUTE_ELOSS_G(tustep,eke,elke,lelke,de);
 
                     epcont.tvstep = tustep
                     is_ch_step = True
@@ -531,7 +535,8 @@ def tstep_ustep(
                             logger.warning(
                                 f" lambda_ > lambda_max: {lambda_},{lambda_max}"
                                 f" eke dedx: {eke},{dedx}"
-                                f" ir medium blcc: {ir[np_m1]},{medium},{blcc[medium_m1]}"
+                                f" ir medium blcc: {ir[np_m1]}"
+                                f",{medium},{blcc[medium_m1]}"
                                 f" position = {x[np_m1]},{y[np_m1]},{z[np_m1]}"
                             )
                             dosingle = False
@@ -702,8 +707,8 @@ def tstep_ustep(
                         ekems = eke - 0.5 * tustep * vstep / ustep0 * dedx
                         # This estimates the energy loss to the boundary.
                         # tustep was the intended curved path-length,
-                        # ustep0 is the average transport distance in the initial direction
-                        #        resulting from tustep
+                        # ustep0 is the average transport distance
+                        # in the initial direction resulting from tustep
                         # vstep = ustep is the reduced average transport distance in the
                         #               initial direction due to boundary crossing
                         # --- Inline replace: $ CALCULATE_XI(vstep); -----
@@ -717,7 +722,8 @@ def tstep_ustep(
                             epcont.tvstep = -vstep * log(1 - xi) / xi
                         else:
                             # This is an error condition because the average transition
-                            # in the initial direction of motion is always smaller than 1/Q1
+                            # in the initial direction of motion is
+                            # always smaller than 1/Q1
                             logger.info(
                                 " Stopped in SET-TVSTEP because xi > 1! \n"
                                 f" Medium: {medium}\n"
@@ -750,7 +756,7 @@ def tstep_ustep(
                 if not callmsdist:
                     # Second order technique for dedx
                     # Already done in a normal CH step with call to msdist
-                    # --- Inline replace: $ COMPUTE_ELOSS_G(tvstep,eke,elke,lelke,de); -----
+                    # --- Inline replace: $ COMPUTE_ELOSS_G(tvstep,eke,elke,lelke,de);
                     de = compute_eloss_g(
                         lelec, medium, tvstep, eke, elke, lelke, range_
                     )
@@ -900,10 +906,13 @@ def tstep_ustep(
                     epcont.w_final = w[np_m1]
                     # if iausfl[UVWAUSA]:
                     #     ausgab(
-                    #         UVWAUSA, msg="domultiple/dosingle after", uf=u_final, vf=v_final, wf=w_final
+                    #         UVWAUSA, msg="domultiple/dosingle after",
+                    #         uf=u_final, vf=v_final, wf=w_final
                     #     )
 
-                    # logger.debug(f'Called UPHI: final uvw={u_final},{v_final},{w_final}')
+                    # logger.debug(
+                    #    f'Called UPHI: final uvw={u_final},{v_final},{w_final}'
+                    # )
                     # logger.debug(f'Called UPHI: uvw={u[np_m1]},{v[np_m1]},{w[np_m1]}')
                     u[np_m1], v[np_m1], w[np_m1] = uvw_tmp
                 else:
@@ -912,7 +921,8 @@ def tstep_ustep(
                     epcont.w_final = w[np_m1]
                     # if iausfl[UVWAUSA]:
                     #     ausgab(
-                    #         UVWAUSA, msg="NOT domultiple/dosingle", uf=u_final, vf=v_final, wf=w_final
+                    #         UVWAUSA, msg="NOT domultiple/dosingle",
+                    #             uf=u_final, vf=v_final, wf=w_final
                     #     )
 
             if call_tranausb:

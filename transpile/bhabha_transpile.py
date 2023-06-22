@@ -52,7 +52,6 @@ def bhabha():
     np_m1 = np - 1
     medium_m1 = medium - 1
     peip = e[np_m1]  # Precise energy of incident positron
-    eip = peip  # Energy of incident positron
     pekin = peip - prm  # Precise k.e. of incident positron
     ekin = pekin
     t0 = ekin / rm
@@ -98,8 +97,6 @@ def bhabha():
     pekse2 = br * ekin  # precise kinetic energy of secondary 'electron' 2
     pese1 = peip - pekse2  # precise energy of secondary 'electron' 1
     pese2 = pekse2 + prm  # precise energy of secondary 'electron' 2
-    ese1 = pese1
-    ese2 = pese2
     e[np_m1] = pese1
     e[np_m1+1] = pese2
     #    Bhabha angles are uniquely determined by kinematics
