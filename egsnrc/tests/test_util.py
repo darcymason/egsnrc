@@ -1,4 +1,3 @@
-import pytest
 from egsnrc.util import float_from_fort_hex
 
 def test_py_hex_from_fort_hex():

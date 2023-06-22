@@ -3,11 +3,10 @@ from egsnrc.randoms import randomset
 from egsnrc.params import *
 from egsnrc.commons import *
 from egsnrc.constants import *
-from egsnrc.util import fort_hex  # for detailed debug tracing
 
 from egsnrc.calcfuncs import (
     calc_tstep_from_demfp, calculate_xi, compute_drange,
-    compute_eloss, compute_eloss_g
+    compute_eloss_g
 )
 from egsnrc.angles import uphi
 
@@ -400,7 +399,6 @@ def tstep_ustep(
                     # End inline replace: $ COMPUTE_ELOSS_G(tustep,eke,elke,lelke,de); ----
 
                     epcont.tvstep = tustep
-                    is_ch_step = True
 
                     if transport_algorithm == PRESTA_II:
                         # logger.debug(
@@ -860,7 +858,6 @@ def tstep_ustep(
 
             useful.medold = medium
             if medium != 0:
-                ekeold = eke
                 epcont.eke = eie - rm # update kinetic energy
                 epcont.elke = log(eke)
                 lelke = int(eke1[medium_m1]*elke + eke0[medium_m1])

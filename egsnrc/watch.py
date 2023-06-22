@@ -129,7 +129,6 @@ def watch(iarg, iwatch, **kwargs):
 
     global icount, jhstry, graph_unit
 
-    ku = 13; kr = 0; ka = 1  # graph file params
     if iarg == -99:
         # Initialize flags so we will get calls thru AUSGAB
         iausfl[:] = 1

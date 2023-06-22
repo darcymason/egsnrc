@@ -1,6 +1,5 @@
 import os
 from numba import cuda
-import numba as nb
 import numpy as np
 from logging import getLogger
 

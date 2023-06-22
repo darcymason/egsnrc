@@ -28,11 +28,10 @@ def russian_roulette(ip):
         Index of particle
     """
     ip_m1 = ip - 1  # ** 0-based
-    i_survived_rr = 0 # flag all survive
     if i_play_rr == 1:
         if prob_rr <= 0:
             if n_rr_warning < MAX_RR_WARNING:
-                n_rr_warning = n_rr_warning + 1
+                n_rr_warning + 1
                 logger.warning(
                     '**** Warning, attempt to play Roussian Roulette with'
                     f' prob_rr<=0! {prob_rr:14.6f}'

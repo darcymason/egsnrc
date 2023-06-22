@@ -196,7 +196,6 @@ def main(num_particles, array_library, gpu_requested=False):
 
     # print(particles.f_arr)
     # print(particles.i_arr)
-    z_bound = 100 # cm
 
     while len(particles):
         # print(f"{len(particles)=}")
@@ -210,7 +209,7 @@ lib = "numpy"
 gpu = False  # True
 lib = "pytorch"
 
-gpu_msg = f" with GPU" if gpu else "** NO GPU **"
+gpu_msg = " with GPU" if gpu else "** NO GPU **"
 print(f"Starting run(s) {gpu_msg}...")
 seconds = timeit.timeit("main(num_particles, lib, gpu)", globals=globals(), number=10)
 print(f"Completed run in {seconds} seconds")
@@ -219,7 +218,6 @@ print(f"Completed run in {seconds} seconds")
 
 def setup(num_particles, array_library, gpu_requested=False):
     have_cuda = torch.cuda.is_available()
-    device = "cuda" if (have_cuda and gpu_requested) else "cpu"
     if gpu_requested and (not have_cuda or array_library != "pytorch"):
         raise ValueError("GPU not available")
 
@@ -235,7 +233,7 @@ def setup(num_particles, array_library, gpu_requested=False):
                 (P.NUM_INT_PARAMS, num_particles), dtype=INT_ARRAY_DTYPE
             )
 
-    key = random_initialize(42)
+    random_initialize(42)
 
     # Start in region 0, medium 0, status 0 so leave those alone
     f_arr[P.ENERGY, :] = 100.0
@@ -247,4 +245,3 @@ def setup(num_particles, array_library, gpu_requested=False):
 
     # print(particles.f_arr)
     # print(particles.i_arr)
-    z_bound = 100 # cm
