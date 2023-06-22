@@ -22,13 +22,15 @@ dependencies = [
     "Numba>=0.57,<1"  # in turn requires numpy
 ]
 # Get __version__ and description (docstring) from __init__.py
-dynamic = ["version", "description"]  
+description = "EGSnrc Radiation Transport code in Python with GPU"
 keywords = ["Monte Carlo", "Python", "Radiation Transport", "Simulation"]
 
 license = {file = "LICENSE"}
 name = "egsnrc"
 readme = "README.md"
 requires-python = ">=3.10,<4"
+version = "0.1.0.dev0"
+
 
 [project.optional-dependencies]
 
