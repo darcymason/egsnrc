@@ -1,4 +1,4 @@
-name: main
+name: PR
 
 on:
   pull_request:
