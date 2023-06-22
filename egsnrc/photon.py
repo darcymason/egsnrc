@@ -1,11 +1,9 @@
-from math import log, exp, sqrt, sin, cos
+from math import log
 import sys
 import numpy as np
 from numba import cuda
 import numba as nb
 
-from numba import int32, float32
-from numba.core.types import NamedTuple
 
 import logging
 from egsnrc.compton import compton
@@ -14,11 +12,10 @@ from egsnrc.config import KINT, device_jit, on_gpu
 from egsnrc.constants import REST_MASS
 from egsnrc.params import VACDST, EPSGMFP
 from egsnrc.particles import replace_region_xyz
-from egsnrc.particles import STEPPING, COMPTON, PHOTO
+from egsnrc.particles import COMPTON, PHOTO
 from egsnrc.particles import (
-    INTERACTION_READY, GEOMETRY_DISCARD, PCUT_DISCARD, PHOTO_DISCARD, USER_PHOTON_DISCARD
+    INTERACTION_READY, PCUT_DISCARD, USER_PHOTON_DISCARD
 )
-from egsnrc.particles import set_particle
 from egsnrc.media import GBR_PAIR, GBR_COMPTON
 from egsnrc.photo import photo
 from egsnrc import egsrandom
@@ -323,7 +320,7 @@ def run(particles, scoring_out, on_gpu=True):
     if cuda.is_available():
         print(cuda_details())
     else:
-        thread_index = GridIterator()
+        GridIterator()
         print("**** Running on CPU  ****")
 
     # To Debug on CPU:
@@ -351,8 +348,8 @@ def run(particles, scoring_out, on_gpu=True):
             dtype=np.float32
         )
         if not debug_on_cpu:
-            dev_fparticles = cuda.to_device(fparticles)
-            dev_iparticles = cuda.to_device(iparticles)
+            cuda.to_device(fparticles)
+            cuda.to_device(iparticles)
             dev_out = cuda.to_device(out)
 
         # Run

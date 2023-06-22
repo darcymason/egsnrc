@@ -5,8 +5,6 @@ from collections import namedtuple
 import numpy as np
 from numba import cuda
 from egsnrc.config import device_jit
-from egsnrc.params import EPSGMFP, VACDST
-from egsnrc import egsrandom
 
 
 # Constants to use for `status`

@@ -220,7 +220,7 @@ def electr(hownear, howfar, ausgab) -> int:
         # pbr2 is (brems + bhabha)/(brems + bhabha + annih)
         # --- Inline replace: $ EVALUATE_BHABHA_FRACTION; -----
         if evaluate_bhabha_fraction:
-            prb2 = evaluate_bhabha_fraction()
+            evaluate_bhabha_fraction()
         else:
             # EVALUATE pbr2 USING pbr2(elke)
             pbr2 = pbr21[lelke_m1, medium_m1]*elke+ pbr20[lelke_m1, medium_m1]

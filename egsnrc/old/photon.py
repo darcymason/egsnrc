@@ -103,7 +103,6 @@ def photon(howfar, ausgab):
     particle_outcome = None
     PCUT_DISCARD = 1
     USER_PHOTON_DISCARD = 2
-    PAIR_ELECTRONS_KILLED = 3
 
 
     # --- Inline replace: $ start_new_particle; -----

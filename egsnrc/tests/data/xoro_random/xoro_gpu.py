@@ -13,11 +13,10 @@ else:
 
 
 from time import perf_counter
-import numba as nb
 from numba import cuda
 import numpy as np
 import sys
-from egsnrc.config import KFLOAT, KINT
+from egsnrc.config import KFLOAT
 from egsnrc import egsrandom
 from egsnrc.util import CUDATimer, cuda_details
 
@@ -103,7 +102,6 @@ def run(num_particles, blocks_per_grid, threads_per_block):
 
 if __name__ == "__main__":
     import sys
-    from math import ceil
 
     num_particles = 2**20
     num_blocks = 512

@@ -183,14 +183,13 @@ def egs_init_user_photon(prefix,comp_prefix,photonuc_prefix,out):
     # ]
     # ]
 
-    input_compton_data = False
     # IF( ibcmp(1) > 1 & lnblnk1(comp_prefix) > 0 ) [
     #     IF( comp_prefix(1:7) ~= 'default' ) input_compton_data = .true.;
     # ]
     photo_file = DATA_DIR / f"{prefix}_photo.data"
-    pair_file = DATA_DIR / f"{prefix}_pair.data"
-    triplet_file = DATA_DIR / f"{prefix}_triplet.data"
-    rayleigh_file = DATA_DIR / f"{prefix}_rayleigh.data"
+    DATA_DIR / f"{prefix}_pair.data"
+    DATA_DIR / f"{prefix}_triplet.data"
+    DATA_DIR / f"{prefix}_rayleigh.data"
     # if input_compton_data:
     compton_file = DATA_DIR / f"{prefix}_compton.data"
     # else:

@@ -3,7 +3,7 @@ import pytest
 from egsnrc.config import KFLOAT
 from egsnrc.hatch import DATA_DIR, get_xsection_table
 from egsnrc.media import Medium, Interaction
-from math import exp, log
+from math import exp
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent

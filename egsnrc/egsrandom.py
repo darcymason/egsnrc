@@ -1,7 +1,5 @@
 
-import itertools
 import numpy as np
-import numba
 
 # NOTE: if change from 32-bit floats, need to change xoroshiro here
 from numba.cuda.random import create_xoroshiro128p_states

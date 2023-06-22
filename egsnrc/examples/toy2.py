@@ -47,11 +47,11 @@ def run(particles, key, device):
     particles.f_arr[Particles.W] = 1.0
 
     while particles.any_alive():
-        gle = particles.log_energy()
+        particles.log_energy()
         # Sample number of mfp to transport before interacting
         rnno35 = egsrandom.float_0_1(len(particles), device)
         rnno35[rnno35==0] += 1.0e-30  # could use `numpy.clip` but not quite same as old code
-        dpmfp = torch.log(rnno35)
+        torch.log(rnno35)
         key, ran_floats = egsrandom.floats_0_1(key, len(particles.energy), device)
         particles.f_arr[Particles.ENERGY] -= 20.0 * ran_floats
 

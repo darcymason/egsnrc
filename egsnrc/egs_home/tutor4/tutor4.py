@@ -3,21 +3,13 @@ from pathlib import Path
 import os
 from egsnrc import egsfortran
 from egsnrc import watch
-from egsnrc.electr import electr
 from egsnrc.shower import shower
-from egsnrc.util import for_E18, fort_hex  # for debugging vs mortran
 import logging
-import numpy  # cannot use `np` as is an EGS var!!
-from math import log  # for calculate_tstep_...
 
 
 # Get all common blocks
 from egsnrc.commons import *
 
-from egsnrc.calcfuncs import (
-    calc_tstep_from_demfp,
-    compute_eloss, compute_eloss_g
-)
 
 
 init_done = False  # run init() only once, else crashes (unknown reason)
@@ -72,7 +64,6 @@ def ausgab(iarg, **kwargs):
 
     if iarg <= 4:
         irl = ir[np-1] # pick up current region number  ** 0-based
-        msg = " AUSGAB irl,edep"
         # logger.debug(f"{msg:<35}:{irl:3}{fort_hex(edep)}")
         escore[irl-1] += edep
 
@@ -157,8 +148,8 @@ def init(iwatch=1, high_prec=False):
     med[1] = 1
 
     # Note take 1 off indices for f2py 0-based in Python
-    ecut[2-1]=1.5;  #    terminate electron histories at 1.5 MeV in the plate#
-    pcut[2-1]=0.1;  #    terminate   photon histories at 0.1 MeV in the plate#
+    ecut[2-1]=1.5  #    terminate electron histories at 1.5 MeV in the plate#
+    pcut[2-1]=0.1  #    terminate   photon histories at 0.1 MeV in the plate#
     #                only needed for region 2 since no transport elsewhere#
     #                ECUT is total energy = 0.989   MeV kinetic energy
 
@@ -191,7 +182,7 @@ def init(iwatch=1, high_prec=False):
     # Here mimic that exact single precision number to get identical results
     # Even before end of history one, a min(tustep, tperp (from hownear)) is
     # different between Python and Fortran without this.
-    point1_single_prec = float.fromhex('0x1.99999a0000000p-4')
+    float.fromhex('0x1.99999a0000000p-4')
     # OR, change tutor4.mortran to 0.1D0 and then compare with 0.1 below
     geom.zbound=0.1  # point1_single_prec  #      plate is 1 mm thick
 
@@ -392,8 +383,6 @@ def hownear(x, y, z, irl):
 
 if __name__ == "__main__":
     import sys
-    import cProfile as profile
-    import pstats
     HERE  = Path(__file__).resolve().parent
     TEST_DATA = HERE.parent.parent / "tests" / "data"
 
