@@ -26,15 +26,15 @@ def uphi(rng_states, gid, p, sinthe, costhe):
     #          COSTHE = sin(CTHET)
     #   2: Randomly set phi (falls through to 3)
     #   3: Adjust particle directions accordingly:
-    #     Lvl 
+    #     Lvl
     #         2: new particle: copy n-1 particle, use saved abc, ADJUST
-    #         
+    #
     #         In old code source, only lvl 2 was used, i.e. (3,2).
     #         For reference, others were:
     #         1: old particle: abc = uvw (top particle), then ADJUST
     #         3: brems-gamma: abc=electron(n-1) uvw, ADJUST nth particle
-    # :ADJUST: 
-    #   calc uvw from theta, phi: 
+    # :ADJUST:
+    #   calc uvw from theta, phi:
     #       "a rotation is performed to transform direction cosines of the
     #       particle back to the physical frame (from the transport frame)"
 
