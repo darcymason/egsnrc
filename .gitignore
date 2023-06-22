@@ -15,3 +15,4 @@ egsnrc.egg-info/**/*
 .vscode/*
 htmlcov/*
 .coverage
+dist/*

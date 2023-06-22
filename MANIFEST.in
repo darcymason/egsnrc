@@ -1,5 +1,0 @@
-
-recursive-include egsnrc/examples *
-include egsnrc/*
-include LICENSE
-include README.md
