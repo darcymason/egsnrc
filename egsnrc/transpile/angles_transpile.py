@@ -19,8 +19,8 @@ def select_azimuthal_angle() -> Tuple[float, float]:
     Reject the set if it lies without the inscribed unit semicircle centered
        at (x,y) = (0,0)
     once out of the loop, use the trigonimetric relations (TeX notation)
-        \cos 2\phi = (x^2 - y^2)/(x^2 + y^2)
-        \sin 2\phi = 2xy/(x^2 + y^2)
+        \\cos 2\\phi = (x^2 - y^2)/(x^2 + y^2)
+        \\sin 2\\phi = 2xy/(x^2 + y^2)
 
     Returns
     -------

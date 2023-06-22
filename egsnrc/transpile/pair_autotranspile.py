@@ -6,7 +6,7 @@ set_pair_angle = None
 set_pair_rejection_function = None
 
 
-# CALLBACKS ---- 
+# CALLBACKS ----
 
 def randomset():
     global rng_seed
@@ -24,19 +24,19 @@ def randomset():
 # ******************************************************************
 #                                National Research Council of Canada
 def PAIR:
-#                                                                   
+#
 # ******************************************************************
-#    For a photon energy below 2.1 MeV, the energies of the pair    
-#    particles are uniformly distributed in the allowed range via   
-#    the default replacement for $ SELECT-LOW-ENERGY-PAIR-PRODICTION 
-#    If the user has a better approach, modify this macro.          
-#    For a photon energy between 2.1 and 50 MeV the Bethe-Heitler   
-#    cross section is employed, above 50 MeV the Coulomb-corrected  
-#    Bethe-Heitler is used.                                         
-#    Modified from its original version to make compatible with the 
-#    changes made in BREMS.                                         
-#                                                                   
-#    I. Kawrakow                                                    
+#    For a photon energy below 2.1 MeV, the energies of the pair
+#    particles are uniformly distributed in the allowed range via
+#    the default replacement for $ SELECT-LOW-ENERGY-PAIR-PRODICTION
+#    If the user has a better approach, modify this macro.
+#    For a photon energy between 2.1 and 50 MeV the Bethe-Heitler
+#    cross section is employed, above 50 MeV the Coulomb-corrected
+#    Bethe-Heitler is used.
+#    Modified from its original version to make compatible with the
+#    changes made in BREMS.
+#
+#    I. Kawrakow
 # ******************************************************************
 
 implicit none
@@ -59,9 +59,9 @@ NPold = NP # Set the old stack counter
 
 if  i_play_RR == 1 :
 
-     [ #  The user wants to play Russian Roulette. For pair 
-                      #  it is much more efficient to do it BEFORE the 
-                      #  actual sampling 
+     [ #  The user wants to play Russian Roulette. For pair
+                      #  it is much more efficient to do it BEFORE the
+                      #  actual sampling
     i_survived_RR = 0 # flag they all survive inititally
     if  prob_RR <= 0 :
 
@@ -74,13 +74,13 @@ if  i_play_RR == 1 :
     else:
         rnno_RR = randomset()
         if  rnno_RR > prob_RR :
-             [  # The pair was killed 
+             [  # The pair was killed
             i_survived_RR =2 # flag both particles eliminated
             if  np > 1 :
-                 np = np-1; 
+                 np = np-1;
             else:
-                   #  get a proper exit from PHOTO, we have to leave at least 
-                   #  one particle on the stack                               
+                   #  get a proper exit from PHOTO, we have to leave at least
+                   #  one particle on the stack
                 wt[np] = 0; e[np] = 0
 
             return
@@ -93,7 +93,7 @@ if  i_play_RR == 1 :
 if check_stack:
     <XXX> = check_stack(np+1, 'PAIR')
 else:
-    
+
       if  np+1 > MXSTACK :
 
           $egs_fatal('(//,3a,/,2(a,i9))',' In subroutine ','PAIR',
@@ -110,7 +110,7 @@ if  itriplet > 0 and eig > 4*rm :
     ftrip = a_triplet(itrip,medium)*gle + b_triplet(itrip,medium)
     rnno34 = randomset()
     if  rnno34 < ftrip :
-         [  #  Triplet production 
+         [  #  Triplet production
         call sample_triplet
         return
 
@@ -124,7 +124,7 @@ if  pair_nrc == 1 :
 
         do_nrc_pair = True
         if  k <= nrcp_emin :
-             ibin = 1; 
+             ibin = 1;
         else:
             abin = 1 + log((k-2)/(nrcp_emin-2))*nrcp_dlei
             ibin = abin; abin = abin - ibin
@@ -135,7 +135,7 @@ if  pair_nrc == 1 :
         xx = alias_sample1(NRC_PAIR_NX_1,nrcp_xdata,
                 nrcp_fdata(1,ibin,medium),nrcp_wdata(1,ibin,medium),
                 nrcp_idata(1,ibin,medium))
-           #  The above returns the energy fraction of the positron 
+           #  The above returns the energy fraction of the positron
         if  xx > 0.5 :
 
             pese1 = prm*(1 + xx*(k-2)); iq1 = 1
@@ -155,7 +155,7 @@ if EIG <= 2.1:
     if select_low_energy_pair_prodiction:
         select_low_energy_pair_prodiction()
     else:
-    
+
         RNNO30 = randomset() rnno34 = randomset()
         PESE2 = PRM + 0.5*RNNO30*(PEIG-2*PRM); PESE1 = PEIG - PESE2
         if  rnno34 < 0.5 :
@@ -220,7 +220,7 @@ else:
 
     if  rnno34*rejmax <= rejf :
 
-        break 
+        break
 
     pese2 = Eminus; pese1 = peig - pese2
     RNNO34 = randomset()
@@ -234,13 +234,13 @@ e[np]=PESE1; E(NP+1)=PESE2
 #    THIS AVERAGE ANGLE OF EMISSION FOR BOTH PAIR PRODUCTION AND
 #    BREMSSTRAHLUNG IS MUCH SMALLER THAN THE AVERAGE ANGLE OF
 #    MULTIPLE SCATTERING FOR DELTA T TRANSPORT=0.01 R.L.
-#    THE INITIAL AND FINAL MOMENTA ARE COPLANAR 
-#    SET UP A NEW 'ELECTRON'  
+#    THE INITIAL AND FINAL MOMENTA ARE COPLANAR
+#    SET UP A NEW 'ELECTRON'
 # --- Inline replace: $ SET_PAIR_ANGLE; -----
 if set_pair_angle:
     set_pair_angle()
 else:
-    
+
         if  iprdst > 0 :
 
             if  iprdst == 4 :
@@ -249,13 +249,13 @@ else:
                 # gbeta = (1-rmt2/eig)**8
                 gbeta = PESE1/(PESE1+10)
                 if  rtest < gbeta :
-                     iprdst_use = 1 
+                     iprdst_use = 1
                 else:
-                     iprdst_use = 4 
+                     iprdst_use = 4
             else:
-                 iprdst_use = 1 
+                 iprdst_use = 1
             else:
-                 iprdst_use = iprdst 
+                 iprdst_use = iprdst
             DO ichrg = 1,2 [
                 if ICHRG == 1:
                     ESE=PESE1ELSE[
@@ -265,9 +265,9 @@ else:
                         gbeta = ESE/(ESE+10)
                         rtest = randomset()
                         if  rtest < gbeta :
-                             iprdst_use = 1 
+                             iprdst_use = 1
                         else:
-                             iprdst_use = 4 
+                             iprdst_use = 4
 
 
                 if  iprdst_use == 1 :
@@ -288,20 +288,20 @@ else:
                     # THIS IS THE RATIO (r IN PIRS0287)
                     ESEDEI=TTESE/(TTEIG-TTESE)
                     ESEDER=1.0/ESEDEI
-                    # DETERMINE THE NORMALIZATION 
+                    # DETERMINE THE NORMALIZATION
                     XIMIN=1.0/(1.0+(3.141593*TTESE)**2)
                     # --- Inline replace: $ SET_PAIR_REJECTION_FUNCTION(REJMIN,XIMIN); -----
                     if set_pair_rejection_function:
                         <XXX> = set_pair_rejection_function(REJMIN, XIMIN)
                     else:
-        
+
                         ; REJMIN = 2.0+3.0*(ESEDEI+ESEDER) -
                                 4.00*(ESEDEI+ESEDER+1.0-4.0*(XIMIN-0.5)**2)*(
                                     1.0+0.25*LOG(
                                         ((1.0+ESEDER)*(1.0+ESEDEI)/(2.*TTEIG))**2+ZTARG*XIMIN**2
                                         )
                                     )
-                                
+
                     # End inline replace: $ SET_PAIR_REJECTION_FUNCTION(REJMIN,XIMIN); ----
                     YA=(2.0/TTEIG)**2
                     XITRY=max(0.01,MAX(XIMIN,min(0.5,SQRT(YA/ZTARG))))
@@ -320,17 +320,17 @@ else:
                     if set_pair_rejection_function:
                         <XXX> = set_pair_rejection_function(REJMID, XIMID)
                     else:
-        
+
                         ; REJMID = 2.0+3.0*(ESEDEI+ESEDER) -
                                 4.00*(ESEDEI+ESEDER+1.0-4.0*(XIMID-0.5)**2)*(
                                     1.0+0.25*LOG(
                                         ((1.0+ESEDER)*(1.0+ESEDEI)/(2.*TTEIG))**2+ZTARG*XIMID**2
                                         )
                                     )
-                                
+
                     # End inline replace: $ SET_PAIR_REJECTION_FUNCTION(REJMID,XIMID); ----
                     # ESTIMATE MAXIMUM OF THE REJECTION FUNCTION
-                    # FOR LATER USE BY THE REJECTION TECHNIQUE  
+                    # FOR LATER USE BY THE REJECTION TECHNIQUE
                     REJTOP=1.02*max(REJMIN,REJMID)
                     LOOP[
                         XITST = randomset()
@@ -338,14 +338,14 @@ else:
                         if set_pair_rejection_function:
                             <XXX> = set_pair_rejection_function(REJTST, XITST)
                         else:
-        
+
                             ; REJTST = 2.0+3.0*(ESEDEI+ESEDER) -
                                     4.00*(ESEDEI+ESEDER+1.0-4.0*(XITST-0.5)**2)*(
                                         1.0+0.25*LOG(
                                             ((1.0+ESEDER)*(1.0+ESEDEI)/(2.*TTEIG))**2+ZTARG*XITST**2
                                             )
                                         )
-                                    
+
                         # End inline replace: $ SET_PAIR_REJECTION_FUNCTION(REJTST,XITST); ----
                         RTEST = randomset()
                         # CONVERT THE SUCCESSFUL CANDIDATE XITST TO AN ANGLE
@@ -362,7 +362,7 @@ else:
                          sinthe = sqrt(sinthe);  ELSE [ sinthe = 0; ]
                 else:
                     # PSE=SQRT(max(1e-10,(ESE-RM)*(ESE+RM)))
-                    # $ RANDOMSET costhe 
+                    # $ RANDOMSET costhe
                     # costhe=(ese-(ese+pse)*exp(-2*costhe*log((ese+pse)/rm)))/pse
                     costhe = randomset()
                     costhe=1-2*sqrt(costhe)
@@ -373,17 +373,17 @@ else:
                 if  ichrg == 1 :
                     CALL UPHI(2,1)
                 else:
-                     sinthe=-sinthe; NP=NP+1; CALL UPHI(3,2) 
+                     sinthe=-sinthe; NP=NP+1; CALL UPHI(3,2)
 
             iq[np] = iq2; iq(np-1) = iq1; return
         else:
-            THETA=0 # THETA=RM/EIG 
+            THETA=0 # THETA=RM/EIG
 
 # End inline replace: $ SET_PAIR_ANGLE; ----
-#  DEFAULT FOR $ SET-PAIR-ANGLE; is to select the angle from the leading term 
-#  of the angular distribution 
+#  DEFAULT FOR $ SET-PAIR-ANGLE; is to select the angle from the leading term
+#  of the angular distribution
 CALL UPHI(1,1)
-#    SET UP A NEW 'ELECTRON' 
+#    SET UP A NEW 'ELECTRON'
 NP=NP+1
 SINTHE=-SINTHE
 CALL UPHI(3,2)
