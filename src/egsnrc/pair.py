@@ -13,20 +13,6 @@ set_pair_angle = None
 set_pair_rejection_function = None
 
 
-@config.device_jit
-def select_low_energy_pair_production(rng_states, gid, energy):
-    # IK introduced this because uniform energy distribution
-    # is probably a better approximation than a zero energy 'electron'
-    # for low energy pair production
-
-    rnno30 = egsrandom.random_kfloat(rng_states, gid)
-    energy_e2 = REST_MASS + 0.5 * rnno30 * (energy - 2 * REST_MASS)
-    energy_e1 = energy - energy_e2
-
-    rnno34 = egsrandom.random_kfloat(rng_states, gid)
-    charge_e1 = -1 if rnno34 < 0.5 else 1
-    return energy_e1, energy_e2, charge_e1, -charge_e1
-
 @config.devicejit
 def set_e_angle(rng_states, gid, e_energy):
     pse = sqrt(max(0.0, (e_energy - REST_MASS) * (e_energy + REST_MASS)))
@@ -147,14 +133,16 @@ def pair(rng_states, gid, p):
     #             charge_e1 = -1
 
     if not do_nrc_pair:
+        # Calculate split of energy between the two particles
         if p.energy <= 2.1:
-            #    Below 2.1, use approximation
-            (
-                energy_e1,
-                energy_e2,
-                charge_e1,
-                charge_e2,
-            ) = select_low_energy_pair_production(p.energy)
+            # Below 2.1, use approximation
+            # IK introduced this because uniform energy distribution
+            # is probably a better approximation than a zero energy 'electron'
+            # for low energy pair production
+
+            rnno30 = egsrandom.random_kfloat(rng_states, gid)
+            energy_e2 = REST_MASS + 0.5 * rnno30 * (p.energy - 2 * REST_MASS)
+            energy_e1 = p.energy - energy_e2
         else:  # Above 2.1, must sample
             # Decide whether to use Bethe-Heitler or BH coulomb corrected
             if p.energy < 50.0:  # Use BH without Coulomb correction
@@ -222,16 +210,13 @@ def pair(rng_states, gid, p):
                     break
 
             energy_e2 = Eminus
-            energy_e1 = peig - energy_e2
-            rnno34 = egsrandom.random_kfloat(rng_states, gid)
-            if rnno34 < 0.5:
-                charge_e1 = -1
-                charge_e2 = 1
-            else:
-                charge_e1 = 1
-                charge_e2 = -1
+            energy_e1 = Eplus
+        # Have energies, now randomly determine charge
+        rnno34 = egsrandom.random_kfloat(rng_states, gid)
+        charge_e1 = -1 if rnno34 < 0.5 else 1
+        charge_e2 = -charge_e1
 
-    # Energy going to lower secondary has now been determined
+    # Energy done, now calculated angles
     ESE2 = energy_e2
     e[np] = energy_e1
     E[NP + 1] = energy_e2

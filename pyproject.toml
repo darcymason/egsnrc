@@ -19,7 +19,7 @@ classifiers=[
     "Topic :: Scientific/Engineering :: Physics",
 ]
 dependencies = [
-    "Numba>=0.57"  # in turn requires numpy
+    "Numba>=0.57,<1"  # in turn requires numpy
 ]
 # Get __version__ and description (docstring) from __init__.py
 dynamic = ["version", "description"]  
@@ -28,7 +28,7 @@ keywords = ["Monte Carlo", "Python", "Radiation Transport", "Simulation"]
 license = {file = "LICENSE"}
 name = "egsnrc"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<4"
 
 [project.optional-dependencies]
 
