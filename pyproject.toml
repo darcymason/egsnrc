@@ -82,3 +82,30 @@ max-args = 17
 max-branches = 120
 max-returns = 11
 max-statements = 378
+
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src/", "tests/"]
+exclude = [
+    "src/egsnrc/electr.py", 
+    "src/egsnrc/electr_steps.py",
+    "src/egsnrc/egsrandom.py",
+    "src/egsnrc/calcfuncs.py"
+]
+show_error_codes = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = false
+warn_unreachable = false
+ignore_missing_imports = true
+disallow_untyped_calls = false
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+    "numba",
+    "cuda"
+]
+ignore_missing_imports = true

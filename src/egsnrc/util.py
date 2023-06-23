@@ -51,7 +51,7 @@ def py_hex_from_fort_hex(hex_str) -> str:
     sign_char = "-" if sign == 1 else " "
 
     exponent = sign_exp & 0x7FF
-    leading_bit = 1
+    leading_bit = "1"
     if exponent == 0:
         leading_bit = "0"
         exponent = 1

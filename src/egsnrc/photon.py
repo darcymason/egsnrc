@@ -10,7 +10,8 @@ from numba.core.types import NamedTuple
 import logging
 from egsnrc.compton import compton
 
-from egsnrc.config import KINT, evice_jit, on_gpu
+from egsnrc.config import KINT
+from egsnrc import config
 from egsnrc.constants import REST_MASS
 from egsnrc.params import VACDST, EPSGMFP
 from egsnrc.particles import replace_region_xyz
@@ -154,7 +155,7 @@ def photon_kernel(
     """
 
     # Get unique grid index
-    gid = cuda.grid(1) if on_gpu else non_gpu_index  # Global for testing only
+    gid = cuda.grid(1) if config.on_gpu else non_gpu_index  # Global for testing only
     # if gid > len(fparticles):   # needed when have more GPU threads than particles
     if gid >= num_particles:
         return

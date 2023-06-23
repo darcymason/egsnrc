@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     # Int args could be num_particles, num_blocks, threads_per_block
 
-    int_args = [int(x) for x in sys.argv[1:]] if len(sys.argv) > 1 else None
+    int_args = [int(x) for x in sys.argv[1:]] if len(sys.argv) > 1 else []
 
     if int_args:
         num_particles = int_args[0]

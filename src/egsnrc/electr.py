@@ -1,6 +1,5 @@
 from egsnrc.randoms import randomset
 from egsnrc.params import *
-from egsnrc.commons import *
 from egsnrc.constants import *
 from egsnrc.electr_steps import tstep_ustep
 from .annih import annih

@@ -7,13 +7,8 @@ import logging
 
 logger = logging.getLogger("egsnrc")
 
-# EMPTY CALLBACKS ----
-select_low_energy_pair_prodiction = None
-set_pair_angle = None
-set_pair_rejection_function = None
 
-
-@config.devicejit
+@config.device_jit
 def set_e_angle(rng_states, gid, e_energy):
     pse = sqrt(max(0.0, (e_energy - REST_MASS) * (e_energy + REST_MASS)))
     costhe = egsrandom.random_kfloat(rng_states, gid)
@@ -27,7 +22,7 @@ def set_e_angle(rng_states, gid, e_energy):
 
     return sinthe, costhe
 
-@config.devicejit
+@config.device_jit
 def set_pair_angle(rng_states, gid, p):
     # if iprdst > 0:  -- here we always use 1
     for ichrg in (1, 2):
@@ -47,7 +42,7 @@ def set_pair_angle(rng_states, gid, p):
     return charge_e1, charge_e2, costhe, sinthe  # XXX ??, ......??
 
 
-@devicejit
+@config.device_jit
 def pair(rng_states, gid, p):
     """Pair / Triplet production
 

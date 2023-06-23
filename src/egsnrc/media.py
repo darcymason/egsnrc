@@ -19,15 +19,6 @@ GBR_PAIR, GBR_COMPTON = np.arange(2, dtype=np.int32)
 _Medium = namedtuple("_Medium", "number rho gmfp01 ge gbr12")  # formula name
 
 
-Vacuum = _Medium(
-    np.int32(0),
-    np.float32(0.0),  # "Vacuum", "Vacuum",
-    np.empty((0, 0), dtype=np.float32),
-    np.empty(0, dtype=np.float32),
-    np.empty((0, 0, 0), dtype=np.float32),
-)
-
-
 Interaction = Enum(
     "Interaction",
     ["PHOTOELECTRIC", "RAYLEIGH", "COMPTON", "PAIR", "TRIPLET", "PHOTONUCLEAR"],
@@ -79,8 +70,8 @@ class Medium:
 
     number: int
     formula: str
-    name: str = None
-    rho: float = None
+    name: str | None = None
+    rho: float | None = None
     "Medium density"
     ap: float = 0.001
     "Lower photon cutoff energy"
@@ -90,7 +81,7 @@ class Medium:
     "Number of energy intervals for interaction coefficients"
     table_prefix: str = "xcom"
     "Prefix for name of cross-section data files"
-    sumA: float = None
+    sumA: float | None = None
     "Sum of atomic weights; mainly for test suite to match different element data"
     # Following are calculated on init
     # ge0: float = 0
@@ -98,6 +89,8 @@ class Medium:
     # sigmas = {}  - dict with Interaction type key to array of sigmas
 
     def __post_init__(self):
+        if self.number == 0:
+            return
         if self.name is None:
             self.name = self.formula
         if self.formula not in element_data:
@@ -313,6 +306,9 @@ class Medium:
         self.bpar = bpar
 
         # DELCM = 136*m*exp(Zg), eq. (2.7.51)
+
+
+Vacuum = Medium(0, "", "Vacuum")
 
 
 @np.errstate(divide="raise")

@@ -1,9 +1,8 @@
 import re
-from typing import Tuple
+from typing import cast, Match
+from importlib.metadata import version
 
+__version__: str = version("egsnrc")
 
-__version__: str = '0.1.0.dev0'
-
-__version_info__: Tuple[str, str, str] = tuple(
-    re.match(r'(\d+\.\d+\.\d+).*', __version__).group(1).split('.')
-)
+result = cast(Match[str], re.match(r'(\d+\.\d+\.\d+).*', __version__))
+__version_info__ = tuple(result.group(1).split('.'))

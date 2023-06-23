@@ -1,5 +1,4 @@
 from math import log
-from egsnrc.commons import *
 from egsnrc import config
 
 import logging

@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize]
 
 jobs:
-  PR:
+  pr-tests:
     strategy:
       matrix:
         # One Python version per OS

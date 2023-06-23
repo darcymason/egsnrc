@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  PR:
+  merge-tests:
     strategy:
       matrix:
         # Run tests not done in PR workflow
