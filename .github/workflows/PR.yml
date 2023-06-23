@@ -25,5 +25,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check updates to CI
+      - name: Check updates to CI tools
         run: echo "::notice file=mypy::Newer version available"
+        shell: bash
