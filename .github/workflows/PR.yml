@@ -19,3 +19,7 @@ jobs:
     with: 
       os: ${{ matrix.os }}
       python-version:  ${{ matrix.python-version }}
+
+    
+  check-updates:
+    echo "::notice file=mypy::Newer version available"
