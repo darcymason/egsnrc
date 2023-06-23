@@ -22,4 +22,8 @@ jobs:
 
     
   check-updates:
-    echo "::notice file=mypy::Newer version available"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check updates to CI
+        run: echo "::notice file=mypy::Newer version available"
