@@ -26,5 +26,7 @@ jobs:
 
     steps:
       - name: Check updates to CI tools
-        run: echo "::notice file=mypy::Newer version available"
-        shell: bash
+        run: |
+          echo "| Package  | Version | New Version |" >> $GITHUB_STEP_SUMMARY
+          echo "| ---- | --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| test | 0.1 | 0.2 |" >> $GITHUB_STEP_SUMMARY
