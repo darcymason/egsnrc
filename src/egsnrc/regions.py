@@ -13,7 +13,7 @@ MEDIUM, IRAYL, IPHOTONUCR = np.arange(3, dtype=np.int32)
 PCUT, RHO = np.arange(2, dtype=np.float32)
 
 
-_Region = namedtuple("Region", ("number medium pcut rho"))  # irayl iphotonucr
+_Region = namedtuple("_Region", ("number medium pcut rho"))  # irayl iphotonucr
 
 # @dataclass
 # class Region:
@@ -45,7 +45,7 @@ class Region:
     number: int
     medium: Medium
     pcut: float=0.001
-    rho: float=None
+    rho: float | None = None
 
     def __post_init__(self):
         if not isinstance(self.medium, (Medium, _Medium)):

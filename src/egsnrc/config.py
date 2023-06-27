@@ -8,14 +8,17 @@ logger = getLogger("egsnrc")
 try:
     cudasim_env = os.environ['NUMBA_ENABLE_CUDASIM']
 except KeyError:
-    cudasim_env = 0
+    cudasim_env = "0"
 on_cuda_sim = bool(int(cudasim_env))
+
+
+on_gpu = False  # default for type-checker
 
 
 # Define bit-width for all int's and floats in the GPU kernels
 # NOTE: need to set egsrandom routines to same bits
-KINT = np.int32
-KFLOAT = np.float32
+KINT: np.dtype = np.int32  # type:ignore[assignment]
+KFLOAT: np.dtype = np.float32  # type:ignore[assignment]
 
 
 def cuda_device_jit(func):
@@ -26,11 +29,13 @@ def no_jit(func):
     return func
 
 
+device_jit = no_jit  # nb.njit   # no_jit
+
+
 def use_gpu(want_gpu=True):
     global device_jit
     global on_gpu
 
-    device_jit = no_jit  # nb.njit   # no_jit
     on_gpu = False
     if not want_gpu:
         return

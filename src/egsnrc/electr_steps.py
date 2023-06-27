@@ -1,7 +1,6 @@
 from typing import Tuple
 from egsnrc.randoms import randomset
 from egsnrc.params import *
-from egsnrc.commons import *
 from egsnrc.constants import *
 from egsnrc.util import fort_hex  # for detailed debug tracing
 

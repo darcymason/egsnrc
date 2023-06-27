@@ -9,6 +9,8 @@ from numba.cuda.random import (
 )
 from egsnrc import config
 
+# Put in default value to silence type-checker
+random_kfloat = xoroshiro128p_uniform_float32
 
 def _np_initialize(seed, num_particles=None):
     return np.random.default_rng(seed)

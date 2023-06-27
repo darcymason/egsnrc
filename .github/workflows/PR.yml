@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize]
 
 jobs:
-  PR:
+  pr-tests:
     strategy:
       matrix:
         # One Python version per OS
@@ -19,3 +19,14 @@ jobs:
     with: 
       os: ${{ matrix.os }}
       python-version:  ${{ matrix.python-version }}
+
+    
+  check-updates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check updates to CI tools
+        run: |
+          echo "| Package  | Version | New Version |" >> $GITHUB_STEP_SUMMARY
+          echo "| ---- | --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| test | 0.1 | 0.2 |" >> $GITHUB_STEP_SUMMARY
