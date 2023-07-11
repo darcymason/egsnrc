@@ -10,7 +10,7 @@ repos:
 #     -   id: check-added-large-files
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version.
-  rev: v0.0.276
+  rev: v0.0.277
   hooks:
   - id: ruff
     args: [src, --fix, --exit-non-zero-on-fix]
