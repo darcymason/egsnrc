@@ -79,6 +79,7 @@ target-version = "py310"
 "photon.py" = ["F821"] 
 # ignored pair while developing it
 "pair.py" = ["F821", "E741"]
+"electr_steps.py" = ["PLR0912", "PLR0915"]  # too many branches, statements
 
 [tool.ruff.mccabe]
 max-complexity = 92
