@@ -14,6 +14,7 @@ def uphi(rng_states, gid, p, sinthe, costhe):
     u, v, w direction cosines
     """
     # In original Mortran UPHI(ientry, lvl):
+    #   lvl only used for ientry==3
     # SAVEd between calls: CTHET,PHI,CPHI,A,B,C,SINPS2,SINPSI,US,VS,SINDEL,COSDEL
     # ientry:
     #   1: calculate sinthe, costhe from theta (falls through to 2)

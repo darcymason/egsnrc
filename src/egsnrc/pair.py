@@ -61,7 +61,7 @@ def pair(rng_states, gid, p):
     Reference:  NRC report PIRS-701 (2021-04), sections 2.2.1.iv and 2.2.1.v
 
     Here we code only for the default IPRDST=1,
-    leading order term for angular slection
+    leading order term for angular selection
     """
 
     medium = p.region.medium
@@ -170,7 +170,7 @@ def pair(rng_states, gid, p):
                 aux1 = aux1 / (Bmax + aux1)
             else:
                 # Use BH Coulomb-corrected
-                L = 7
+                l = 7
                 # The absolute maxima are close to the actual maxima at high energies
                 # =>use the absolute maxima to save time
                 # bpar: Prob. for the 12*(BR-1/2)**2 part in PAIR, eq. (2.7.105)
