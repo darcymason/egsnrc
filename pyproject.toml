@@ -35,7 +35,7 @@ version = "0.1.0.dev0"
 
 [project.optional-dependencies]
 dev = [
-    "mypy==1.7.0",
+    "mypy==1.7.1",
     "ruff==0.1.8",
     "pytest",
     "pytest-cov"
