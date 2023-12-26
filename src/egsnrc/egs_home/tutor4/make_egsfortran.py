@@ -37,7 +37,7 @@ with working_dir(HERE):
     print(f"Working directory: {HERE}")
     print(f"Mortran compiling: 'm {USER_CODE}' to {USER_CODE_FORTRAN}")
     command = str(COMPILE_USER_CODE)
-    proc = subprocess.run([command, "m", USER_CODE], capture_output=True)
+    proc = subprocess.run([command, "m", USER_CODE], capture_output=True, check=False)
     if proc.returncode != 0:
         print("Error in mortran compile")
         print(proc.stderr)
@@ -67,7 +67,7 @@ with working_dir(HERE):
         (
             f"python3.9 -m numpy.f2py {F2PY_OPTIONS} -c {LIB_NAME}.pyf"
             f" {USER_CODE_FORTRAN}"
-        ).split(),
+        ).split(), check=False,
         # capture_output=True, encoding="utf8"
     )
     if proc.returncode != 0:
