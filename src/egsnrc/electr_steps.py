@@ -512,8 +512,7 @@ def tstep_ustep(
                         # Sample the distance to a single scattering event
                         rnnoss = randomset()
                         # logger.info(f'random rnnoss={rnnoss:0.8e}')
-                        if rnnoss < 1.0e-30:
-                            rnnoss = 1.0e-30
+                        rnnoss = max(rnnoss, 1.0e-30)
 
                         lambda_ = -log(1 - rnnoss)
                         lambda_max = 0.5 * blccl * rm / dedx * (eke / rm + 1) ** 3
