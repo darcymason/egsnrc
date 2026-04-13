@@ -19,7 +19,7 @@ classifiers=[
     "Topic :: Scientific/Engineering :: Physics",
 ]
 dependencies = [
-    "Numba>=0.57,<1"  # in turn requires numpy
+    "Numba>=0.65.0,<1"  # in turn requires numpy
 ]
 # Get __version__ and description (docstring) from __init__.py
 
